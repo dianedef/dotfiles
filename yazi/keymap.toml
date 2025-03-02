@@ -1,0 +1,34 @@
+[manager]
+
+prepend_keymap = [
+	{ on = "<Esc>",     run = "quit",               desc = "Exit the process" },
+	{ on = "o",         run = "create",             desc = "Create a file (ends with / for directories)" },
+	{ on = "t",         run = [ "select --state=none", "arrow 0" ], desc = "Toggle the current selection state" },
+ 	{ on = [ "d", "d" ],         run = "remove",    desc = "Trash selected files" },
+	{ on = [ "y", "y" ],         run = "yank",      desc = "Yank selected files (copy)" },
+
+	# Shell et tâches
+	{ on = [ "w" ],     run = 'shell "$SHELL" --block --confirm', desc = "Open shell here" },
+	{ on = [ "W" ],     run = "tasks_show",         desc = "Show tasks" },
+
+	# Navigation rapide
+	{ on = [ "U" ],     run = "arrow -5",           desc = "Move up 5 lines" },
+	{ on = [ "E" ],     run = "arrow 5",            desc = "Move down 5 lines" },
+	{ on = [ "<C-u>" ], run = "seek -5",           desc = "Seek up 5 pages" },
+	{ on = [ "<C-e>" ], run = "seek 5",            desc = "Seek down 5 pages" },
+
+	# Liens symboliques
+	{ on = [ "l" ],     run = "link",               desc = "Create symlink" },
+	{ on = [ "L" ],     run = "link --relative",    desc = "Create relative symlink" },
+]
+
+[tasks]
+prepend_keymap = [
+	{ on = [ "W" ],     run = "close",              desc = "Close tasks" },
+]
+
+[select]
+prepend_keymap = [
+	{ on = [ "U" ],     run = "arrow -5",           desc = "Move up 5 items" },
+	{ on = [ "E" ],     run = "arrow 5",            desc = "Move down 5 items" },
+]

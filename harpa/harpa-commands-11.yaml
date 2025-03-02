@@ -1,0 +1,574 @@
+- meta:
+    title: YouTube Tuto
+    description: ''
+    category: User
+    name: command-tmyg-xt1o
+  steps:
+    - type: ask
+      param: p1
+      message: 'Please provide p1:'
+      options: null
+      default: ''
+    - type: gpt
+      prompt: >-
+        ---
+         {{transcript}} 
+        ---
+
+        Make a step by step tutorial about "{{p1}}" please. Remove all
+        timestamps, and write it in french.
+      param: ''
+  version: 1
+- meta:
+    title: Page2post -short
+    description: ''
+    category: User
+    name: command-cmcg-y86h
+  steps:
+    - type: ask
+      param: p1
+      message: 'Please provide p1:'
+      options: null
+      default: ''
+    - type: gpt
+      prompt: >-
+        Here is the "source": {{chunk}}
+
+
+        Please ignore all previous instructions. You are a marketer specialized
+        in business softwares and teaching technology to small businesses.
+
+        You are writing a short Pinterest informational post about {p1} in the
+        "source". Follow this structure and remove instructions in {}:
+
+
+        {related emoji}{title : a clicbait business question}
+
+
+        {related emoji}{A 10-words sentences about what we are discussing}
+
+        {related emoji}{}
+
+
+        {related emoji}{Call to action}
+
+
+        The output should be in {{language}}.
+      chunkify:
+        text: '{{page}}'
+        empty: ''
+      param: chunk
+  version: 1
+- meta:
+    title: Page2post -long
+    description: ''
+    category: User
+    name: command-66qz-06v1
+  steps:
+    - type: ask
+      param: p1
+      message: 'Please provide p1:'
+      options: null
+      default: ''
+    - type: gpt
+      prompt: >-
+        Here is the "source": {{chunk}}
+
+
+        Please ignore all previous instructions. You are a marketer specialized
+        in business softwares and teaching technology to small businesses.
+
+        You are writing a LinkedIn informational long post about {p1} in the
+        "source". Follow this structure and remove instructions in {}:
+
+
+        {related emoji}{title : a clicbait business question}
+
+
+        {related emoji}{A 10-words sentences about what we are discussing}
+
+        {related emoji}{}
+
+
+        {related emoji}{Call to action}
+
+
+        The output should be in {{language}}.
+      chunkify:
+        text: '{{page}}'
+        empty: ''
+      param: chunk
+  version: 1
+- meta:
+    title: 'Sample custom command: 5 facts'
+    description: >-
+      This is a sample GPT-powered command. Use it as a reference, feel free to
+      edit or remove.
+    category: User
+    name: sample-custom-command
+  steps:
+    - type: ask
+      selected: false
+      param: p1
+      message: >-
+        👋 This is a sample command. Enter a country name or a topic, and I will
+        provide 5 surprising facts.
+      default: Finland
+    - type: gpt
+      selected: false
+      prompt: >-
+        Please ignore all previous instructions. Please provide 5 not so well
+        known / surprising facts about {{p1}}. Format every fact:
+
+
+        - [relevant fact emoji] [fact]
+
+
+        Facts:
+- meta:
+    title: '#short page'
+    description: ''
+    category: User
+    name: command-044a-hpqm
+  steps:
+    - type: gpt
+      prompt: >-
+        Please ignore all previous instructions. 
+
+
+        Here is the context: {{page}}
+
+        I. Write a script for a YouTube Short by using the context given. The
+        content should be engaging, educating, funny, compelling. Follow the
+        AIDA structure (Attention, Interest, Desire, Action)  to create a #short
+        for YouTube in a business niche. The video aims to captivate the
+        audience, address a common problem, present a solution, and prompt
+        action from the viewers. The YouTube description complements the video
+        by providing additional context and encouraging viewer engagement.
+
+        1. Attention(hook): Start with a captivating and attention grabbing
+        statement or question to pique the viewer's interest.
+
+        2. Interest(problem): Identify a common issue or pain point that the
+        viewer can relate to.
+
+        3. Solution: Explain what {{p1}} does and how it's a solution to the
+        problem.
+
+        4. Desire(benefits): Highlight the benefits or positive outcomes of
+        implementing the solution.
+
+        5. Action(call to action): Encourage viewers to take a specific action,
+        such as liking, commenting, or subscribing.
+
+
+        II. Write the YouTube Description
+         Brief Summary: Provide a concise overview of the video content and its value to the viewer.
+         Links: Include relevant links, such as to your channel or related videos.
+         Call to Action: Encourage viewers to engage with the video by liking, commenting, and subscribing.
+         Add emojis
+        The output should be in {{language}}.
+      chunkify:
+        text: '{{page}}'
+        empty: ''
+      param: chunk
+  version: 1
+- meta:
+    title: YouTube Transcript
+    description: ''
+    category: User
+    name: command-m8du-rvc1
+  steps:
+    - type: gpt
+      prompt: >-
+        The subject is {{p1}} 
+
+
+        I would like you convert a text to a blog article in {{language}} and
+        use 'tu' (not 'vous') for a more familiar tone.
+
+        Nothing should mention that the info comes from an outside source,
+        remove timestamps and all other video-related info, as if it just came
+        straight out of my brain
+
+
+        Structure the text in 1, 2, 3 or 4 big sections maximum and add a ##
+        title in markdown for each.
+
+        Each section could have several ### titles, or just be a big paragraph
+        that illustrate the points that are made.
+
+        Keep a high level of accuracy in the lexicon
+
+
+
+        Here is the source: 
+
+        ---
+
+        {{chunk}}
+
+        ---
+      chunkify:
+        text: '{{transcript}}'
+        empty: ''
+      param: chunk
+  version: 1
+- meta:
+    title: YT2post
+    description: ''
+    category: User
+    name: command-oz59-csx8
+  steps:
+    - type: ask
+      param: p1
+      message: 'Please provide p1:'
+      options: null
+      default: ''
+    - type: gpt
+      prompt: >-
+        Here is the "source": {{chunk}}
+
+
+        Please ignore all previous instructions. You are a marketer specialized
+        in business softwares and teaching technology to small businesses. You
+        are writing an informational post about the software {p1} and what's
+        been discussed in "source". Follow this structure and remove
+        instructions in {}:
+
+
+        {related emoji}{title : a clicbait business wide question}
+
+
+        {related emoji}{A 10-words sentences about what we are discussing}
+
+        {related emoji}{}
+
+
+        {related emoji}{Call to action}
+
+
+
+        The post should be maximum 400 words and the output should be in
+        {{language}}.
+      chunkify:
+        text: '{{transcript}}'
+        empty: ''
+      param: chunk
+  version: 1
+- meta:
+    title: Apps
+    description: ''
+    category: User
+    name: command-5mpv-o2aw
+  steps:
+    - type: ask
+      param: p1
+      message: 'Please provide p1:'
+      options: null
+      default: ''
+    - type: gpt
+      prompt: >-
+        - Please ignore all previous instructions. The output should be in
+        {{language}}. You are a business specialist that has a directory website
+        about French SaaS softwares helping businesses. 
+
+        - You are writing a review about the software {p1} with SEO keyword and
+        precision of the content in mind.
+
+        - You are filling an outline with relevant information you found on the
+        context given to you.
+
+        - Instructions are in parenthesis for your comprehension, remove them in
+        the output
+
+        - A "benefit" is an outcome like saving time or money, being more
+        productive or having a better reputation. A "feature" is a technical
+        task that the software offers to do for you.
+
+        - The tone should be friendly in french, using "tu" as pronoun, and with
+        a simple language
+
+        - Remove the point at the end of each alone sentence, or the sentence of
+        the end of a paragraph
+
+        - Here is the expected format of the review:
+
+        - 
+
+        ##  (Title of article that grabs attention)
+
+
+        ✔️ (a less than 10-word benefit)
+
+        ✔️ (a less than 10-word benefit)
+
+        ✔️ (a less than 10-word benefit)
+
+
+        🎯 (a less than 10-words ideal customer)
+
+        🎯 (a less than 10-words ideal customer)
+
+        🎯 (a less than 10-words ideal customer)
+
+
+        📢 Alternative : (list the most well-known competitors)
+
+
+        (in the next section you will list one by one, all the features and
+        operation that can be done with this software!)
+
+        ## (add a relevant emoji)(feature 1)
+
+        ### (add a relevant emoji)(subfeature a)
+
+        (description)
+
+        ### (add a relevant emoji)(subfeature b)
+
+        (description)
+
+        ### (add a relevant emoji)(subfeature c)
+
+        (description)
+
+
+        ## (add a relevant emoji)(feature 2)
+
+        ### (add a relevant emoji)(subfeature a)
+
+        (description)
+
+        ### (add a relevant emoji)(subfeature b)
+
+        (description)
+
+        ### (add a relevant emoji)(subfeature c)
+
+        (description)
+
+
+        (… continue until there is no more feature)
+
+
+        ## 💶 Offres & Prix
+
+        (What are the software plans we could subscribe to? Make a simple table)
+
+        ## 🎖️ Équipe, Histoire Et Mission
+
+        (Who made this software ? Why did they build it? What were the hurdles
+        ?)
+
+        ## 🚧 Feuille de Route Future
+
+        (What is expected to be release soon? Do they have a public roadmap?)
+
+        ## ⛓️ Liens et Ressources
+
+        (Social media urls, documentation, support email… list ONLY VERIFIED and
+        real urls)
+
+        ## 🤝 (a title like this : Earn X while promoting {{p1}})
+
+        Programme de Parrainage  
+
+        (Can we find a referral of affiliate program for this software?)
+
+        ## ⚙️ Intégrations
+
+        (What integration with other tools are available ? Do they have an API?
+        Webhooks? bullet lists please)
+
+        ## 👀 Comment l’utiliser ?
+
+        (List the steps to use the software at its full potential, considering
+        webmarketing science)
+
+        ## 🤔 Comment ça marche en détail ?
+
+        (What is the specific technology or methodology they use if any?)
+
+        ## Mon Avis
+
+        👍 (a short point rooting for the software)
+
+        👍 (a short point rooting for the software)
+
+        👍 (a short point rooting for the software)
+
+        👎 (a short point again this software)
+
+        👎 (a short point again this software)
+
+        👎 (a short point again this software)
+
+        Here is the context: {{chunk}}
+      chunkify:
+        text: '{{page}}'
+        empty: ''
+      param: chunk
+  version: 1
+- meta:
+    title: Blog section
+    description: ''
+    category: User
+    name: eHgQ7ER-_DQ4dRPK6YTPM
+  steps:
+    - type: gpt
+      prompt: >-
+        Please ignore all previous instructions. I would like you convert a text
+        to a blog article in {{language}}.
+
+        Nothing should mention that the info comes from an outside source,
+        remove timestamps and all other video-related info, as if it just came
+        straight out of my brain
+
+
+        Structure the text in big paragraphs Web'IndéTHOUT ANY HEADING and Keep
+        a high level of accuracy in the lexicon
+
+
+
+
+        Here is the source: {{chunk}}
+      param: chunk
+      chunkify:
+        text: '{{page}}'
+        empty: ''
+  version: 1
+- meta:
+    title: aaa
+    description: ''
+    category: User
+    name: 4G4A3afPk8rGQJm28q9lI
+  steps:
+    - type: ask
+      message: 'Please provide p1:'
+      param: p1
+      default: ''
+    - type: gpt
+      prompt: >-
+        Please ignore all previous instructions.
+
+
+        You are a business software expert and make a post about a new solution,
+        about 400 words.
+
+        [[instructions]]
+
+        Follow this structure:
+
+
+        📌 [[title: Ask a question about the use case adressed by {{p1}}]]
+
+
+        Pourquoi utiliser {{p1}}?
+
+
+        ⚡ [[A short sentence about what {{p1}} does]]
+
+        ⚡ [[A short sentence about what {{p1}} does]]
+
+        ⚡ [[A short sentence about what {{p1}} does]]
+
+        ⚡ [[A short sentence about what {{p1}} does]]
+
+
+        [[Showcase {{p1}}: What does it have that other don’t? What’s unique ?
+        Roadmap? Does it have integrations? Who’s the team? The price? Etc…]]
+
+
+        ✅ [[A good thing about {{p1}}]]
+
+        ✅ [[A good thing about {{p1}}]]
+
+        ❌ [[Find a bad thing about {{p1}}]]
+
+        ❌ [[Find a bad thing about {{p1}}]]
+
+
+        Alors… 🧐 Tu en penses quoi ?!
+
+
+        Pour ma part
+
+
+        Essaye dès maintenant {{p1}} et partage ton expérience avec nous ? 🔥 
+
+
+        🔓 Consulte l'offre exclusive 👉 [[{{page.url}} without any utm
+        parameters]](aff)
+
+
+        Here is the content: {{page}}
+
+        Keep it simple, in {{language}} and use "tu" for a familiar tone.
+
+        Delete all [[instructions]]
+  version: 1
+- meta:
+    title: Lifetime offer
+    description: ''
+    category: User
+    name: mdA3SqJlao2ctIDXMFZgH
+  steps:
+    - type: ask
+      message: 'Please provide p1:'
+      param: p1
+      default: ''
+    - type: gpt
+      prompt: >-
+        You are a business software expert and make a post about a new solution,
+        about 300 words.
+
+        There [instructions] that you need to remove please. Ffollow this
+        structure:
+
+
+        📌 [title: Ask a question about the use case adressed by {{p1}}]
+
+
+        Pourquoi utiliser {{p1}}?
+
+
+        ⚡ [A short sentence about what {{p1}} does]
+
+        ⚡ [What the softwares does, in a short sentence]
+
+        ⚡ [What the softwares does, in a short sentence]
+
+        ⚡ [What the softwares does, in a short sentence]
+
+
+        [Showcase {{p1}}: What does it have that other don’t? What’s unique ?
+        Roadmap? Does it have integrations? Who’s the team? The price? Etc…]
+
+
+        ✅ [Find a good thing about {{p1}}]
+
+        ✅ [Find a good thing about {{p1}}]
+
+        ❌ [Find a bad thing about {{p1}}]
+
+        ❌ [Find a bad thing about {{p1}}]
+
+
+        Alors... 🧐 Tu en penses quoi ?!
+
+
+        Pour ma part
+
+
+        Essaye dès maintenant {{p1}} et partage ton expérience avec nous ? 🔥 
+
+
+        🔓 Consulte l'offre exclusive 👉 {{page.url}} (aff)
+
+
+        Keep it simple, in {{language}} and use "tu" for a familiar tone. Delete
+        all [instructions].
+
+        Here is the content: {{page}}
+  version: 1

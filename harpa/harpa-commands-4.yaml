@@ -1,0 +1,195 @@
+- meta:
+    title: FB Group Post
+    description: ''
+    category: User
+    name: OBBGGn9zCCHWyxDaIi9mc
+  steps:
+    - type: gpt
+      prompt: "Make a post for a Facebook group where people talk about software offers.\nUse the content provided to make a 1500 words post about the solution.\nI will give you [instructions]. Follow this structure:\n\n[Name of the product]\n\n🪄\_[What the softwares does, in one very short sentenece]\n\n[Introduction yielding pain points adressed by the solution. DO NOT MENTION any promo code]\n\nPourquoi utiliser [Name of the product] ?\n\n🔑 [Benefit number 1]\n🔑 [Benefit number 2]\n🔑 [Benefit number 3]\n🔑 [Benefit number 4]\n🔑 [Benefit number 5]\n\n[Showcase the product : What does it have that other don’t? What’s the roadmap? Does it have integrations? Who’s the team? The price? Etc…]\n\nPour :\n✅ [Find a good thing to say about the solution]\n✅ [Find a good thing to say about the solution]\n\nContre :\n❌ [Find a bad thing to say about the product]\n❌ [Find a bad thing to say about the product]\n\n[Outro about the solution and its customers. Promo code to use if any, and until when?]\n\n[Relevant emoji] [Call to action to check out the offer]\n\nRemove all [instructions] and commentary in the ouput. REMOVE ALL *\nKeep the text clean, without any formatting, in {{language}}.\nHere is the content to remix: {{page}}\n"
+  version: 1
+- meta:
+    title: Blog section
+    description: ''
+    category: User
+    name: TDqX3PfoS3e9ok-8Kz0xo
+  steps:
+    - type: gpt
+      prompt: >-
+        Please ignore all previous instructions. The output should be in
+        {{language}}. Please summarize page content by presenting the solution
+        and its use case:
+
+
+        {{page}}
+
+
+        Expected format: a blog article section of 500 words, that will be part
+        of a listcle with other SaaS product presented. The language should use
+        "tu" in french.
+
+
+        Summary:
+  version: 1
+- meta:
+    title: App 2
+    description: ''
+    category: User
+    name: '-ahWLRwJjzbXJ23bj6mBI'
+  steps:
+    - type: ask
+      message: 'Please provide p1:'
+      param: Name_of_the_App
+      default: ''
+    - type: gpt
+      prompt: >-
+        Please ignore all previous instructions. The output should be in
+        {{language}}.
+
+        You are a business specialist that has a directory website about French
+        SaaS softwares helping entrepreneurs make more sales and save time.
+
+
+        You are writing a review about the software {{p1}} with SEO and
+        precision of the content in mind.
+
+
+        Here is the expected format (instructions in parenthesis for your
+        comprehension):
+
+
+
+        ## ❔  (Title of the review)
+
+        ## ✔️ Bénéfices
+
+        (What key advantage are expected for a business by using this software?)
+
+        ## 🎯 Pour Qui ?
+
+        (Who is the ideal user of this software?)
+
+        ## 📢 Alternative
+
+        (Who are the well-known competitors of the software?)
+
+        ## 🛠️ Fonctionnalités
+
+        (List all feature like this:
+
+        ### (title)
+
+        (description)
+
+        )
+
+        ## 💶 Offres & Prix
+
+        (What are the software plans we could subscribe to?)
+
+        ## 🎖️ Équipe, Histoire Et Mission
+
+        (Who made this software ? Why did they build it? What were the hurdles
+        ?)
+
+        ## 🚧 Feuille de Route Future
+
+        (What is expected to be release soon? Do they have a public roadmap?)
+
+        ## ⛓️ Liens et Ressources
+
+        (Social media urls, documentation, support email...)
+
+        ## 🤝 Programme de Parrainage
+
+        (Can we find a referral of affiliate program for this software?)
+
+        ## ⚙️ Intégrations
+
+        (What integration with other tools are available ? Do they have an API?
+        Webhooks?)
+
+        ## 👀 Comment l’utiliser ?
+
+        (List the steps to use the software at its full potential, considering
+        webmarketing science)
+
+        ## 🤔 Comment ça marche en détail ?
+
+        (What is the specific technology or methodology they use if any?)
+
+        ## 👩‍🏫 Démonstration complète
+
+        (leave blank)
+
+        ## Mon Avis
+
+        (A summary about the usefulness of the tool)
+
+        ### 👎 Points Faibles
+
+        (Cons)
+
+        ### 👍 Points Forts
+
+        (Pros)
+
+
+        - Do NOT add "meta info" like "in this review we are going to talk about
+        this and this". Give valuable, concise and extremely precise sentences
+        extracted from the page!
+
+        - Fill out this outline with all relevant informations
+
+        - Educate people on the specific business related domain of the
+        software.
+
+        - Use examples from actual current business scenario, add figures or KPI
+        from recent studies in the industry related field.
+
+        - Keep relevant emojis and add some more.
+
+        - For the writing style, use the pronoun "tu" and conjugate verbs
+        accordingly in French (do not use "vous").
+
+
+        The idea is to have a review easy to read by professionnal. You want to
+        help the user understand the bigger picture of the industry and the
+        value there is for their business to use te software {{p1}}.
+
+
+        You can find the infos here: {{chunk}} 
+      chunkify:
+        text: '{{page}}'
+        empty: ''
+      param: gpt
+  version: 1
+- meta:
+    title: YouTube Transcript
+    description: ''
+    category: User
+    name: tbZAm-ANNTVR_B1_CqJyf
+  steps:
+    - type: gpt
+      prompt: >-
+        I would like you convert a text to a blog article in {{language}}.
+
+        Nothing should mention that the info comes from an outside source,
+        remove timestamps and all other video-related info, as if it just came
+        straight out of my brain
+
+
+        Structure the text in 1, 2, 3 or 4 big sections maximum and add a ##
+        title in markdown for each.
+
+        Each section could have several ### titles, or just be a big paragraph
+        that illustrate the points that are made.
+
+        Keep a high level of accuracy in the lexicon
+
+
+        Here is the source: {{chunk}}
+      chunkify:
+        text: '{{youtube.transcript}}'
+        empty: ''
+      param: gpt
+  version: 1

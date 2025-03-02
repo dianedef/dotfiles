@@ -1,0 +1,94 @@
+version: 1
+meta:
+  name: youtube-summary-v2
+  category: User
+  title: YT summary v2
+  description: >
+    Custom prompt
+  apps: YouTube
+steps:
+  - say: >
+      Parsing video from the page… Long videos may take a few seconds to parse.
+
+  - type: calc
+    param: transcript
+    value: '{{youtube.transcript}}'
+
+  - type: gpt
+    chunkify:
+      text: '{{transcript}}'
+      empty: >
+        It looks as if the video has no text transcript, or I could not fetch it from the page.
+    prompt: >
+      I want you to only answer in {{language}}. You goal is to extract key takeaways of
+      the next chunk of the transcript. Takeaways must be concise, informative and easy to read
+      & understand.
+
+      Each key takeaway should be a list item, of the following format:
+
+
+      - [Timestamp URL] [Takeaway emoji] [Key takeaway in {{language}}]
+
+
+      The timestamp should be presented in markdown URL format. The URL text indicates,
+      and the address links to a specific time in the video, for example:
+
+      - [00:00](https://youtu.be/Mde2q7GFCrw?t=0s) 🤖 ...
+
+      - [01:18](https://youtu.be/Mde2q7GFCrw?t=78s) 🛡️ ...
+
+      - [03:37](https://youtu.be/Mde2q7GFCrw?t=217s) 💼 ...
+
+
+      Keep emoji relevant and unique to each key takeaway item. Do not use the same emoji
+      for every takeaway. Do not render brackets. Do not prepend takeaway with "Key takeaway".
+
+
+      [VIDEO TITLE]:
+
+      {{page.desc}}
+
+
+      [VIDEO URL]:
+
+      {{page.url}}
+
+
+      [VIDEO TRANSCRIPT CHUNK]:
+
+      {{chunk}}
+
+
+      [KEY TAKEAWAYS LIST IN {{language}}]:
+
+
+  - type: ask
+    label: complete
+    message: >
+      ✅ Summary complete.
+    param: action
+    options:
+      - { label: '🎯️ ENTIRE SUMMARY', value: 'yes' }
+      - { label: '⛔ STOP', value: 'no' }
+
+  - condition: '{{action}} = no'
+    type: stop
+
+  - condition: '{{action}} = yes'
+    type: gpt
+    prompt: >
+      I want you to only answer in {{language}}. 
+      You goal is to shorten the takeaways summary of the complete youtube video transcript by ~50%. 
+      You can do so by dropping least important key takeaways, by combining key takeaways into one,
+      by shortening the text of each takeaway, in any combination.
+
+
+      Please keep the format: shortened summary should be a list of  5 key takeaways in bulletpoints.
+
+      [SUMMARY]:
+
+      {{gpt}}
+
+
+      [5 key takeaways in bulletpoints in {{language}}]:
+

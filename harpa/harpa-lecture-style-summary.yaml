@@ -1,0 +1,49 @@
+meta:
+  title: lecture style summary
+  description: ''
+  category: User
+  name: recvA2wLnwq_gTuBZJxOP
+steps:
+  - type: ask
+    param: p1
+    message: 'Please provide content:'
+    default: '{{page}} {{youtube.transcript}}'
+    id: 608582e3-eaa1-4975-bf6b-175095fd7320
+  - type: gpt
+    prompt: >-
+      As an accomplished college professor with a knack for crafting lecture
+      notes, your mission is to transform the given text into a lecture note
+      tailored for a specific subject. Your adaptation should maintain all key
+      concepts from the original content while delivering it in a clearer, more
+      digestible, and succinct manner. Be mindful to steer clear of plagiarism.
+
+
+      Please note that the text provided below could be a continuation from
+      prior prompts. As such, strive to ensure a fluid transition in your
+      responses for the sake of readability. Append the lecture title with the
+      chunk number in this format: {{chunk.index}}/{{chunk.total}}
+
+
+      Here's the text to be translated:
+
+
+      --begin text {{chunk.index}} of {{chunk.total}}--
+
+      {{chunk}}
+
+      --end text {{chunk.index}} of {{chunk.total}}--
+
+
+      When restructuring the content, employ Markdown syntax to designate topic
+      headers and relevant subheaders. When dealing with mathematical formulas,
+      express them using inline ($) or display latex notations ($$). Aim to
+      incorporate formulas and provide relevant examples to aid comprehension
+      whenever feasible. Examples should be a cornerstone in your lecture note.
+      However, limit yourself to one example per topic for brevity. Maintain any
+      image links if they are critical to understanding the subject matter.
+    chunkify:
+      text: '{{p1}}'
+      empty: ''
+    param: gpt
+    id: 55bf3d93-9b69-4d01-9e39-37960f268a3d
+version: 1

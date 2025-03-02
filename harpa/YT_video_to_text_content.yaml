@@ -1,0 +1,208 @@
+version: 1
+meta:
+  name: youtube-video-to-text
+  category: SMM
+  title: YT video to text content
+  description: >-
+    Generates text content from a YouTube video.
+  apps: YouTube
+steps:
+  - say: >-
+      Parsing video from the page… Long videos may take a few seconds to parse.
+
+  - type: calc
+    param: transcript
+    value: '{{youtube.transcript}}'
+
+  - type: gpt
+    chunkify:
+      text: '{{transcript}}'
+      empty: >-
+        It looks as if the video has no text transcript, or I could not fetch it from the page.
+    prompt: >-
+      I want you to only answer in {{language}}. 
+      You goal is to analyze a part of a YouTube transcript 
+      and extract the main important information from there. 
+
+      Choose the format of recording this information depending on the 
+      subject of the video. Capture important facts in your answer and 
+      do not miss the names of people and their opinions if you are presented 
+      with a transcript of an interview.
+
+      Please, during the analysis of the transcript, do not mention that this is a video or a video transcript. 
+      Just analyze the text as content containing important information.
+
+
+      Your response be informative and easy to read & understand.
+      Preserve as much important information as possible; you don't need to shorten your response.
+
+
+      Don't write general phrases, headings, or notes. I only need the result of the transcript analysis.
+
+
+      [VIDEO TRANSCRIPT CHUNK]:
+
+      {{chunk}}
+
+
+      [MAIN IMPORTANT INFORMATION IN {{language}}]:
+
+
+  - type: ask
+    label: complete
+    message: >-
+      ✅ Content analysis is complete. Now I can write something based on the video.
+    param: action
+    options:
+      - { label: '🖊 BLOG POST', value: 'blogpost' }
+      - { label: '💡 TWEET', value: 'tweet' }
+      - { label: '📝 LONG ARTICLE', value: 'article' }
+      - { label: '🛠 CUSTOM', value: 'custom' }
+      - { label: '⛔ STOP', value: 'no' }
+
+  - condition: '{{action}} = no'
+    type: stop
+
+  - condition: '{{action}} = blogpost'
+    type: group
+    steps:
+      - type: ask
+        param: blog-post-option
+        options:
+          - { label: '⬆️ LONG', value: 'I need a long blog post, do not limit yourself in the number of words.' }
+          - { label: '⬇️ SHORT', value: 'The blog post must be concise and not exceed 150 words. The short length ensures that the content remains engaging and easily digestible, aligning with the need for brief yet informative content.' }
+        
+      - type: gpt
+        prompt: >-
+          Please ignore all previous instructions. 
+          I want you to only respond in {{language}}.
+
+          Act as a professional blogger with expertise in the specific subject matter.
+          I will provide you with text information obtained from watching a YouTube video;
+           analyze it and write a blog post based on the data obtained. 
+
+          {{blog-post-option}}
+
+          Come up with a title for this blog post at the beginning,
+          a meta description, and hashtags at the end.
+          The content must be well-researched and provide valuable insights, 
+          opinions, or advice related to the subject.
+
+          --- Output format:
+
+          ## Blog post title
+
+          Blog post text
+
+
+          ### Meta description:
+
+          Meta description
+
+
+          ### HASHTAGS:
+
+          10 relevant hashtags with #, comma separated
+
+
+          Format the text using headings (H2, H3, H4), numbered and bullet points, and other markdown formatting features.
+
+          [INFORMATION]: {{gpt}}
+
+
+          BLOG POST IN {{language}}:
+
+      - type: jump
+        to: ask-for-change
+
+  - condition: '{{action}} = tweet'
+    type: group
+    steps:
+      - type: gpt
+        prompt: >-
+          Please ignore all previous instructions. 
+          I want you to only respond in {{language}}.
+
+           Act as a social media content creator with expertise in specific topic generation,
+           and compose a tweet related to the topic provided. T
+           he tweet should reflect insights, opinions, or updates related to the given subject. 
+           Keep the content engaging and tailored to it's potential target audience.
+
+          [TWEET TOPIC]: 
+
+          {{gpt}}
+
+
+          TWEET in {{language}}::
+
+      - type: jump
+        to: ask-for-change
+
+  - condition: '{{action}} = article'
+    type: group
+    steps: 
+      - type: command
+        inputs:
+          - 'Entire Article'
+          - 'Generate Outline'
+          - '{{gpt}}'
+        name: Article creator
+      - type: stop
+
+  - condition: '{{action}} = custom'
+    type: group
+    steps: 
+      - type: ask
+        message: >-
+          What should I do with the info from the YouTube video?
+        param: task
+      - type: gpt
+        prompt: >-
+          Please ignore all previous instructions. 
+          I want you to only respond in {{language}}.
+
+          I want you to complete my task, which I will write after the word [MY TASK]. 
+          If you need more information, ask me for additional details to complete the task.
+
+          [MY TASK]: {{task}}
+
+
+          [CONTEXT]: {{gpt}}
+
+  - type: ask
+    label: ask-for-change
+    param: change
+    options:
+      - { label: '✅ DONE', value: 'no' }
+      - { label: '✴️ REFINE', value: 'refine' }
+      - { value: '$custom' }
+
+  - condition: '{{change}} = no'
+    type: stop
+
+  - condition: '{{change}} = refine'
+    type: ask
+    param: instructions
+    message: 'What changes would you like me to make?'
+
+  - condition: '{{change}} = refine'
+    type: gpt
+    prompt: >-
+      Please completely rewrite your answer, taking into account the
+      inputs provided earlier and [ADDITIONAL INSTRUCTIONS]. 
+      Provide a rewritten response.
+
+     
+      [ADDITIONAL INSTRUCTIONS]: {{instructions}}
+
+
+      [KEYWORD STRATEGY]:
+
+  - type: jump
+    to: ask-for-change
+
+
+
+
+
+

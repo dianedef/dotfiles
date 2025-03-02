@@ -1,0 +1,285 @@
+meta:
+  title: YouTube to Notion
+  description: ''
+  category: User
+  name: command-89r1-6yli
+steps:
+  - type: ask
+    param: url
+    message: Please provide URL
+    options:
+      - label: ✅ USE CURRENT PAGE
+        value: current
+      - $custom
+    default: ''
+    optionsInvalid: false
+    label: start
+  - type: navigate
+    url: '{{url}}'
+    waitForIdle: true
+    silent: false
+    condition: '{{url}} != current'
+  - type: group
+    steps:
+      - type: gpt
+        prompt: >-
+          I want you to only answer in {{language}}. You goal is to analyze a
+          part of a
+
+          YouTube transcript and extract the main important information from
+          that.
+
+
+          Choose the format of recording this information depending on the
+          subject of the
+
+          video and format your response with markdown features.
+
+
+          Capture important facts in your answer and do not miss the names of
+          people and
+
+          their opinions.
+
+
+          Please, during the analysis of the transcript, do not mention that
+          this is a
+
+          video or a video transcript. Just analyze the text as content
+          containing important
+           information.
+
+           Your response be informative and easy to read & understand. Preserve as much
+          important information as possible; you don't need to shorten your
+          response.
+
+
+          Don't write general phrases like "this video is about..." or notes. I
+          only need
+           the result of the transcript analysis.
+
+          [VIDEO TRANSCRIPT CHUNK]:
+
+
+          {{chunk}}
+
+
+
+          [MAIN IMPORTANT INFORMATION IN {{language}}]:
+        chunkify:
+          text: '{{transcript}}'
+          empty: ''
+        param: content
+      - type: gpt
+        prompt: >-
+          I want you to process  the YouTube video transcript analysis. The goal
+          is to eliminate introductory words and extraneous phrases, leaving
+          only valuable information that can be used to create a blog post. Do
+          not shorten the input, but delete all the general phrases. Your output
+          should consist solely of useful content for article writing.
+
+
+          Video transcript analysis: {{content}}
+        param: input
+      - type: gpt
+        prompt: >-
+          Act as a professional blogger with expertise in the specific subject
+          matter.
+
+          I will provide you with text information obtained from watching a
+          YouTube video;
+
+          analyze it and write a blog post based on the data obtained.
+
+
+          I need a long blog post, do not limit yourself by the word number.
+
+
+          Come up with a title for this blog post at the beginning, a meta
+          description,
+
+          and hashtags at the end. The content must be well-researched and
+          provide valuable
+
+          insights, opinions, or advice related to the subject.
+
+
+                    --- Output format:
+
+                    ## Blog post title
+
+                    Blog post text
+
+
+                    ### Meta description:
+
+                    Meta description
+
+
+                    ### HASHTAGS:
+
+          10 relevant hashtags with #, comma separated
+
+
+
+          Format the text using headings (H2, H3, H4), numbered and bullet
+          points, and
+
+          other markdown formatting features.
+
+
+
+          [INFORMATION]: {{input}}
+
+
+
+          [BLOG POST IN {{language}}]:
+        param: post
+    label: blog post
+  - type: group
+    steps:
+      - type: calc
+        func: first-line
+        to: h1
+        param: post
+      - type: calc
+        func: encode-url
+        to: h1
+        param: h1
+      - type: navigate
+        url: https://www.google.com/search?q={{h1}}
+        waitForIdle: true
+        silent: false
+      - type: gpt
+        prompt: >-
+          I want you to respond only in {{language}} and output a single table.
+
+          Pretend to be a SEO keyword research expert.
+
+
+          Read the [SERP] that I will provide you and 
+
+          find top 20 LSI keywords in SERP, each containing at least 2 words:
+
+
+          - Output these keywords comma separated. 
+                        
+          - Do not include keywords in the list that are not thematically
+          relevant to my query.
+                        
+          - Do not add any notes, write only comma separated keywords.
+
+
+          - Do not echo my prompt. 
+
+
+
+          [SERP]:
+
+
+          {{page}}
+
+
+
+          [KEYWORDS]:
+        param: keywords
+      - type: gpt
+        prompt: >-
+          Please add keywords to my blog post: {{keywords}}. 
+
+
+          You can modify the provided keywords to
+
+          better align with Google E-A-T guidelines. Mention the keywords I
+          provided in the text
+
+          up to two times. There is no need to restructure the entire text
+          around these keywords.
+
+
+          Blog post: {{post}}
+        param: post2
+      - type: command
+        inputs:
+          - '{{post2}}'
+        name: AI content humanizer
+    label: add kw
+  - type: calc
+    func: list-add
+    index: last
+    list: g.posts
+    item: post2
+  - type: ask
+    param: option
+    message: Options
+    options:
+      - label: PASTE TO NOTION
+        value: notion
+      - label: NEXT POST
+        value: next
+      - $custom
+    default: ''
+    optionsInvalid: false
+  - type: group
+    steps:
+      - type: navigate
+        url: PASTE YOUR LINK HERE
+        waitForIdle: true
+        silent: false
+      - type: click
+        selectorType: ai
+        selector:
+          - $matches:
+              - $tag: DIV
+              - $class: notranslate
+              - $attribute: spellcheck=true
+              - $attribute: data-content-editable-leaf=true
+              - $attribute: >-
+                  style=max-width: 100%; width: 100%; white-space: pre-wrap;
+                  word-break: break-word; caret-color: rgb(55, 53, 47); padding:
+                  3px 2px; min-height: 1em; color: rgb(55, 53, 47);
+                  -webkit-text-fill-color: rgba(55, 53, 47, 0.5);
+              - $attribute: contenteditable=true
+              - $style: ui-sans-serif:16px:400:normal
+              - $placeholder: ' '
+              - $class: notion-text-block
+                traverse: '0:0:0'
+              - $class: notion-page-content
+                traverse: '0:0:0:0'
+              - $class: whenContentEditable
+                traverse: '3:0:0:0:0:0:0'
+              - $role: main
+                traverse: '0:1:3:0:0:0:0:0:0'
+              - $class: notion-frame
+                traverse: '0:1:3:0:0:0:0:0:0'
+              - $anchor: 📝
+                shift: '-1:191'
+              - $text: 📝
+                traverse: '-9:3:0:0:0:0:0:0'
+              - $anchor: Untitled
+                shift: '263:310'
+              - $text: Untitled
+                traverse: '-6:1:0:1:3:0:0:0:0:0:0'
+              - $anchor: 📝
+                shift: '288:313'
+              - $text: 📝
+                traverse: '-9:1:0:1:3:0:0:0:0:0:0'
+            min: 7
+          - $size: 1
+        item:
+          type: element
+          container:
+            __$ht: element
+            id: 1
+          value: '" "'
+      - type: paste
+        text: '{{g.posts}}'
+        selectorType: ai
+        selector: null
+        item: null
+        close: false
+    condition: '{{option}} = notion'
+  - type: jump
+    to: start
+    condition: '{{option}} = next'
+version: 1
