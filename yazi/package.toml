@@ -1,0 +1,26 @@
+[plugin]
+deps = [
+  # Pour prévisualiser les fichiers markdown
+  { use = "Reledia/glow", rev = "536185a" },
+  # Pour voir les métadonnées audio
+  { use = "Sonico98/exifaudio", rev = "92366cf" },
+  # Pour gérer les archives compressées
+  { use = "ndtoan96/ouch", rev = "fe6b0a6" },
+  # Pour gérer les favoris
+  { use = "dedukun/bookmarks", rev = "748efed" },
+  # Pour les permissions
+  { use = "yazi-rs/plugins:chmod", rev = "06e5fe1" },
+  # Pour la navigation intelligente
+  { use = "yazi-rs/plugins:zoxide", rev = "1.0.0" },
+  # Meilleure gestion de l'ouverture des fichiers
+  { use = "yazi-rs/plugins:smart-enter", rev = "1.0.0" },
+  # Intégration Git améliorée
+  { use = "yazi-rs/plugins:git", rev = "1.0.0" },
+  # Bordures complètes pour l'interface
+  { use = "yazi-rs/plugins:full-border", rev = "1.0.0" },
+  # Thème Catppuccin
+  { use = "yazi-rs/flavors:catppuccin-frappe", rev = "1.0.0" },
+]
+
+[flavor]
+deps = [] 

@@ -1,0 +1,33 @@
+meta:
+  title: Tuto YouTube
+  category: User
+steps:
+  - type: ask
+    param: p1
+    message: 'Please provide p1:'
+    options: null
+    default: ''
+  - type: gpt
+    prompt: >-
+      Please ignore all previous instructions. The output should be in
+      {{language}}. Please rewrite page content in a tutorial format with
+
+      ## 1. Numbered Headings for the Steps
+
+      Contextual details beneath them.
+
+
+      {{gpt}}
+
+
+      Expected format:
+
+      - [relevant emoji] [bullet point]
+
+
+      Summary:
+    chunkify:
+      text: '{{transcript}}'
+      empty: ''
+    param: gpt
+version: 1

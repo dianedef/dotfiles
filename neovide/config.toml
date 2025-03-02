@@ -1,0 +1,19 @@
+# Configuration générale
+frame = "transparent"  # Meilleur pour macOS, plus élégant que "none"
+idle = true
+maximized = false
+vsync = false  # Pour un meilleur contrôle du taux de rafraîchissement
+tabs = true
+theme = "auto"
+title-hidden = true
+
+# Performance
+fork = false
+no-multigrid = false
+srgb = false
+wsl = false
+
+# Police
+[font]
+normal = []  # Utilise Fira Code Nerd Font par défaut
+size = 14.0

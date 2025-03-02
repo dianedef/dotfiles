@@ -1,0 +1,158 @@
+version: 1
+meta:
+  name: outrank-article
+  title: Outrank SEO article
+  category: Marketing & SEO
+  description: >-
+    Outrank competition with an in-depth, SEO-optimized article. Navigate to a web
+    page with an article to outrank, then run this command.
+steps:
+  - say: >
+      Please copy paste an article to outrank or press Enter and I will extract it
+      from the opened web page:
+  - ask: input
+    default: '{{page}}'
+  - type: ask
+    message: >
+      Should I include your company name into the article?
+    param: company
+    options:
+      - label: YES
+        value: with-company-name
+      - label: NO
+        value: >
+          Please write the article in the "we" form. In your text do not mention any
+          company on behalf of which the text is written. You should not write
+          "[OUR COMPANY]", "[YOUR COMPANY NAME]", or in any other way indicate that I
+          should insert the name of a company.
+
+  - condition: '{{company}} = with-company-name'
+    type: ask
+    param: company-name
+    message: >
+      Please type your company name:
+
+  - condition: '{{company}} = with-company-name'
+    type: calc
+    param: company
+    value: >
+      My company name is: {{company-name}}. Please write the article in the "We" form
+      on behalf of my company.
+
+  - gpt: >-
+      Please ignore all previous instructions. Only reply in {{language}}.
+
+      I want you to act as a very proficient SEO and high end copy writer.
+
+      I want you to pretend you can write content so good that it can outrank other
+      websites. I will give you a part of an article that we need to outrank in Google.
+
+      Then I want you to write an article in a formal form that helps me outrank
+      the article I gave you. Write a long, fully markdown formatted article in
+      {{language}} that could rank on Google on the same keywords as that article I
+      gave you.
+
+      Your article should contain rich and comprehensive, very detailed paragraphs,
+      with lots of details. The article must be follow the google E-A-T guidelines.
+
+      Do use useful subheadings with keyword-rich titles. Get to the point precisely and
+      accurately. Do not repeat the same thing over again and do not echo my prompt.
+
+      I only need the generated article, I don't need any website fillers (subscription
+      buttons, links to other articles, or anything else). Regardless of the [CONTEXT]
+      that I will provide, base the generated article on the textual content and not on
+      any unrelated words that may be in the [CONTEXT]. Do not write "END OF REVISED TEXT",
+      "END OF ARTICLE" or any kind of such words anywhere.
+
+
+      [ADDITIONAL INSTRUCTIONS]:
+
+      {{company}}
+
+
+      [CONTEXT]:
+
+      {{input}}
+
+
+      [ARTICLE]:
+
+  - type: ask
+    label: ask-for-change
+    message: >
+      You can change the article style using the options below or type custom instructions.
+      Read about [writing styles in this guide](https://harpa.ai/guide/writing-styles).
+    param: change
+    options:
+      - { label: '✅ DONE', value: 'no' }
+      - { label: '📋 PASTE TO PAGE', value: 'paste' }
+      - { label: '✴️ ADD KEYWORDS', value: 'keywords' }
+      - { label: '🆗 MECE',value: 'I want you to completely change the style of the text to MECE framework article creating style.This means that you should take the text and rewrite it from scratch in the style that I request, regardless of its original style.' }
+      - { label: '📣 AIDA', value: 'I want you to completely change the style of the text to Attention-Interest-Desire-Action writing framework. This means that you should take the text and rewrite it from scratch in the style that I request, regardless of its original style.' }
+      - { label: '💡 PAS', value: 'I want you to completely change the style of the text to Problem-Agitate-Solve writing framework. This means that you should take the text and rewrite it from scratch in the style that I request, regardless of its original style.' }
+      - { label: '🎯 5W1H', value: 'I want you to completely change the style of the text to 5W1H writing framework. This means that you should take the text and rewrite it from scratch in the style that I request, regardless of its original style.'}
+      - { label: '💡 SWOT', value: 'I want you to completely change the style of the text to SWAT Analysis (Strengths, Weaknesses, Opportunities, Threats) writing framework. This means that you should take the text and rewrite it from scratch in the style that I request, regardless of its original style.' }
+      - { label: '🌉 BAB', value: 'I want you to completely change the style of the text to Before-After-Bridge writing framework. This means that you should take the text and rewrite it from scratch in the style that I request, regardless of its original style.' }
+      - { label: '📚 PASTOR', value: 'I want you to completely change the style of the text to Problem-Amplify-Solution-Testimonials-Offer-Response writing framework. This means that you should take the text and rewrite it from scratch in the style that I request, regardless of its original style.'  }
+      - { label: '🎓‍️ FAB', value: 'I want you to completely change the style of the text to Features-Advantages-Benefits writing framework. This means that you should take the text and rewrite it from scratch in the style that I request, regardless of its original style.' }
+      - { label: '🔺 PYRAMID', value: 'I want you to completely change the style of the text to Pyramid Principle writing framework, start by presenting the most critical information (the main point) at the beginning, followed by supporting details and explanations arranged in a hierarchical structure. This means that you should take the text and rewrite it from scratch in the style that I request, regardless of its original style.' }
+      - { label: '😚 KISS', value: 'I want you to completely change the style of the text to KISS (Keep It Simple, Stupid) writing framework. Avoid unnecessary jargon, complexity, and verbosity. This means that you should take the text and rewrite it from scratch in the style that I request, regardless of its original style.' }
+      - { label: '📝 PEEL', value: 'I want you to completely change the style of the text to PEEL (Point, Explanation, Evidence, Link) writing framework that begins by making a point, followed by an explanation of the point, the provision of evidence to support the claim, and finally, linking the point to the broader context or theme. This means that you should take the text and rewrite it from scratch in the style that I request, regardless of its original style.' }
+      - { label: '⭐ STAR', value: 'I want you to completely change the style of the text to STAR (Situation, Task, Action, Result) writing framework. This means that you should take the text and rewrite it from scratch in the style that I request, regardless of its original style.' }
+      - { label: '🦅 SOAR', value: 'I want you to completely change the style of the text to SOAR (Situation, Obstacles, Actions, Results) writing framework. This means that you should take the text and rewrite it from scratch in the style that I request, regardless of its original style.' }
+      - { label: '🏛️ TOULMIN', value: 'I want you to completely change the style of the text to Toulmin Model writing framework: firstly establish a claim, then support it with evidence (grounds), and finally build a logical and persuasive case through warrants, which connect the evidence to the claim. This means that you should take the text and rewrite it from scratch in the style that I request, regardless of its original style. ', }
+      - { label: '📈 SCIPAB', value: 'I want you to completely change the style of the text to SCIPAB (Situation, Complication, Implication, Position, Action, Benefit) writing framework. This means that you should take the text and rewrite it from scratch in the style that I request, regardless of its original style.' }
+      - { label: '🎓‍️ HARVARD', value: 'I want you to completely change the style of the text to Harvard writing framework, use headings and sub headings (H1, H2, H3, H4). This means that you should take the text and rewrite it from scratch in the style that I request, regardless of its original style.', }
+      - { label: '🕵️‍️ OPINION', value: 'I want you to completely change the style of the text to "Opinion Writing" framework: express different opinions on a given topic. This means that you should take the text and rewrite it from scratch in the style that I request, regardless of its original style.', }
+      - { label: '🤪 GONZO', value: 'I want you to completely change the style of the text to GONZO writing framework. This means that you should take the text and rewrite it from scratch in the style that I request, regardless of its original style.' }
+      - { label: '🗣️ PREP', value: 'I want you to completely change the style of the text to PREP (Point, Reason, Example, Point) writing framework. This means that you should take the text and rewrite it from scratch in the style that I request, regardless of its original style.' }
+      - { value: '$custom' }
+
+  - condition: '{{change}} = no'
+    type: stop
+  - condition: '{{change}} = paste'
+    type: paste
+  - condition: '{{change}} = paste'
+    type: control
+    action: hide
+  - condition: '{{change}} = paste'
+    type: stop
+
+  - condition: '{{change}} = keywords'
+    type: ask
+    param: keywordsList
+    message: >
+      Please type the keywords to add to the article, comma separated:
+
+  - condition: '{{change}} = keywords'
+    type: calc
+    param: change
+    value: >
+      Please add keywords to the text: {{keywordsList}}. You can modify the provided keywords to
+      better align with Google E-A-T guidelines. Mention the keywords I provided in the text
+      up to two times. There is no need to restructure the entire text around these keywords.
+
+  - type: gpt
+    prompt: >-
+      I would like you to make changes to the new text you have just written. Please do
+      not output anything but the revised text. Do not echo my command. Do not put quotes
+      around the revised text. If necessary, format the text using headings and subheadings
+      (H2, H3, H4), bullet points, and other visual formatting methods.
+
+      Do not use words that refer to framework chapters (if i asked you to change text
+      writing framework). For example, if I asked you to rewrite the text about the STAR
+      framework, do not name the first chapter "Situation". Come up with a unique title
+      for it that corresponds to the framework.
+
+      Do not write "END OF REVISED TEXT" or "END OF ARTICLE"
+
+
+      [CHANGES TO MAKE]:
+
+      {{change}}
+
+
+      [NEW TEXT]:
+
+  - type: jump
+    to: ask-for-change

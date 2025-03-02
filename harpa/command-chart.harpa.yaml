@@ -1,0 +1,91 @@
+meta:
+  title: Chart
+  description: Draws yours data in chart.
+  category: User
+  name: y_9F5MByN3h0V6UIOPBXb
+steps:
+  - type: ask
+    selected: false
+    param: data
+    message: >-
+      Data to draw in a chart?
+
+
+      Specify chart series, labels, data, etc. For example: "Series: kg
+      consumed. Labels: Banana, Pineapple, Orange. Data: 5, 10, 20". 
+
+
+      Or press Enter to get an example.
+    default: 'Series: Kg consumed. Labels: Banana, Pineapple, Orange. Data: 5, 10, 50'
+  - type: ask
+    selected: false
+    param: type
+    message: >-
+      Chart type?
+
+
+      Supported types: bar, line, pie, doughnut, polarArea, radar, bubble,
+      scatter etc.
+
+
+      Or press enter to let me guess the best option.
+    default: Use the best / the most suitable type
+  - type: gpt
+    prompt: >-
+      Please ignore all previous instructions.
+
+
+      I would like you to generate a chart preview link, using
+      http://quickchart.io. The chart should have the specified type and data.
+      Please do not echo my prompts, only provide the output URL.
+
+
+      [CHART TYPE]: {{type}}
+
+
+      [CHART DATA]: {{data}}
+
+
+      [REQUIRED OUTPUT FORMAT]: A single markdown link URL (not encoded):
+
+
+      ![Chart title](link to the image)
+
+
+      [OUTPUT EXAMPLES, notice URL is not encoded]:
+
+
+      ![Bar](https://quickchart.io/chart?c={type:'bar',data:{labels:['Banana','Pineapple','Orange'],datasets:[{label:'Kg
+      consumed',data:[5,10,50]}]}})
+
+
+      ![Bar](https://quickchart.io/chart?bkg=white&c={type:'bar',data:{labels:['Q1','Q2','Q3','Q4'],datasets:[{label:'Users',data:[50,60,70,180]},{label:'Revenue',data:[100,200,300,400]}]}})
+
+
+      ![Combo Bar
+      Line](https://quickchart.io/chart?c={type:'bar',data:{labels:['January','February','March','April','May','June','July'],datasets:[{type:'line',label:'Dataset
+      1',borderColor:'rgb(54, 162,
+      235)',borderWidth:2,fill:false,data:[-33,26,29,89,-41,70,-84]},{type:'bar',label:'Dataset
+      2',backgroundColor:'rgb(255, 99,
+      132)',data:[-42,73,-69,-94,-81,18,87],borderColor:'white',borderWidth:2},{type:'bar',label:'Dataset
+      3',backgroundColor:'rgb(75, 192,
+      192)',data:[93,60,-15,77,-59,82,-44]}]},options:{responsive:true,title:{display:true,text:'Chart.js
+      Combo Bar Line Chart'},tooltips:{mode:'index',intersect:true}}})
+
+
+      ![Scatterplot](https://quickchart.io/chart?c={type:"scatter",data:{datasets:[{label:"Mercury",borderColor:"rgb(255,
+      99, 132)",backgroundColor:"rgba(255, 99, 132,
+      0.2)",data:[{x:0.330,y:2439.7}]},{label:"Venus",borderColor:"rgb(54, 162,
+      235)",backgroundColor:"rgba(54, 162, 235,
+      0.2)",data:[{x:4.87,y:6051.8}]},{label:"Earth",borderColor:"dark-green",backgroundColor:"rgba(0,
+      255, 0,
+      0.2)",data:[{x:5.97,y:6371}]}]},options:{title:{display:true,text:"Planet
+      masses and
+      radii"},scales:{xAxes:[{ticks:{beginAtZero:true},scaleLabel:{display:true,labelString:'Radius
+      (km)'}}],yAxes:[{ticks:{beginAtZero:true},scaleLabel:{display:true,labelString:'Mass
+      (x10^24 kg)'}}]}}})
+
+
+      OUTPUT:
+    selected: true
+version: 1

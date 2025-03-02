@@ -1,0 +1,9 @@
+meta:
+  title: FB Group Post
+  description: ''
+  category: User
+  name: OBBGGn9zCCHWyxDaIi9mc
+steps:
+  - type: gpt
+    prompt: "We need a post for a Facebook group where people talk about software and offers. Use the content of {{page}} to make a post of 1500 words about the solution. Keep the text clean, without any formatting, in {{language}}, and follow this structure:\n\n[Name of the product]\n\n🪄\_[What the softwares does, in one very short sentenece]\n\n[Introduction yielding pain points adressed by the solution. DO NOT MENTION any promo code]\n\nPourquoi utiliser [Name of the product] ?\n\n🔑 [Benefit number 1]\n🔑 [Benefit number 2]\n🔑 [Benefit number 3]\n🔑 [Benefit number 4]\n🔑 [Benefit number 5]\n\n[Showcase the product : What does it have that other don’t? What’s the roadmap? Does it have integrations? Who’s the team? The price? Etc…]\n\nPour :\n✅ [Find a good thing to say about the solution]\n✅ [Find a good thing to say about the solution]\n\nContre :\n❌ [Find a bad thing to say about the product]\n❌ [Find a bad thing to say about the product]\n\n[Outro about the solution and its customers. Promo code to use if any, and until when?]\n\n[Relevant emoji] [Call to action to check out the offer]"
+version: 1

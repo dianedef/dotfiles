@@ -1,0 +1,31 @@
+meta:
+  title: YouTube Transcript
+  description: ''
+  category: User
+  name: ve2Ug_flI8KoPzANMzGiy
+steps:
+  - type: gpt
+    prompt: >-
+      I would like you convert a transcript to a blog article in {{language}}.
+
+      Nothing should mention that the info comes from an outside source, remove
+      timestamps and all other video-related info, as if it just came straight
+      out of my brain
+
+
+      Structure the text in 1, 2, 3 or 4 big sections maximum and add a ## title
+      in markdown for each.
+
+      Each section could have several ### titles, or just be a big paragraph
+      that illustrate the points that are made.
+
+      Keep a high level of accuracy in the lexicon, you can even extract some
+      parts word by word when needed.
+
+
+      Here is the source: {{chunk}}
+    chunkify:
+      text: '{{youtube.transcript}}'
+      empty: ''
+    param: gpt
+version: 1

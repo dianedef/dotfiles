@@ -1,0 +1,87 @@
+meta:
+  title: outrank-and-link
+  description: ''
+  category: User
+  name: Y-g5ZX8Es9KOFyBjqcCG3
+steps:
+  - type: say
+    message: >-
+      This command will check the internal linking structure before
+      creating/rewriting an article. First, copy + paste the URL of the article
+      you want to rewrite into HARPA. Then, the command will open the post and
+      page sitemaps of the open website, extract the links, and generate 2-3
+      keywords for each link relative to the slug. After it has generated
+      keywords for each URL, HARPA will navigate back to the original article
+      linked in the first step, and rewrite the article based on the internal
+      linking structure and generated keywords.
+  - type: ask
+    message: Article URL
+    param: articleurl
+    default: ''
+  - type: navigate
+    url: /post-sitemap.xml
+    waitForIdle: true
+  - type: extract
+    selectorType: ai
+    selector: null
+    item: null
+    param: postsitemapurls
+    default: ''
+    showMore: false
+    onFailure: skip
+  - type: gpt
+    prompt: >-
+      Post Sitemap: {{postsitemapurls}}
+
+
+      From all of the above URL's, generate 2-3 keywords for each URL. You
+      should only respond with the keywords and the corresponding URLs.
+    param: postsitemapkeywords
+  - type: navigate
+    url: /page-sitemap.xml
+    waitForIdle: true
+  - type: extract
+    selectorType: ai
+    selector: null
+    item: null
+    param: pagesitemapurls
+    default: ''
+    showMore: false
+    onFailure: skip
+  - type: gpt
+    prompt: >-
+      Post Sitemap: {{pagesitemapurls}}
+
+
+      From all of the above URL's, generate 2-3 keywords for each URL. You
+      should only respond with the keywords and the corresponding URLs.
+    param: pagesitemapkeywords
+  - type: navigate
+    url: '{{articleurl}}'
+    waitForIdle: true
+  - type: gpt
+    prompt: >-
+      Website: {{page}}
+
+
+      Post Sitemap URL's + Keywords: {{postsitemapkeywords}}
+
+
+      Page Sitemap URL's + Keywords: {{pagesitemapkeywords}}
+
+
+      Using the above information from the website page and the websites sitemap
+      I want you to rewrite the article. 
+
+
+      You SHOULD write in Markdown formatting, MUST have a title/meta title at
+      the start, internal links which SHOULD and MUST be naturally included in
+      the article linking relevant keywords to relevant link, UL/OL, block
+      quotes, and any other HTML/Markdown formatting you can think to include.
+      The article should be professionally written, while also sounding human
+      and not like an AI/Robot has written it. 
+
+
+      You MUST remember to add internal linking, linking relevant keywords to
+      relevant pages.
+version: 1

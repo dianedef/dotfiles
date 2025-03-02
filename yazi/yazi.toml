@@ -1,0 +1,94 @@
+[manager]
+show_hidden = true
+sort_by = "natural"
+sort_dir_first = true
+scrolloff = 5
+linemode = "none"
+# Amélioration de l'affichage
+ratio = [1, 3, 3]
+show_symlink = true
+
+# [preview]
+# ueberzug_offset = [0.5, 0.5, -0.5, -0.5]
+# ueberzug_scale  = 1
+
+[preview]
+tab_size = 4
+max_width = 600
+max_height = 900
+ueberzug_scale = 1
+ueberzug_offset = [0, 0, 0, 0]
+
+[opener]
+edit = [
+    # Neovim pour l'édition de texte
+    { run = 'nvim "$@"', desc = "Neovim", block = true },
+    # VS Code comme alternative
+    { run = 'code "$@"', orphan = true, desc = "VS Code" },
+]
+play = [
+    # MPV pour la lecture média
+    { run = 'mpv --force-window "$@"', orphan = true, desc = "MPV" },
+    # MediaInfo pour les détails
+    { run = '''mediainfo "$1" | less''', block = true, desc = "Media Info" },
+]
+archive = [
+    # 7-Zip pour les archives
+    { run = '7z x "$1" -o"$1_extracted"', block = true, desc = "Extract here" },
+]
+
+[open]
+rules = [
+    # Dossiers
+    { name = "*/", use = [ "edit", "reveal" ] },
+
+    # Code et texte
+    { mime = "text/*", use = [ "edit", "reveal" ] },
+    { mime = "application/json", use = [ "edit", "reveal" ] },
+    { mime = "*/javascript", use = [ "edit", "reveal" ] },
+    { mime = "*/python", use = [ "edit", "reveal" ] },
+    { mime = "*/lua", use = [ "edit", "reveal" ] },
+
+    # Médias
+    { mime = "image/*", use = [ "open", "reveal" ] },
+    { mime = "video/*", use = [ "play", "reveal" ] },
+    { mime = "audio/*", use = [ "play", "reveal" ] },
+
+    # Archives
+    { mime = "application/zip", use = [ "archive", "reveal" ] },
+    { mime = "application/x-7z-compressed", use = [ "archive", "reveal" ] },
+    { mime = "application/x-rar", use = [ "archive", "reveal" ] },
+    { mime = "application/gzip", use = [ "archive", "reveal" ] },
+    { mime = "application/x-tar", use = [ "archive", "reveal" ] },
+
+    # Par défaut
+    { name = "*", use = [ "open", "reveal" ] },
+]
+
+[input]
+# Amélioration des dialogues
+cd_title = "Changer de dossier:"
+create_title = ["Créer:", "Créer (dossier):"]
+rename_title = "Renommer:"
+trash_title = "Déplacer {n} fichier{s} vers la corbeille ? (o/N)"
+delete_title = "Supprimer {n} fichier{s} définitivement ? (o/N)"
+find_title = ["Rechercher suivant:", "Rechercher précédent:"]
+search_title = "Rechercher:"
+
+[plugin]
+prepend_previewers = [
+  # Markdown avec Glow
+  { name = "*.md", run = "glow" },
+  # Métadonnées audio
+  { mime = "audio/*", run = "exifaudio" },
+  # Archives
+  { mime = "application/zip", run = "ouch" },
+  { mime = "application/gzip", run = "ouch" },
+  { mime = "application/x-tar", run = "ouch" },
+  { mime = "application/x-7z-compressed", run = "ouch" },
+  { mime = "application/x-rar", run = "ouch" },
+  # Ajout de types d'archives supplémentaires
+  { mime = "application/x-xz", run = "ouch" },
+  { mime = "application/x-bzip", run = "ouch" },
+  { mime = "application/x-bzip2", run = "ouch" },
+]

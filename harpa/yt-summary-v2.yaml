@@ -1,0 +1,364 @@
+version: 1
+meta:
+  name: youtube-summary
+  category: Productivity
+  title: YouTube video summary
+  description: >
+    Save time on watching YouTube videos. Break down YouTube videos into parts and get key
+    takeaways.
+  apps: YouTube
+steps:
+  - type: ask
+    message: >
+      Pick a summary format, or type custom instructions.
+    param: format
+    options:
+      - { label: '🐳 LONGER', value: 'long' }
+      - { label: '🐬 SHORTER', value: 'short' }
+      - { label: '💬 TEXT ONLY', value: 'text' }
+      - { value: '$custom' }
+
+  - say: >
+      Parsing video from the page… Long videos may take a few seconds to parse.
+
+  - type: calc
+    param: transcript
+    value: '{{youtube.transcript}}'
+
+  - condition: '{{format}} = short'
+    type: gpt
+    chunkify:
+      text: '{{transcript}}'
+      empty: >
+        It looks as if the video has no text transcript, or I could not fetch it from the page.
+    prompt: >
+      I want you to only answer in {{language}}. You goal is to extract key takeaways of
+      the next chunk of the transcript. Takeaways must be concise, informative and easy to
+      read & understand. Extract no more than 5 takeaways or less.
+
+      Each key takeaway should be a list item, of the following format:
+
+
+      - [Timestamp URL] [Takeaway emoji] [Key takeaway in {{language}}]
+
+
+      The timestamp should be presented in markdown URL format. The URL text indicates,
+      and the address links to a specific time in the video, for example:
+
+      - [00:00](https://youtu.be/Mde2q7GFCrw?t=0s) 🤖 ...
+
+      - [01:18](https://youtu.be/Mde2q7GFCrw?t=78s) 🛡️ ...
+
+      - [03:37](https://youtu.be/Mde2q7GFCrw?t=217s) 💼 ...
+
+
+      Keep emoji relevant and unique to each key takeaway item. Do not use the same emoji
+      for every takeaway. Do not render brackets. Do not prepend takeaway with "Key takeaway".
+
+
+      [VIDEO TITLE]:
+
+      {{page.desc}}
+
+
+      [VIDEO URL]:
+
+      {{page.url}}
+
+
+      [VIDEO TRANSCRIPT CHUNK]:
+
+      {{chunk}}
+
+
+      [KEY TAKEAWAYS LIST IN {{language}}]:
+
+
+  - condition: '{{format}} = long'
+    type: gpt
+    chunkify:
+      text: '{{transcript}}'
+      empty: >
+        It looks as if the video has no text transcript, or I could not fetch it from the page.
+    prompt: >
+      I want you to only answer in {{language}}. You goal is to extract key takeaways of
+      the next chunk of the transcript. Takeaways must be concise, informative and easy to read
+      & understand.
+
+      Each key takeaway should be a list item, of the following format:
+
+
+      - [Timestamp URL] [Takeaway emoji] [Key takeaway in {{language}}]
+
+
+      The timestamp should be presented in markdown URL format. The URL text indicates,
+      and the address links to a specific time in the video, for example:
+
+      - [00:00](https://youtu.be/Mde2q7GFCrw?t=0s) 🤖 ...
+
+      - [01:18](https://youtu.be/Mde2q7GFCrw?t=78s) 🛡️ ...
+
+      - [03:37](https://youtu.be/Mde2q7GFCrw?t=217s) 💼 ...
+
+
+      Keep emoji relevant and unique to each key takeaway item. Do not use the same emoji
+      for every takeaway. Do not render brackets. Do not prepend takeaway with "Key takeaway".
+
+
+      [VIDEO TITLE]:
+
+      {{page.desc}}
+
+
+      [VIDEO URL]:
+
+      {{page.url}}
+
+
+      [VIDEO TRANSCRIPT CHUNK]:
+
+      {{chunk}}
+
+
+      [KEY TAKEAWAYS LIST IN {{language}}]:
+
+
+  - condition: '{{format}} = text'
+    type: gpt
+    chunkify:
+      text: '{{transcript}}'
+      empty: >
+        It looks as if the video has no text transcript, or I could not fetch it from the page.
+    prompt: >
+      I want you to only answer in {{language}}. You goal is to extract key takeaways of
+      the next chunk of the transcript. Takeaways must be concise, informative and easy to read
+      & understand:
+
+
+      - [Timestamp URL] [Key takeaway in {{language}}]
+
+
+      Do not render brackets. Do not prepend takeaway with "Key takeaway". The timestamp
+      should be presented in markdown URL format. The URL text indicates, and the address
+      links to a specific time in the video, for example:
+      [15:49](https://youtu.be/Mde2q7GFCrw?t=949s)
+
+
+      [VIDEO TITLE]:
+
+      {{page.desc}}
+
+
+      [VIDEO URL]:
+
+      {{page.url}}
+
+
+      [VIDEO TRANSCRIPT CHUNK]:
+
+      {{chunk}}
+
+
+      [KEY TAKEAWAYS LIST IN {{language}}]:
+
+  - condition: '{{format-option}} = $custom'
+    type: gpt
+    chunkify:
+      text: '{{transcript}}'
+      empty: >
+        It looks as if the video has no text transcript, or I could not fetch it from the page.
+    prompt: >
+      I want you to only answer in {{language}}. Please read the part of a video transcript
+      and perform the instructions I give you below. If instructions are not specified or
+      unclear, simply summarize the transcript for me in a single paragraph.
+
+
+      [VIDEO TITLE]:
+
+      {{page.desc}}
+
+
+      [VIDEO URL]:
+
+      {{page.url}}
+
+
+      [VIDEO TRANSCRIPT CHUNK]:
+
+      {{chunk}}
+
+
+      [INSTRUCTIONS]:
+
+      {{format}}
+
+
+      [RESULT IN {{language}}]:
+
+  # stop if no transcript found
+  - condition: '{{transcript}} = '
+    type: stop
+
+  # stop if custom option selected
+  - condition: '{{format-option}} = $custom'
+    type: stop
+
+  # ask user to share
+  - type: ask
+    label: complete
+    message: >
+      ✅ Summary complete.
+
+      Share to comments? Sharing this summary saves people time and contributes
+      to HARPA's growth.
+    param: share
+    options:
+      - { label: '🎯️️️️ YES, ADD COMMENT', value: 'yes' }
+      - { label: '⬇️ SHORTEN', value: 'shorten' }
+      - { label: '⛔ NO', value: 'no' }
+
+  # stop if no sharing requested
+  - condition: '{{share}} = no'
+    type: stop
+    analytics:
+      event: 'youtube-comment-summary'
+      value: false
+
+  # shorten the summary
+  - condition: '{{share}} = shorten'
+    type: gpt
+    prompt: >
+      I want you to only answer in {{language}}. You goal is to shorten the takeaways
+      summary of the complete youtube video transcript by ~50%. You can do so by
+      dropping least important key takeaways, by combining key takeaways into one,
+      by shortening the text of each takeaway, in any combination.
+
+
+      Please keep the format: shortened summary should be a list of key takeaways, just
+      as the input summary, and include timestamp URLs and emojis:
+
+
+      - [Timestamp URL] [Takeaway emoji] [Key takeaway in {{language}}]
+
+
+      [SUMMARY]:
+
+      {{gpt}}
+
+
+      [SHORTENED SUMMARY IN {{language}}]:
+
+  - condition: '{{share}} = shorten'
+    type: jump
+    to: complete
+
+  # find comment box, scroll one screen if comment box is not found
+  - condition: '{{share}} = yes'
+    type: js
+    silent: true
+    code: |-
+      // check if comment box is found
+      let cb = document.querySelector('ytd-comment-simplebox-renderer')
+      if (cb) return true
+
+      // wait for comment box to appear
+      document.documentElement.scrollTop += window.innerHeight
+      cb = await $harpa.waiter.wait(
+        () => document.querySelector('ytd-comment-simplebox-renderer'),
+        { timeout: 1500 })
+      return !!commentBox
+    param: commentBoxFound
+    analytics:
+      event: 'youtube-comment-summary'
+      value: true
+
+  # could not find comment box? -> report and stop
+  - condition: '{{commentBoxFound}} = false'
+    say: ⛔ Could not find comment element.
+  - condition: '{{commentBoxFound}} = false'
+    type: stop
+
+  # find comment box
+  - condition: '{{share}} = yes'
+    type: click
+    selectorType: ai
+    selector:
+      - $matches:
+          - $tag: YT-FORMATTED-STRING
+          - $role: textbox
+          - $id: simplebox-placeholder
+          - $class: style-scope
+          - $class: ytd-comment-simplebox-renderer
+          - $attribute: role=textbox
+          - $attribute: tabindex=0
+          - $style: Roboto:14px:400:normal
+          - $content: Add a comment…
+          - $id: placeholder-area
+            traverse: '0'
+          - $id: simple-box
+            traverse: '0:1:0'
+          - $id: header
+            traverse: '0:4:0:1:0'
+          - $id: sections
+            traverse: '0:0:4:0:1:0'
+          - $id: comments
+            traverse: '1:0:0:4:0:1:0'
+          - $anchor: Sort by
+            shift: '-136:51'
+          - $text: Sort by
+            traverse: '-8:4:0:1:0'
+        min: 6
+      - $size: 1
+    item: null
+    showMore: false
+    onFailure: skip
+    waitForIdle: false
+    silent: true
+
+  # compute summary to paste
+  - condition: '{{share}} = yes'
+    type: calc
+    func: youtube.comment-summary
+    param: summary
+
+  # paste summary and click submit
+  - condition: '{{share}} = yes'
+    type: paste
+    text: '{{summary}}'
+    selectorType: ai
+    silent: true
+
+  - condition: '{{share}} = yes'
+    type: click
+    selectorType: ai
+    selector:
+      - $matches:
+          - $tag: SPAN
+          - $role: text
+          - $class: yt-core-attributed-string
+          - $class: yt-core-attributed-string--white-space-no-wrap
+          - $attribute: role=text
+          - $style: Roboto:14px:500:normal
+          - $content: Comment
+          - $id: submit-button
+            traverse: '0:0:0:0'
+          - $id: buttons
+            traverse: '1:0:0:0:0'
+          - $id: footer
+            traverse: '6:1:0:0:0:0'
+          - $id: main
+            traverse: '7:6:1:0:0:0:0'
+          - $id: thumbnail-input-row
+            traverse: '1:7:6:1:0:0:0:0'
+          - $anchor: Cancel
+            shift: '92:0'
+          - $text: Cancel
+            traverse: '-5:1:0:0:0:0'
+        min: 7
+      - $size: 1
+    item: null
+    showMore: false
+    onFailure: skip
+    waitForIdle: false
+    silent: true
+
