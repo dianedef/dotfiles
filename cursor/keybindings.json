@@ -1,0 +1,140 @@
+// Empty
+[
+   {
+      "key": "ctrl+k ctrl+c",
+      "command": "-editor.action.addCommentLine",
+      "when": "editorTextFocus && !editorReadonly"
+   },
+   {
+      "key": "ctrl+shift+o",
+      "command": "chrome-extension-developer-tools.create"
+   },
+   {
+      "key": "ctrl+m ctrl+l",
+      "command": "-editor.toggleFold",
+      "when": "editorTextFocus && foldingEnabled"
+   },
+   {
+      "key": "ctrl+shift+oem_6",
+      "command": "-editor.unfold",
+      "when": "editorTextFocus && foldingEnabled"
+   },
+   {
+      "key": "ctrl+m ctrl+oem_4",
+      "command": "-editor.foldRecursively",
+      "when": "editorTextFocus && foldingEnabled"
+   },
+   {
+      "key": "alt+x",
+      "command": "editor.fold",
+      "when": "editorTextFocus && foldingEnabled"
+   },
+   {
+      "key": "ctrl+shift+oem_4",
+      "command": "-editor.fold",
+      "when": "editorTextFocus && foldingEnabled"
+   },
+   {
+      "key": "ctrl+alt+up",
+      "command": "editor.foldAll",
+      "when": "editorTextFocus && foldingEnabled"
+   },
+   {
+      "key": "ctrl+m ctrl+0",
+      "command": "-editor.foldAll",
+      "when": "editorTextFocus && foldingEnabled"
+   },
+   {
+      "key": "ctrl+alt+down",
+      "command": "editor.unfoldAll",
+      "when": "editorTextFocus && foldingEnabled"
+   },
+   {
+      "key": "ctrl+m ctrl+j",
+      "command": "-editor.unfoldAll",
+      "when": "editorTextFocus && foldingEnabled"
+   },
+   {
+      "key": "ctrl+m ctrl+oem_6",
+      "command": "-editor.unfoldRecursively",
+      "when": "editorTextFocus && foldingEnabled"
+   },
+   {
+      "key": "alt+q",
+      "command": "workbench.action.toggleSidebarVisibility"
+   },
+   {
+      "key": "ctrl+b",
+      "command": "-workbench.action.toggleSidebarVisibility"
+   },
+   {
+      "key": "ctrl+q",
+      "command": "workbench.action.showCommands"
+   },
+   {
+      "key": "ctrl+shift+p",
+      "command": "-workbench.action.showCommands"
+   },
+   {
+      "key": "alt+f",
+      "command": "actions.find",
+      "when": "editorFocus || editorIsOpen"
+   },
+   {
+      "key": "ctrl+f",
+      "command": "-actions.find",
+      "when": "editorFocus || editorIsOpen"
+   },
+   {
+      "key": "alt+x",
+      "command": "notebook.unfold",
+      "when": "notebookEditorFocused && !inputFocus && activeEditor == 'workbench.editor.notebook'"
+   },
+   {
+      "key": "right",
+      "command": "-notebook.unfold",
+      "when": "notebookEditorFocused && !inputFocus && activeEditor == 'workbench.editor.notebook'"
+   },
+   {
+      "key": "shift+alt+x",
+      "command": "editor.unfold"
+   },
+   {
+      "key": "ctrl+shift+down",
+      "command": "editor.unfoldRecursively"
+   },
+   {
+      "key": "ctrl+shift+up",
+      "command": "editor.foldRecursively"
+   },
+   {
+      "key": "alt+w",
+      "command": "-toggleSearchEditorWholeWord",
+      "when": "inSearchEditor && searchInputBoxFocus"
+   },
+   {
+      "key": "alt+w",
+      "command": "-workbench.action.terminal.toggleFindWholeWord",
+      "when": "terminalFindVisible && terminalHasBeenCreated || terminalFindVisible && terminalProcessSupported"
+   },
+   {
+      "key": "alt+w",
+      "command": "-toggleFindWholeWord",
+      "when": "editorFocus"
+   },
+   {
+      "key": "alt+w",
+      "command": "-toggleSearchWholeWord",
+      "when": "searchViewletFocus"
+   },
+   {
+      "key": "alt+w",
+      "command": "workbench.action.navigateBack",
+      "when": "canNavigateBack"
+   },
+   {
+      "key": "alt+left",
+      "command": "-workbench.action.navigateBack",
+      "when": "canNavigateBack"
+   }
+]
