@@ -2,10 +2,39 @@
 
 # Script d'installation des dotfiles pour GitHub Codespaces
 
+## Configuration du système de logging
+# Use workspace directory for persistence with repository
+LOG_FILE="$PWD/install.log"
+LOG_LEVEL=${LOG_LEVEL:-INFO}  # Niveaux possibles: DEBUG, INFO, WARN, ERROR
+DEBUG_MODE=${DEBUG_MODE:-false}
+
+# Fonction de logging avec timestamps et niveaux de sévérité
+log() {
+    local level=$1
+    local message=$2
+    local timestamp=$(date +"%Y-%m-%d %H:%M:%S")
+    local log_entry="[$timestamp] [$level] $message"
+
+    # Afficher dans la console
+    echo "$log_entry"
+
+    # Écrire dans le fichier de log
+    echo "$log_entry" >> "$LOG_FILE"
+
+    # Si DEBUG_MODE est activé, afficher plus de détails
+    if [ "$DEBUG_MODE" = "true" ] && [ "$level" = "DEBUG" ]; then
+        echo "[DEBUG_MODE] $message" >> "$LOG_FILE"
+    fi
+}
+
+# Vérifier et créer le fichier de log
+touch "$LOG_FILE"
+log "INFO" "Starting installation script - Log file: $LOG_FILE"
+
 echo "🚀 Starting dotfiles installation..."
 
 # --- 1. Installation de Neovim ---
-echo "📦 Installing Neovim..."
+log "INFO" "📦 Installing Neovim..."
 
 # Méthode 1 : Essayer via AppImage (la plus fiable pour Codespaces)
 install_neovim_appimage() {
@@ -48,7 +77,7 @@ else
 fi
 
 # --- 2. Installation des dépendances ---
-echo "📦 Installing dependencies..."
+log "INFO" "📦 Installing dependencies..."
 
 sudo apt-get update
 sudo apt-get install -y \
@@ -75,7 +104,7 @@ if ! command -v node &> /dev/null; then
 fi
 
 # --- 3. Configuration de LazyVim ---
-echo "⚙️ Setting up LazyVim..."
+log "INFO" "⚙️ Setting up LazyVim..."
 
 NVIM_CONFIG_DIR="$HOME/.config/nvim"
 
@@ -90,7 +119,7 @@ git clone https://github.com/LazyVim/starter "$NVIM_CONFIG_DIR"
 rm -rf "$NVIM_CONFIG_DIR/.git"
 
 # --- 4. Liens symboliques pour vos dotfiles personnalisés ---
-echo "🔗 Creating symlinks for custom configs..."
+log "INFO" "🔗 Creating symlinks for custom configs..."
 
 SOURCE_DIR="$HOME/dotfiles"
 
@@ -141,13 +170,23 @@ if [ -f "$SOURCE_DIR/.zshrc" ]; then
 fi
 
 # --- 5. Installation des plugins Neovim ---
-echo "📥 Installing Neovim plugins..."
+log "INFO" "📥 Installing Neovim plugins..."
 
 # Installer les plugins en mode headless
 nvim --headless "+Lazy! sync" +qa 2>&1 | tee /tmp/nvim-install.log
+
+echo ""
+log "INFO" "✨ Dotfiles installation complete!"
+log "INFO" "🎉 Run 'nvim' to start Neovim with LazyVim"
+log "INFO" "📝 Installation log saved to /tmp/nvim-install.log"
+log "INFO" "📄 Main installation log persisted with repository: $LOG_FILE"
+log "INFO" "🔍 You can view logs with: cat $LOG_FILE"
+log "INFO" "📖 Or monitor in real-time with: tail -f $LOG_FILE"
+log "INFO" "📁 Log file is accessible via VS Code file explorer"
 
 echo ""
 echo "✨ Dotfiles installation complete!"
 echo "🎉 Run 'nvim' to start Neovim with LazyVim"
 echo ""
 echo "📝 Installation log saved to /tmp/nvim-install.log"
+echo "📄 Main installation log persisted with repository: $LOG_FILE"
