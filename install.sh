@@ -1,89 +1,153 @@
 #!/bin/bash
-#
-## Le script sera exécuté par Codespaces dans votre répertoire ~/dotfiles.
-#
-## --- 1. Installation des Dépendances Linux (Applications) ---
-#echo "Installing required Linux applications..."
-#
-## Mettre à jour et installer les outils de base (Codespace a déjà beaucoup de choses)
-#sudo apt-get update
-#sudo apt-get install -y \
-#  git \
-#    curl \
-#      wget \
-#        unzip \
-#          build-essential \
-#            python3-pip \
-#              xclip  # Essentiel pour le presse-papiers dans VS Code/Codespace
-#
-#              # Installer Node.js et pnpm via nvm ou une autre méthode standard Linux
-#              # Ici, nous utilisons la méthode NodeSource pour une installation propre
-#              # curl -fsSL https://deb.nodesource.com/setup_lts.x | sudo -E bash -
-#              # sudo apt-get install -y nodejs
-#              # npm install -g pnpm
-#
-#              # --- Installation de LazyVim pour Neovim (Équivalent de votre section Windows) ---
-#              echo "Setting up LazyVim..."
-#
-#              NVIM_CONFIG_DIR="$HOME/.config/nvim"
-#
-#              if [ -d "$NVIM_CONFIG_DIR" ]; then
-#                  echo "Backing up existing Neovim config to ${NVIM_CONFIG_DIR}.backup"
-#                      mv "$NVIM_CONFIG_DIR" "${NVIM_CONFIG_DIR}.backup"
-#                      fi
-#
-#                      # Cloner le starter de LazyVim
-#                      git clone https://github.com/LazyVim/starter "$NVIM_CONFIG_DIR"
-#
-#                      # Suppression du répertoire .git (car nous ne voulons pas que la configuration soit un repo)
-#                      rm -rf "$NVIM_CONFIG_DIR/.git"
-#
-#                      # --- 2. Configuration des Dotfiles (Liens Symboliques) ---
-#                      echo "Starting dotfiles symlinking..."
-#
-#                      # Définir le répertoire source de configuration (là où le repo dotfiles est cloné)
-#                      SOURCE_DIR="$HOME/dotfiles"
-#
-#                      # Tableau associatif des configurations à lier (source -> cible)
-#                      declare -A CONFIG_PATHS=(
-#                          ["nvim"]="$SOURCE_DIR/nvim:$HOME/.config/nvim"
-#                              ["yazi"]="$SOURCE_DIR/yazi:$HOME/.config/yazi"
-#                                  # Ajoutez ici d'autres configurations comme zshrc, bashrc, etc.
-#                                      # ["bashrc"]="$SOURCE_DIR/.bashrc:$HOME/.bashrc"
-#                                      )
-#
-#                                      # Fonction pour créer le lien symbolique (très similaire à votre fonction PowerShell)
-#                                      create_symlink() {
-#                                          local SOURCE=$1
-#                                              local TARGET=$2
-#                                                  
-#                                                      # Supprimer l'ancienne cible (ou lien)
-#                                                          if [ -e "$TARGET" ] || [ -L "$TARGET" ]; then
-#                                                                  echo "Removing existing $TARGET..."
-#                                                                          rm -rf "$TARGET"
-#                                                                              fi
-#
-#                                                                                  # Créer le répertoire parent si absent
-#                                                                                      mkdir -p "$(dirname "$TARGET")"
-#
-#                                                                                          # Créer le lien symbolique
-#                                                                                              echo "Creating symlink: $TARGET -> $SOURCE"
-#                                                                                                  ln -s "$SOURCE" "$TARGET"
-#                                                                                                  }
-#
-#                                                                                                  for KEY in "${!CONFIG_PATHS[@]}"; do
-#                                                                                                      IFS=':' read -r SOURCE TARGET <<< "${CONFIG_PATHS[$KEY]}"
-#                                                                                                          echo -e "\nInstalling $KEY configuration..."
-#                                                                                                              create_symlink "$SOURCE" "$TARGET"
-#                                                                                                              done
-#
-#                                                                                                              # --- 3. Synchronisation et finalisation Neovim ---
-#
-#                                                                                                              # Exécuter Neovim en mode headless pour installer les plugins LazyVim/Neovim
-#                                                                                                              echo "Running Neovim to install plugins and complete setup (LazyVim)..."
-#
-#                                                                                                              # Cette commande lance nvim, exécute la commande de synchronisation des plugins, et quitte.
-#                                                                                                              nvim --headless -c 'Lazy sync' -c 'qa!'
-#
-#                                                                                                              echo -e "\nInstallation complete!"
-#
+
+# Script d'installation des dotfiles pour GitHub Codespaces
+
+echo "🚀 Starting dotfiles installation..."
+
+# --- 1. Installation de Neovim ---
+echo "📦 Installing Neovim..."
+
+# Méthode 1 : Essayer via AppImage (la plus fiable pour Codespaces)
+install_neovim_appimage() {
+    echo "Installing Neovim via AppImage..."
+    cd /tmp
+    curl -LO https://github.com/neovim/neovim/releases/latest/download/nvim.appimage
+    chmod u+x nvim.appimage
+    sudo mv nvim.appimage /usr/local/bin/nvim
+    
+    # Vérifier si ça fonctionne, sinon extraire l'AppImage
+    if ! /usr/local/bin/nvim --version &> /dev/null; then
+        echo "AppImage needs extraction..."
+        cd /tmp
+        curl -LO https://github.com/neovim/neovim/releases/latest/download/nvim.appimage
+        chmod u+x nvim.appimage
+        ./nvim.appimage --appimage-extract
+        sudo mv squashfs-root /opt/nvim
+        sudo ln -sf /opt/nvim/usr/bin/nvim /usr/local/bin/nvim
+    fi
+}
+
+# Méthode 2 : Via le package Ubuntu (version plus ancienne mais stable)
+install_neovim_apt() {
+    echo "Installing Neovim via apt..."
+    sudo apt-get update
+    sudo apt-get install -y neovim
+}
+
+# Essayer l'AppImage d'abord, sinon utiliser apt
+if ! command -v nvim &> /dev/null; then
+    install_neovim_appimage || install_neovim_apt
+fi
+
+# Vérifier l'installation
+if command -v nvim &> /dev/null; then
+    echo "✅ Neovim installed successfully: $(nvim --version | head -n 1)"
+else
+    echo "❌ Neovim installation failed"
+    exit 1
+fi
+
+# --- 2. Installation des dépendances ---
+echo "📦 Installing dependencies..."
+
+sudo apt-get update
+sudo apt-get install -y \
+  git \
+  curl \
+  wget \
+  unzip \
+  build-essential \
+  python3-pip \
+  ripgrep \
+  fd-find \
+  xclip
+
+# Créer un lien pour fd (fd-find sur Ubuntu)
+if [ -f /usr/bin/fdfind ] && [ ! -f /usr/bin/fd ]; then
+    sudo ln -s /usr/bin/fdfind /usr/bin/fd
+fi
+
+# Installer Node.js si nécessaire
+if ! command -v node &> /dev/null; then
+    echo "Installing Node.js..."
+    curl -fsSL https://deb.nodesource.com/setup_lts.x | sudo -E bash -
+    sudo apt-get install -y nodejs
+fi
+
+# --- 3. Configuration de LazyVim ---
+echo "⚙️ Setting up LazyVim..."
+
+NVIM_CONFIG_DIR="$HOME/.config/nvim"
+
+# Sauvegarder la config existante
+if [ -d "$NVIM_CONFIG_DIR" ]; then
+    echo "Backing up existing Neovim config..."
+    mv "$NVIM_CONFIG_DIR" "${NVIM_CONFIG_DIR}.backup.$(date +%s)"
+fi
+
+# Cloner LazyVim starter
+git clone https://github.com/LazyVim/starter "$NVIM_CONFIG_DIR"
+rm -rf "$NVIM_CONFIG_DIR/.git"
+
+# --- 4. Liens symboliques pour vos dotfiles personnalisés ---
+echo "🔗 Creating symlinks for custom configs..."
+
+SOURCE_DIR="$HOME/dotfiles"
+
+# Fonction pour créer les liens symboliques
+create_symlink() {
+    local SOURCE=$1
+    local TARGET=$2
+    
+    if [ ! -e "$SOURCE" ]; then
+        echo "⚠️  Source $SOURCE does not exist, skipping..."
+        return
+    fi
+    
+    if [ -e "$TARGET" ] || [ -L "$TARGET" ]; then
+        echo "Removing existing $TARGET..."
+        rm -rf "$TARGET"
+    fi
+    
+    mkdir -p "$(dirname "$TARGET")"
+    
+    echo "Creating symlink: $TARGET -> $SOURCE"
+    ln -s "$SOURCE" "$TARGET"
+}
+
+# Lier votre configuration nvim personnalisée (si elle existe dans dotfiles/nvim)
+if [ -d "$SOURCE_DIR/nvim" ]; then
+    echo "Linking custom nvim config..."
+    # Supprimer le starter LazyVim et utiliser votre config
+    rm -rf "$NVIM_CONFIG_DIR"
+    create_symlink "$SOURCE_DIR/nvim" "$NVIM_CONFIG_DIR"
+fi
+
+# Lier yazi (si présent)
+if [ -d "$SOURCE_DIR/yazi" ]; then
+    echo "Linking yazi config..."
+    create_symlink "$SOURCE_DIR/yazi" "$HOME/.config/yazi"
+fi
+
+# Lier d'autres configs si présentes
+if [ -f "$SOURCE_DIR/.bashrc" ]; then
+    echo "Linking .bashrc..."
+    create_symlink "$SOURCE_DIR/.bashrc" "$HOME/.bashrc"
+fi
+
+if [ -f "$SOURCE_DIR/.zshrc" ]; then
+    echo "Linking .zshrc..."
+    create_symlink "$SOURCE_DIR/.zshrc" "$HOME/.zshrc"
+fi
+
+# --- 5. Installation des plugins Neovim ---
+echo "📥 Installing Neovim plugins..."
+
+# Installer les plugins en mode headless
+nvim --headless "+Lazy! sync" +qa 2>&1 | tee /tmp/nvim-install.log
+
+echo ""
+echo "✨ Dotfiles installation complete!"
+echo "🎉 Run 'nvim' to start Neovim with LazyVim"
+echo ""
+echo "📝 Installation log saved to /tmp/nvim-install.log"
