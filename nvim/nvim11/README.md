@@ -187,7 +187,7 @@ Using this [commit](https://github.com/LazyVim/starter/commit/cb79b0e6a9d0ec8104
 - [ ] Better `M`/`m<space>` keymaps.
 - [x] Better `<leader>ff` keymaps since we have `<leader><space>`.
 - [ ] Check [lsp_signature.nvim config of AstroNvim](https://github.com/AstroNvim/astrocommunity/blob/aaaa844e45420cd7b5f11b7c399bee919513d1d5/lua/astrocommunity/lsp/lsp-signature-nvim/init.lua).
-- [x] Map `esc` for some buffers (maybe floating windows?) in [close.lua](lua/plugins/close.lua).
+- [x] Map `esc` for some buffers (maybe floating windows?) in [close.lua](close.lua).
   - Maybe map `q` to close window like [rafi](https://github.com/rafi/vim-config/blob/814f312d92e97282913f4c3ef5f09712840b5604/lua/rafi/config/keymaps.lua#L374), and map `<C-q>` for macros.
 - [ ] Check this [util/path.lua](https://github.com/sakakibara/dotfiles/blob/f281ed9865623e204becbc3b87b3983045421422/dot_config/nvim/lua/util/path.lua).
 - [ ] Use `<leader>f,` instead of `<leader>fc` like [chrisgrieser](https://github.com/chrisgrieser/.config/blob/88eb71f88528f1b5a20b66fd3dfc1f7bd42b408a/nvim/lua/config/lazy.lua#L129).
@@ -216,8 +216,8 @@ Using this [commit](https://github.com/LazyVim/starter/commit/cb79b0e6a9d0ec8104
 - [x] Map `<M-i>` to `<C-i>` in nvim, and map `<C-i>` to `<M-i>` in terminal.
   - Like mrbeardad: [nvim](https://github.com/mrbeardad/nvim/blob/master/lua%2Fuser%2Fconfigs%2Fkeymaps.lua#L69) and [terminal](https://github.com/mrbeardad/MyIDE/blob/0792378a80e3eb72ce47de8e78d9df6c37002bbf/wt/settings.json#L425).
 - [ ] Create a `state` util to cache the state (like [zen-mode.nvim](https://github.com/folke/zen-mode.nvim/blob/29b292bdc58b76a6c8f294c961a8bf92c5a6ebd6/lua/zen-mode/plugins.lua#L137)) instead of using `vim.g.user_...`
-  - [vim.g.user_zenmode_on](lua/plugins/ui.lua), [vim.g.user_minianimate_disable_old](lua/plugins/ui.lua)
-  - [local neovide_state = {}](lua/config/keymaps.lua)
+  - [vim.g.user_zenmode_on](awesome/00%20⚡%20Code/dotfiles/nvim/nvim11/lua/plugins/ui.lua), [vim.g.user_minianimate_disable_old](awesome/00%20⚡%20Code/dotfiles/nvim/nvim11/lua/plugins/ui.lua)
+  - [local neovide_state = {}](awesome/00%20⚡%20Code/dotfiles/nvim/nvim11/lua/config/keymaps.lua)
 - [ ] Preview scroll up/down: `<C-u>`/`<C-d>` or `<C-f>`/`<C-b>`?
   - `<C-f>`/`<C-b>`: fzf, telescope, lsp-hover-doc, blink-cmp-doc, which-key-popup, yazi, nvim-ufo, trans.nvim
     - `<C-b>` used for tmux prefix.

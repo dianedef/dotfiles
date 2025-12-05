@@ -29,15 +29,3 @@ Terminal: [kitty](https://github.com/kovidgoyal/kitty)
 `pacman -Syu cmake fd ripgrep`
 
 Open Neovim and run `:Mason` to install the LSP servers you need.
-
-## Author
-
-- Github: [@kohane27](https://github.com/kohane27)
-
-## Show your support
-
-Give a ⭐️ if this project helped you!
-
----
-
-_This README was generated with ❤️ by [readme-md-generator](https://github.com/kefranabg/readme-md-generator)_

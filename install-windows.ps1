@@ -132,7 +132,7 @@ $CONFIG_PATHS = @{
         "target" = "$env:LOCALAPPDATA\nvim"
     }
     "yazi" = @{
-        "source" = "$HOME\dotfiles\yazi1"
+        "source" = "$HOME\dotfiles\yazi"
         "target" = "$env:APPDATA\yazi"
     }
     # Add more configurations here as needed
