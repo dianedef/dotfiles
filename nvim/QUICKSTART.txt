@@ -1,0 +1,107 @@
+╔═══════════════════════════════════════════════════════════════════════════╗
+║                    NEOVIM CONFIG SWITCHER - QUICK START                   ║
+╚═══════════════════════════════════════════════════════════════════════════╝
+
+🚀 INSTALLATION
+───────────────────────────────────────────────────────────────────────────
+
+1. Lancez le script d'installation (tout est automatique) :
+   ./install.sh
+
+2. Ouvrez un nouveau terminal ou rechargez votre shell :
+   source ~/.bashrc
+
+C'est tout ! Les commandes sont prêtes à l'emploi.
+   # Voir la documentation Nushell pour l'équivalent
+
+
+📝 USAGE RAPIDE
+───────────────────────────────────────────────────────────────────────────
+
+┌─ Méthode 1 : Script de changement permanent ─────────────────────────┐
+│                                                                        │
+│  ./switch-config.sh --list         # Voir toutes les configs         │
+│  ./switch-config.sh nvim11         # Changer vers nvim11             │
+│  ./switch-config.sh --current      # Config actuelle                 │
+│                                                                        │
+└────────────────────────────────────────────────────────────────────────┘
+
+┌─ Méthode 2 : NVIM_APPNAME (temporaire, sans changer la config) ─────┐
+│                                                                        │
+│  NVIM_APPNAME=nvim11 nvim          # Utiliser nvim11 temporairement  │
+│  nv11                              # Avec alias (après installation)  │
+│  nv22 fichier.lua                  # Ouvrir un fichier avec nvim22   │
+│                                                                        │
+└────────────────────────────────────────────────────────────────────────┘
+
+┌─ Méthode 3 : Fonctions shell (après installation) ──────────────────┐
+│                                                                        │
+│  nvims                             # Liste les configs                │
+│  nvims nvim11                      # Change et lance nvim             │
+│  nvim-try nvim22 fichier.lua      # Teste une config temporairement  │
+│                                                                        │
+└────────────────────────────────────────────────────────────────────────┘
+
+
+🎯 CONFIGURATIONS DISPONIBLES
+───────────────────────────────────────────────────────────────────────────
+
+  • nvim      Configuration par défaut (racine)
+  • nvim3     Configuration alternative 3
+  • nvim6     Configuration alternative 6
+  • nvim11    Configuration alternative 11
+  • nvim22    Configuration alternative 22
+
+
+💡 EXEMPLES CONCRETS
+───────────────────────────────────────────────────────────────────────────
+
+# Tester nvim11 sans rien changer
+NVIM_APPNAME=nvim11 nvim
+
+# Changer définitivement vers nvim22
+./switch-config.sh nvim22
+
+# Comparer deux configs côte à côte
+NVIM_APPNAME=nvim11 nvim fichier.lua &
+NVIM_APPNAME=nvim22 nvim fichier.lua &
+
+# Utiliser nvim3 juste pour éditer un fichier
+nv3 ~/.bashrc
+
+# Revenir à la config par défaut
+./switch-config.sh nvim
+
+
+🔧 PERSONNALISATION
+───────────────────────────────────────────────────────────────────────────
+
+Modifier les chemins dans switch-config.sh si nécessaire :
+
+  DOTFILES_DIR="/workspaces/dotfiles"
+  NVIM_DIR="${DOTFILES_DIR}/nvim"
+  CONFIG_HOME="${XDG_CONFIG_HOME:-$HOME/.config}"
+
+
+⚠️  NOTES IMPORTANTES
+───────────────────────────────────────────────────────────────────────────
+
+• Chaque configuration a ses propres plugins (répertoire data séparé)
+• La première ouverture d'une nouvelle config installera ses plugins
+• Vos anciennes configs sont automatiquement sauvegardées
+• NVIM_APPNAME ne change pas la config par défaut, juste la session
+
+
+📚 RESSOURCES
+───────────────────────────────────────────────────────────────────────────
+
+• README complet : SWITCH-README.md
+• Script principal : switch-config.sh
+• Aliases shell : aliases.sh
+• Intégration shell : shell-integration.sh
+
+
+═══════════════════════════════════════════════════════════════════════════
+
+Questions ? Consultez : ./switch-config.sh --help
+
