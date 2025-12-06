@@ -51,18 +51,18 @@ install_neovim_tarball() {
     
     echo "📦 Downloading Neovim $NVIM_VERSION (latest stable)..."
     
-    curl -LO "https://github.com/neovim/neovim/releases/download/${NVIM_VERSION}/nvim-linux64.tar.gz"
+    curl -LO "https://github.com/neovim/neovim/releases/download/${NVIM_VERSION}/nvim-linux-x86_64.tar.gz"
     
     # Extraire et installer
     sudo rm -rf /opt/nvim
-    sudo tar -C /opt -xzf nvim-linux64.tar.gz
-    sudo mv /opt/nvim-linux64 /opt/nvim
+    sudo tar -C /opt -xzf nvim-linux-x86_64.tar.gz
+    sudo mv /opt/nvim-linux-x86_64 /opt/nvim
     
     # Créer le lien symbolique
     sudo ln -sf /opt/nvim/bin/nvim /usr/local/bin/nvim
     
     # Nettoyer
-    rm nvim-linux64.tar.gz
+    rm nvim-linux-x86_64.tar.gz
     
     cd - > /dev/null
 }
@@ -82,11 +82,11 @@ install_neovim_appimage() {
     
     echo "📦 Downloading Neovim AppImage $NVIM_VERSION (latest stable)..."
     
-    curl -LO "https://github.com/neovim/neovim/releases/download/${NVIM_VERSION}/nvim.appimage"
-    chmod u+x nvim.appimage
+    curl -LO "https://github.com/neovim/neovim/releases/download/${NVIM_VERSION}/nvim-linux-x86_64.appimage"
+    chmod u+x nvim-linux-x86_64.appimage
     
     # Extraire l'AppImage
-    ./nvim.appimage --appimage-extract
+    ./nvim-linux-x86_64.appimage --appimage-extract
     sudo rm -rf /opt/nvim
     sudo mv squashfs-root /opt/nvim
     sudo ln -sf /opt/nvim/usr/bin/nvim /usr/local/bin/nvim
