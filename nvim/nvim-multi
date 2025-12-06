@@ -1,0 +1,25 @@
+#!/usr/bin/env bash
+
+# nvim-multi: A simple wrapper to launch Neovim with different configs
+# Usage: nvim-multi [config-name] [nvim-args...]
+
+CONFIG_NAME="${1}"
+
+# If no config specified, use default
+if [[ -z "$CONFIG_NAME" ]] || [[ "$CONFIG_NAME" == -* ]]; then
+    exec nvim "$@"
+fi
+
+# Check if it's a valid config name
+case "$CONFIG_NAME" in
+    nvim|nvim3|nvim6|nvim11|nvim22)
+        shift
+        echo "🚀 Launching Neovim with config: $CONFIG_NAME"
+        exec env NVIM_APPNAME="$CONFIG_NAME" nvim "$@"
+        ;;
+    *)
+        echo "❌ Unknown config: $CONFIG_NAME"
+        echo "Available: nvim, nvim3, nvim6, nvim11, nvim22"
+        exit 1
+        ;;
+esac
