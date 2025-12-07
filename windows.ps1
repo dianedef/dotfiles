@@ -135,6 +135,10 @@ $CONFIG_PATHS = @{
         "source" = "$HOME\dotfiles\yazi"
         "target" = "$env:APPDATA\yazi"
     }
+    "starship" = @{
+        "source" = "$HOME\dotfiles\starship\starship.toml"
+        "target" = "$HOME\.config\starship.toml"
+    }
     # Add more configurations here as needed
 }
 

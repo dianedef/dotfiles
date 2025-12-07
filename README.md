@@ -7,7 +7,8 @@
 
 <!-- toc -->
 
-- [Windows Installation](#quick-installation)
+- [Windows Installation](#windows-installation)
+- [Linux Installation](#linux-installation)
 - [Technical Details](#technical-details)
   - [Installation Process](#installation-process)
   - [File Locations](#file-locations)
@@ -43,6 +44,45 @@
    Set-ExecutionPolicy Bypass -Scope Process -Force
    $HOME/dotfiles/install.ps1
    ```
+
+## Linux Installation
+
+1. **Clone the repository**
+   ```bash
+   git clone https://github.com/dianedef/dotfiles.git ~/dotfiles
+   ```
+
+2. **Run the installation script**
+   ```bash
+   cd ~/dotfiles
+   chmod +x install.sh
+   ./install.sh
+   ```
+
+The `install.sh` script will:
+- Install Neovim (latest stable version)
+- Install Starship prompt
+- Install dependencies (git, curl, ripgrep, fd-find, etc.)
+- Create symbolic links for all configurations
+- Set up shell integration for bash
+
+3. **Activate shell integration**
+   ```bash
+   source ~/.bashrc
+   ```
+
+### Starship Configuration
+
+Starship is automatically installed and configured for both Linux and Windows:
+- **Linux**: `~/.config/starship.toml`
+- **Windows**: `$HOME\.config\starship.toml`
+- **Nushell**: Configured in `nushell/env.nu`
+
+The configuration includes:
+- Git status indicators
+- Command duration display
+- Language version indicators (Node.js, Python, Rust, Go, Java)
+- Custom prompt format with visual separators
 
 ### Installation Process Details
 
@@ -95,6 +135,12 @@ The `install.ps1` script manages the dotfiles installation through several steps
 - Source: `$HOME\dotfiles\yazi1`
 - Target: `$env:APPDATA\yazi`
 - Contains: yazi.toml, keymap.toml, theme settings
+
+#### Starship Configuration
+- Source: `$HOME\dotfiles\starship\starship.toml`
+- Target (Windows): `$HOME\.config\starship.toml`
+- Target (Linux): `~/.config/starship.toml`
+- Contains: prompt customization, git indicators, language displays
 
 ## Neovim Setup
 
