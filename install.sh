@@ -133,6 +133,12 @@ if ! command -v node &> /dev/null; then
     sudo apt-get install -y nodejs
 fi
 
+# Installer Starship si nécessaire
+if ! command -v starship &> /dev/null; then
+    echo "Installing Starship..."
+    curl -sS https://starship.rs/install.sh | sh -s -- -y
+fi
+
 # --- 3. Configuration de Neovim ---
 log "INFO" "⚙️ Setting up Neovim configuration..."
 
@@ -194,6 +200,14 @@ fi
 if [ -d "$SOURCE_DIR/yazi" ]; then
     echo "Linking yazi config..."
     create_symlink "$SOURCE_DIR/yazi" "$HOME/.config/yazi"
+fi
+
+# Lier starship (si présent)
+if [ -d "$SOURCE_DIR/starship" ]; then
+    echo "Linking starship config..."
+    mkdir -p "$HOME/.config"
+    create_symlink "$SOURCE_DIR/starship/starship.toml" "$HOME/.config/starship.toml"
+    log "INFO" "✅ Starship config linked to $HOME/.config/starship.toml"
 fi
 
 # Lier d'autres configs si présentes
