@@ -15,8 +15,10 @@ log() {
     local timestamp=$(date +"%Y-%m-%d %H:%M:%S")
     local log_entry="[$timestamp] [$level] $message"
 
-    # Afficher dans la console
-    echo "$log_entry"
+    # Afficher dans la console (seulement INFO et erreurs)
+    if [ "$level" = "INFO" ] || [ "$level" = "ERROR" ]; then
+        echo "$message"
+    fi
 
     # Écrire dans le fichier de log
     echo "$log_entry" >> "$LOG_FILE"
@@ -38,28 +40,28 @@ log "INFO" "📦 Installing Neovim..."
 
 # Méthode 1 : Via tarball précompilé (la plus fiable)
 install_neovim_tarball() {
-    echo "Fetching latest Neovim stable release..."
+    log "INFO" "Fetching latest Neovim stable release..."
     cd /tmp
     
     # Récupérer la dernière version stable depuis GitHub API
     NVIM_VERSION=$(curl -s https://api.github.com/repos/neovim/neovim/releases/latest | grep '"tag_name":' | sed -E 's/.*"([^"]+)".*/\1/')
     
     if [ -z "$NVIM_VERSION" ]; then
-        echo "❌ Failed to fetch latest version, using fallback v0.10.2"
+        log "INFO" "❌ Failed to fetch latest version, using fallback v0.10.2"
         NVIM_VERSION="v0.10.2"
     fi
     
-    echo "📦 Downloading Neovim $NVIM_VERSION (latest stable)..."
+    log "INFO" "📦 Downloading Neovim $NVIM_VERSION (latest stable)..."
     
-    curl -LO "https://github.com/neovim/neovim/releases/download/${NVIM_VERSION}/nvim-linux-x86_64.tar.gz"
+    curl -sLO "https://github.com/neovim/neovim/releases/download/${NVIM_VERSION}/nvim-linux-x86_64.tar.gz"
     
     # Extraire et installer
-    sudo rm -rf /opt/nvim
-    sudo tar -C /opt -xzf nvim-linux-x86_64.tar.gz
-    sudo mv /opt/nvim-linux-x86_64 /opt/nvim
+    sudo rm -rf /opt/nvim 2>/dev/null
+    sudo tar -C /opt -xzf nvim-linux-x86_64.tar.gz 2>/dev/null
+    sudo mv /opt/nvim-linux-x86_64 /opt/nvim 2>/dev/null
     
     # Créer le lien symbolique
-    sudo ln -sf /opt/nvim/bin/nvim /usr/local/bin/nvim
+    sudo ln -sf /opt/nvim/bin/nvim /usr/local/bin/nvim 2>/dev/null
     
     # Nettoyer
     rm nvim-linux-x86_64.tar.gz
@@ -69,27 +71,27 @@ install_neovim_tarball() {
 
 # Méthode 2 : Via AppImage si tarball échoue
 install_neovim_appimage() {
-    echo "Fetching latest Neovim stable release..."
+    log "INFO" "Fetching latest Neovim stable release..."
     cd /tmp
     
     # Récupérer la dernière version stable
     NVIM_VERSION=$(curl -s https://api.github.com/repos/neovim/neovim/releases/latest | grep '"tag_name":' | sed -E 's/.*"([^"]+)".*/\1/')
     
     if [ -z "$NVIM_VERSION" ]; then
-        echo "❌ Failed to fetch latest version, using fallback v0.10.2"
+        log "INFO" "❌ Failed to fetch latest version, using fallback v0.10.2"
         NVIM_VERSION="v0.10.2"
     fi
     
-    echo "📦 Downloading Neovim AppImage $NVIM_VERSION (latest stable)..."
+    log "INFO" "📦 Downloading Neovim AppImage $NVIM_VERSION (latest stable)..."
     
-    curl -LO "https://github.com/neovim/neovim/releases/download/${NVIM_VERSION}/nvim-linux-x86_64.appimage"
-    chmod u+x nvim-linux-x86_64.appimage
+    curl -sLO "https://github.com/neovim/neovim/releases/download/${NVIM_VERSION}/nvim-linux-x86_64.appimage"
+    chmod u+x nvim-linux-x86_64.appimage 2>/dev/null
     
     # Extraire l'AppImage
-    ./nvim-linux-x86_64.appimage --appimage-extract
-    sudo rm -rf /opt/nvim
-    sudo mv squashfs-root /opt/nvim
-    sudo ln -sf /opt/nvim/usr/bin/nvim /usr/local/bin/nvim
+    ./nvim-linux-x86_64.appimage --appimage-extract >/dev/null 2>&1
+    sudo rm -rf /opt/nvim 2>/dev/null
+    sudo mv squashfs-root /opt/nvim 2>/dev/null
+    sudo ln -sf /opt/nvim/usr/bin/nvim /usr/local/bin/nvim 2>/dev/null
     
     cd - > /dev/null
 }
@@ -100,16 +102,16 @@ install_neovim_tarball || install_neovim_appimage
 
 # Vérifier l'installation
 if command -v nvim &> /dev/null; then
-    echo "✅ Neovim installed successfully: $(nvim --version | head -n 1)"
+    log "INFO" "✅ Neovim installed successfully: $(nvim --version | head -n 1)"
 else
-    echo "❌ Neovim installation failed"
+    log "ERROR" "❌ Neovim installation failed"
     exit 1
 fi
 
 # --- 2. Installation des dépendances ---
 log "INFO" "📦 Installing dependencies..."
 
-sudo apt-get update
+sudo apt-get update >/dev/null 2>&1
 sudo apt-get install -y \
   git \
   curl \
@@ -119,24 +121,45 @@ sudo apt-get install -y \
   python3-pip \
   ripgrep \
   fd-find \
-  xclip
+  xclip >/dev/null 2>&1
 
 # Créer un lien pour fd (fd-find sur Ubuntu)
 if [ -f /usr/bin/fdfind ] && [ ! -f /usr/bin/fd ]; then
-    sudo ln -s /usr/bin/fdfind /usr/bin/fd
+    sudo ln -s /usr/bin/fdfind /usr/bin/fd 2>/dev/null
+fi
+
+# Installer fzf (latest version from GitHub)
+if ! command -v fzf &> /dev/null; then
+    log "INFO" "Installing latest fzf..."
+    git clone --depth 1 --quiet https://github.com/junegunn/fzf.git ~/.fzf 2>/dev/null
+    ~/.fzf/install --bin >/dev/null 2>&1
+    sudo ln -sf ~/.fzf/bin/fzf /usr/local/bin/fzf 2>/dev/null
+    log "INFO" "✅ fzf installed: $(fzf --version)"
+else
+    log "INFO" "✅ fzf already installed: $(fzf --version)"
 fi
 
 # Installer Node.js si nécessaire
 if ! command -v node &> /dev/null; then
-    echo "Installing Node.js..."
-    curl -fsSL https://deb.nodesource.com/setup_lts.x | sudo -E bash -
-    sudo apt-get install -y nodejs
+    log "INFO" "Installing Node.js..."
+    curl -fsSL https://deb.nodesource.com/setup_lts.x | sudo -E bash - >/dev/null 2>&1
+    sudo apt-get install -y nodejs >/dev/null 2>&1
+else
+    log "INFO" "✅ Node.js already installed: $(node --version)"
+fi
+
+# Installer GitHub Copilot CLI
+if command -v npm &> /dev/null; then
+    log "INFO" "Installing GitHub Copilot CLI..."
+    npm install -g @github/copilot >/dev/null 2>&1
 fi
 
 # Installer Starship si nécessaire
 if ! command -v starship &> /dev/null; then
-    echo "Installing Starship..."
-    curl -sS https://starship.rs/install.sh | sh -s -- -y
+    log "INFO" "Installing Starship..."
+    curl -sS https://starship.rs/install.sh | sh -s -- -y >/dev/null 2>&1
+else
+    log "INFO" "✅ Starship already installed"
 fi
 
 # --- 3. Configuration de Neovim ---
@@ -149,7 +172,7 @@ SOURCE_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
 # Sauvegarder la config existante
 if [ -d "$NVIM_CONFIG_DIR" ]; then
-    echo "Backing up existing Neovim config..."
+    log "INFO" "Backing up existing Neovim config..."
     mv "$NVIM_CONFIG_DIR" "${NVIM_CONFIG_DIR}.backup.$(date +%s)"
 fi
 
@@ -159,7 +182,7 @@ if [ -d "$SOURCE_DIR/nvim/init.lua" ] || [ -f "$SOURCE_DIR/nvim/init.lua" ]; the
 else
     # Sinon, cloner LazyVim
     log "INFO" "Installing LazyVim starter..."
-    git clone https://github.com/LazyVim/starter "$NVIM_CONFIG_DIR"
+    git clone --quiet https://github.com/LazyVim/starter "$NVIM_CONFIG_DIR" 2>/dev/null
     rm -rf "$NVIM_CONFIG_DIR/.git"
 fi
 
@@ -172,24 +195,24 @@ create_symlink() {
     local TARGET=$2
     
     if [ ! -e "$SOURCE" ]; then
-        echo "⚠️  Source $SOURCE does not exist, skipping..."
+        log "WARN" "⚠️  Source $SOURCE does not exist, skipping..."
         return
     fi
     
     if [ -e "$TARGET" ] || [ -L "$TARGET" ]; then
-        echo "Removing existing $TARGET..."
+        log "INFO" "Removing existing $TARGET..."
         rm -rf "$TARGET"
     fi
     
     mkdir -p "$(dirname "$TARGET")"
     
-    echo "Creating symlink: $TARGET -> $SOURCE"
+    log "INFO" "Creating symlink: $TARGET -> $SOURCE"
     ln -s "$SOURCE" "$TARGET"
 }
 
 # Lier votre configuration nvim personnalisée (si elle existe dans dotfiles/nvim)
 if [ -d "$SOURCE_DIR/nvim" ] && [ -f "$SOURCE_DIR/nvim/init.lua" ]; then
-    echo "Linking custom nvim config..."
+    log "INFO" "Linking custom nvim config..."
     # Supprimer la config existante et utiliser votre config
     rm -rf "$NVIM_CONFIG_DIR"
     create_symlink "$SOURCE_DIR/nvim" "$NVIM_CONFIG_DIR"
@@ -198,13 +221,13 @@ fi
 
 # Lier yazi (si présent)
 if [ -d "$SOURCE_DIR/yazi" ]; then
-    echo "Linking yazi config..."
+    log "INFO" "Linking yazi config..."
     create_symlink "$SOURCE_DIR/yazi" "$HOME/.config/yazi"
 fi
 
 # Lier starship (si présent)
 if [ -d "$SOURCE_DIR/starship" ]; then
-    echo "Linking starship config..."
+    log "INFO" "Linking starship config..."
     mkdir -p "$HOME/.config"
     create_symlink "$SOURCE_DIR/starship/starship.toml" "$HOME/.config/starship.toml"
     log "INFO" "✅ Starship config linked to $HOME/.config/starship.toml"
@@ -242,8 +265,11 @@ else
 fi
 
 # Sourcer pour cette session
-source "$SOURCE_DIR/nvim/shell-integration.sh"
+source "$SOURCE_DIR/nvim/shell-integration.sh" 2>/dev/null
 log "INFO" "✅ Shell integration activated for current session"
+
+# Clear bash command hash to recognize newly installed binaries
+hash -r 2>/dev/null
 
 # --- 6. Installation des plugins Neovim ---
 log "INFO" "📥 Installing Neovim plugins..."
@@ -251,7 +277,7 @@ log "INFO" "📥 Installing Neovim plugins..."
 # Essayer d'installer les plugins en mode headless (ne fail pas si ça échoue)
 if command -v nvim &> /dev/null; then
     log "INFO" "Attempting to install plugins with Neovim..."
-    nvim --headless "+Lazy! sync" +qa 2>&1 | tee /tmp/nvim-install.log || log "WARN" "Plugin installation had issues, but this is usually fine"
+    nvim --headless "+Lazy! sync" +qa >/tmp/nvim-install.log 2>&1 || log "WARN" "Plugin installation had issues, but this is usually fine"
 else
     log "WARN" "⚠️  Neovim not found, skipping plugin installation"
 fi
@@ -274,5 +300,6 @@ echo ""
 echo "✅ Shell integration configured automatically!"
 echo "   Commands available: nvims, nv11, nv22, nvim11, nvim22, etc."
 echo ""
-echo "🚀 Start a new shell or run: source ~/.bashrc"
+echo "🔄 Run 'hash -r' or start a new shell to use newly installed commands"
+echo "🚀 Or run: source ~/.bashrc"
 echo "📄 Main installation log persisted with repository: $LOG_FILE"
