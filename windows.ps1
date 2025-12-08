@@ -25,6 +25,9 @@ winget install MSYS2.MSYS2
 Write-Host "Installing GitHub CLI..." -ForegroundColor Yellow
 winget install GitHub.cli
 
+Write-Host "Installing fzf..." -ForegroundColor Yellow
+winget install junegunn.fzf
+
 Write-Host "Installing Python..." -ForegroundColor Yellow
 winget install Python.Python.3.11
 
@@ -33,6 +36,9 @@ winget install OpenJS.NodeJS.LTS
 
 Write-Host "Installing pnpm..." -ForegroundColor Yellow
 winget install pnpm.pnpm
+
+Write-Host "Installing GitHub Copilot CLI..." -ForegroundColor Yellow
+npm install -g @github/copilot
 
 Write-Host "Installing Cloudflared..." -ForegroundColor Yellow
 winget install Cloudflare.cloudflared
