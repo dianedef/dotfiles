@@ -148,10 +148,22 @@ else
     log "INFO" "✅ Node.js already installed: $(node --version)"
 fi
 
-# Installer GitHub Copilot CLI
+# Installer GitHub Copilot CLI and other tools via npm
 if command -v npm &> /dev/null; then
+    log "INFO" "Installing CLI tools via npm..."
+    
     log "INFO" "Installing GitHub Copilot CLI..."
     npm install -g @github/copilot >/dev/null 2>&1
+    
+    log "INFO" "Installing Kilocode CLI..."
+    npm install -g @kilocode/cli >/dev/null 2>&1
+    
+    log "INFO" "Installing OpenCode AI..."
+    npm install -g opencode-ai >/dev/null 2>&1
+    
+    log "INFO" "✅ CLI tools installed via npm (update with: npm update -g)"
+else
+    log "WARN" "⚠️  npm not found, skipping CLI tools installation"
 fi
 
 # Installer Starship si nécessaire

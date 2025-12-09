@@ -37,8 +37,28 @@ winget install OpenJS.NodeJS.LTS
 Write-Host "Installing pnpm..." -ForegroundColor Yellow
 winget install pnpm.pnpm
 
-Write-Host "Installing GitHub Copilot CLI..." -ForegroundColor Yellow
-npm install -g @github/copilot
+# Wait for npm to be available after Node.js installation
+Write-Host "Waiting for npm to be available..." -ForegroundColor Yellow
+Start-Sleep -Seconds 5
+$env:Path = [System.Environment]::GetEnvironmentVariable("Path","Machine") + ";" + [System.Environment]::GetEnvironmentVariable("Path","User")
+
+# Verify npm is installed
+if (Get-Command npm -ErrorAction SilentlyContinue) {
+    Write-Host "Installing CLI tools via npm..." -ForegroundColor Yellow
+    
+    Write-Host "Installing GitHub Copilot CLI..." -ForegroundColor Yellow
+    npm install -g @github/copilot
+    
+    Write-Host "Installing Kilocode CLI..." -ForegroundColor Yellow
+    npm install -g @kilocode/cli
+    
+    Write-Host "Installing OpenCode AI..." -ForegroundColor Yellow
+    npm install -g opencode-ai
+    
+    Write-Host "CLI tools installed via npm (update with: npm update -g)" -ForegroundColor Green
+} else {
+    Write-Host "npm not found, skipping CLI tools installation" -ForegroundColor Red
+}
 
 Write-Host "Installing Cloudflared..." -ForegroundColor Yellow
 winget install Cloudflare.cloudflared
