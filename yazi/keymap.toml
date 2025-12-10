@@ -1,4 +1,4 @@
-[manager]
+[mgr]
 
 prepend_keymap = [
 	{ on = "<Esc>",     run = "quit",               desc = "Exit the process" },

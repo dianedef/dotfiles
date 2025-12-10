@@ -18,46 +18,46 @@ local function require_plugin(plugin_name)
 end
 
 -- Configuration des favoris
-local bookmarks = require_plugin("bookmarks")
-if bookmarks then
-    bookmarks:setup({
-        notify = {
-            enable = true,
-            timeout = 1,
-            message = {
-                new = " Favori '<key>' créé",
-                delete = "󰧌 Favori '<key>' supprimé",
-                delete_all = "󰧌 Tous les favoris supprimés",
-            },
-        },
-        last_directory = { enable = true, persist = false },
-        persist = "all",
-        desc_format = "full",
-        file_pick_mode = "parent",
-    })
-end
+-- local bookmarks = require_plugin("bookmarks")
+-- if bookmarks then
+--     bookmarks:setup({
+--         notify = {
+--             enable = true,
+--             timeout = 1,
+--             message = {
+--                 new = " Favori '<key>' créé",
+--                 delete = "󰧌 Favori '<key>' supprimé",
+--                 delete_all = "󰧌 Tous les favoris supprimés",
+--             },
+--         },
+--         last_directory = { enable = true, persist = false },
+--         persist = "all",
+--         desc_format = "full",
+--         file_pick_mode = "parent",
+--     })
+-- end
 
 -- Intégration de zoxide pour une navigation intelligente
-require("zoxide"):setup({
-    -- Met à jour la base de données zoxide
-    update_db = true,
-})
+-- require("zoxide"):setup({
+--     -- Met à jour la base de données zoxide
+--     update_db = true,
+-- })
 
 -- Smart Enter pour une meilleure gestion des fichiers
-require("smart-enter"):setup({
-    open_multi = true,
-})
+-- require("smart-enter"):setup({
+--     open_multi = true,
+-- })
 
 -- Synchronisation des sessions
-require("session"):setup({
-    sync_yanked = true,
-})
+-- require("session"):setup({
+--     sync_yanked = true,
+-- })
 
 -- Intégration Git
-require("git"):setup()
+-- require("git"):setup()
 
 -- Bordures complètes pour l'interface
-require("full-border"):setup()
+-- require("full-border"):setup()
 
 -- AMÉLIORATION DE L'INTERFACE
 -- Ajout d'espacement pour une meilleure lisibilité
