@@ -8,8 +8,10 @@
 # ============================================
 
 # Method 1: Source the aliases file (recommended)
-if [ -f "/workspaces/dotfiles/nvim/aliases.sh" ]; then
-    source "/workspaces/dotfiles/nvim/aliases.sh"
+# Get the directory of this script to find aliases.sh
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+if [ -f "${SCRIPT_DIR}/aliases.sh" ]; then
+    source "${SCRIPT_DIR}/aliases.sh"
 fi
 
 # Method 2: Manual aliases (if you prefer to customize)

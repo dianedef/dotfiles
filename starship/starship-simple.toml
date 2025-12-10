@@ -49,7 +49,7 @@ truncation_symbol = "…"
 
 # Git status - with emojis and spaces
 [git_status]
-format = '([\[$all_status$ahead_behind\]]($style) )'
+format = '([\[$all_status$ahead_behind\]]($style))'
 style = "bold yellow"
 conflicted = "= "
 ahead = "📤${count} "
