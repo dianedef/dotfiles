@@ -9,9 +9,6 @@ return {
     -- language server settings in json
     { "tamago324/nlsp-settings.nvim" },
 
-    -- providing access to the SchemaStore catalog
-    { "b0o/schemastore.nvim" },
-
     -- Additional lua configuration
     -- { "folke/neodev.nvim" },
 
@@ -66,7 +63,6 @@ return {
       },
       settings = {
         json = {
-          schemas = require("schemastore").json.schemas(),
           validate = { enable = true },
         },
       },

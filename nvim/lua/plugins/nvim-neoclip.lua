@@ -1,10 +1,10 @@
 return {
   "AckslD/nvim-neoclip.lua",
   event = "VeryLazy",
-  dependencies = { "nvim-telescope/telescope.nvim", "kkharji/sqlite.lua" },
+  dependencies = { "nvim-telescope/telescope.nvim" },
   opts = {
     history = 1000,
-    enable_persistent_history = true,
+    enable_persistent_history = false,
     default_register = '"',
     enable_macro_history = false,
     on_paste = {
