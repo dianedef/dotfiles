@@ -33,7 +33,7 @@
 		"yaml-eslint-parser": "^1.2.3"
 	},
 	"devDependencies": {
-		"esbuild": "^0.17.19",
+		"esbuild": "^0.27.1",
 		"eslint": "^8.57.0"
 	}
 }
