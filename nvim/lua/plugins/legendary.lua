@@ -2,7 +2,7 @@ return {
   "mrjones2014/legendary.nvim",
   -- NOTE: has to be `VeryLazy` or else won't work for some reason
   event = "VeryLazy",
-  dependencies = { "kkharji/sqlite.lua", "stevearc/dressing.nvim" },
+  dependencies = { "stevearc/dressing.nvim" },
   config = function()
     local core_utils = require("core.utils")
     local toolbox = require("legendary.toolbox")
@@ -10,7 +10,7 @@ return {
       include_builtin = false,
       include_legendary_cmds = false,
       -- NOTE: this takes precedence over other sort options
-      sort = { frecency = { db_root = string.format("%s/legendary/", vim.fn.stdpath("data")), max_timestamps = 20 } },
+      -- sort = { frecency = { db_root = string.format("%s/legendary/", vim.fn.stdpath("data")), max_timestamps = 20 } },
       -- `keys` spec will be automatically loaded
       extensions = { lazy_nvim = true, diffview = true },
       -- stylua: ignore
@@ -276,8 +276,6 @@ return {
         -- │ Run Code                                                 │
         -- ╰──────────────────────────────────────────────────────────╯
         { "<leader>rf", "<cmd>RunCode<CR>",   description = "Run File" },
-        { "<leader>rs", "<cmd>SnipRun<CR>",   description = "Run Snip" },
-        { "<leader>rc", "<cmd>SnipClose<CR>", description = "Close Snip" },
 
         -- ╭──────────────────────────────────────────────────────────╮
         -- │ scratch.nvim                                             │
@@ -296,35 +294,9 @@ return {
         -- { "<leader>sn", function() require("scratch.api").openScratch() end,                     description = "Scratch: Find File Name" },
 
         -- ╭──────────────────────────────────────────────────────────╮
-        -- │ gp.nvim                                                  │
-        -- ╰──────────────────────────────────────────────────────────╯
-        { "<leader>io", function() core_utils.gp_chat_new_ulti() end,                         description = "GPT: Ultimate Assistant" },
-        { "<leader>ii", function() core_utils.gp_chat_toggle() end,                           description = "GPT: Toggle" },
-        {
-          "<leader>if",
-          function()
-            local gp_chats_dir = os.getenv("HOME") .. "/Cloud/laptop/nvim/local/share/gp/chats"
-            core_utils.search_chats(gp_chats_dir)
-          end,
-          description = "GPT: Finder"
-        },
-
-        { "<leader>ia", function() core_utils.gp_choose_agent() end,                          description = "GPT: Choose an Agent" },
-        {
-          "<leader>ir",
-          function()
-            local current_buf = vim.api.nvim_get_current_buf()
-            local filetype = vim.bo[current_buf].filetype
-            if filetype == "markdown" then
-              vim.cmd("GpChatRespond")
-            end
-          end,
-          description = "GPT: Respond",
-        },
-
-        -- ╭──────────────────────────────────────────────────────────╮
         -- │ AI                                                       │
         -- ╰──────────────────────────────────────────────────────────╯
+        -- Removed gp.nvim and codecompanion keybindings
         -- { "<leader>ao", "<cmd>CodeCompanionChat<CR>", description = "GPT: Open" },
         -- { "<leader>ai", ":'<,'>GpImplement<CR>", description = "GPT: Implement", mode = { "v" } },
         -- same as gp.nvim

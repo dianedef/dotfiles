@@ -63,75 +63,10 @@ function M.get_visual_selection()
   end
 end
 
-function M.gp_choose_agent(opts)
-  local pickers = require("telescope.pickers")
-  local finders = require("telescope.finders")
-  local conf = require("telescope.config").values
-  local action_state = require("telescope.actions.state")
-  local actions = require("telescope.actions")
-  opts = opts or {}
-
-  local agents = {
-    { description = "React Software Engineer", command = "React-Software-Engineer" },
-    { description = "Arch Linux Expert", command = "Arch-Linux-Expert" },
-    { description = "Neovim Expert", command = "Neovim-Expert" },
-    { description = "Task Breakdown Helper", command = "Software-Engineering-Task-Breakdown-Helper" },
-  }
-
-  -- Create the picker
-  pickers
-    .new(opts, {
-      prompt_title = "Choose an Agent",
-      finder = finders.new_table({
-        results = agents,
-        entry_maker = function(entry)
-          return {
-            value = entry,
-            display = entry.description,
-            ordinal = entry.description,
-          }
-        end,
-      }),
-      sorter = conf.generic_sorter(opts),
-      attach_mappings = function(prompt_bufnr)
-        actions.select_default:replace(function()
-          local selection = action_state.get_selected_entry()
-          actions.close(prompt_bufnr)
-          local command = selection.value.command
-          vim.api.nvim_exec("GpChatNew vsplit", false)
-          vim.api.nvim_win_set_width(0, 100)
-          vim.api.nvim_exec("GpAgent " .. command, false)
-        end)
-        return true
-      end,
-      -- initial_mode = "normal",
-      layout_config = {
-        width = 0.6,
-        height = 0.6,
-      },
-    })
-    :find()
-end
-
-function M.gp_chat_new_ulti()
-  -- Get the name of the current buffer
-  local buf_name = vim.api.nvim_buf_get_name(0)
-
-  local dir = vim.fn.stdpath("data") .. "/gp/chats/"
-
-  -- Check if the current buffer is a Markdown file in the gp chats directory
-  if buf_name:match("^" .. dir .. ".+%.md$") then
-    vim.cmd("bdelete")
-  end
-  vim.api.nvim_exec("GpChatNew vsplit", false)
-  vim.api.nvim_win_set_width(0, 100)
-  vim.api.nvim_exec("GpAgent Ultimate-Assistant", false)
-end
-
-function M.gp_chat_toggle()
-  vim.api.nvim_exec("GpChatToggle vsplit", false)
-  vim.api.nvim_win_set_width(0, 90)
-end
+-- Removed gp.nvim related functions
+-- function M.gp_choose_agent(opts)
+-- function M.gp_chat_new_ulti()
+-- function M.gp_chat_toggle()
 
 -- ╭─────────────────────────────────────────────────────────╮
 -- │ START: grep                                             │

@@ -408,15 +408,18 @@ log "INFO" "✅ Shell integration activated for current session"
 hash -r 2>/dev/null
 
 # --- 6. Installation des plugins Neovim ---
-log "INFO" "📥 Installing Neovim plugins..."
+# NOTE: Plugin installation is now deferred to first Neovim launch
+# This reduces Codespace setup time from ~10 minutes to ~1 minute
+log "INFO" "⏭️  Skipping automatic plugin installation (plugins will install on first Neovim launch)"
+log "INFO" "💡 Tip: Plugins will auto-install when you first run 'nvim' (~130 plugins, takes 2-3 minutes)"
 
-# Essayer d'installer les plugins en mode headless (ne fail pas si ça échoue)
-if command -v nvim &> /dev/null; then
-    log "INFO" "Attempting to install plugins with Neovim..."
-    nvim --headless "+Lazy! sync" +qa >/tmp/nvim-install.log 2>&1 || log "WARN" "Plugin installation had issues, but this is usually fine"
-else
-    log "WARN" "⚠️  Neovim not found, skipping plugin installation"
-fi
+# Uncomment below to restore automatic plugin installation during setup:
+# if command -v nvim &> /dev/null; then
+#     log "INFO" "📥 Installing Neovim plugins..."
+#     nvim --headless "+Lazy! sync" +qa >/tmp/nvim-install.log 2>&1 || log "WARN" "Plugin installation had issues, but this is usually fine"
+# else
+#     log "WARN" "⚠️  Neovim not found, skipping plugin installation"
+# fi
 
 echo ""
 log "INFO" "✨ Dotfiles installation complete!"

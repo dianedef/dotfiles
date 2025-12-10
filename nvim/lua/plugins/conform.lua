@@ -10,16 +10,9 @@ return {
       typescriptreact = { "prettier" },
 
       lua = { "stylua" },
-      nix = { "nixfmt" },
       sh = { "shfmt" },
-      terraform = { "terraform_fmt" },
 
-      -- run multiple formatters sequentially
-      rust = { "rustfmt" },
-      go = { "gofmt" },
       python = { "isort", "black" },
-      -- run the first available formatter
-      sql = { "sql_formatter", stop_after_first = true },
     },
     formatters = {
       shfmt = {
