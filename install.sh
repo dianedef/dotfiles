@@ -174,6 +174,15 @@ else
     log "INFO" "✅ Starship already installed"
 fi
 
+# Installer Zoxide si nécessaire
+if ! command -v zoxide &> /dev/null; then
+    log "INFO" "Installing Zoxide (smart cd)..."
+    curl -sS https://raw.githubusercontent.com/ajeetdsouza/zoxide/main/install.sh | bash >/dev/null 2>&1
+    log "INFO" "✅ Zoxide installed: $(zoxide --version 2>/dev/null || echo 'installed')"
+else
+    log "INFO" "✅ Zoxide already installed: $(zoxide --version)"
+fi
+
 # Installer Yazi si nécessaire
 if ! command -v yazi &> /dev/null; then
     log "INFO" "Installing Yazi..."
@@ -344,6 +353,18 @@ else
     log "INFO" "✅ Shell integration already in ~/.bashrc"
 fi
 
+# Ajouter Zoxide à ~/.bashrc si installé
+if command -v zoxide &> /dev/null; then
+    if ! grep -q "eval.*zoxide init" "$HOME/.bashrc" 2>/dev/null; then
+        echo "" >> "$HOME/.bashrc"
+        echo "# Zoxide - smart cd" >> "$HOME/.bashrc"
+        echo 'eval "$(zoxide init bash)"' >> "$HOME/.bashrc"
+        log "INFO" "✅ Added zoxide integration to ~/.bashrc"
+    else
+        log "INFO" "✅ Zoxide integration already in ~/.bashrc"
+    fi
+fi
+
 # Sourcer pour cette session
 source "$SOURCE_DIR/nvim/shell-integration.sh" 2>/dev/null
 log "INFO" "✅ Shell integration activated for current session"
@@ -379,6 +400,9 @@ echo "📄 Full installation log: $LOG_FILE"
 echo ""
 echo "✅ Shell integration configured automatically!"
 echo "   Commands available: nvims, nv11, nv22, nvim11, nvim22, etc."
+echo ""
+echo "🚀 Zoxide (smart cd) installed - use 'z' command after restart"
+echo "   Example: z nvim (jumps to most used nvim directory)"
 echo ""
 echo "🔄 Run 'hash -r' or start a new shell to use newly installed commands"
 echo "🚀 Or run: source ~/.bashrc"
