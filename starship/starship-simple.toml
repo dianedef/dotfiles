@@ -1,0 +1,114 @@
+# Starship Configuration - Simple & Clean for Android/Termux
+# Optimized for small screens and SSH usage
+
+# Get editor completions based on the config schema
+"$schema" = 'https://starship.rs/config-schema.json'
+
+# Blank line before each prompt (cleaner look)
+add_newline = true
+
+# Quick timeout for SSH responsiveness
+scan_timeout = 10
+command_timeout = 500
+
+# Simple format - NO DECORATIVE LINES
+format = """
+$directory\
+$git_branch\
+$git_status\
+$nodejs\
+$python\
+$rust\
+$golang\
+$java\
+$cmd_duration
+$character"""
+
+# Prompt character with emoji
+[character]
+success_symbol = "[➜](bold green)"
+error_symbol = "[✗](bold red)"
+vicmd_symbol = "[❮](bold green)"
+
+# Directory - compact with emoji
+[directory]
+truncation_length = 3
+truncate_to_repo = true
+format = "📁 [$path]($style) "
+style = "bold cyan"
+read_only = "🔒"
+truncation_symbol = "…/"
+
+# Git branch
+[git_branch]
+format = "[$symbol$branch]($style) "
+symbol = " "
+style = "bold purple"
+truncation_length = 15
+truncation_symbol = "…"
+
+# Git status - with emojis and spaces
+[git_status]
+format = '([\[$all_status$ahead_behind\]]($style) )'
+style = "bold yellow"
+conflicted = "= "
+ahead = "⇡${count} "
+behind = "📬${count} "
+diverged = "⇕ "
+up_to_date = "✅ "
+untracked = "⚠️ ${count} "
+stashed = "⏳${count} "
+modified = "📝${count} "
+staged = "🚀${count} "
+deleted = "🧹${count} "
+
+# Command duration - only if slow
+[cmd_duration]
+min_time = 2000
+format = "[⏱ $duration]($style) "
+style = "bold yellow"
+
+# Languages - minimal icons
+[nodejs]
+format = "[$symbol$version]($style) "
+symbol = "⬢ "
+style = "green"
+
+[python]
+format = "[$symbol$version]($style) "
+symbol = "🐍 "
+style = "yellow"
+
+[rust]
+format = "[$symbol$version]($style) "
+symbol = "🦀 "
+style = "red"
+
+[golang]
+format = "[$symbol$version]($style) "
+symbol = "🐹 "
+style = "cyan"
+
+[java]
+format = "[$symbol$version]($style) "
+symbol = "☕ "
+style = "red"
+
+# Docker - only when needed
+[docker_context]
+format = "[$symbol$context]($style) "
+symbol = "🐳 "
+style = "blue"
+only_with_files = true
+
+# Disable time (saves space)
+[time]
+disabled = true
+
+# Disable battery (not useful in SSH)
+[battery]
+disabled = true
+
+# Disable OS icon (obvious from hostname)
+[os]
+disabled = true

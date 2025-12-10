@@ -23,5 +23,4 @@ alias nvim22="NVIM_APPNAME=nvim22 nvim"
 alias nv-list="nvim-switch --list"
 alias nv-current="nvim-switch --current"
 
-echo "✓ Neovim config switcher aliases loaded"
-echo "  Usage: nv11, nv22, etc. or 'nvim-switch --list' to see all configs"
+# Silent load - no messages
