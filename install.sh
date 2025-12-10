@@ -174,6 +174,68 @@ else
     log "INFO" "✅ Starship already installed"
 fi
 
+# Installer Yazi si nécessaire
+if ! command -v yazi &> /dev/null; then
+    log "INFO" "Installing Yazi..."
+    cd /tmp
+    YAZI_VERSION=$(curl -s https://api.github.com/repos/sxyazi/yazi/releases/latest | grep '"tag_name":' | sed -E 's/.*"([^"]+)".*/\1/')
+    
+    if [ -z "$YAZI_VERSION" ]; then
+        log "WARN" "Failed to fetch latest Yazi version, using fallback v0.2.5"
+        YAZI_VERSION="v0.2.5"
+    fi
+    
+    log "INFO" "📦 Downloading Yazi $YAZI_VERSION..."
+    curl -sLO "https://github.com/sxyazi/yazi/releases/download/${YAZI_VERSION}/yazi-x86_64-unknown-linux-gnu.tar.gz"
+    
+    tar -xzf yazi-x86_64-unknown-linux-gnu.tar.gz
+    sudo mv yazi-x86_64-unknown-linux-gnu/yazi /usr/local/bin/yazi
+    rm -rf yazi-x86_64-unknown-linux-gnu yazi-x86_64-unknown-linux-gnu.tar.gz
+    
+    cd - > /dev/null
+    
+    if command -v yazi &> /dev/null; then
+        log "INFO" "✅ Yazi installed: $(yazi --version)"
+    else
+        log "WARN" "⚠️  Yazi installation failed"
+    fi
+else
+    log "INFO" "✅ Yazi already installed: $(yazi --version)"
+fi
+
+# Installer Doppler CLI si nécessaire
+if ! command -v doppler &> /dev/null; then
+    log "INFO" "Installing Doppler CLI..."
+    
+    # Install prerequisites for Debian/Ubuntu
+    sudo apt-get install -y apt-transport-https ca-certificates curl gnupg >/dev/null 2>&1
+    
+    # Add Doppler GPG key
+    curl -sLf --retry 3 --tlsv1.2 --proto "=https" 'https://packages.doppler.com/public/cli/gpg.DE2A7741A397C129.key' | sudo gpg --dearmor -o /usr/share/keyrings/doppler-archive-keyring.gpg 2>/dev/null
+    
+    # Add Doppler APT repository
+    echo "deb [signed-by=/usr/share/keyrings/doppler-archive-keyring.gpg] https://packages.doppler.com/public/cli/deb/debian any-version main" | sudo tee /etc/apt/sources.list.d/doppler-cli.list >/dev/null 2>&1
+    
+    # Install Doppler CLI
+    sudo apt-get update >/dev/null 2>&1
+    sudo apt-get install -y doppler >/dev/null 2>&1
+    
+    if command -v doppler &> /dev/null; then
+        log "INFO" "✅ Doppler CLI installed: $(doppler --version)"
+    else
+        log "WARN" "⚠️  Doppler CLI installation failed, trying alternative method..."
+        # Fallback to shell script installation
+        curl -Ls --tlsv1.2 --proto "=https" --retry 3 https://cli.doppler.com/install.sh | sudo sh >/dev/null 2>&1
+        if command -v doppler &> /dev/null; then
+            log "INFO" "✅ Doppler CLI installed via shell script: $(doppler --version)"
+        else
+            log "WARN" "⚠️  Doppler CLI installation failed"
+        fi
+    fi
+else
+    log "INFO" "✅ Doppler CLI already installed: $(doppler --version)"
+fi
+
 # --- 3. Configuration de Neovim ---
 log "INFO" "⚙️ Setting up Neovim configuration..."
 
@@ -315,3 +377,25 @@ echo ""
 echo "🔄 Run 'hash -r' or start a new shell to use newly installed commands"
 echo "🚀 Or run: source ~/.bashrc"
 echo "📄 Main installation log persisted with repository: $LOG_FILE"
+echo ""
+
+# --- 7. Configuration de Doppler (optionnel) ---
+echo "════════════════════════════════════════════════════════════════"
+echo ""
+read -p "🔐 Voulez-vous configurer vos API keys avec Doppler maintenant? (y/N): " SETUP_DOPPLER
+
+if [ "$SETUP_DOPPLER" = "y" ] || [ "$SETUP_DOPPLER" = "Y" ]; then
+    if [ -f "$SOURCE_DIR/doppler-setup.sh" ]; then
+        log "INFO" "🚀 Lancement de la configuration Doppler..."
+        bash "$SOURCE_DIR/doppler-setup.sh"
+    else
+        log "WARN" "⚠️  Script doppler-setup.sh non trouvé"
+        echo "⚠️  Lancez manuellement: ./doppler-setup.sh"
+    fi
+else
+    echo "⏭️  Configuration Doppler skippée"
+    echo "💡 Lancez plus tard avec: ./doppler-setup.sh"
+fi
+
+echo ""
+echo "🎊 Installation complète! Profitez bien de votre environnement!"
