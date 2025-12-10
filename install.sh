@@ -398,7 +398,7 @@ if ! grep -q "# Productivity aliases" "$HOME/.bashrc" 2>/dev/null; then
     echo "alias gs='git status'" >> "$HOME/.bashrc"
     echo "alias ga='git add .'" >> "$HOME/.bashrc"
     echo "alias gc='git commit -m'" >> "$HOME/.bashrc"
-    echo "alias gf='git fetch'" >> "$HOME/.bashrc
+    echo "alias gf='git fetch'" >> "$HOME/.bashrc"
     echo "alias gp='git push'" >> "$HOME/.bashrc"
     echo "alias gl='git pull'" >> "$HOME/.bashrc"
     echo "alias gd='git diff'" >> "$HOME/.bashrc"
