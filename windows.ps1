@@ -16,6 +16,9 @@ winget install Cursor.Cursor
 Write-Host "Installing Wezterm..." -ForegroundColor Yellow
 winget install wez.wezterm
 
+Write-Host "Installing Rio Terminal..." -ForegroundColor Yellow
+winget install raphaelamorim.rio
+
 Write-Host "Installing Git Bash..." -ForegroundColor Yellow
 winget install Git.Git
 
@@ -170,6 +173,14 @@ $CONFIG_PATHS = @{
     "starship" = @{
         "source" = "$HOME\dotfiles\starship\starship.toml"
         "target" = "$HOME\.config\starship.toml"
+    }
+    "wezterm" = @{
+        "source" = "$HOME\dotfiles\wezterm"
+        "target" = "$HOME\.config\wezterm"
+    }
+    "rio" = @{
+        "source" = "$HOME\dotfiles\rio\config.toml"
+        "target" = "$env:APPDATA\rio\config.toml"
     }
     # Add more configurations here as needed
 }
