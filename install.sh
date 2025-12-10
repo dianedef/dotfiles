@@ -299,6 +299,12 @@ if [ -d "$SOURCE_DIR/yazi" ]; then
     create_symlink "$SOURCE_DIR/yazi" "$HOME/.config/yazi"
 fi
 
+# Lier ranger (si présent)
+if [ -d "$SOURCE_DIR/ranger" ]; then
+    log "INFO" "Linking ranger config..."
+    create_symlink "$SOURCE_DIR/ranger" "$HOME/.config/ranger"
+fi
+
 # Lier starship (si présent)
 if [ -d "$SOURCE_DIR/starship" ]; then
     log "INFO" "Linking starship config..."
