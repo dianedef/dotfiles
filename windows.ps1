@@ -28,6 +28,9 @@ winget install GitHub.cli
 Write-Host "Installing fzf..." -ForegroundColor Yellow
 winget install junegunn.fzf
 
+Write-Host "Installing Yazi..." -ForegroundColor Yellow
+winget install sxyazi.yazi
+
 Write-Host "Installing Python..." -ForegroundColor Yellow
 winget install Python.Python.3.11
 
@@ -62,6 +65,9 @@ if (Get-Command npm -ErrorAction SilentlyContinue) {
 
 Write-Host "Installing Cloudflared..." -ForegroundColor Yellow
 winget install Cloudflare.cloudflared
+
+Write-Host "Installing Doppler CLI..." -ForegroundColor Yellow
+winget install doppler
 
 Write-Host "Installing Aider..." -ForegroundColor Yellow
 pip install aider-chat

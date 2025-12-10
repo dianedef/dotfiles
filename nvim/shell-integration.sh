@@ -29,8 +29,30 @@ fi
 
 # Function to quickly switch and launch Neovim with fzf
 nvims() {
-    # Liste des configurations disponibles
-    local items=("nvim" "nvim3" "nvim6" "nvim11" "nvim22")
+    local nvim_dir="/workspaces/dotfiles/nvim"
+    local config_home="${XDG_CONFIG_HOME:-$HOME/.config}"
+    local items=()
+    
+    # Auto-detect configurations
+    # Add default nvim if it has init file
+    if [[ -f "${nvim_dir}/init.lua" ]] || [[ -f "${nvim_dir}/init.vim" ]]; then
+        items+=("nvim")
+    fi
+    
+    # Find all subdirectories with init.lua or init.vim
+    while IFS= read -r -d '' dir; do
+        local name=$(basename "$dir")
+        # Skip hidden directories and common non-config directories
+        if [[ ! "$name" =~ ^\. ]] && [[ "$name" != "lua" ]] && [[ "$name" != "plugin" ]] && [[ "$name" != "queries" ]] && [[ "$name" != "scripts" ]] && [[ "$name" != "tests" ]] && [[ "$name" != "doc" ]]; then
+            if [[ -f "${dir}/init.lua" ]] || [[ -f "${dir}/init.vim" ]]; then
+                items+=("$name")
+                # Auto-create symlink if it doesn't exist (for NVIM_APPNAME to work)
+                if [[ ! -e "${config_home}/${name}" ]]; then
+                    ln -s "${dir}" "${config_home}/${name}" 2>/dev/null
+                fi
+            fi
+        fi
+    done < <(find "${nvim_dir}" -mindepth 1 -maxdepth 1 -type d -print0 | sort -z)
     
     # Utiliser fzf pour choisir avec des couleurs rose/violet/orange
     local config=$(printf "%s\n" "${items[@]}" | fzf \

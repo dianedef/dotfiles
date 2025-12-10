@@ -18,14 +18,31 @@ DOTFILES_DIR="/workspaces/dotfiles"
 NVIM_DIR="${DOTFILES_DIR}/nvim"
 CONFIG_HOME="${XDG_CONFIG_HOME:-$HOME/.config}"
 
-# Available configurations (relative to dotfiles/nvim)
-CONFIGS=(
-    "nvim:Default configuration (current)"
-    "nvim3:Alternative config 3"
-    "nvim6:Alternative config 6"
-    "nvim11:Alternative config 11"
-    "nvim22:Alternative config 22"
-)
+# Function to auto-detect available configurations
+detect_configs() {
+    local configs=()
+    
+    # Add default nvim config if it has init.lua/init.vim
+    if [[ -f "${NVIM_DIR}/init.lua" ]] || [[ -f "${NVIM_DIR}/init.vim" ]]; then
+        configs+=("nvim:Default configuration")
+    fi
+    
+    # Find all subdirectories with init.lua or init.vim
+    while IFS= read -r -d '' dir; do
+        local name=$(basename "$dir")
+        # Skip hidden directories and common non-config directories
+        if [[ ! "$name" =~ ^\. ]] && [[ "$name" != "lua" ]] && [[ "$name" != "plugin" ]] && [[ "$name" != "queries" ]] && [[ "$name" != "scripts" ]] && [[ "$name" != "tests" ]] && [[ "$name" != "doc" ]]; then
+            if [[ -f "${dir}/init.lua" ]] || [[ -f "${dir}/init.vim" ]]; then
+                configs+=("${name}:Configuration ${name}")
+            fi
+        fi
+    done < <(find "${NVIM_DIR}" -mindepth 1 -maxdepth 1 -type d -print0 | sort -z)
+    
+    printf '%s\n' "${configs[@]}"
+}
+
+# Available configurations (auto-detected)
+CONFIGS=()
 
 # Function to display usage
 usage() {
@@ -41,11 +58,8 @@ Options:
     -h, --help              Show this help message
 
 Config Names:
-    nvim                    Default configuration
-    nvim3                   Alternative config 3
-    nvim6                   Alternative config 6
-    nvim11                  Alternative config 11
-    nvim22                  Alternative config 22
+    Automatically detected from directories in ${NVIM_DIR}/
+    Each directory containing init.lua or init.vim is a valid config
 
 Examples:
     $0 --list               # List all configs
@@ -69,19 +83,17 @@ list_configs() {
     local current_config
     current_config=$(get_current_config)
     
-    for config in "${CONFIGS[@]}"; do
+    # Auto-detect configurations
+    while IFS= read -r config; do
+        [[ -z "$config" ]] && continue
         IFS=':' read -r name desc <<< "$config"
         
-        if [[ -d "${NVIM_DIR}/${name}" ]] || [[ "$name" == "nvim" && -d "${NVIM_DIR}" ]]; then
-            if [[ "$name" == "$current_config" ]]; then
-                echo -e "  ${GREEN}* $name${NC} - $desc ${YELLOW}(active)${NC}"
-            else
-                echo -e "    $name - $desc"
-            fi
+        if [[ "$name" == "$current_config" ]]; then
+            echo -e "  ${GREEN}* $name${NC} - $desc ${YELLOW}(active)${NC}"
         else
-            echo -e "    ${RED}$name${NC} - $desc ${RED}(not found)${NC}"
+            echo -e "    $name - $desc"
         fi
-    done
+    done < <(detect_configs)
     echo ""
 }
 
