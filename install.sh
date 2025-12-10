@@ -357,6 +357,18 @@ else
     log "INFO" "✅ Shell integration already in ~/.bashrc"
 fi
 
+# Ajouter Starship à ~/.bashrc si installé
+if command -v starship &> /dev/null; then
+    if ! grep -q "eval.*starship init" "$HOME/.bashrc" 2>/dev/null; then
+        echo "" >> "$HOME/.bashrc"
+        echo "# Starship prompt" >> "$HOME/.bashrc"
+        echo 'eval "$(starship init bash)"' >> "$HOME/.bashrc"
+        log "INFO" "✅ Added starship integration to ~/.bashrc"
+    else
+        log "INFO" "✅ Starship integration already in ~/.bashrc"
+    fi
+fi
+
 # Ajouter Zoxide à ~/.bashrc si installé
 if command -v zoxide &> /dev/null; then
     if ! grep -q "eval.*zoxide init" "$HOME/.bashrc" 2>/dev/null; then
@@ -373,7 +385,7 @@ fi
 if ! grep -q "# Productivity aliases" "$HOME/.bashrc" 2>/dev/null; then
     echo "" >> "$HOME/.bashrc"
     echo "# Productivity aliases" >> "$HOME/.bashrc"
-    echo "alias reload='source ~/.bashrc'" >> "$HOME/.bashrc"
+    echo "alias reload='source ~/.bashrc && echo \"✓ Shell rechargé!\"'" >> "$HOME/.bashrc"
     echo "alias cls='clear'" >> "$HOME/.bashrc"
     echo "alias h='history'" >> "$HOME/.bashrc"
     echo "" >> "$HOME/.bashrc"
@@ -385,7 +397,7 @@ if ! grep -q "# Productivity aliases" "$HOME/.bashrc" 2>/dev/null; then
     echo "# Git shortcuts" >> "$HOME/.bashrc"
     echo "alias gs='git status'" >> "$HOME/.bashrc"
     echo "alias ga='git add'" >> "$HOME/.bashrc"
-    echo "alias gc='git commit'" >> "$HOME/.bashrc"
+    echo "alias gc='git commit -m'" >> "$HOME/.bashrc"
     echo "alias gp='git push'" >> "$HOME/.bashrc"
     echo "alias gl='git pull'" >> "$HOME/.bashrc"
     echo "alias gd='git diff'" >> "$HOME/.bashrc"

@@ -52,7 +52,7 @@ truncation_symbol = "…"
 format = '([\[$all_status$ahead_behind\]]($style) )'
 style = "bold yellow"
 conflicted = "= "
-ahead = "⇡${count} "
+ahead = "📤${count} "
 behind = "📬${count} "
 diverged = "⇕ "
 up_to_date = "✅ "
