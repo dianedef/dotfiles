@@ -121,7 +121,11 @@ sudo apt-get install -y \
   python3-pip \
   ripgrep \
   fd-find \
-  xclip >/dev/null 2>&1
+  xclip \
+  ranger \
+  bat \
+  lsd \
+  trash-cli >/dev/null 2>&1
 
 # Créer un lien pour fd (fd-find sur Ubuntu)
 if [ -f /usr/bin/fdfind ] && [ ! -f /usr/bin/fd ]; then
@@ -363,6 +367,37 @@ if command -v zoxide &> /dev/null; then
     else
         log "INFO" "✅ Zoxide integration already in ~/.bashrc"
     fi
+fi
+
+# Ajouter les aliases utiles à ~/.bashrc
+if ! grep -q "# Productivity aliases" "$HOME/.bashrc" 2>/dev/null; then
+    echo "" >> "$HOME/.bashrc"
+    echo "# Productivity aliases" >> "$HOME/.bashrc"
+    echo "alias reload='source ~/.bashrc'" >> "$HOME/.bashrc"
+    echo "alias cls='clear'" >> "$HOME/.bashrc"
+    echo "alias h='history'" >> "$HOME/.bashrc"
+    echo "" >> "$HOME/.bashrc"
+    echo "# Navigation shortcuts" >> "$HOME/.bashrc"
+    echo "alias ..='cd ..'" >> "$HOME/.bashrc"
+    echo "alias ...='cd ../..'" >> "$HOME/.bashrc"
+    echo "alias ....='cd ../../..'" >> "$HOME/.bashrc"
+    echo "" >> "$HOME/.bashrc"
+    echo "# Git shortcuts" >> "$HOME/.bashrc"
+    echo "alias gs='git status'" >> "$HOME/.bashrc"
+    echo "alias ga='git add'" >> "$HOME/.bashrc"
+    echo "alias gc='git commit'" >> "$HOME/.bashrc"
+    echo "alias gp='git push'" >> "$HOME/.bashrc"
+    echo "alias gl='git pull'" >> "$HOME/.bashrc"
+    echo "alias gd='git diff'" >> "$HOME/.bashrc"
+    echo "alias glog='git log --oneline --graph'" >> "$HOME/.bashrc"
+    echo "" >> "$HOME/.bashrc"
+    echo "# Better tools (if installed)" >> "$HOME/.bashrc"
+    echo "command -v bat >/dev/null && alias cat='bat --paging=never'" >> "$HOME/.bashrc"
+    echo "command -v lsd >/dev/null && alias ls='lsd' && alias ll='lsd -lh' && alias la='lsd -lAh' && alias lt='lsd --tree --depth 2'" >> "$HOME/.bashrc"
+    echo "command -v trash-put >/dev/null && alias tp='trash-put' && alias tl='trash-list' && alias tr='trash-restore' && alias te='trash-empty'" >> "$HOME/.bashrc"
+    log "INFO" "✅ Added productivity aliases to ~/.bashrc"
+else
+    log "INFO" "✅ Productivity aliases already in ~/.bashrc"
 fi
 
 # Sourcer pour cette session
