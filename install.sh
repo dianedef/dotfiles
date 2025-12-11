@@ -408,9 +408,36 @@ if ! grep -q "# Productivity aliases" "$HOME/.bashrc" 2>/dev/null; then
     echo "command -v bat >/dev/null && alias cat='bat --paging=never'" >> "$HOME/.bashrc"
     echo "command -v lsd >/dev/null && alias ls='lsd' && alias ll='lsd -lh' && alias la='lsd -lAh' && alias lt='lsd --tree --depth 2'" >> "$HOME/.bashrc"
     echo "command -v trash-put >/dev/null && alias tp='trash-put' && alias tl='trash-list' && alias tr='trash-restore' && alias te='trash-empty'" >> "$HOME/.bashrc"
+    echo "" >> "$HOME/.bashrc"
+    echo "# Doppler shortcuts" >> "$HOME/.bashrc"
+    echo "alias ds='bash $SOURCE_DIR/doppler-setup.sh'" >> "$HOME/.bashrc"
     log "INFO" "✅ Added productivity aliases to ~/.bashrc"
 else
     log "INFO" "✅ Productivity aliases already in ~/.bashrc"
+fi
+
+# Ajouter l'alias/fonction ds séparément si manquant (pour les installations existantes)
+if ! grep -q "ds()" "$HOME/.bashrc" 2>/dev/null && ! grep -q "alias ds=" "$HOME/.bashrc" 2>/dev/null; then
+    echo "" >> "$HOME/.bashrc"
+    echo "# Doppler shortcuts - finds doppler-setup.sh dynamically" >> "$HOME/.bashrc"
+    echo "ds() {" >> "$HOME/.bashrc"
+    echo "    # Try common locations" >> "$HOME/.bashrc"
+    echo "    local script=\"\"" >> "$HOME/.bashrc"
+    echo "    if [ -f \"\$HOME/.config/nvim/../doppler-setup.sh\" ]; then" >> "$HOME/.bashrc"
+    echo "        script=\"\$HOME/.config/nvim/../doppler-setup.sh\"" >> "$HOME/.bashrc"
+    echo "    elif [ -f \"/workspaces/dotfiles/doppler-setup.sh\" ]; then" >> "$HOME/.bashrc"
+    echo "        script=\"/workspaces/dotfiles/doppler-setup.sh\"" >> "$HOME/.bashrc"
+    echo "    elif [ -f \"\$HOME/dotfiles/doppler-setup.sh\" ]; then" >> "$HOME/.bashrc"
+    echo "        script=\"\$HOME/dotfiles/doppler-setup.sh\"" >> "$HOME/.bashrc"
+    echo "    elif [ -f \"\$HOME/storage/shared/dotfiles/doppler-setup.sh\" ]; then" >> "$HOME/.bashrc"
+    echo "        script=\"\$HOME/storage/shared/dotfiles/doppler-setup.sh\"" >> "$HOME/.bashrc"
+    echo "    else" >> "$HOME/.bashrc"
+    echo "        echo \"❌ doppler-setup.sh not found. Searched common locations.\"" >> "$HOME/.bashrc"
+    echo "        return 1" >> "$HOME/.bashrc"
+    echo "    fi" >> "$HOME/.bashrc"
+    echo "    bash \"\$script\"" >> "$HOME/.bashrc"
+    echo "}" >> "$HOME/.bashrc"
+    log "INFO" "✅ Added Doppler function (ds) to ~/.bashrc"
 fi
 
 # Sourcer pour cette session
@@ -463,19 +490,26 @@ echo ""
 # --- 7. Configuration de Doppler (optionnel) ---
 echo "════════════════════════════════════════════════════════════════"
 echo ""
-read -p "🔐 Voulez-vous configurer vos API keys avec Doppler maintenant? (y/N): " SETUP_DOPPLER
 
-if [ "$SETUP_DOPPLER" = "y" ] || [ "$SETUP_DOPPLER" = "Y" ]; then
-    if [ -f "$SOURCE_DIR/doppler-setup.sh" ]; then
-        log "INFO" "🚀 Lancement de la configuration Doppler..."
-        bash "$SOURCE_DIR/doppler-setup.sh"
+# Vérifier si Doppler est installé avant de proposer la configuration
+if command -v doppler &> /dev/null; then
+    read -p "🔐 Voulez-vous configurer vos API keys avec Doppler maintenant? (y/N): " SETUP_DOPPLER
+
+    if [ "$SETUP_DOPPLER" = "y" ] || [ "$SETUP_DOPPLER" = "Y" ]; then
+        if [ -f "$SOURCE_DIR/doppler-setup.sh" ]; then
+            log "INFO" "🚀 Lancement de la configuration Doppler..."
+            bash "$SOURCE_DIR/doppler-setup.sh"
+        else
+            log "WARN" "⚠️  Script doppler-setup.sh non trouvé"
+            echo "⚠️  Lancez manuellement: ./doppler-setup.sh"
+        fi
     else
-        log "WARN" "⚠️  Script doppler-setup.sh non trouvé"
-        echo "⚠️  Lancez manuellement: ./doppler-setup.sh"
+        echo "⏭️  Configuration Doppler skippée"
+        echo "💡 Lancez plus tard avec: ./doppler-setup.sh"
     fi
 else
-    echo "⏭️  Configuration Doppler skippée"
-    echo "💡 Lancez plus tard avec: ./doppler-setup.sh"
+    log "WARN" "⚠️  Doppler CLI n'est pas installé. Configuration skippée."
+    echo "💡 Installez Doppler puis lancez: ./doppler-setup.sh"
 fi
 
 echo ""
