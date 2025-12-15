@@ -162,20 +162,28 @@ if ! grep -q "shell-integration.sh" "$BASHRC" 2>/dev/null; then
     log "INFO" "✅ Added shell integration"
 fi
 
-# Starship
-if command -v starship &> /dev/null && ! grep -q "starship init" "$BASHRC"; then
+# Add cargo/local bin to PATH for Starship/Zoxide
+if ! grep -q "\.cargo/bin" "$BASHRC"; then
+    echo "" >> "$BASHRC"
+    echo '# Cargo and local binaries' >> "$BASHRC"
+    echo 'export PATH="$HOME/.cargo/bin:$HOME/.local/bin:$PATH"' >> "$BASHRC"
+    log "INFO" "✅ Added cargo/local bin to PATH"
+fi
+
+# Starship (check PATH after adding it above)
+if ! grep -q "starship init" "$BASHRC"; then
     echo "" >> "$BASHRC"
     echo '# Starship prompt' >> "$BASHRC"
     echo 'eval "$(starship init bash)"' >> "$BASHRC"
-    log "INFO" "✅ Added Starship"
+    log "INFO" "✅ Added Starship to bashrc"
 fi
 
-# Zoxide
-if command -v zoxide &> /dev/null && ! grep -q "zoxide init" "$BASHRC"; then
+# Zoxide (check PATH after adding it above)
+if ! grep -q "zoxide init" "$BASHRC"; then
     echo "" >> "$BASHRC"
     echo '# Zoxide' >> "$BASHRC"
     echo 'eval "$(zoxide init bash)"' >> "$BASHRC"
-    log "INFO" "✅ Added Zoxide"
+    log "INFO" "✅ Added Zoxide to bashrc"
 fi
 
 # Aliases essentiels
