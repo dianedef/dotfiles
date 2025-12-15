@@ -22,9 +22,29 @@ dotfiles/
 ```
 
 ## Installation Context
-- **Linux/Codespaces**: Use `install.sh` (creates symlinks to `~/.config/`)
+- **Linux/Codespaces**: Use `install.sh` (automatically runs on Codespace creation)
 - **Windows**: Use `windows.ps1` (requires admin, uses symbolic links)
-- **Termux**: Runs as regular Linux but with Android constraints
+- **Termux (Android)**: Use `termux.sh` (lightweight, no Copilot, essential tools only)
+
+### Installation Scripts Behavior
+1. **`install.sh`** (Codespaces/Linux)
+   - Runs automatically on each new Codespace startup
+   - Installs full development environment (Neovim, LSPs, Copilot, etc.)
+   - Creates symlinks to `~/.config/`
+   - Full-featured, optimized for cloud development
+
+2. **`termux.sh`** (Android/Termux)
+   - Run manually: `bash ~/dotfiles/termux.sh`
+   - Lightweight installation (limited Android resources)
+   - Installs: Neovim, Starship, Zoxide, Yazi (optional)
+   - Excludes: GitHub Copilot, heavy LSPs
+   - **Important**: Binaries install to `~/.cargo/bin` and `~/.local/bin`
+   - Adds PATH to `~/.bashrc` for Starship/Zoxide
+   - Use `source ~/.bashrc` or restart shell after installation
+
+3. **`windows.ps1`** (Windows)
+   - Manual installation with admin privileges
+   - Full Windows development setup
 
 ## Key Technologies
 - **Neovim**: Modern Vim with Lua config, LSP, Treesitter
@@ -54,10 +74,15 @@ dotfiles/
 - Handle missing directories gracefully
 
 ## Common Gotchas
-1. **Android/Termux**: Different paths (`/data/data/com.termux/...`)
+1. **Android/Termux**: 
+   - Different paths (`/data/data/com.termux/files/home/`)
+   - Binaries install to `~/.cargo/bin` (Starship) and `~/.local/bin` (Zoxide)
+   - Need to restart shell or `source ~/.bashrc` after `termux.sh`
+   - PATH is automatically added by script
 2. **SSH performance**: Configs should be lightweight for SSH latency
 3. **Clipboard**: Different between local Termux and remote Codespaces
 4. **File permissions**: Termux runs as non-root user
+5. **Codespaces**: `install.sh` runs automatically, no manual action needed
 
 ## Development Workflow
 1. Edit configs in dotfiles repo
@@ -66,7 +91,15 @@ dotfiles/
 4. Then test in Termux if Android-specific
 
 ## Helpful Assumptions
+- **Current environment**: You are running in GitHub Codespaces (not Termux)
 - When suggesting changes, assume Linux/Bash environment
 - Prefer built-in tools over npm/pip packages when possible
 - Keep configs minimal and fast (SSH latency matters)
 - Document Android-specific workarounds clearly
+
+## Debugging Installation Issues
+When helping with `termux.sh` problems:
+1. Check if binaries are installed: `ls ~/.cargo/bin/starship ~/.local/bin/zoxide`
+2. Check if PATH was added: `grep -E "(cargo|local)" ~/.bashrc`
+3. Verify current PATH: `echo $PATH`
+4. Remind user to restart shell or run: `source ~/.bashrc`
