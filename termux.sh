@@ -50,8 +50,12 @@ log "INFO" "📦 Installing lightweight tools..."
 # Starship (prompt)
 if ! command -v starship &> /dev/null; then
     log "INFO" "Installing Starship..."
-    curl -sS https://starship.rs/install.sh | sh -s -- -y >/dev/null 2>&1
-    log "INFO" "✅ Starship installed"
+    curl -sS https://starship.rs/install.sh | sh -s -- -y --bin-dir "$HOME/.local/bin"
+    if [ $? -eq 0 ] && [ -f "$HOME/.local/bin/starship" ]; then
+        log "INFO" "✅ Starship installed to ~/.local/bin"
+    else
+        log "ERROR" "❌ Starship installation failed"
+    fi
 else
     log "INFO" "✅ Starship already installed"
 fi
@@ -59,8 +63,12 @@ fi
 # Zoxide (smart cd)
 if ! command -v zoxide &> /dev/null; then
     log "INFO" "Installing Zoxide..."
-    curl -sS https://raw.githubusercontent.com/ajeetdsouza/zoxide/main/install.sh | bash >/dev/null 2>&1
-    log "INFO" "✅ Zoxide installed"
+    curl -sSfL https://raw.githubusercontent.com/ajeetdsouza/zoxide/main/install.sh | bash
+    if [ $? -eq 0 ] && [ -f "$HOME/.local/bin/zoxide" ]; then
+        log "INFO" "✅ Zoxide installed to ~/.local/bin"
+    else
+        log "ERROR" "❌ Zoxide installation failed"
+    fi
 else
     log "INFO" "✅ Zoxide already installed"
 fi
