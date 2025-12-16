@@ -1,180 +1,136 @@
 # My Dotfiles
 
-- Neovim for code editing
-- Yazi as terminal file manager
-- PowerShell with Starship prompt
-- FZF, Ripgrep, and Zoxide for navigation
+Multi-platform development environment with modern terminal tools and AI-assisted workflows.
+
+- 🎨 Neovim for code editing
+- 📁 Yazi as terminal file manager  
+- ✨ Starship prompt with git integration
+- 🔍 FZF, Ripgrep, and Zoxide for navigation
+- 🤖 BMAD Method for AI-driven development
+
+## 📚 Documentation
+
+**→ [Complete Documentation Index](docs/INDEX.md)** - Start here for comprehensive guides
+
+### Quick Links
+- **[⚡ Quick Start](docs/installation/QUICK-START.md)** - Get started in 5 minutes
+- **[🪟 Windows Setup](docs/installation/WINDOWS.md)** - Windows installation
+- **[🐧 Linux/Codespaces](docs/installation/LINUX.md)** - Linux installation  
+- **[📱 Termux/Android](docs/installation/TERMUX.md)** - Android installation
+- **[🤖 BMAD Usage](docs/workflows/BMAD-USAGE.md)** - AI-assisted development
 
 <!-- toc -->
 
-- [Windows Installation](#windows-installation)
-- [Linux Installation](#linux-installation)
-- [Technical Details](#technical-details)
-  - [Installation Process](#installation-process)
-  - [File Locations](#file-locations)
-- [Neovim Setup](#neovim-setup)
-- [Yazi File Manager](#yazi-file-manager)
-- [Maintenance](#maintenance)
+- [Quick Installation](#quick-installation)
+  - [Windows](#windows)
+  - [Linux/Codespaces](#linuxcodespaces)
+  - [Termux/Android](#termuxandroid)
+- [What's Included](#whats-included)
+- [BMAD Method Integration](#bmad-method-integration)
+- [Documentation](#documentation)
 - [Credits](#credits)
 
 <!-- tocstop -->
 
-## Windows Installation
+## Quick Installation
 
-1. **Install Required Tools**
-   ```powershell
-   # Run in PowerShell as administrator
-   winget install Git.Git
-   winget install Neovim.Neovim
-   winget install Starship.Starship
-   winget install junegunn.fzf
-   winget install sharkdp.fd
-   winget install BurntSushi.ripgrep.MSVC
-   winget install ajeetdsouza.zoxide
-   winget install mpv.mpv
-   winget install qBittorrent.qBittorrent --version 4.6.0
-   ```
+### Windows
 
-2. **Clone and Install**
-   ```powershell
-   # Clone repository
-   git clone https://github.com/dianedef/dotfiles.git $HOME/dotfiles
-
-   # Run installation script (as administrator)
-   Set-ExecutionPolicy Bypass -Scope Process -Force
-   $HOME/dotfiles/install.ps1
-   ```
-
-## Linux Installation
-
-1. **Clone the repository**
-   ```bash
-   git clone https://github.com/dianedef/dotfiles.git ~/dotfiles
-   ```
-
-2. **Run the installation script**
-   ```bash
-   cd ~/dotfiles
-   chmod +x install.sh
-   ./install.sh
-   ```
-
-The `install.sh` script will:
-- Install Neovim (latest stable version)
-- Install Starship prompt
-- Install dependencies (git, curl, ripgrep, fd-find, etc.)
-- Create symbolic links for all configurations
-- Set up shell integration for bash
-
-3. **Activate shell integration**
-   ```bash
-   source ~/.bashrc
-   ```
-
-### Starship Configuration
-
-Starship is automatically installed and configured for both Linux and Windows:
-- **Linux**: `~/.config/starship.toml`
-- **Windows**: `$HOME\.config\starship.toml`
-- **Nushell**: Configured in `nushell/env.nu`
-
-The configuration includes:
-- Git status indicators
-- Command duration display
-- Language version indicators (Node.js, Python, Rust, Go, Java)
-- Custom prompt format with visual separators
-
-### Installation Process Details
-
-The `install.ps1` script manages the dotfiles installation through several steps:
-
-1. **Administrator Check**
-   ```powershell
-   # Requires -RunAsAdministrator
-   ```
-   The script requires administrator privileges to create symbolic links.
-
-2. **Configuration Mapping**
-   ```powershell
-   $CONFIG_PATHS = @{
-       "nvim" = @{
-           "source" = "$HOME\dotfiles\nvim"
-           "target" = "$env:LOCALAPPDATA\nvim"
-       }
-       "yazi" = @{
-           "source" = "$HOME\dotfiles\yazi1"
-           "target" = "$env:APPDATA\yazi"
-       }
-   }
-   ```
-   Defines the source and target paths for each configuration.
-
-3. **Backup Process**
-   - Checks if target configuration exists
-   - If found, creates a `.backup` copy
-   - Example: `$env:LOCALAPPDATA\nvim` → `$env:LOCALAPPDATA\nvim.backup`
-
-4. **Directory Structure**
-   - Creates any missing parent directories
-   - Uses native PowerShell directory handling
-   - Ensures clean installation
-
-5. **Symbolic Links**
-   - Creates Windows symbolic links using `New-Item`
-   - Links point from system locations to dotfiles repository
-   - Example: `$env:APPDATA\yazi` → `$HOME\dotfiles\yazi1`
-
-### File Locations
-
-#### Neovim Configuration
-- Source: `$HOME\dotfiles\nvim`
-- Target: `$env:LOCALAPPDATA\nvim`
-- Contains: init.lua, plugins, keymaps
-
-#### Yazi Configuration
-- Source: `$HOME\dotfiles\yazi1`
-- Target: `$env:APPDATA\yazi`
-- Contains: yazi.toml, keymap.toml, theme settings
-
-#### Starship Configuration
-- Source: `$HOME\dotfiles\starship\starship.toml`
-- Target (Windows): `$HOME\.config\starship.toml`
-- Target (Linux): `~/.config/starship.toml`
-- Contains: prompt customization, git indicators, language displays
-
-## Neovim Setup
-
-- Full development environment
-- Custom keybindings and plugins
-- Optimized for Windows
-
-## Yazi File Manager
-
-Modern terminal file manager with:
-- Smart directory navigation (zoxide)
-- Git status integration
-- File previews (including Markdown)
-- Archive handling
-- Catppuccin Frappé theme
-
-#### Yazi Key Bindings
-- Navigation: `u`/`e` (up/down), `U`/`E` (5 lines)
-- Files: `o` (create), `d d` (delete), `y y` (copy)
-- Tools: `w` (shell), `W` (tasks)
-
-## Maintenance
-
-To update the dotfiles:
 ```powershell
-cd $HOME/dotfiles
-git pull
-```
-
-To reinstall/update symlinks:
-```powershell
+# Clone and run installation (as administrator)
+git clone https://github.com/dianedef/dotfiles.git $HOME/dotfiles
 Set-ExecutionPolicy Bypass -Scope Process -Force
-$HOME/dotfiles/install.ps1
+$HOME/dotfiles/windows.ps1
 ```
+
+**[→ Detailed Windows Guide](docs/installation/WINDOWS.md)**
+
+### Linux/Codespaces
+
+```bash
+# Clone and run installation
+git clone https://github.com/dianedef/dotfiles.git ~/dotfiles
+cd ~/dotfiles && chmod +x install.sh && ./install.sh
+source ~/.bashrc
+```
+
+**[→ Detailed Linux Guide](docs/installation/LINUX.md)**
+
+### Termux/Android
+
+```bash
+# Clone and run lightweight installation
+git clone https://github.com/dianedef/dotfiles.git ~/dotfiles
+cd ~/dotfiles && chmod +x termux.sh && ./termux.sh
+source ~/.bashrc
+```
+
+**[→ Detailed Termux Guide](docs/installation/TERMUX.md)**
+
+## What's Included
+
+### Core Tools
+- **Neovim** - LazyVim-based configuration with LSP support
+- **Yazi** - Fast terminal file manager with previews
+- **Starship** - Beautiful customizable shell prompt
+- **FZF** - Fuzzy finder for files and command history
+- **Ripgrep** - Lightning-fast text search
+- **Zoxide** - Smart directory navigation
+
+### Additional Tools
+- **Lazygit** - Terminal UI for git operations
+- **Ranger** - Alternative file manager
+- **Nushell** - Modern shell (configs available)
+
+### Platform Support
+| Tool | Windows | Linux | Termux |
+|------|---------|-------|--------|
+| Neovim | ✅ Full | ✅ Full | ✅ Basic |
+| Yazi | ✅ | ✅ | ✅ |
+| Starship | ✅ | ✅ | ✅ |
+| GitHub Copilot | ✅ | ✅ | ❌ |
+
+## BMAD Method Integration
+
+This repository now includes the **BMAD (Build More, Architect Dreams) Method** - a structured AI-driven development framework.
+
+### What is BMAD?
+
+BMAD provides specialized AI agents for different development roles:
+- 🤖 **10 Specialized Agents** - Developer, Architect, Tech Writer, PM, etc.
+- 📋 **34 Workflows** - Structured processes for any task size
+- 🎯 **Scale-Adaptive** - From quick fixes to enterprise features
+- 📚 **Documentation-First** - Maintain quality through structure
+
+### Quick BMAD Usage
+
+```bash
+# Initialize BMAD (first time)
+@bmd-custom-core-bmad-master *workflow-init
+
+# Quick bug fix or small feature
+@bmd-custom-bmm-quick-flow-solo-dev *workflow-quick-flow
+
+# Documentation improvement
+@bmd-custom-bmm-tech-writer
+```
+
+**[→ Complete BMAD Guide](docs/workflows/BMAD-USAGE.md)**
+
+## Documentation
+
+This repository follows structured documentation organization:
+
+```
+docs/
+├── installation/     # Platform-specific setup guides
+├── configuration/    # Per-tool configuration guides
+├── workflows/        # Usage and BMAD workflows
+├── troubleshooting/ # Common issues and solutions
+└── reference/       # Technical reference materials
+```
+
+**[→ Browse Complete Documentation](docs/INDEX.md)**
 
 ## Credits
 
