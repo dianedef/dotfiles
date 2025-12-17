@@ -217,4 +217,35 @@ foreach ($config in $CONFIG_PATHS.GetEnumerator()) {
     Create-SymLink -Source $config.Value.source -Target $config.Value.target
 }
 
+# Add aliases to PowerShell profile
+Write-Host "`nConfiguring PowerShell aliases..." -ForegroundColor Cyan
+
+$ProfilePath = $PROFILE.CurrentUserAllHosts
+$ProfileDir = Split-Path -Parent $ProfilePath
+
+# Create profile directory if it doesn't exist
+if (-not (Test-Path $ProfileDir)) {
+    New-Item -ItemType Directory -Path $ProfileDir -Force | Out-Null
+}
+
+# Create or append to profile
+if (-not (Test-Path $ProfilePath)) {
+    New-Item -ItemType File -Path $ProfilePath -Force | Out-Null
+}
+
+# Add aliases if not already present
+$aliasContent = @"
+
+# File manager aliases
+Set-Alias -Name r -Value ranger
+Set-Alias -Name y -Value yazi
+"@
+
+if (-not (Get-Content $ProfilePath -ErrorAction SilentlyContinue | Select-String "File manager aliases")) {
+    Add-Content -Path $ProfilePath -Value $aliasContent
+    Write-Host "Added file manager aliases to PowerShell profile" -ForegroundColor Green
+} else {
+    Write-Host "File manager aliases already exist in PowerShell profile" -ForegroundColor Yellow
+}
+
 Write-Host "`nInstallation complete!" -ForegroundColor Green 

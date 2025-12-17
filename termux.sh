@@ -241,6 +241,9 @@ alias termux-sleep='termux-wake-unlock'
 alias storage='cd ~/storage/shared'
 alias dl='cd ~/storage/downloads'
 
+# File managers
+alias r='ranger'
+
 EOF
     log "INFO" "✅ Added Termux aliases"
 fi
