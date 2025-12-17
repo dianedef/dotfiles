@@ -86,6 +86,15 @@ source ~/.bashrc
 - **GitHub Copilot CLI** (`copilot`) - AI assistant in your terminal
 - **Kilocode** (`kilocode` or `kilo`) - AI-powered code generation
 - **OpenCode AI** (`opencode`) - Open-source AI coding assistant
+  - Supports: OpenAI (GPT), Anthropic (Claude), Google (Gemini), Groq
+  - Neovim integration with `opencode.nvim` plugin
+  - Automated setup via Doppler secrets
+
+### Secrets Management
+- **Doppler** - Secure API key management across devices
+  - Auto-configures GitHub CLI authentication
+  - Manages AI provider API keys (OpenAI, Claude, Gemini, Groq)
+  - Syncs secrets between Termux, Codespaces, and local machines
 
 ### Fonts & Icons
 - **Nerd Fonts** - Automatically installed for icons in Neovim, Starship, and Yazi
@@ -96,10 +105,12 @@ source ~/.bashrc
 | Tool | Windows | Linux | Termux |
 |------|---------|-------|--------|
 | Neovim | ✅ Full | ✅ Full | ✅ Basic |
-| Yazi | ✅ | ✅ | ✅ |
+| Yazi | ✅ | ✅ | ❌ (Ranger) |
 | Starship | ✅ | ✅ | ✅ |
 | Nerd Fonts | ✅ | ✅ | ✅ |
 | GitHub Copilot | ✅ | ✅ | ❌ |
+| OpenCode AI | ✅ | ✅ | ✅ (Alpine) |
+| Doppler | ✅ | ✅ | ✅ |
 
 ## BMAD Method Integration
 

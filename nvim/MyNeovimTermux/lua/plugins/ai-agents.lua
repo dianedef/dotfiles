@@ -83,6 +83,7 @@ return {
     opts = {
       spec = {
         { "<leader>a", group = "ai-agents", icon = "🤖" },
+        { "<leader>o", group = "opencode", icon = "🔥" },
       },
     },
   },

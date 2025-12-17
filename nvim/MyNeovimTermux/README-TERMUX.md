@@ -51,31 +51,43 @@ python codex.py
 
 ---
 
-### 3. **OpenCode Termux (Alpine proot)**
-Version complète d'OpenCode pour mobile.
+### 3. **OpenCode Termux (Alpine proot)** - Auto-installé ✨
+Version complète d'OpenCode pour mobile avec support multi-modèles.
 
-**Installation:**
+**Installation automatique:**
+Le script `termux.sh` installe et configure OpenCode automatiquement avec Doppler.
+
+**Configuration manuelle (si besoin):**
 ```bash
-# Installer proot-distro Alpine
-pkg install proot-distro
-proot-distro install alpine
+# Si pas encore installé
+cd ~/dotfiles
+./termux.sh  # Choisir 'y' pour OpenCode
 
-# Entrer dans Alpine
-proot-distro login alpine
-
-# Dans Alpine, installer OpenCode fork
-apk add git nodejs npm
-git clone https://github.com/Charlie6F/opencode_termux_alpine_aarch64.git
-cd opencode_termux_alpine_aarch64
-./install.sh
+# Configuration API keys avec Doppler
+doppler secrets set OPENCODE_API_KEY="your_key"
+doppler secrets set OPENAI_API_KEY="sk-..."
+doppler secrets set ANTHROPIC_API_KEY="sk-ant-..."
+doppler secrets set GEMINI_AI="your_gemini_key"
+doppler secrets set GROQ="your_groq_key"
 ```
 
 **Utilisation:**
 ```bash
-proot-distro login alpine
-cd opencode_termux_alpine_aarch64
-./opencode-termux-wrapper.sh
+# Depuis le terminal
+ao  # Alias configuré automatiquement
+
+# Depuis Neovim
+<leader>ao  # Ouvre OpenCode dans terminal flottant
+<leader>oa  # Ask OpenCode (inline)
+<leader>ox  # Execute action
+<leader>ot  # Toggle panel
 ```
+
+**Modèles supportés:**
+- OpenAI (GPT-4, GPT-3.5)
+- Anthropic (Claude 3)
+- Google (Gemini)
+- Groq (Mixtral, Llama)
 
 ---
 

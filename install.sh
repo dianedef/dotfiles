@@ -35,6 +35,15 @@ log "INFO" "Starting installation script - Log file: $LOG_FILE"
 
 echo "🚀 Starting dotfiles installation..."
 
+# Detect execution mode
+if [ ! -t 0 ]; then
+    echo "🤖 Running in non-interactive mode (Codespaces auto-run)"
+    echo "💡 For authentication setup: run './install.sh' manually after Doppler setup"
+else
+    echo "👤 Running in interactive mode"
+fi
+echo ""
+
 # --- 1. Installation de Neovim ---
 log "INFO" "📦 Installing Neovim..."
 
@@ -562,6 +571,48 @@ if command -v doppler &> /dev/null; then
 else
     log "WARN" "⚠️  Doppler CLI n'est pas installé. Configuration skippée."
     echo "💡 Installez Doppler puis lancez: ./doppler-setup.sh"
+fi
+
+# --- GitHub CLI Authentication (with Doppler fallback) ---
+log "INFO" "🔐 Setting up GitHub CLI..."
+
+# Try 1: Doppler token (automated)
+if command -v doppler &>/dev/null && doppler me &>/dev/null 2>&1; then
+    GH_TOKEN=$(doppler secrets get GH_TOKEN --plain 2>/dev/null || doppler secrets get GITHUB_TOKEN --plain 2>/dev/null)
+    
+    if [ ! -z "$GH_TOKEN" ]; then
+        log "INFO" "Authenticating with Doppler token..."
+        echo "$GH_TOKEN" | gh auth login --with-token >/dev/null 2>&1
+        
+        if gh auth status &>/dev/null 2>&1; then
+            log "INFO" "✅ GitHub authenticated via Doppler"
+        else
+            log "WARN" "⚠️ Doppler token failed, manual login needed"
+            GH_TOKEN=""
+        fi
+    fi
+fi
+
+# Try 2: Already authenticated
+if [ -z "$GH_TOKEN" ] && gh auth status &>/dev/null 2>&1; then
+    log "INFO" "✅ GitHub already authenticated"
+
+# Try 3: Manual login (interactive fallback)
+elif [ -z "$GH_TOKEN" ]; then
+    log "INFO" "⚠️ GitHub not authenticated"
+    log "INFO" "📝 Setup Doppler with GH_TOKEN or run: gh auth login"
+    
+    if [ ! -t 0 ]; then
+        # Non-interactive (Codespaces auto-run)
+        log "INFO" "🤖 Non-interactive mode: skipping auth prompt"
+        log "INFO" "💡 Quick setup: run 'ds' (doppler-setup.sh) then re-run ./install.sh"
+    else
+        # Interactive mode
+        read -p "Authenticate now? (y/N): " AUTH_NOW
+        if [ "$AUTH_NOW" = "y" ] || [ "$AUTH_NOW" = "Y" ]; then
+            gh auth login
+        fi
+    fi
 fi
 
 echo ""

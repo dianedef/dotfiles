@@ -103,7 +103,7 @@ mkdir -p "$HOME/.local/bin" "$HOME/.cargo/bin" "$HOME/tmp"
 # Starship (prompt)
 if ! command -v starship &> /dev/null; then
     log "INFO" "Installing Starship..."
-    curl -sS https://starship.rs/install.sh | sh -s -- -y --bin-dir "$HOME/.local/bin"
+    curl -sS https://starship.rs/install.sh | sh -s -- -y --bin-dir "$HOME/.local/bin" >/dev/null 2>&1
     if [ $? -eq 0 ] && [ -f "$HOME/.local/bin/starship" ]; then
         log "INFO" "✅ Starship installed to ~/.local/bin"
     else
@@ -337,6 +337,68 @@ if [ "$INSTALL_OPENCODE" = "y" ] || [ "$INSTALL_OPENCODE" = "Y" ]; then
         
         if [ $? -eq 0 ]; then
             log "INFO" "✅ OpenCode installed in Alpine"
+            
+            # --- OpenCode Authentication & AI Providers (with Doppler) ---
+            log "INFO" "🔐 Setting up OpenCode authentication & AI providers..."
+            
+            # Try Doppler for OpenCode + AI providers (automated)
+            if command -v doppler &>/dev/null && doppler me &>/dev/null; then
+                OPENCODE_KEY=$(doppler secrets get OPENCODE_API_KEY --plain 2>/dev/null)
+                OPENAI_KEY=$(doppler secrets get OPENAI_API_KEY --plain 2>/dev/null)
+                ANTHROPIC_KEY=$(doppler secrets get ANTHROPIC_API_KEY --plain 2>/dev/null)
+                GEMINI_KEY=$(doppler secrets get GEMINI_AI --plain 2>/dev/null)
+                GROQ_KEY=$(doppler secrets get GROQ --plain 2>/dev/null)
+                
+                # Configure OpenCode auth + AI provider keys in Alpine
+                if [ ! -z "$OPENCODE_KEY" ] || [ ! -z "$OPENAI_KEY" ] || [ ! -z "$ANTHROPIC_KEY" ]; then
+                    log "INFO" "Configuring OpenCode with Doppler secrets..."
+                    proot-distro login alpine -- /bin/sh -c "
+                        # OpenCode auth
+                        mkdir -p /root/.opencode
+                        echo '{\"apiKey\":\"$OPENCODE_KEY\"}' > /root/.opencode/config.json
+                        chmod 600 /root/.opencode/config.json
+                        
+                        # AI Provider environment variables in Alpine profile
+                        cat >> /root/.profile << 'PROFILE_EOF'
+
+# AI Provider API Keys (from Doppler)
+export OPENAI_API_KEY='$OPENAI_KEY'
+export ANTHROPIC_API_KEY='$ANTHROPIC_KEY'
+export GOOGLE_GENERATIVE_AI_API_KEY='$GEMINI_KEY'
+export GROQ_API_KEY='$GROQ_KEY'
+PROFILE_EOF
+                    " 2>/dev/null
+                    
+                    if [ $? -eq 0 ]; then
+                        log "INFO" "✅ OpenCode + AI providers configured via Doppler"
+                        [ ! -z "$OPENAI_KEY" ] && log "INFO" "   • OpenAI (GPT)"
+                        [ ! -z "$ANTHROPIC_KEY" ] && log "INFO" "   • Anthropic (Claude)"
+                        [ ! -z "$GEMINI_KEY" ] && log "INFO" "   • Google (Gemini)"
+                        [ ! -z "$GROQ_KEY" ] && log "INFO" "   • Groq"
+                    else
+                        log "WARN" "⚠️ Doppler configuration failed"
+                    fi
+                else
+                    log "INFO" "⚠️ No API keys found in Doppler"
+                fi
+            fi
+            
+            # Check if authenticated, otherwise prompt
+            OPENCODE_CONFIGURED=$(proot-distro login alpine -- /bin/sh -c "test -f /root/.opencode/config.json && echo 'yes' || echo 'no'" 2>/dev/null)
+            
+            if [ "$OPENCODE_CONFIGURED" != "yes" ]; then
+                log "INFO" "⚠️ OpenCode not authenticated"
+                log "INFO" "📝 To authenticate later:"
+                log "INFO" "   1. proot-distro login alpine"
+                log "INFO" "   2. cd /root/opencode_termux_alpine_aarch64"
+                log "INFO" "   3. opencode auth login"
+                
+                read -p "Authenticate OpenCode now? (y/N): " AUTH_OC
+                if [ "$AUTH_OC" = "y" ] || [ "$AUTH_OC" = "Y" ]; then
+                    proot-distro login alpine -- /bin/sh -c "cd /root/opencode_termux_alpine_aarch64 && opencode auth login"
+                fi
+            fi
+            
             log "INFO" "   Run: proot-distro login alpine"
             log "INFO" "   Then: cd /root/opencode_termux_alpine_aarch64 && ./opencode-termux-wrapper.sh"
         else
@@ -453,3 +515,38 @@ echo "   ao           → OpenCode (Alpine proot)"
 echo ""
 echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
 echo ""
+
+# --- GitHub CLI Authentication (with Doppler fallback) ---
+log "INFO" "🔐 Setting up GitHub CLI..."
+
+# Try 1: Doppler token (automated)
+if command -v doppler &>/dev/null && doppler me &>/dev/null; then
+    GH_TOKEN=$(doppler secrets get GH_TOKEN --plain 2>/dev/null || doppler secrets get GITHUB_TOKEN --plain 2>/dev/null)
+    
+    if [ ! -z "$GH_TOKEN" ]; then
+        log "INFO" "Authenticating with Doppler token..."
+        echo "$GH_TOKEN" | gh auth login --with-token >/dev/null 2>&1
+        
+        if gh auth status &>/dev/null; then
+            log "INFO" "✅ GitHub authenticated via Doppler"
+        else
+            log "WARN" "⚠️ Doppler token failed, manual login needed"
+            GH_TOKEN=""
+        fi
+    fi
+fi
+
+# Try 2: Already authenticated
+if [ -z "$GH_TOKEN" ] && gh auth status &>/dev/null; then
+    log "INFO" "✅ GitHub already authenticated"
+
+# Try 3: Manual login (interactive fallback)
+elif [ -z "$GH_TOKEN" ]; then
+    log "INFO" "⚠️ GitHub not authenticated"
+    log "INFO" "📝 Run: gh auth login  (or setup Doppler with GH_TOKEN)"
+    
+    read -p "Authenticate now? (y/N): " AUTH_NOW
+    if [ "$AUTH_NOW" = "y" ] || [ "$AUTH_NOW" = "Y" ]; then
+        gh auth login
+    fi
+fi

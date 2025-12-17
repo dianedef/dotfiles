@@ -236,8 +236,9 @@ if (-not (Test-Path $ProfilePath)) {
 # Add aliases if not already present
 $aliasContent = @"
 
-# Installation shortcut
+# Installation shortcuts
 Set-Alias -Name i -Value "$HOME\dotfiles\windows.ps1"
+function ds { & "$HOME\dotfiles\doppler-setup.sh" }
 
 # File manager aliases
 Set-Alias -Name r -Value ranger
@@ -251,4 +252,60 @@ if (-not (Get-Content $ProfilePath -ErrorAction SilentlyContinue | Select-String
     Write-Host "File manager aliases already exist in PowerShell profile" -ForegroundColor Yellow
 }
 
-Write-Host "`nInstallation complete!" -ForegroundColor Green 
+# --- GitHub CLI Authentication (with Doppler fallback) ---
+Write-Host "`n🔐 Setting up GitHub CLI..." -ForegroundColor Cyan
+
+# Try 1: Doppler token (automated)
+$ghAuthenticated = $false
+if (Get-Command doppler -ErrorAction SilentlyContinue) {
+    try {
+        $null = doppler me 2>&1
+        $dopplerWorking = $?
+        
+        if ($dopplerWorking) {
+            $ghToken = doppler secrets get GH_TOKEN --plain 2>$null
+            if (-not $ghToken) {
+                $ghToken = doppler secrets get GITHUB_TOKEN --plain 2>$null
+            }
+            
+            if ($ghToken) {
+                Write-Host "Authenticating with Doppler token..." -ForegroundColor Yellow
+                echo $ghToken | gh auth login --with-token 2>&1 | Out-Null
+                
+                $null = gh auth status 2>&1
+                if ($?) {
+                    Write-Host "✅ GitHub authenticated via Doppler" -ForegroundColor Green
+                    $ghAuthenticated = $true
+                }
+                else {
+                    Write-Host "⚠️ Doppler token failed" -ForegroundColor Yellow
+                }
+            }
+        }
+    }
+    catch {
+        # Doppler not configured, skip
+    }
+}
+
+# Try 2: Already authenticated
+if (-not $ghAuthenticated) {
+    $null = gh auth status 2>&1
+    if ($?) {
+        Write-Host "✅ GitHub already authenticated" -ForegroundColor Green
+        $ghAuthenticated = $true
+    }
+}
+
+# Try 3: Manual login (interactive fallback)
+if (-not $ghAuthenticated) {
+    Write-Host "⚠️ GitHub not authenticated" -ForegroundColor Yellow
+    Write-Host "📝 Setup Doppler with GH_TOKEN or run: gh auth login" -ForegroundColor Cyan
+    
+    $authNow = Read-Host "Authenticate now? (y/N)"
+    if ($authNow -eq "y" -or $authNow -eq "Y") {
+        gh auth login
+    }
+}
+
+Write-Host "`n🎊 Installation complete!" -ForegroundColor Green 
