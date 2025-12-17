@@ -236,6 +236,9 @@ if (-not (Test-Path $ProfilePath)) {
 # Add aliases if not already present
 $aliasContent = @"
 
+# Installation shortcut
+Set-Alias -Name i -Value "$HOME\dotfiles\windows.ps1"
+
 # File manager aliases
 Set-Alias -Name r -Value ranger
 Set-Alias -Name y -Value yazi
