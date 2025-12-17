@@ -228,12 +228,14 @@ if ! grep -q "zoxide init" "$BASHRC"; then
 fi
 
 # Aliases essentiels - Toujours écraser pour avoir la dernière version
-sed -i '/# Termux aliases/,/^$/d' "$BASHRC" 2>/dev/null
+# Remove old aliases block (between markers)
+sed -i '/# Termux aliases/,/# END Termux aliases/d' "$BASHRC" 2>/dev/null
 cat >> "$BASHRC" << 'EOF'
 
 # Termux aliases
-alias reload='source ~/.bashrc'
+alias reload='source "$HOME/.bashrc" && echo "✓ Shell rechargé!"'
 alias i='bash ~/dotfiles/termux.sh'
+alias ds='bash ~/dotfiles/doppler-setup.sh'
 alias cls='clear'
 alias ..='cd ..'
 alias ...='cd ../..'
@@ -261,6 +263,7 @@ alias shk='sheikh'
 alias cx='cd ~/codex-termux && python codex.py'
 alias ao='proot-distro login alpine -- /bin/sh -c "cd /root/opencode_termux_alpine_aarch64 && ./opencode-termux-wrapper.sh"'
 
+# END Termux aliases
 EOF
 log "INFO" "✅ Added/Updated Termux aliases"
 
