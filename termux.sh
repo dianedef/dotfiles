@@ -84,6 +84,9 @@ fi
 # --- 3. Outils légers uniquement ---
 log "INFO" "📦 Installing lightweight tools..."
 
+# Create bin directories first
+mkdir -p "$HOME/.local/bin" "$HOME/.cargo/bin" "$HOME/tmp"
+
 # Starship (prompt)
 if ! command -v starship &> /dev/null; then
     log "INFO" "Installing Starship..."
@@ -97,9 +100,10 @@ else
     log "INFO" "✅ Starship already installed"
 fi
 
-# Zoxide (smart cd)
+# Zoxide (smart cd) - use HOME/tmp instead of /tmp for Termux
 if ! command -v zoxide &> /dev/null; then
     log "INFO" "Installing Zoxide..."
+    export TMPDIR="$HOME/tmp"
     curl -sSfL https://raw.githubusercontent.com/ajeetdsouza/zoxide/main/install.sh | bash
     if [ $? -eq 0 ] && [ -f "$HOME/.local/bin/zoxide" ]; then
         log "INFO" "✅ Zoxide installed to ~/.local/bin"
@@ -141,8 +145,8 @@ if [ "$INSTALL_YAZI" != "n" ] && [ "$INSTALL_YAZI" != "N" ]; then
     fi
 fi
 
-# --- 4. Configuration Neovim LIGHT ---
-log "INFO" "⚙️ Setting up Neovim (LIGHT config)..."
+# --- 4. Configuration Neovim (MyNeovimTermux) ---
+log "INFO" "⚙️ Setting up Neovim (MyNeovimTermux config)..."
 
 SOURCE_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 NVIM_CONFIG_DIR="$HOME/.config/nvim"
@@ -168,8 +172,14 @@ create_symlink() {
     log "INFO" "Linked: $TARGET -> $SOURCE"
 }
 
-# Neovim config
-if [ -d "$SOURCE_DIR/nvim" ] && [ -f "$SOURCE_DIR/nvim/init.lua" ]; then
+# Neovim config - Use MyNeovimTermux
+if [ -d "$SOURCE_DIR/nvim/MyNeovimTermux" ] && [ -f "$SOURCE_DIR/nvim/MyNeovimTermux/init.lua" ]; then
+    create_symlink "$SOURCE_DIR/nvim/MyNeovimTermux" "$NVIM_CONFIG_DIR"
+elif [ -d "$SOURCE_DIR/nvim/MyNeovim" ] && [ -f "$SOURCE_DIR/nvim/MyNeovim/init.lua" ]; then
+    # Fallback to MyNeovim if MyNeovimTermux not found
+    create_symlink "$SOURCE_DIR/nvim/MyNeovim" "$NVIM_CONFIG_DIR"
+elif [ -d "$SOURCE_DIR/nvim" ] && [ -f "$SOURCE_DIR/nvim/init.lua" ]; then
+    # Fallback to nvim root
     create_symlink "$SOURCE_DIR/nvim" "$NVIM_CONFIG_DIR"
 fi
 
@@ -259,34 +269,87 @@ EOF
     log "INFO" "✅ Added Termux aliases"
 fi
 
-# --- 7. Configuration Neovim allégée ---
-log "INFO" "📝 Applying lightweight Neovim settings..."
+# --- 7. AI Coding Agents Installation ---
+log "INFO" "🤖 Installing AI coding agents..."
 
-# Créer un fichier de config local pour désactiver les plugins lourds
-mkdir -p "$NVIM_CONFIG_DIR/lua/config"
-cat > "$NVIM_CONFIG_DIR/lua/config/termux.lua" << 'EOF'
--- Termux: Désactiver plugins lourds
-return {
-  -- Désactiver Copilot sur Termux
-  { "zbirenbaum/copilot.lua", enabled = false },
-  { "zbirenbaum/copilot-cmp", enabled = false },
-  
-  -- LSP léger uniquement
-  {
-    "neovim/nvim-lspconfig",
-    opts = {
-      servers = {
-        -- Garder seulement les LSP légers
-        lua_ls = {},
-        bashls = {},
-        -- Désactiver les autres
-      },
-    },
-  },
-}
-EOF
+# Aider (Recommandé - léger)
+if ! command -v aider &> /dev/null; then
+    log "INFO" "Installing Aider..."
+    pip install aider-chat >/dev/null 2>&1
+    if command -v aider &> /dev/null; then
+        log "INFO" "✅ Aider installed"
+    else
+        log "WARN" "⚠️  Aider installation failed (pip issue)"
+    fi
+else
+    log "INFO" "✅ Aider already installed"
+fi
 
-log "INFO" "✅ Created termux-optimized config"
+# Codex-Termux (Léger ARM64)
+if [ ! -d "$HOME/codex-termux" ]; then
+    log "INFO" "Installing Codex-Termux..."
+    cd ~
+    git clone --quiet https://github.com/nasarman/codex-termux.git 2>/dev/null
+    if [ -d "$HOME/codex-termux" ]; then
+        cd codex-termux
+        pip install -r requirements.txt >/dev/null 2>&1
+        log "INFO" "✅ Codex-Termux installed to ~/codex-termux"
+    else
+        log "WARN" "⚠️  Codex-Termux installation failed"
+    fi
+    cd - > /dev/null
+else
+    log "INFO" "✅ Codex-Termux already installed"
+fi
+
+# Sheikh CLI Assistant (100% local)
+if ! command -v sheikh &> /dev/null; then
+    log "INFO" "Installing Sheikh CLI Assistant..."
+    pip install sheikh-cli-assistant >/dev/null 2>&1
+    if command -v sheikh &> /dev/null; then
+        log "INFO" "✅ Sheikh CLI installed"
+    else
+        log "WARN" "⚠️  Sheikh installation failed (pip issue)"
+    fi
+else
+    log "INFO" "✅ Sheikh CLI already installed"
+fi
+
+# OpenCode (Optionnel - nécessite proot Alpine)
+read -p "🗂️  Install OpenCode in proot Alpine? (requires 500MB+) (y/N): " INSTALL_OPENCODE
+if [ "$INSTALL_OPENCODE" = "y" ] || [ "$INSTALL_OPENCODE" = "Y" ]; then
+    if ! command -v proot-distro &> /dev/null; then
+        log "INFO" "Installing proot-distro..."
+        pkg install -y proot-distro >/dev/null 2>&1
+    fi
+    
+    if command -v proot-distro &> /dev/null; then
+        log "INFO" "Setting up Alpine Linux..."
+        proot-distro install alpine 2>/dev/null
+        
+        log "INFO" "Installing OpenCode in Alpine (this may take a while)..."
+        proot-distro login alpine -- /bin/sh -c "
+            apk add git nodejs npm >/dev/null 2>&1
+            cd /root
+            git clone --quiet https://github.com/Charlie6F/opencode_termux_alpine_aarch64.git 2>/dev/null
+            cd opencode_termux_alpine_aarch64
+            chmod +x install.sh opencode-termux-wrapper.sh
+            ./install.sh
+        " 2>/dev/null
+        
+        if [ $? -eq 0 ]; then
+            log "INFO" "✅ OpenCode installed in Alpine"
+            log "INFO" "   Run: proot-distro login alpine"
+            log "INFO" "   Then: cd /root/opencode_termux_alpine_aarch64 && ./opencode-termux-wrapper.sh"
+        else
+            log "WARN" "⚠️  OpenCode installation failed"
+        fi
+    fi
+else
+    log "INFO" "⏭️  Skipped OpenCode installation"
+fi
+
+log "INFO" "✅ AI coding agents setup complete"
 
 # --- 8. Finalisation ---
 echo ""
@@ -299,13 +362,19 @@ echo "🚀 Pour activer: source ~/.bashrc"
 echo "💡 Ou redémarrez Termux"
 echo ""
 echo "📦 Packages installés:"
-echo "   • Neovim (version Termux)"
+echo "   • Neovim (MyNeovimTermux config)"
 echo "   • Ripgrep, fd, fzf"
 echo "   • Starship prompt"
 echo "   • Zoxide (smart cd)"
 echo "   • Node.js LTS"
 echo "   • JetBrainsMono Nerd Font (icônes)"
 [ -x "$(command -v yazi)" ] && echo "   • Yazi file manager"
+echo ""
+echo "🤖 AI Coding Agents:"
+[ -x "$(command -v aider)" ] && echo "   • Aider (aider command)"
+[ -d "$HOME/codex-termux" ] && echo "   • Codex-Termux (~/codex-termux)"
+[ -x "$(command -v sheikh)" ] && echo "   • Sheikh CLI (sheikh command)"
+[ -d "/data/data/com.termux/files/usr/var/lib/proot-distro/installed-rootfs/alpine/root/opencode_termux_alpine_aarch64" ] && echo "   • OpenCode (proot Alpine)"
 echo ""
 if [ -f "$HOME/.termux/font.ttf" ]; then
     echo "🎨 Nerd Font installée! Pour l'activer:"
@@ -315,9 +384,20 @@ if [ -f "$HOME/.termux/font.ttf" ]; then
     echo ""
 fi
 echo "⚠️  EXCLUS de cette installation (trop lourds):"
-echo "   ✗ GitHub Copilot"
+echo "   ✗ GitHub Copilot (remplacé par Aider/Codex)"
 echo "   ✗ Neovim compilé from source"
 echo "   ✗ Plugins LSP lourds"
+echo ""
+echo "🎯 Utilisation des AI Agents dans Neovim:"
+echo "   <leader>ai  → Aider"
+echo "   <leader>ax  → Codex-Termux"
+echo "   <leader>as  → Sheikh CLI"
+echo "   <leader>ao  → OpenCode (Alpine)"
+echo ""
+echo "📚 Configuration API keys (exemple):"
+echo "   export OPENAI_API_KEY=\"sk-...\""
+echo "   export ANTHROPIC_API_KEY=\"sk-ant-...\""
+echo "   Puis: source ~/.bashrc"
 echo ""
 echo "💡 Pour Codespaces, utilisez: bash install.sh"
 echo ""
