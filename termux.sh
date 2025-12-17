@@ -103,8 +103,10 @@ fi
 # Zoxide (smart cd) - use HOME/tmp instead of /tmp for Termux
 if ! command -v zoxide &> /dev/null; then
     log "INFO" "Installing Zoxide..."
+    log "INFO" "Detected architecture: $(uname -m)"
     export TMPDIR="$HOME/tmp"
-    curl -sSfL https://raw.githubusercontent.com/ajeetdsouza/zoxide/main/install.sh | bash
+    mkdir -p "$TMPDIR"
+    curl -sSfL https://raw.githubusercontent.com/ajeetdsouza/zoxide/main/install.sh | sh
     if [ $? -eq 0 ] && [ -f "$HOME/.local/bin/zoxide" ]; then
         log "INFO" "✅ Zoxide installed to ~/.local/bin"
     else
@@ -114,35 +116,12 @@ else
     log "INFO" "✅ Zoxide already installed"
 fi
 
-# Yazi (file manager) - optionnel, peut être lourd
-read -p "🗂️  Install Yazi file manager? (Y/n): " INSTALL_YAZI
-if [ "$INSTALL_YAZI" != "n" ] && [ "$INSTALL_YAZI" != "N" ]; then
-    if ! command -v yazi &> /dev/null; then
-        log "INFO" "Installing Yazi..."
-        cd /tmp
-        YAZI_VERSION=$(curl -s https://api.github.com/repos/sxyazi/yazi/releases/latest | grep '"tag_name":' | sed -E 's/.*"([^"]+)".*/\1/')
-        [ -z "$YAZI_VERSION" ] && YAZI_VERSION="v0.2.5"
-        
-        # Termux utilise ARM64 généralement
-        ARCH=$(uname -m)
-        if [ "$ARCH" = "aarch64" ]; then
-            YAZI_FILE="yazi-aarch64-unknown-linux-musl.tar.gz"
-        else
-            log "WARN" "⚠️  Architecture $ARCH non supportée pour Yazi"
-            YAZI_FILE=""
-        fi
-        
-        if [ -n "$YAZI_FILE" ]; then
-            curl -sLO "https://github.com/sxyazi/yazi/releases/download/${YAZI_VERSION}/${YAZI_FILE}"
-            tar -xzf "$YAZI_FILE" 2>/dev/null
-            mv yazi-*/yazi "$PREFIX/bin/" 2>/dev/null
-            rm -rf yazi-* 2>/dev/null
-            log "INFO" "✅ Yazi installed"
-        fi
-        cd - > /dev/null
-    else
-        log "INFO" "✅ Yazi already installed"
-    fi
+# File manager - Use Ranger (already installed via pkg)
+# Yazi has compatibility issues on Termux/Android
+if command -v ranger &> /dev/null; then
+    log "INFO" "✅ Ranger file manager installed (use 'ranger' command)"
+else
+    log "WARN" "⚠️  Ranger not found, install with: pkg install ranger"
 fi
 
 # --- 4. Configuration Neovim (MyNeovimTermux) ---
@@ -183,10 +162,7 @@ elif [ -d "$SOURCE_DIR/nvim" ] && [ -f "$SOURCE_DIR/nvim/init.lua" ]; then
     create_symlink "$SOURCE_DIR/nvim" "$NVIM_CONFIG_DIR"
 fi
 
-# Yazi (si installé)
-[ -d "$SOURCE_DIR/yazi" ] && create_symlink "$SOURCE_DIR/yazi" "$HOME/.config/yazi"
-
-# Ranger
+# Ranger (primary file manager for Termux)
 [ -d "$SOURCE_DIR/ranger" ] && create_symlink "$SOURCE_DIR/ranger" "$HOME/.config/ranger"
 
 # Starship (utilise la version simplifiée)
@@ -368,7 +344,7 @@ echo "   • Starship prompt"
 echo "   • Zoxide (smart cd)"
 echo "   • Node.js LTS"
 echo "   • JetBrainsMono Nerd Font (icônes)"
-[ -x "$(command -v yazi)" ] && echo "   • Yazi file manager"
+echo "   • Ranger file manager (use 'ranger' command)"
 echo ""
 echo "🤖 AI Coding Agents:"
 [ -x "$(command -v aider)" ] && echo "   • Aider (aider command)"
