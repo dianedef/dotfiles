@@ -19,6 +19,7 @@ Welcome to the comprehensive documentation for this dotfiles repository. This do
 - [Yazi File Manager](configuration/YAZI.md)
 - [Starship Prompt](configuration/STARSHIP.md)
 - [Shell Configuration](configuration/SHELL.md)
+- [AI CLI Tools](configuration/AI-CLI-TOOLS.md) ⭐ **New!**
 
 ### Workflows & Usage
 - [Daily Workflows](workflows/DAILY-USE.md)
@@ -26,6 +27,7 @@ Welcome to the comprehensive documentation for this dotfiles repository. This do
 - [Dotfiles Maintenance](workflows/MAINTENANCE.md)
 
 ### Troubleshooting
+- [Nerd Fonts Issues](troubleshooting/NERD-FONTS.md) ⭐ **New!**
 - [Common Issues](troubleshooting/COMMON-ISSUES.md)
 - [Platform-Specific Issues](troubleshooting/PLATFORM-SPECIFIC.md)
 - [FAQ](troubleshooting/FAQ.md)

@@ -82,12 +82,23 @@ source ~/.bashrc
 - **Ranger** - Alternative file manager
 - **Nushell** - Modern shell (configs available)
 
+### AI-Powered CLI Tools
+- **GitHub Copilot CLI** (`copilot`) - AI assistant in your terminal
+- **Kilocode** (`kilocode` or `kilo`) - AI-powered code generation
+- **OpenCode AI** (`opencode`) - Open-source AI coding assistant
+
+### Fonts & Icons
+- **Nerd Fonts** - Automatically installed for icons in Neovim, Starship, and Yazi
+- **JetBrainsMono Nerd Font** - Professional monospace with complete icon coverage
+- **Note for Termux**: Requires full restart after installation to apply font
+
 ### Platform Support
 | Tool | Windows | Linux | Termux |
 |------|---------|-------|--------|
 | Neovim | ✅ Full | ✅ Full | ✅ Basic |
 | Yazi | ✅ | ✅ | ✅ |
 | Starship | ✅ | ✅ | ✅ |
+| Nerd Fonts | ✅ | ✅ | ✅ |
 | GitHub Copilot | ✅ | ✅ | ❌ |
 
 ## BMAD Method Integration

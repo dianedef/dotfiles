@@ -44,7 +44,44 @@ else
     exit 1
 fi
 
-# --- 2. Outils légers uniquement ---
+# --- 2. Nerd Fonts pour Termux ---
+log "INFO" "📝 Installing Nerd Fonts for Termux..."
+
+# Termux utilise un système de fonts différent
+FONT_DIR="$HOME/.termux"
+mkdir -p "$FONT_DIR"
+
+if [ ! -f "$FONT_DIR/font.ttf" ]; then
+    log "INFO" "Downloading JetBrainsMono Nerd Font..."
+    cd /tmp
+    
+    # Télécharger JetBrainsMono Nerd Font (version complète avec icônes)
+    FONT_URL="https://github.com/ryanoasis/nerd-fonts/releases/download/v3.2.1/JetBrainsMono.zip"
+    curl -sLO "$FONT_URL"
+    
+    if [ -f JetBrainsMono.zip ]; then
+        unzip -q JetBrainsMono.zip 2>/dev/null
+        
+        # Utiliser la version Regular pour Termux
+        if [ -f "JetBrainsMonoNerdFont-Regular.ttf" ]; then
+            cp "JetBrainsMonoNerdFont-Regular.ttf" "$FONT_DIR/font.ttf"
+            log "INFO" "✅ Nerd Font installed to ~/.termux/font.ttf"
+            log "INFO" "⚠️  You need to restart Termux to apply the new font!"
+        else
+            log "WARN" "⚠️  Font file not found in archive"
+        fi
+        
+        rm -rf JetBrainsMono* *.ttf *.otf 2>/dev/null
+    else
+        log "WARN" "⚠️  Failed to download Nerd Fonts"
+    fi
+    
+    cd - > /dev/null
+else
+    log "INFO" "✅ Nerd Font already configured in ~/.termux/font.ttf"
+fi
+
+# --- 3. Outils légers uniquement ---
 log "INFO" "📦 Installing lightweight tools..."
 
 # Starship (prompt)
@@ -104,7 +141,7 @@ if [ "$INSTALL_YAZI" != "n" ] && [ "$INSTALL_YAZI" != "N" ]; then
     fi
 fi
 
-# --- 3. Configuration Neovim LIGHT ---
+# --- 4. Configuration Neovim LIGHT ---
 log "INFO" "⚙️ Setting up Neovim (LIGHT config)..."
 
 SOURCE_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
@@ -116,7 +153,7 @@ if [ -d "$NVIM_CONFIG_DIR" ]; then
     mv "$NVIM_CONFIG_DIR" "${NVIM_CONFIG_DIR}.backup.$(date +%s)"
 fi
 
-# --- 4. Symlinks ---
+# --- 5. Symlinks ---
 log "INFO" "🔗 Creating symlinks..."
 
 create_symlink() {
@@ -150,7 +187,7 @@ elif [ -f "$SOURCE_DIR/starship/starship.toml" ]; then
     create_symlink "$SOURCE_DIR/starship/starship.toml" "$HOME/.config/starship.toml"
 fi
 
-# --- 5. Shell integration ---
+# --- 6. Shell integration ---
 log "INFO" "🔧 Setting up shell integration..."
 
 # Make scripts executable
@@ -222,7 +259,7 @@ EOF
     log "INFO" "✅ Added Termux aliases"
 fi
 
-# --- 6. Configuration Neovim allégée ---
+# --- 7. Configuration Neovim allégée ---
 log "INFO" "📝 Applying lightweight Neovim settings..."
 
 # Créer un fichier de config local pour désactiver les plugins lourds
@@ -251,7 +288,7 @@ EOF
 
 log "INFO" "✅ Created termux-optimized config"
 
-# --- 7. Finalisation ---
+# --- 8. Finalisation ---
 echo ""
 log "INFO" "✨ Termux installation complete!"
 echo ""
@@ -267,8 +304,16 @@ echo "   • Ripgrep, fd, fzf"
 echo "   • Starship prompt"
 echo "   • Zoxide (smart cd)"
 echo "   • Node.js LTS"
+echo "   • JetBrainsMono Nerd Font (icônes)"
 [ -x "$(command -v yazi)" ] && echo "   • Yazi file manager"
 echo ""
+if [ -f "$HOME/.termux/font.ttf" ]; then
+    echo "🎨 Nerd Font installée! Pour l'activer:"
+    echo "   1. Fermez complètement Termux (pas juste sortir)"
+    echo "   2. Rouvrez Termux"
+    echo "   3. Les icônes devraient maintenant s'afficher!"
+    echo ""
+fi
 echo "⚠️  EXCLUS de cette installation (trop lourds):"
 echo "   ✗ GitHub Copilot"
 echo "   ✗ Neovim compilé from source"

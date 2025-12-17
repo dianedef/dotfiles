@@ -143,6 +143,33 @@ else
     log "INFO" "✅ fzf already installed: $(fzf --version)"
 fi
 
+# Installer Nerd Fonts pour les icônes
+if ! fc-list | grep -iq "nerd"; then
+    log "INFO" "📝 Installing Nerd Fonts (JetBrainsMono for icons)..."
+    mkdir -p ~/.local/share/fonts
+    cd /tmp
+    
+    # Télécharger JetBrainsMono Nerd Font (populaire et complet)
+    FONT_VERSION="v3.2.1"
+    curl -sLO "https://github.com/ryanoasis/nerd-fonts/releases/download/${FONT_VERSION}/JetBrainsMono.zip"
+    
+    if [ -f JetBrainsMono.zip ]; then
+        unzip -q JetBrainsMono.zip -d ~/.local/share/fonts/JetBrainsMono/ 2>/dev/null
+        rm JetBrainsMono.zip
+        
+        # Mettre à jour le cache des fonts
+        fc-cache -fv ~/.local/share/fonts >/dev/null 2>&1
+        
+        log "INFO" "✅ Nerd Fonts installed: $(fc-list | grep -i jetbrains | wc -l) variants"
+    else
+        log "WARN" "⚠️  Failed to download Nerd Fonts"
+    fi
+    
+    cd - > /dev/null
+else
+    log "INFO" "✅ Nerd Fonts already installed"
+fi
+
 # Installer Node.js si nécessaire
 if ! command -v node &> /dev/null; then
     log "INFO" "Installing Node.js..."
@@ -156,16 +183,37 @@ fi
 if command -v npm &> /dev/null; then
     log "INFO" "Installing CLI tools via npm..."
     
+    # GitHub Copilot CLI
     log "INFO" "Installing GitHub Copilot CLI..."
-    npm install -g @github/copilot >/dev/null 2>&1
+    if npm install -g @github/copilot 2>&1 | tee -a "$LOG_FILE" | grep -q "added\|updated\|already"; then
+        log "INFO" "✅ GitHub Copilot CLI installed"
+    else
+        log "WARN" "⚠️  GitHub Copilot CLI installation may have failed"
+    fi
     
+    # Kilocode CLI
     log "INFO" "Installing Kilocode CLI..."
-    npm install -g @kilocode/cli >/dev/null 2>&1
+    if npm install -g @kilocode/cli 2>&1 | tee -a "$LOG_FILE" | grep -q "added\|updated\|already"; then
+        log "INFO" "✅ Kilocode CLI installed"
+    else
+        log "WARN" "⚠️  Kilocode CLI installation may have failed"
+    fi
     
+    # OpenCode AI
     log "INFO" "Installing OpenCode AI..."
-    npm install -g opencode-ai >/dev/null 2>&1
+    if npm install -g opencode-ai 2>&1 | tee -a "$LOG_FILE" | grep -q "added\|updated\|already"; then
+        log "INFO" "✅ OpenCode AI installed"
+    else
+        log "WARN" "⚠️  OpenCode AI installation may have failed"
+    fi
     
-    log "INFO" "✅ CLI tools installed via npm (update with: npm update -g)"
+    # Verify installations
+    hash -r 2>/dev/null
+    echo ""
+    log "INFO" "📦 Installed npm global packages:"
+    npm list -g --depth=0 2>/dev/null | grep -E "@github/copilot|@kilocode|opencode" | tee -a "$LOG_FILE" || log "WARN" "No packages found in npm list"
+    
+    log "INFO" "✅ CLI tools installation complete (update with: npm update -g)"
 else
     log "WARN" "⚠️  npm not found, skipping CLI tools installation"
 fi
