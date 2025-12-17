@@ -126,6 +126,41 @@ else
     log "INFO" "✅ Zoxide already installed"
 fi
 
+# Doppler (secret management)
+if ! command -v doppler &> /dev/null; then
+    log "INFO" "Installing Doppler..."
+    # Doppler requires architecture detection
+    ARCH=$(uname -m)
+    case $ARCH in
+        aarch64|arm64)
+            DOPPLER_ARCH="arm64"
+            ;;
+        x86_64|amd64)
+            DOPPLER_ARCH="amd64"
+            ;;
+        *)
+            log "WARN" "⚠️ Unsupported architecture: $ARCH (skipping Doppler)"
+            DOPPLER_ARCH=""
+            ;;
+    esac
+    
+    if [ ! -z "$DOPPLER_ARCH" ]; then
+        # Download Doppler CLI for Linux ARM64/AMD64
+        DOPPLER_URL="https://cli.doppler.com/install.sh"
+        curl -sL "$DOPPLER_URL" | sh -s -- --no-install --no-package-manager >/dev/null 2>&1
+        
+        if [ -f "./doppler" ]; then
+            mv ./doppler "$HOME/.local/bin/doppler"
+            chmod +x "$HOME/.local/bin/doppler"
+            log "INFO" "✅ Doppler installed to ~/.local/bin"
+        else
+            log "ERROR" "❌ Doppler installation failed"
+        fi
+    fi
+else
+    log "INFO" "✅ Doppler already installed"
+fi
+
 # File manager - Use Ranger (already installed via pkg)
 # Yazi has compatibility issues on Termux/Android
 if command -v ranger &> /dev/null; then
@@ -550,3 +585,9 @@ elif [ -z "$GH_TOKEN" ]; then
         gh auth login
     fi
 fi
+
+# --- Git Identity Configuration ---
+log "INFO" "👤 Configuring Git identity..."
+git config --global user.name "Diane"
+git config --global user.email "deforesd@gmail.com"
+log "INFO" "✅ Git identity configured"
