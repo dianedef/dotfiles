@@ -51,34 +51,47 @@ log "INFO" "📝 Installing Nerd Fonts for Termux..."
 FONT_DIR="$HOME/.termux"
 mkdir -p "$FONT_DIR"
 
+# Vérifier si unzip est installé
+if ! command -v unzip &> /dev/null; then
+    log "INFO" "Installing unzip..."
+    pkg install -y unzip >/dev/null 2>&1
+fi
+
+FONT_INSTALLED=false
+
 if [ ! -f "$FONT_DIR/font.ttf" ]; then
     log "INFO" "Downloading JetBrainsMono Nerd Font..."
-    cd /tmp
+    cd "$HOME/tmp" || cd /tmp
     
     # Télécharger JetBrainsMono Nerd Font (version complète avec icônes)
     FONT_URL="https://github.com/ryanoasis/nerd-fonts/releases/download/v3.2.1/JetBrainsMono.zip"
-    curl -sLO "$FONT_URL"
     
-    if [ -f JetBrainsMono.zip ]; then
-        unzip -q JetBrainsMono.zip 2>/dev/null
+    if curl -fsSL "$FONT_URL" -o JetBrainsMono.zip; then
+        log "INFO" "Download complete, extracting..."
         
-        # Utiliser la version Regular pour Termux
-        if [ -f "JetBrainsMonoNerdFont-Regular.ttf" ]; then
-            cp "JetBrainsMonoNerdFont-Regular.ttf" "$FONT_DIR/font.ttf"
-            log "INFO" "✅ Nerd Font installed to ~/.termux/font.ttf"
-            log "INFO" "⚠️  You need to restart Termux to apply the new font!"
+        if unzip -q JetBrainsMono.zip "JetBrainsMonoNerdFont-Regular.ttf" 2>/dev/null; then
+            if [ -f "JetBrainsMonoNerdFont-Regular.ttf" ]; then
+                cp "JetBrainsMonoNerdFont-Regular.ttf" "$FONT_DIR/font.ttf"
+                chmod 644 "$FONT_DIR/font.ttf"
+                log "INFO" "✅ Nerd Font installed to ~/.termux/font.ttf"
+                FONT_INSTALLED=true
+            else
+                log "WARN" "⚠️  Font file not found after extraction"
+            fi
         else
-            log "WARN" "⚠️  Font file not found in archive"
+            log "WARN" "⚠️  Failed to extract font from zip"
         fi
         
-        rm -rf JetBrainsMono* *.ttf *.otf 2>/dev/null
+        rm -rf JetBrainsMono.zip JetBrainsMono* *.ttf *.otf 2>/dev/null
     else
-        log "WARN" "⚠️  Failed to download Nerd Fonts"
+        log "ERROR" "❌ Failed to download Nerd Font from GitHub"
+        log "INFO" "💡 Alternative: Install 'Termux:Styling' app from F-Droid"
     fi
     
     cd - > /dev/null
 else
     log "INFO" "✅ Nerd Font already configured in ~/.termux/font.ttf"
+    FONT_INSTALLED=true
 fi
 
 # --- 3. Outils légers uniquement ---
@@ -220,6 +233,7 @@ cat >> "$BASHRC" << 'EOF'
 
 # Termux aliases
 alias reload='source ~/.bashrc'
+alias i='bash ~/dotfiles/termux.sh'
 alias cls='clear'
 alias ..='cd ..'
 alias ...='cd ../..'
@@ -240,6 +254,12 @@ alias dl='cd ~/storage/downloads'
 
 # File managers
 alias r='ranger'
+
+# AI Agents
+alias ai='aider'
+alias shk='sheikh'
+alias cx='cd ~/codex-termux && python codex.py'
+alias ao='proot-distro login alpine -- /bin/sh -c "cd /root/opencode_termux_alpine_aarch64 && ./opencode-termux-wrapper.sh"'
 
 EOF
 log "INFO" "✅ Added/Updated Termux aliases"
@@ -351,13 +371,31 @@ echo "🤖 AI Coding Agents:"
 [ -x "$(command -v sheikh)" ] && echo "   • Sheikh CLI (sheikh command)"
 [ -d "/data/data/com.termux/files/usr/var/lib/proot-distro/installed-rootfs/alpine/root/opencode_termux_alpine_aarch64" ] && echo "   • OpenCode (proot Alpine)"
 echo ""
+echo ""
+echo "🎨 CONFIGURATION DES ICÔNES (Nerd Font):"
 if [ -f "$HOME/.termux/font.ttf" ]; then
-    echo "🎨 Nerd Font installée! Pour l'activer:"
-    echo "   1. Fermez complètement Termux (pas juste sortir)"
+    echo "✅ Font installée dans ~/.termux/font.ttf"
+    echo ""
+    echo "📱 Pour activer les icônes dans Neovim:"
+    echo "   1. TUEZ complètement l'app Termux:"
+    echo "      • Paramètres Android > Apps > Termux > Forcer l'arrêt"
+    echo "      • Ou glissez Termux hors du multitâche"
     echo "   2. Rouvrez Termux"
-    echo "   3. Les icônes devraient maintenant s'afficher!"
+    echo "   3. Lancez Neovim: nvim"
+    echo ""
+    echo "🧪 Testez si les icônes fonctionnent:"
+    echo "   echo '    '"
     echo ""
 fi
+echo "❌ Si les icônes ne s'affichent TOUJOURS PAS après redémarrage:"
+echo "   Solution recommandée: Installez 'Termux:Styling' (officiel)"
+echo "   1. Ouvrez F-Droid"
+echo "   2. Cherchez 'Termux:Styling'"
+echo "   3. Installez l'app"
+echo "   4. Lancez Termux:Styling et choisissez une Nerd Font"
+echo ""
+echo "   Alternative: Supprimez ~/.termux/font.ttf pour désactiver"
+echo ""
 echo "⚠️  EXCLUS de cette installation (trop lourds):"
 echo "   ✗ GitHub Copilot (remplacé par Aider/Codex)"
 echo "   ✗ Neovim compilé from source"
@@ -375,4 +413,40 @@ echo "   export ANTHROPIC_API_KEY=\"sk-ant-...\""
 echo "   Puis: source ~/.bashrc"
 echo ""
 echo "💡 Pour Codespaces, utilisez: bash install.sh"
+echo ""
+echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+echo "📖 ALIASES DISPONIBLES (ajoutés à ~/.bashrc):"
+echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+echo ""
+echo "🔄 Système:"
+echo "   reload       → Recharger .bashrc"
+echo "   i            → Relancer le script d'installation"
+echo "   cls          → Effacer l'écran (clear)"
+echo "   ..           → cd .."
+echo "   ...          → cd ../.."
+echo ""
+echo "📁 Git:"
+echo "   gs           → git status"
+echo "   ga           → git add ."
+echo "   gc <msg>     → git commit -m '<msg>'"
+echo "   gp           → git push"
+echo "   gl           → git pull"
+echo "   gd           → git diff"
+echo ""
+echo "📱 Termux:"
+echo "   termux-wake  → Garder l'écran allumé"
+echo "   termux-sleep → Autoriser veille"
+echo "   storage      → cd ~/storage/shared"
+echo "   dl           → cd ~/storage/downloads"
+echo ""
+echo "📂 File Managers:"
+echo "   r            → ranger"
+echo ""
+echo "🤖 AI Agents (terminal):"
+echo "   ai           → Aider (AI pair programming)"
+echo "   shk          → Sheikh CLI assistant"
+echo "   cx           → Codex-Termux"
+echo "   ao           → OpenCode (Alpine proot)"
+echo ""
+echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
 echo ""
