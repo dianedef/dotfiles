@@ -100,15 +100,12 @@ else
     log "INFO" "✅ Starship already installed"
 fi
 
-# Zoxide (smart cd) - use HOME/tmp instead of /tmp for Termux
+# Zoxide (smart cd) - available in Termux repos
 if ! command -v zoxide &> /dev/null; then
     log "INFO" "Installing Zoxide..."
-    log "INFO" "Detected architecture: $(uname -m)"
-    export TMPDIR="$HOME/tmp"
-    mkdir -p "$TMPDIR"
-    curl -sSfL https://raw.githubusercontent.com/ajeetdsouza/zoxide/main/install.sh | sh
-    if [ $? -eq 0 ] && [ -f "$HOME/.local/bin/zoxide" ]; then
-        log "INFO" "✅ Zoxide installed to ~/.local/bin"
+    pkg install -y zoxide >/dev/null 2>&1
+    if command -v zoxide &> /dev/null; then
+        log "INFO" "✅ Zoxide installed via pkg"
     else
         log "ERROR" "❌ Zoxide installation failed"
     fi
@@ -189,7 +186,7 @@ touch "$BASHRC"
 if ! grep -q "shell-integration.sh" "$BASHRC" 2>/dev/null; then
     echo "" >> "$BASHRC"
     echo "# Neovim config switcher" >> "$BASHRC"
-    echo "source $SOURCE_DIR/nvim/shell-integration.sh" >> "$BASHRC"
+    echo '[ -f "$HOME/dotfiles/nvim/shell-integration.sh" ] && source "$HOME/dotfiles/nvim/shell-integration.sh"' >> "$BASHRC"
     log "INFO" "✅ Added shell integration"
 fi
 
@@ -205,7 +202,7 @@ fi
 if ! grep -q "starship init" "$BASHRC"; then
     echo "" >> "$BASHRC"
     echo '# Starship prompt' >> "$BASHRC"
-    echo 'eval "$(starship init bash)"' >> "$BASHRC"
+    echo 'command -v starship >/dev/null && eval "$(starship init bash)"' >> "$BASHRC"
     log "INFO" "✅ Added Starship to bashrc"
 fi
 
@@ -213,13 +210,13 @@ fi
 if ! grep -q "zoxide init" "$BASHRC"; then
     echo "" >> "$BASHRC"
     echo '# Zoxide' >> "$BASHRC"
-    echo 'eval "$(zoxide init bash)"' >> "$BASHRC"
+    echo 'command -v zoxide >/dev/null && eval "$(zoxide init bash)"' >> "$BASHRC"
     log "INFO" "✅ Added Zoxide to bashrc"
 fi
 
-# Aliases essentiels
-if ! grep -q "# Termux aliases" "$BASHRC"; then
-    cat >> "$BASHRC" << 'EOF'
+# Aliases essentiels - Toujours écraser pour avoir la dernière version
+sed -i '/# Termux aliases/,/^$/d' "$BASHRC" 2>/dev/null
+cat >> "$BASHRC" << 'EOF'
 
 # Termux aliases
 alias reload='source ~/.bashrc'
@@ -245,8 +242,7 @@ alias dl='cd ~/storage/downloads'
 alias r='ranger'
 
 EOF
-    log "INFO" "✅ Added Termux aliases"
-fi
+log "INFO" "✅ Added/Updated Termux aliases"
 
 # --- 7. AI Coding Agents Installation ---
 log "INFO" "🤖 Installing AI coding agents..."
