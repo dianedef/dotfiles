@@ -25,6 +25,9 @@ env/
 venv/
 .env
 
+# Secrets
+.dotfiles-secrets.env
+
 # Logs and databases
 *.log
 *.sqlite

@@ -270,7 +270,7 @@ cat >> "$BASHRC" << 'EOF'
 # Termux aliases
 alias reload='source "$HOME/.bashrc" && echo "✓ Shell rechargé!"'
 alias i='bash ~/dotfiles/termux.sh'
-alias ds='bash ~/dotfiles/doppler-setup.sh'
+alias ds='bash ~/dotfiles/doppler-setup-termux.sh'
 alias cls='clear'
 alias ..='cd ..'
 alias ...='cd ../..'
@@ -416,6 +416,40 @@ PROFILE_EOF
                 else
                     log "INFO" "⚠️ No API keys found in Doppler"
                 fi
+            # Fallback: Try local .env file
+            elif [ -f "$HOME/.dotfiles-secrets.env" ]; then
+                log "INFO" "📝 Using local secrets from ~/.dotfiles-secrets.env"
+                source "$HOME/.dotfiles-secrets.env"
+                
+                # Use environment variables from .env file
+                if [ ! -z "$OPENAI_API_KEY" ] || [ ! -z "$ANTHROPIC_API_KEY" ]; then
+                    log "INFO" "Configuring OpenCode with local secrets..."
+                    proot-distro login alpine -- /bin/sh -c "
+                        # AI Provider environment variables in Alpine profile
+                        cat >> /root/.profile << 'PROFILE_EOF'
+
+# AI Provider API Keys (from local .env)
+export OPENAI_API_KEY='$OPENAI_API_KEY'
+export ANTHROPIC_API_KEY='$ANTHROPIC_API_KEY'
+export GOOGLE_GENERATIVE_AI_API_KEY='$GOOGLE_AI_API_KEY'
+export GROQ_API_KEY='$GROQ_API_KEY'
+export DEEPSEEK_API_KEY='$DEEPSEEK_API_KEY'
+PROFILE_EOF
+                    " 2>/dev/null
+                    
+                    if [ $? -eq 0 ]; then
+                        log "INFO" "✅ AI providers configured via local .env"
+                        [ ! -z "$OPENAI_API_KEY" ] && log "INFO" "   • OpenAI (GPT)"
+                        [ ! -z "$ANTHROPIC_API_KEY" ] && log "INFO" "   • Anthropic (Claude)"
+                        [ ! -z "$GOOGLE_AI_API_KEY" ] && log "INFO" "   • Google (Gemini)"
+                        [ ! -z "$GROQ_API_KEY" ] && log "INFO" "   • Groq"
+                        [ ! -z "$DEEPSEEK_API_KEY" ] && log "INFO" "   • Deepseek"
+                    fi
+                else
+                    log "INFO" "⚠️ No API keys found in local .env file"
+                fi
+            else
+                log "INFO" "⚠️ No secrets configured - run: bash ~/dotfiles/doppler-setup-termux.sh"
             fi
             
             # Check if authenticated, otherwise prompt
@@ -569,6 +603,21 @@ if command -v doppler &>/dev/null && doppler me &>/dev/null; then
             GH_TOKEN=""
         fi
     fi
+# Try 1b: Local .env file
+elif [ -f "$HOME/.dotfiles-secrets.env" ]; then
+    source "$HOME/.dotfiles-secrets.env"
+    
+    if [ ! -z "$GITHUB_TOKEN" ]; then
+        log "INFO" "Authenticating with local .env token..."
+        echo "$GITHUB_TOKEN" | gh auth login --with-token >/dev/null 2>&1
+        
+        if gh auth status &>/dev/null; then
+            log "INFO" "✅ GitHub authenticated via local .env"
+        else
+            log "WARN" "⚠️ Local token failed, manual login needed"
+            GH_TOKEN=""
+        fi
+    fi
 fi
 
 # Try 2: Already authenticated
@@ -578,7 +627,7 @@ if [ -z "$GH_TOKEN" ] && gh auth status &>/dev/null; then
 # Try 3: Manual login (interactive fallback)
 elif [ -z "$GH_TOKEN" ]; then
     log "INFO" "⚠️ GitHub not authenticated"
-    log "INFO" "📝 Run: gh auth login  (or setup Doppler with GH_TOKEN)"
+    log "INFO" "📝 Run: gh auth login  (or bash ~/dotfiles/doppler-setup-termux.sh)"
     
     read -p "Authenticate now? (y/N): " AUTH_NOW
     if [ "$AUTH_NOW" = "y" ] || [ "$AUTH_NOW" = "Y" ]; then

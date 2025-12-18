@@ -1,6 +1,29 @@
 #!/bin/bash
 
 # Script d'installation des dotfiles pour GitHub Codespaces
+# 
+# Configuration:
+#   - Edit .env file to customize installation (tokens, skip flags, etc.)
+#   - See docs/ENV_CONFIGURATION.md for all options
+#   - Safe defaults provided in .env (no tokens required)
+#
+# Usage:
+#   ./install.sh                    # Run with .env config
+#   LOG_LEVEL=DEBUG ./install.sh    # Override env vars
+#   AUTO_INSTALL_NVIM_PLUGINS=true ./install.sh  # Force plugin install
+
+# Déterminer le répertoire du script (pour trouver .env)
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+
+# Load environment variables from .env file (if exists)
+if [ -f "$SCRIPT_DIR/.env" ]; then
+    echo "📋 Loading configuration from .env file..."
+    export $(grep -v '^#' "$SCRIPT_DIR/.env" | grep -v '^$' | xargs)
+    echo "✅ Configuration loaded (LOG_LEVEL=$LOG_LEVEL, AUTO_INSTALL_NVIM_PLUGINS=${AUTO_INSTALL_NVIM_PLUGINS:-false})"
+else
+    echo "⚠️  No .env file found, using defaults"
+    echo "💡 Copy .env.example to .env to customize installation"
+fi
 
 ## Configuration du système de logging
 # Use workspace directory for persistence with repository
@@ -45,7 +68,11 @@ fi
 echo ""
 
 # --- 1. Installation de Neovim ---
-log "INFO" "📦 Installing Neovim..."
+if [ "${SKIP_NEOVIM_INSTALL:-false}" = "true" ]; then
+    log "INFO" "⏭️  Skipping Neovim installation (SKIP_NEOVIM_INSTALL=true)"
+else
+    log "INFO" "📦 Installing Neovim..."
+fi
 
 # Méthode 1 : Via tarball précompilé (la plus fiable)
 install_neovim_tarball() {
@@ -105,9 +132,11 @@ install_neovim_appimage() {
     cd - > /dev/null
 }
 
-# Toujours installer/mettre à jour Neovim
-log "INFO" "Installing Neovim 0.10.2..."
-install_neovim_tarball || install_neovim_appimage
+# Toujours installer/mettre à jour Neovim (unless skipped)
+if [ "${SKIP_NEOVIM_INSTALL:-false}" != "true" ]; then
+    log "INFO" "Installing Neovim 0.10.2..."
+    install_neovim_tarball || install_neovim_appimage
+fi
 
 # Vérifier l'installation
 if command -v nvim &> /dev/null; then
@@ -153,7 +182,9 @@ else
 fi
 
 # Installer Nerd Fonts pour les icônes
-if ! fc-list | grep -iq "nerd"; then
+if [ "${SKIP_NERD_FONTS:-false}" = "true" ]; then
+    log "INFO" "⏭️  Skipping Nerd Fonts installation (SKIP_NERD_FONTS=true)"
+elif ! fc-list | grep -iq "nerd"; then
     log "INFO" "📝 Installing Nerd Fonts (JetBrainsMono for icons)..."
     mkdir -p ~/.local/share/fonts
     cd /tmp
@@ -189,7 +220,9 @@ else
 fi
 
 # Installer GitHub Copilot CLI and other tools via npm
-if command -v npm &> /dev/null; then
+if [ "${SKIP_NPM_TOOLS:-false}" = "true" ]; then
+    log "INFO" "⏭️  Skipping npm tools installation (SKIP_NPM_TOOLS=true)"
+elif command -v npm &> /dev/null; then
     log "INFO" "Installing CLI tools via npm..."
     
     # GitHub Copilot CLI
@@ -245,7 +278,9 @@ else
 fi
 
 # Installer Yazi si nécessaire
-if ! command -v yazi &> /dev/null; then
+if [ "${SKIP_YAZI_INSTALL:-false}" = "true" ]; then
+    log "INFO" "⏭️  Skipping Yazi installation (SKIP_YAZI_INSTALL=true)"
+elif ! command -v yazi &> /dev/null; then
     log "INFO" "Installing Yazi..."
     cd /tmp
     YAZI_VERSION=$(curl -s https://api.github.com/repos/sxyazi/yazi/releases/latest | grep '"tag_name":' | sed -E 's/.*"([^"]+)".*/\1/')
@@ -274,7 +309,9 @@ else
 fi
 
 # Installer Doppler CLI si nécessaire
-if ! command -v doppler &> /dev/null; then
+if [ "${SKIP_DOPPLER_INSTALL:-false}" = "true" ]; then
+    log "INFO" "⏭️  Skipping Doppler CLI installation (SKIP_DOPPLER_INSTALL=true)"
+elif ! command -v doppler &> /dev/null; then
     log "INFO" "Installing Doppler CLI..."
     
     # Install prerequisites for Debian/Ubuntu
@@ -509,18 +546,20 @@ log "INFO" "✅ Shell integration activated for current session"
 hash -r 2>/dev/null
 
 # --- 6. Installation des plugins Neovim ---
-# NOTE: Plugin installation is now deferred to first Neovim launch
-# This reduces Codespace setup time from ~10 minutes to ~1 minute
-log "INFO" "⏭️  Skipping automatic plugin installation (plugins will install on first Neovim launch)"
-log "INFO" "💡 Tip: Plugins will auto-install when you first run 'nvim' (~130 plugins, takes 2-3 minutes)"
-
-# Uncomment below to restore automatic plugin installation during setup:
-# if command -v nvim &> /dev/null; then
-#     log "INFO" "📥 Installing Neovim plugins..."
-#     nvim --headless "+Lazy! sync" +qa >/tmp/nvim-install.log 2>&1 || log "WARN" "Plugin installation had issues, but this is usually fine"
-# else
-#     log "WARN" "⚠️  Neovim not found, skipping plugin installation"
-# fi
+if [ "${AUTO_INSTALL_NVIM_PLUGINS:-false}" = "true" ]; then
+    log "INFO" "📥 Installing Neovim plugins (AUTO_INSTALL_NVIM_PLUGINS=true)..."
+    if command -v nvim &> /dev/null; then
+        nvim --headless "+Lazy! sync" +qa >/tmp/nvim-install.log 2>&1 || log "WARN" "Plugin installation had issues, but this is usually fine"
+        log "INFO" "✅ Neovim plugins installed"
+    else
+        log "WARN" "⚠️  Neovim not found, skipping plugin installation"
+    fi
+else
+    # Deferred installation (default)
+    log "INFO" "⏭️  Skipping automatic plugin installation (plugins will install on first Neovim launch)"
+    log "INFO" "💡 Tip: Plugins will auto-install when you first run 'nvim' (~130 plugins, takes 2-3 minutes)"
+    log "INFO" "💡 Or set AUTO_INSTALL_NVIM_PLUGINS=true in .env to install during setup"
+fi
 
 echo ""
 log "INFO" "✨ Dotfiles installation complete!"
@@ -548,59 +587,98 @@ echo "🚀 Or run: source ~/.bashrc"
 echo "📄 Main installation log persisted with repository: $LOG_FILE"
 echo ""
 
-# --- 7. Configuration de Doppler (optionnel) ---
+# --- 7. Doppler Authentication (non-interactive via DOPPLER_TOKEN) ---
 echo "════════════════════════════════════════════════════════════════"
 echo ""
 
-# Vérifier si Doppler est installé avant de proposer la configuration
 if command -v doppler &> /dev/null; then
-    read -p "🔐 Voulez-vous configurer vos API keys avec Doppler maintenant? (y/N): " SETUP_DOPPLER
-
-    if [ "$SETUP_DOPPLER" = "y" ] || [ "$SETUP_DOPPLER" = "Y" ]; then
-        if [ -f "$SOURCE_DIR/doppler-setup.sh" ]; then
-            log "INFO" "🚀 Lancement de la configuration Doppler..."
-            bash "$SOURCE_DIR/doppler-setup.sh"
+    # Try non-interactive authentication first (via DOPPLER_TOKEN from .env)
+    if [ ! -z "${DOPPLER_TOKEN}" ]; then
+        log "INFO" "🔐 Authenticating Doppler with service token from .env..."
+        export DOPPLER_TOKEN="${DOPPLER_TOKEN}"
+        
+        if doppler me &>/dev/null 2>&1; then
+            log "INFO" "✅ Doppler authenticated via service token"
+            DOPPLER_AUTHENTICATED=true
         else
-            log "WARN" "⚠️  Script doppler-setup.sh non trouvé"
-            echo "⚠️  Lancez manuellement: ./doppler-setup.sh"
+            log "WARN" "⚠️  Doppler token authentication failed"
+            DOPPLER_AUTHENTICATED=false
         fi
+    # Check if already authenticated
+    elif doppler me &>/dev/null 2>&1; then
+        log "INFO" "✅ Doppler already authenticated"
+        DOPPLER_AUTHENTICATED=true
     else
-        echo "⏭️  Configuration Doppler skippée"
-        echo "💡 Lancez plus tard avec: ./doppler-setup.sh"
+        log "INFO" "⚠️  Doppler not authenticated"
+        DOPPLER_AUTHENTICATED=false
+        
+        # Interactive mode: offer to configure
+        if [ -t 0 ]; then
+            read -p "🔐 Configure Doppler API keys now? (y/N): " SETUP_DOPPLER
+            
+            if [ "$SETUP_DOPPLER" = "y" ] || [ "$SETUP_DOPPLER" = "Y" ]; then
+                if [ -f "$SOURCE_DIR/doppler-setup.sh" ]; then
+                    log "INFO" "🚀 Launching Doppler setup..."
+                    bash "$SOURCE_DIR/doppler-setup.sh"
+                else
+                    log "WARN" "⚠️  doppler-setup.sh not found"
+                    echo "⚠️  Run manually: ./doppler-setup.sh"
+                fi
+            else
+                echo "⏭️  Doppler setup skipped"
+                echo "💡 Setup later with: ds (alias for doppler-setup.sh)"
+                echo "💡 Or add DOPPLER_TOKEN to .env for auto-auth"
+            fi
+        else
+            # Non-interactive: skip prompt
+            log "INFO" "🤖 Non-interactive mode: Doppler setup skipped"
+            echo "💡 To auto-authenticate: Add DOPPLER_TOKEN to .env"
+            echo "💡 Get service token: https://dashboard.doppler.com → Project → Access → Service Tokens"
+        fi
     fi
 else
-    log "WARN" "⚠️  Doppler CLI n'est pas installé. Configuration skippée."
-    echo "💡 Installez Doppler puis lancez: ./doppler-setup.sh"
+    log "WARN" "⚠️  Doppler CLI not installed. Skipping configuration."
+    echo "💡 Install Doppler, then run: ./doppler-setup.sh"
 fi
 
-# --- GitHub CLI Authentication (with Doppler fallback) ---
+# --- 8. GitHub CLI Authentication (with .env, Doppler, or manual fallback) ---
+echo ""
 log "INFO" "🔐 Setting up GitHub CLI..."
 
-# Try 1: Doppler token (automated)
-if command -v doppler &>/dev/null && doppler me &>/dev/null 2>&1; then
-    GH_TOKEN=$(doppler secrets get GH_TOKEN --plain 2>/dev/null || doppler secrets get GITHUB_TOKEN --plain 2>/dev/null)
+GH_TOKEN_FINAL=""
+
+# Try 1: .env file token (highest priority)
+if [ ! -z "${GH_TOKEN}" ] || [ ! -z "${GITHUB_TOKEN}" ]; then
+    GH_TOKEN_FINAL="${GH_TOKEN:-${GITHUB_TOKEN}}"
+    log "INFO" "Found GitHub token in .env file"
+fi
+
+# Try 2: Doppler token (if .env empty and Doppler authenticated)
+if [ -z "$GH_TOKEN_FINAL" ] && [ "${DOPPLER_AUTHENTICATED:-false}" = "true" ]; then
+    GH_TOKEN_FINAL=$(doppler secrets get GH_TOKEN --plain 2>/dev/null || doppler secrets get GITHUB_TOKEN --plain 2>/dev/null)
     
-    if [ ! -z "$GH_TOKEN" ]; then
-        log "INFO" "Authenticating with Doppler token..."
-        echo "$GH_TOKEN" | gh auth login --with-token >/dev/null 2>&1
-        
-        if gh auth status &>/dev/null 2>&1; then
-            log "INFO" "✅ GitHub authenticated via Doppler"
-        else
-            log "WARN" "⚠️ Doppler token failed, manual login needed"
-            GH_TOKEN=""
-        fi
+    if [ ! -z "$GH_TOKEN_FINAL" ]; then
+        log "INFO" "Found GitHub token in Doppler"
     fi
 fi
 
-# Try 2: Already authenticated
-if [ -z "$GH_TOKEN" ] && gh auth status &>/dev/null 2>&1; then
+# Authenticate if we have a token
+if [ ! -z "$GH_TOKEN_FINAL" ]; then
+    log "INFO" "Authenticating with GitHub token..."
+    echo "$GH_TOKEN_FINAL" | gh auth login --with-token >/dev/null 2>&1
+    
+    if gh auth status &>/dev/null 2>&1; then
+        log "INFO" "✅ GitHub authenticated successfully"
+    else
+        log "WARN" "⚠️ Token authentication failed, manual login needed"
+    fi
+# Check if already authenticated
+elif gh auth status &>/dev/null 2>&1; then
     log "INFO" "✅ GitHub already authenticated"
-
-# Try 3: Manual login (interactive fallback)
-elif [ -z "$GH_TOKEN" ]; then
+# No token and not authenticated
+else
     log "INFO" "⚠️ GitHub not authenticated"
-    log "INFO" "📝 Setup Doppler with GH_TOKEN or run: gh auth login"
+    log "INFO" "📝 Add GH_TOKEN to .env, setup Doppler, or run: gh auth login"
     
     if [ ! -t 0 ]; then
         # Non-interactive (Codespaces auto-run)

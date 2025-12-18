@@ -54,7 +54,9 @@ cd ~/dotfiles && chmod +x install.sh && ./install.sh
 source ~/.bashrc
 ```
 
-**[→ Detailed Linux Guide](docs/installation/LINUX.md)**
+**🔧 Pre-configure for Codespaces**: Edit `.env` before first boot (optional)
+
+**[→ Detailed Linux Guide](docs/installation/LINUX.md)** | **[→ .env Configuration](docs/ENV_CONFIGURATION.md)**
 
 ### Termux/Android
 
