@@ -283,6 +283,9 @@ alias gp='git push'
 alias gl='git pull'
 alias gd='git diff'
 
+# Codespace
+alias cs='gh cs ssh'                 # SSH into any codespace (interactive)
+
 # Termux specific
 alias termux-wake='termux-wake-lock'
 alias termux-sleep='termux-wake-unlock'
@@ -292,11 +295,10 @@ alias dl='cd ~/storage/downloads'
 # File managers
 alias r='ranger'
 
-# AI Agents
-alias ai='aider'
-alias shk='sheikh'
-alias cx='cd ~/codex-termux && python codex.py'
-alias ao='proot-distro login alpine -- /bin/sh -c "cd /root/opencode_termux_alpine_aarch64 && ./opencode-termux-wrapper.sh"'
+# AI Agents (verified working on Termux)
+alias ai='llm'                       # LLM CLI - multi-provider (Gemini, Claude, GPT)
+alias gpt='sgpt'                     # Shell-GPT - quick OpenAI queries
+alias chat='llm chat'                # Interactive chat mode
 
 # END Termux aliases
 EOF
@@ -305,177 +307,76 @@ log "INFO" "✅ Added/Updated Termux aliases"
 # --- 7. AI Coding Agents Installation ---
 log "INFO" "🤖 Installing AI coding agents..."
 
-# Aider (Recommandé - léger)
-if ! command -v aider &> /dev/null; then
-    log "INFO" "Installing Aider..."
-    pip install aider-chat >/dev/null 2>&1
-    if command -v aider &> /dev/null; then
-        log "INFO" "✅ Aider installed"
+# Shell-GPT (sgpt) - Lightweight, works great on Termux
+if ! command -v sgpt &> /dev/null; then
+    log "INFO" "Installing Shell-GPT (sgpt)..."
+    pip install shell-gpt >/dev/null 2>&1
+    if command -v sgpt &> /dev/null; then
+        log "INFO" "✅ Shell-GPT installed"
     else
-        log "WARN" "⚠️  Aider installation failed (pip issue)"
+        log "WARN" "⚠️  Shell-GPT installation failed"
     fi
 else
-    log "INFO" "✅ Aider already installed"
+    log "INFO" "✅ Shell-GPT already installed"
 fi
 
-# Codex-Termux (Léger ARM64)
-if [ ! -d "$HOME/codex-termux" ]; then
-    log "INFO" "Installing Codex-Termux..."
-    cd ~
-    git clone --quiet https://github.com/nasarman/codex-termux.git 2>/dev/null
-    if [ -d "$HOME/codex-termux" ]; then
-        cd codex-termux
-        pip install -r requirements.txt >/dev/null 2>&1
-        log "INFO" "✅ Codex-Termux installed to ~/codex-termux"
+# LLM by Simon Willison - Multi-provider support with plugins
+if ! command -v llm &> /dev/null; then
+    log "INFO" "Installing LLM CLI..."
+    pip install llm >/dev/null 2>&1
+    if command -v llm &> /dev/null; then
+        log "INFO" "✅ LLM CLI installed"
+        
+        # Install Gemini plugin (lightweight, free tier available)
+        log "INFO" "Installing LLM plugins (Gemini, Claude)..."
+        llm install llm-gemini >/dev/null 2>&1 && log "INFO" "   ✅ Gemini plugin"
+        llm install llm-anthropic >/dev/null 2>&1 && log "INFO" "   ✅ Anthropic plugin"
     else
-        log "WARN" "⚠️  Codex-Termux installation failed"
-    fi
-    cd - > /dev/null
-else
-    log "INFO" "✅ Codex-Termux already installed"
-fi
-
-# Sheikh CLI Assistant (100% local)
-if ! command -v sheikh &> /dev/null; then
-    log "INFO" "Installing Sheikh CLI Assistant..."
-    pip install sheikh-cli-assistant >/dev/null 2>&1
-    if command -v sheikh &> /dev/null; then
-        log "INFO" "✅ Sheikh CLI installed"
-    else
-        log "WARN" "⚠️  Sheikh installation failed (pip issue)"
+        log "WARN" "⚠️  LLM CLI installation failed"
     fi
 else
-    log "INFO" "✅ Sheikh CLI already installed"
+    log "INFO" "✅ LLM CLI already installed"
 fi
 
-# OpenCode (Optionnel - nécessite proot Alpine)
-read -p "🗂️  Install OpenCode in proot Alpine? (requires 500MB+) (y/N): " INSTALL_OPENCODE
-if [ "$INSTALL_OPENCODE" = "y" ] || [ "$INSTALL_OPENCODE" = "Y" ]; then
-    if ! command -v proot-distro &> /dev/null; then
-        log "INFO" "Installing proot-distro..."
-        pkg install -y proot-distro >/dev/null 2>&1
+# Configure API keys from Doppler (if available)
+if command -v doppler &>/dev/null && doppler me &>/dev/null; then
+    log "INFO" "🔐 Configuring AI API keys from Doppler..."
+    
+    # Get keys from Doppler
+    OPENAI_KEY=$(doppler secrets get OPENAI_API_KEY --plain 2>/dev/null)
+    GEMINI_KEY=$(doppler secrets get GEMINI_AI --plain 2>/dev/null)
+    ANTHROPIC_KEY=$(doppler secrets get ANTHROPIC_API_KEY --plain 2>/dev/null)
+    
+    # Configure LLM CLI keys
+    if command -v llm &>/dev/null; then
+        [ ! -z "$OPENAI_KEY" ] && llm keys set openai "$OPENAI_KEY" 2>/dev/null && log "INFO" "   ✅ OpenAI key configured"
+        [ ! -z "$GEMINI_KEY" ] && llm keys set gemini "$GEMINI_KEY" 2>/dev/null && log "INFO" "   ✅ Gemini key configured"
+        [ ! -z "$ANTHROPIC_KEY" ] && llm keys set anthropic "$ANTHROPIC_KEY" 2>/dev/null && log "INFO" "   ✅ Anthropic key configured"
     fi
     
-    if command -v proot-distro &> /dev/null; then
-        log "INFO" "Setting up Alpine Linux..."
-        proot-distro install alpine 2>/dev/null
-        
-        log "INFO" "Installing OpenCode in Alpine (this may take a while)..."
-        proot-distro login alpine -- /bin/sh -c "
-            apk add git nodejs npm >/dev/null 2>&1
-            cd /root
-            git clone --quiet https://github.com/Charlie6F/opencode_termux_alpine_aarch64.git 2>/dev/null
-            cd opencode_termux_alpine_aarch64
-            chmod +x install.sh opencode-termux-wrapper.sh
-            ./install.sh
-        " 2>/dev/null
-        
-        if [ $? -eq 0 ]; then
-            log "INFO" "✅ OpenCode installed in Alpine"
-            
-            # --- OpenCode Authentication & AI Providers (with Doppler) ---
-            log "INFO" "🔐 Setting up OpenCode authentication & AI providers..."
-            
-            # Try Doppler for OpenCode + AI providers (automated)
-            if command -v doppler &>/dev/null && doppler me &>/dev/null; then
-                OPENCODE_KEY=$(doppler secrets get OPENCODE_API_KEY --plain 2>/dev/null)
-                OPENAI_KEY=$(doppler secrets get OPENAI_API_KEY --plain 2>/dev/null)
-                ANTHROPIC_KEY=$(doppler secrets get ANTHROPIC_API_KEY --plain 2>/dev/null)
-                GEMINI_KEY=$(doppler secrets get GEMINI_AI --plain 2>/dev/null)
-                GROQ_KEY=$(doppler secrets get GROQ --plain 2>/dev/null)
-                
-                # Configure OpenCode auth + AI provider keys in Alpine
-                if [ ! -z "$OPENCODE_KEY" ] || [ ! -z "$OPENAI_KEY" ] || [ ! -z "$ANTHROPIC_KEY" ]; then
-                    log "INFO" "Configuring OpenCode with Doppler secrets..."
-                    proot-distro login alpine -- /bin/sh -c "
-                        # OpenCode auth
-                        mkdir -p /root/.opencode
-                        echo '{\"apiKey\":\"$OPENCODE_KEY\"}' > /root/.opencode/config.json
-                        chmod 600 /root/.opencode/config.json
-                        
-                        # AI Provider environment variables in Alpine profile
-                        cat >> /root/.profile << 'PROFILE_EOF'
-
-# AI Provider API Keys (from Doppler)
-export OPENAI_API_KEY='$OPENAI_KEY'
-export ANTHROPIC_API_KEY='$ANTHROPIC_KEY'
-export GOOGLE_GENERATIVE_AI_API_KEY='$GEMINI_KEY'
-export GROQ_API_KEY='$GROQ_KEY'
-PROFILE_EOF
-                    " 2>/dev/null
-                    
-                    if [ $? -eq 0 ]; then
-                        log "INFO" "✅ OpenCode + AI providers configured via Doppler"
-                        [ ! -z "$OPENAI_KEY" ] && log "INFO" "   • OpenAI (GPT)"
-                        [ ! -z "$ANTHROPIC_KEY" ] && log "INFO" "   • Anthropic (Claude)"
-                        [ ! -z "$GEMINI_KEY" ] && log "INFO" "   • Google (Gemini)"
-                        [ ! -z "$GROQ_KEY" ] && log "INFO" "   • Groq"
-                    else
-                        log "WARN" "⚠️ Doppler configuration failed"
-                    fi
-                else
-                    log "INFO" "⚠️ No API keys found in Doppler"
-                fi
-            # Fallback: Try local .env file
-            elif [ -f "$HOME/.dotfiles-secrets.env" ]; then
-                log "INFO" "📝 Using local secrets from ~/.dotfiles-secrets.env"
-                source "$HOME/.dotfiles-secrets.env"
-                
-                # Use environment variables from .env file
-                if [ ! -z "$OPENAI_API_KEY" ] || [ ! -z "$ANTHROPIC_API_KEY" ]; then
-                    log "INFO" "Configuring OpenCode with local secrets..."
-                    proot-distro login alpine -- /bin/sh -c "
-                        # AI Provider environment variables in Alpine profile
-                        cat >> /root/.profile << 'PROFILE_EOF'
-
-# AI Provider API Keys (from local .env)
-export OPENAI_API_KEY='$OPENAI_API_KEY'
-export ANTHROPIC_API_KEY='$ANTHROPIC_API_KEY'
-export GOOGLE_GENERATIVE_AI_API_KEY='$GOOGLE_AI_API_KEY'
-export GROQ_API_KEY='$GROQ_API_KEY'
-export DEEPSEEK_API_KEY='$DEEPSEEK_API_KEY'
-PROFILE_EOF
-                    " 2>/dev/null
-                    
-                    if [ $? -eq 0 ]; then
-                        log "INFO" "✅ AI providers configured via local .env"
-                        [ ! -z "$OPENAI_API_KEY" ] && log "INFO" "   • OpenAI (GPT)"
-                        [ ! -z "$ANTHROPIC_API_KEY" ] && log "INFO" "   • Anthropic (Claude)"
-                        [ ! -z "$GOOGLE_AI_API_KEY" ] && log "INFO" "   • Google (Gemini)"
-                        [ ! -z "$GROQ_API_KEY" ] && log "INFO" "   • Groq"
-                        [ ! -z "$DEEPSEEK_API_KEY" ] && log "INFO" "   • Deepseek"
-                    fi
-                else
-                    log "INFO" "⚠️ No API keys found in local .env file"
-                fi
-            else
-                log "INFO" "⚠️ No secrets configured - run: bash ~/dotfiles/doppler-setup-termux.sh"
-            fi
-            
-            # Check if authenticated, otherwise prompt
-            OPENCODE_CONFIGURED=$(proot-distro login alpine -- /bin/sh -c "test -f /root/.opencode/config.json && echo 'yes' || echo 'no'" 2>/dev/null)
-            
-            if [ "$OPENCODE_CONFIGURED" != "yes" ]; then
-                log "INFO" "⚠️ OpenCode not authenticated"
-                log "INFO" "📝 To authenticate later:"
-                log "INFO" "   1. proot-distro login alpine"
-                log "INFO" "   2. cd /root/opencode_termux_alpine_aarch64"
-                log "INFO" "   3. opencode auth login"
-                
-                read -p "Authenticate OpenCode now? (y/N): " AUTH_OC
-                if [ "$AUTH_OC" = "y" ] || [ "$AUTH_OC" = "Y" ]; then
-                    proot-distro login alpine -- /bin/sh -c "cd /root/opencode_termux_alpine_aarch64 && opencode auth login"
-                fi
-            fi
-            
-            log "INFO" "   Run: proot-distro login alpine"
-            log "INFO" "   Then: cd /root/opencode_termux_alpine_aarch64 && ./opencode-termux-wrapper.sh"
-        else
-            log "WARN" "⚠️  OpenCode installation failed"
-        fi
+    # Configure Shell-GPT (uses OPENAI_API_KEY env var)
+    if [ ! -z "$OPENAI_KEY" ]; then
+        mkdir -p "$HOME/.config/shell_gpt"
+        echo "OPENAI_API_KEY=$OPENAI_KEY" > "$HOME/.config/shell_gpt/.sgptrc"
+        log "INFO" "   ✅ Shell-GPT configured"
+    fi
+elif [ -f "$HOME/.dotfiles-secrets.env" ]; then
+    log "INFO" "📝 Using local secrets from ~/.dotfiles-secrets.env"
+    source "$HOME/.dotfiles-secrets.env"
+    
+    if command -v llm &>/dev/null; then
+        [ ! -z "$OPENAI_API_KEY" ] && llm keys set openai "$OPENAI_API_KEY" 2>/dev/null
+        [ ! -z "$GOOGLE_AI_API_KEY" ] && llm keys set gemini "$GOOGLE_AI_API_KEY" 2>/dev/null
+        [ ! -z "$ANTHROPIC_API_KEY" ] && llm keys set anthropic "$ANTHROPIC_API_KEY" 2>/dev/null
+    fi
+    
+    if [ ! -z "$OPENAI_API_KEY" ]; then
+        mkdir -p "$HOME/.config/shell_gpt"
+        echo "OPENAI_API_KEY=$OPENAI_API_KEY" > "$HOME/.config/shell_gpt/.sgptrc"
     fi
 else
-    log "INFO" "⏭️  Skipped OpenCode installation"
+    log "INFO" "💡 Configure API keys later with: llm keys set <provider>"
+    log "INFO" "   Providers: openai, gemini, anthropic"
 fi
 
 log "INFO" "✅ AI coding agents setup complete"
@@ -500,10 +401,8 @@ echo "   • JetBrainsMono Nerd Font (icônes)"
 echo "   • Ranger file manager (use 'ranger' command)"
 echo ""
 echo "🤖 AI Coding Agents:"
-[ -x "$(command -v aider)" ] && echo "   • Aider (aider command)"
-[ -d "$HOME/codex-termux" ] && echo "   • Codex-Termux (~/codex-termux)"
-[ -x "$(command -v sheikh)" ] && echo "   • Sheikh CLI (sheikh command)"
-[ -d "/data/data/com.termux/files/usr/var/lib/proot-distro/installed-rootfs/alpine/root/opencode_termux_alpine_aarch64" ] && echo "   • OpenCode (proot Alpine)"
+[ -x "$(command -v sgpt)" ] && echo "   • Shell-GPT (sgpt/gpt command)"
+[ -x "$(command -v llm)" ] && echo "   • LLM CLI (ai/llm command) - Gemini, Claude, GPT"
 echo ""
 echo ""
 echo "🎨 CONFIGURATION DES ICÔNES (Nerd Font):"
@@ -531,20 +430,21 @@ echo ""
 echo "   Alternative: Supprimez ~/.termux/font.ttf pour désactiver"
 echo ""
 echo "⚠️  EXCLUS de cette installation (trop lourds):"
-echo "   ✗ GitHub Copilot (remplacé par Aider/Codex)"
+echo "   ✗ GitHub Copilot"
+echo "   ✗ Aider (dépendances lourdes)"
 echo "   ✗ Neovim compilé from source"
 echo "   ✗ Plugins LSP lourds"
 echo ""
-echo "🎯 Utilisation des AI Agents dans Neovim:"
-echo "   <leader>ai  → Aider"
-echo "   <leader>ax  → Codex-Termux"
-echo "   <leader>as  → Sheikh CLI"
-echo "   <leader>ao  → OpenCode (Alpine)"
+echo "🎯 Utilisation des AI Agents:"
+echo "   ai 'question'      → LLM CLI (multi-provider)"
+echo "   gpt 'question'     → Shell-GPT (OpenAI)"
+echo "   chat               → Mode conversation interactif"
+echo "   llm -m gemini-2.0-flash 'question'  → Gemini"
+echo "   llm -m claude-3-haiku 'question'    → Claude"
 echo ""
-echo "📚 Configuration API keys (exemple):"
-echo "   export OPENAI_API_KEY=\"sk-...\""
-echo "   export ANTHROPIC_API_KEY=\"sk-ant-...\""
-echo "   Puis: source ~/.bashrc"
+echo "📚 Configuration API keys:"
+echo "   Via Doppler (recommandé): déjà configuré automatiquement"
+echo "   Manuel: llm keys set openai / gemini / anthropic"
 echo ""
 echo "💡 Pour Codespaces, utilisez: bash install.sh"
 echo ""
@@ -577,10 +477,9 @@ echo "📂 File Managers:"
 echo "   r            → ranger"
 echo ""
 echo "🤖 AI Agents (terminal):"
-echo "   ai           → Aider (AI pair programming)"
-echo "   shk          → Sheikh CLI assistant"
-echo "   cx           → Codex-Termux"
-echo "   ao           → OpenCode (Alpine proot)"
+echo "   ai            → LLM CLI (multi-provider: Gemini, Claude, GPT)"
+echo "   gpt           → Shell-GPT (OpenAI quick queries)"
+echo "   chat          → Mode conversation interactif"
 echo ""
 echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
 echo ""

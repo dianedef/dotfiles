@@ -7,6 +7,9 @@ alias csrename='gh codespace edit -c $CODESPACE_NAME -d'
 # Stop current codespace - usage: csstop
 alias csstop='gh codespace stop -c $CODESPACE_NAME'
 
+# SSH into any codespace (interactive selector) - usage: cs
+alias cs='gh cs ssh'
+
 # List all codespaces - usage: cslist
 alias cslist='gh codespace list'
 
