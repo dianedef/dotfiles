@@ -139,8 +139,20 @@ disabled = true
 disabled = true
 
 # Disable all custom modules that show codespace indicators
+# If enabled, reads cached display name from csrename
 [custom.codespace]
 disabled = true
+command = '''
+if [ -f ~/.codespace_displayname ]; then
+    cat ~/.codespace_displayname
+elif [ -n "$CODESPACE_NAME" ]; then
+    echo "$CODESPACE_NAME"
+fi
+'''
+when = '''test -n "$CODESPACE_NAME" && test "$CODESPACES" = "true"'''
+format = '[$output]($style) '
+style = 'bold cyan'
+shell = ["bash", "--noprofile", "--norc"]
 
 [custom.env]
 disabled = true

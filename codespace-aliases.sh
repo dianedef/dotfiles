@@ -2,7 +2,16 @@
 # Add these aliases to your ~/.bashrc or shell configuration file
 
 # Rename current codespace - usage: csrename "new-name"
-alias csrename='gh codespace edit -c $CODESPACE_NAME -d'
+# Also caches the display name for starship prompt
+csrename() {
+    if [ -z "$1" ]; then
+        echo "Usage: csrename \"new-name\""
+        return 1
+    fi
+    gh codespace edit -c "$CODESPACE_NAME" -d "$1" && \
+    echo "$1" > ~/.codespace_displayname && \
+    echo "Renamed to: $1 (cached for prompt)"
+}
 
 # Stop current codespace - usage: csstop
 alias csstop='gh codespace stop -c $CODESPACE_NAME'
@@ -26,7 +35,9 @@ alias cscreate='gh codespace create'
 alias csdelete='gh codespace delete -c $CODESPACE_NAME'
 
 # Quick rename with current directory name as suggestion
-alias csrenamehere='csrename "$(basename $(pwd))"'
+csrenamehere() {
+    csrename "$(basename "$(pwd)")"
+}
 
 # Enhanced codespace creation for any repository
 alias cscreate-repo='gh codespace create -r'

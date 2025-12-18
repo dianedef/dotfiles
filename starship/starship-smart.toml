@@ -52,9 +52,12 @@ style = 'bold blue'
 shell = ["bash", "--noprofile", "--norc"]
 
 # Custom codespace detection - ONLY in real codespaces
+# Reads cached display name from csrename, falls back to CODESPACE_NAME
 [custom.codespace]
 command = '''
-if [ -n "$CODESPACE_NAME" ] && [ "$CODESPACES" = "true" ]; then
+if [ -f ~/.codespace_displayname ]; then
+    cat ~/.codespace_displayname
+elif [ -n "$CODESPACE_NAME" ]; then
     echo "$CODESPACE_NAME"
 fi
 '''
