@@ -1,4 +1,4 @@
-#!/data/data/com.termux/files/usr/bin/bash
+#!/usr/bin/env bash
 
 # Script d'installation ALLÉGÉ pour Termux (Android)
 # Version minimaliste - pas de copilot, neovim léger, outils essentiels seulement
