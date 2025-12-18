@@ -55,3 +55,14 @@ alias cheat-codespace='cat /workspaces/dotfiles/docs/reference/COMPREHENSIVE-CHE
 # Quick access to specific sections
 alias cheat-keys='cat ~/dotfiles/docs/reference/COMPREHENSIVE-CHEATSHEET.md | rg -A 100 "## ⌨️ 5. Tool-Specific Hotkeys"'
 alias cheat-bmad='cat ~/dotfiles/docs/reference/COMPREHENSIVE-CHEATSHEET.md | rg -A 20 "## 🎯 7. BMAD Agents Workflow"'
+
+# Starship configuration management
+if [ -f "/workspaces/dotfiles/starship/starship-switch.sh" ]; then
+    alias starship='/workspaces/dotfiles/starship/starship-switch.sh'
+    alias ss='/workspaces/dotfiles/starship/starship-switch.sh'
+    alias starship-status='starship status'
+    alias starship-local='starship local'
+    alias starship-smart='starship smart'
+    alias starship-codespace='starship codespace'
+    alias starship-reload='starship auto && source ~/.bashrc'
+fi

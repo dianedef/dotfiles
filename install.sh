@@ -412,12 +412,24 @@ if [ -d "$SOURCE_DIR/ranger" ]; then
     create_symlink "$SOURCE_DIR/ranger" "$HOME/.config/ranger"
 fi
 
-# Lier starship (si présent)
+# Configurer Starship avec détection automatique de l'environnement
 if [ -d "$SOURCE_DIR/starship" ]; then
-    log "INFO" "Linking starship config..."
+    log "INFO" "Setting up Starship with environment detection..."
     mkdir -p "$HOME/.config"
-    create_symlink "$SOURCE_DIR/starship/starship.toml" "$HOME/.config/starship.toml"
-    log "INFO" "✅ Starship config linked to $HOME/.config/starship.toml"
+    
+    # Rendre le script de commutation exécutable
+    if [ -f "$SOURCE_DIR/starship/starship-switch.sh" ]; then
+        chmod +x "$SOURCE_DIR/starship/starship-switch.sh"
+        log "INFO" "Made starship-switch.sh executable"
+        
+        # Appliquer la configuration automatique
+        "$SOURCE_DIR/starship/starship-switch.sh" auto
+        log "INFO" "✅ Starship configuration applied with environment detection"
+    else
+        # Fallback: lier la configuration par défaut
+        create_symlink "$SOURCE_DIR/starship/starship.toml" "$HOME/.config/starship.toml"
+        log "INFO" "✅ Starship config linked to $HOME/.config/starship.toml (fallback)"
+    fi
 fi
 
 # Lier d'autres configs si présentes

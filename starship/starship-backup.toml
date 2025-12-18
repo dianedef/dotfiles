@@ -1,18 +1,19 @@
-# Starship Configuration - Local Development
-# Optimized for local development, no codespace indicators
+# Starship Configuration - Simple & Clean for Android/Termux
+# Optimized for small screens and SSH usage
 
 # Get editor completions based on the config schema
 "$schema" = 'https://starship.rs/config-schema.json'
 
-# Blank line before each prompt
+# Blank line before each prompt (cleaner look)
 add_newline = true
 
-# Responsive timeouts
+# Quick timeout for SSH responsiveness
 scan_timeout = 10
 command_timeout = 500
 
-# Clean format for local development
+# Simple format - NO DECORATIVE LINES
 format = """
+$custom.codespace\
 $username\
 $hostname\
 $directory\
@@ -26,26 +27,13 @@ $java\
 $cmd_duration
 $character"""
 
-# Prompt character
+# Prompt character with emoji
 [character]
 success_symbol = "[➜](bold green)"
 error_symbol = "[✗](bold red)"
 vicmd_symbol = "[❮](bold green)"
 
-# Username - only show when not default
-[username]
-format = "[$user]($style)@"
-style_user = "bold green"
-style_root = "bold red"
-show_always = false
-
-# Hostname - only show in SSH
-[hostname]
-format = "[$hostname]($style) "
-style = "bold dimmed white"
-ssh_only = true
-
-# Directory - smart and clean
+# Directory - compact with emoji and custom repo name
 [directory]
 truncation_length = 3
 truncate_to_repo = true
@@ -53,6 +41,7 @@ format = "📁 [$path]($style) "
 style = "bold cyan"
 read_only = "🔒"
 truncation_symbol = "…/"
+# Custom repo name instead of URL
 repo_root_format = "📁 [$repo_name]($style)[$path]($style) "
 repo_root_style = "bold cyan"
 fish_style_pwd_dir_length = 1
@@ -64,8 +53,10 @@ symbol = " "
 style = "bold purple"
 truncation_length = 15
 truncation_symbol = "…"
+# Only show repo name, not full URL
+ignore_branches = ["main", "master"]
 
-# Git status
+# Git status - with emojis and spaces
 [git_status]
 format = '([\[$all_status$ahead_behind\]]($style) )'
 style = "bold yellow"
@@ -80,13 +71,13 @@ modified = "📝${count} "
 staged = "🚀${count} "
 deleted = "🧹${count} "
 
-# Command duration
+# Command duration - only if slow
 [cmd_duration]
 min_time = 2000
 format = "[⏱ $duration]($style) "
 style = "bold yellow"
 
-# Language versions
+# Languages - minimal icons
 [nodejs]
 format = "[$symbol$version]($style) "
 symbol = "⬢ "
@@ -112,35 +103,48 @@ format = "[$symbol$version]($style) "
 symbol = "☕ "
 style = "red"
 
-# Docker context
+# Docker - only when needed
 [docker_context]
 format = "[$symbol$context]($style) "
 symbol = "🐳 "
 style = "blue"
 only_with_files = true
 
-# Disable unnecessary modules for local development
+# Disable time (saves space)
 [time]
 disabled = true
 
+# Disable battery (not useful in SSH)
 [battery]
 disabled = true
 
-[os]
-disabled = true
-
-[package]
-disabled = true
-
-[conda]
-disabled = true
-
-[memory_usage]
-disabled = true
-
-# Disable all custom modules that show codespace indicators
+# Custom codespace detection section - ONLY show in real codespaces
 [custom.codespace]
-disabled = true
+command = '''
+if [ -n "$CODESPACE_NAME" ] && [ "$CODESPACES" = "true" ]; then
+    echo "$CODESPACE_NAME"
+fi
+'''
+when = '''test -n "$CODESPACE_NAME" && test "$CODESPACES" = "true"'''
+format = '☁️ [$output]($style) '
+style = 'bold blue'
+shell = ["bash", "--noprofile", "--norc"]
 
-[custom.env]
+# Username - only show when not current user
+[username]
+format = "[$user]($style)@"
+style_user = "bold green"
+style_root = "bold red"
+show_always = false
+disabled = false
+
+# Hostname - only show in SSH or when different
+[hostname]
+format = "[$hostname]($style) "
+style = "bold dimmed white"
+ssh_only = true
+disabled = false
+
+# Disable OS icon (obvious from hostname)
+[os]
 disabled = true
