@@ -35,6 +35,12 @@ nvims() {
     local config_home="${XDG_CONFIG_HOME:-$HOME/.config}"
     local items=()
     
+    # Check if nvim directory exists
+    if [[ ! -d "${nvim_dir}" ]]; then
+        echo "Error: Neovim config directory not found: ${nvim_dir}"
+        return 1
+    fi
+    
     # Auto-detect configurations
     # Add default nvim if it has init file
     if [[ -f "${nvim_dir}/init.lua" ]] || [[ -f "${nvim_dir}/init.vim" ]]; then
