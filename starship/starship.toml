@@ -13,6 +13,7 @@ command_timeout = 500
 
 # Simple format - NO DECORATIVE LINES
 format = """
+$custom.codespace\
 $directory\
 $git_branch\
 $git_status\
@@ -108,6 +109,13 @@ disabled = true
 # Disable battery (not useful in SSH)
 [battery]
 disabled = true
+
+# Custom codespace detection section
+[custom.codespace]
+command = 'echo $CODESPACE_NAME'
+when = '[ "$CODESPACES" = "true" ]'
+format = '☁️ [$output]($style) '
+style = 'bold blue'
 
 # Disable OS icon (obvious from hostname)
 [os]

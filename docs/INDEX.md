@@ -33,6 +33,7 @@ Welcome to the comprehensive documentation for this dotfiles repository. This do
 - [FAQ](troubleshooting/FAQ.md)
 
 ### Reference
+- [🚀 Comprehensive Cheatsheet](reference/COMPREHENSIVE-CHEATSHEET.md) ⭐ **NEW!** - All aliases & shortcuts
 - [Tool Versions](reference/VERSIONS.md)
 - [File Locations](reference/FILE-LOCATIONS.md)
 - [Keybindings Reference](reference/KEYBINDINGS.md)
@@ -82,6 +83,20 @@ The BMAD agents are installed in `.github/agents/` and can be used with GitHub C
 8. **Test Architect** - Testing strategy and quality assurance
 9. **UX Designer** - User experience and interface design
 10. **Quick Flow Solo Dev** - Fast development for small changes
+
+### Quick Access Commands
+
+New fuzzy access commands for instant documentation lookup:
+
+| Command | Description |
+|---------|-------------|
+| `cheat` | Full cheatsheet with all aliases and shortcuts |
+| `docs` | Fuzzy search in all documentation files |
+| `dotfind` | Find any dotfile with preview |
+| `cheats` | Search aliases interactively |
+| `cheat-nvim` | Neovim configuration cheatsheet |
+| `cheat-git` | Git workflow shortcuts |
+| `cheat-codespace` | Codespace management commands |
 
 ### Quick BMAD Workflows
 
@@ -154,10 +169,29 @@ docs/
 
 ## 🔍 Need Help?
 
+- **Quick Commands?** → Run `cheat` for full reference
+- **Documentation Search?** → Use `docs` for fuzzy find
 - **Quick Issue?** → Check [Common Issues](troubleshooting/COMMON-ISSUES.md)
 - **Installation Problem?** → See platform-specific guides
 - **Want to Contribute?** → Use BMAD Tech Writer agent
 - **Feature Request?** → Use BMAD PM agent for planning
+
+## 🎯 Quick Start Commands
+
+```bash
+# Load all new aliases
+source ~/dotfiles/codespace-aliases.sh
+
+# Open comprehensive cheatsheet
+cheat
+
+# Search documentation interactively
+docs
+
+# Test new codespace commands
+cslist
+csrename "my-awesome-project"
+```
 
 ## 📄 License
 
