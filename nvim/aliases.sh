@@ -1,10 +1,13 @@
 # Neovim Configuration Switcher Aliases
 # Source this file in your ~/.bashrc or ~/.zshrc
-# Example: source /workspaces/dotfiles/nvim/aliases.sh
+# Example: source $(dirname "${BASH_SOURCE[0]}")/aliases.sh
+
+# Get the directory of this script dynamically
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
 # Main switcher alias
-alias nvim-switch="/workspaces/dotfiles/nvim/switch-config.sh"
-alias nv-switch="/workspaces/dotfiles/nvim/switch-config.sh"
+alias nvim-switch="$SCRIPT_DIR/switch-config.sh"
+alias nv-switch="$SCRIPT_DIR/switch-config.sh"
 
 # Quick access to different configs using NVIM_APPNAME
 alias nv="nvim"
@@ -24,3 +27,6 @@ alias nv-list="nvim-switch --list"
 alias nv-current="nvim-switch --current"
 
 # Silent load - no messages
+
+# pnpm cache clearing alias
+alias pnpm-clear="pnpm store prune"

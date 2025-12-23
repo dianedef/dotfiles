@@ -13,7 +13,9 @@ fi
 install_nvim_switcher() {
     log "INFO" "Installing Neovim Config Switcher..."
     
-    local NVIM_DIR="/workspaces/dotfiles/nvim"
+    # Get the directory of this script dynamically
+    local SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+    local NVIM_DIR="$SCRIPT_DIR"
     local SHELL_CONFIG=""
     
     # Detect shell config file

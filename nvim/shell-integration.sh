@@ -17,7 +17,7 @@ fi
 # Method 2: Manual aliases (if you prefer to customize)
 # Uncomment the following lines if you don't want to source aliases.sh
 
-# alias nvim-switch="/workspaces/dotfiles/nvim/switch-config.sh"
+# alias nvim-switch="$SCRIPT_DIR/nvim/switch-config.sh"
 # alias nv11="NVIM_APPNAME=nvim11 nvim"
 # alias nv22="NVIM_APPNAME=nvim22 nvim"
 
@@ -31,8 +31,32 @@ fi
 
 # Function to quickly switch and launch Neovim with fzf
 nvims() {
-    local nvim_dir="/workspaces/dotfiles/nvim"
+    # Get the directory of this script to find nvim configs dynamically
+    local script_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+    local nvim_dir="$script_dir"
     local config_home="${XDG_CONFIG_HOME:-$HOME/.config}"
+    
+    # If running from aliases.sh, determine script_dir differently
+    if [[ -z "$script_dir" || "$script_dir" == "." ]]; then
+        # Try to find the nvim directory relative to common locations
+        if [[ -f "${BASH_SOURCE[1]}" ]]; then
+            script_dir="$(cd "$(dirname "${BASH_SOURCE[1]}")" && pwd)"
+        elif [[ -d "/root/dotfiles/nvim" ]]; then
+            script_dir="/root/dotfiles/nvim"
+        elif [[ -d "$HOME/dotfiles/nvim" ]]; then
+            script_dir="$HOME/dotfiles/nvim"
+        else
+            echo "Error: Cannot determine nvim config directory"
+            return 1
+        fi
+    fi
+    
+    # Use the parent directory if we're in a subdirectory of nvim
+    if [[ -f "$script_dir/shell-integration.sh" ]]; then
+        nvim_dir="$script_dir"
+    elif [[ -f "$script_dir/../nvim/shell-integration.sh" ]]; then
+        nvim_dir="$(cd "$script_dir/../nvim" && pwd)"
+    fi
     local items=()
     
     # Check if nvim directory exists

@@ -47,33 +47,36 @@ alias cscreate-machine='gh codespace create -r -m'
 # Interactive repo creation via URL
 alias csurl='echo "https://codespaces.new/" && read -p "Repo URL (format: OWNER/REPO): " repo && echo "Opening: https://codespaces.new/$repo"'
 
+# Get the directory of this script dynamically
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+
 # Fuzzy documentation access (with absolute paths and bat fallback)
 if command -v bat &> /dev/null; then
-    alias cheat='bat /workspaces/dotfiles/docs/reference/COMPREHENSIVE-CHEATSHEET.md'
-    alias cheat-nvim='bat /workspaces/dotfiles/nvim/cheat-sheet.sh'
+    alias cheat='bat $SCRIPT_DIR/docs/reference/COMPREHENSIVE-CHEATSHEET.md'
+    alias cheat-nvim='bat $SCRIPT_DIR/nvim/cheat-sheet.sh'
     DOCS_PREVIEW="bat --color=always"
 else
-    alias cheat='cat /workspaces/dotfiles/docs/reference/COMPREHENSIVE-CHEATSHEET.md'
-    alias cheat-nvim='cat /workspaces/dotfiles/nvim/cheat-sheet.sh'
+    alias cheat='cat $SCRIPT_DIR/docs/reference/COMPREHENSIVE-CHEATSHEET.md'
+    alias cheat-nvim='cat $SCRIPT_DIR/nvim/cheat-sheet.sh'
     DOCS_PREVIEW="cat"
 fi
 
-alias docs="fzf --preview=\"$DOCS_PREVIEW /workspaces/dotfiles/docs/{}\" < <(find /workspaces/dotfiles/docs -name \"*.md\" | sort)"
-alias dotfind="find /workspaces/dotfiles -name \"*.md\" | fzf --preview=\"$DOCS_PREVIEW {}\""
-alias cheats='cat /workspaces/dotfiles/codespace-aliases.sh | grep "^alias" | fzf --preview="echo {} | cut -d= -f2-"'
+alias docs="fzf --preview=\"$DOCS_PREVIEW $SCRIPT_DIR/docs/{}\" < <(find $SCRIPT_DIR/docs -name \"*.md\" | sort)"
+alias dotfind="find $SCRIPT_DIR -name \"*.md\" | fzf --preview=\"$DOCS_PREVIEW {}\""
+alias cheats='cat $SCRIPT_DIR/codespace-aliases.sh | grep "^alias" | fzf --preview="echo {} | cut -d= -f2-"'
 
 # Tool-specific cheats
-alias cheat-git='cat /workspaces/dotfiles/docs/reference/COMPREHENSIVE-CHEATSHEET.md | rg -A 50 "## 🔧 6. Development Workflow"'
-alias cheat-codespace='cat /workspaces/dotfiles/docs/reference/COMPREHENSIVE-CHEATSHEET.md | rg -A 30 "## 🔄 1. Codespaces"'
+alias cheat-git='cat $SCRIPT_DIR/docs/reference/COMPREHENSIVE-CHEATSHEET.md | rg -A 50 "## 🔧 6. Development Workflow"'
+alias cheat-codespace='cat $SCRIPT_DIR/docs/reference/COMPREHENSIVE-CHEATSHEET.md | rg -A 30 "## 🔄 1. Codespaces"'
 
 # Quick access to specific sections
-alias cheat-keys='cat ~/dotfiles/docs/reference/COMPREHENSIVE-CHEATSHEET.md | rg -A 100 "## ⌨️ 5. Tool-Specific Hotkeys"'
-alias cheat-bmad='cat ~/dotfiles/docs/reference/COMPREHENSIVE-CHEATSHEET.md | rg -A 20 "## 🎯 7. BMAD Agents Workflow"'
+alias cheat-keys='cat $SCRIPT_DIR/docs/reference/COMPREHENSIVE-CHEATSHEET.md | rg -A 100 "## ⌨️ 5. Tool-Specific Hotkeys"'
+alias cheat-bmad='cat $SCRIPT_DIR/docs/reference/COMPREHENSIVE-CHEATSHEET.md | rg -A 20 "## 🎯 7. BMAD Agents Workflow"'
 
 # Starship configuration management
-if [ -f "/workspaces/dotfiles/starship/starship-switch.sh" ]; then
-    alias starship='/workspaces/dotfiles/starship/starship-switch.sh'
-    alias ss='/workspaces/dotfiles/starship/starship-switch.sh'
+if [ -f "$SCRIPT_DIR/starship/starship-switch.sh" ]; then
+    alias starship='$SCRIPT_DIR/starship/starship-switch.sh'
+    alias ss='$SCRIPT_DIR/starship/starship-switch.sh'
     alias starship-status='starship status'
     alias starship-local='starship local'
     alias starship-smart='starship smart'

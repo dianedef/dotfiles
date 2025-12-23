@@ -67,6 +67,12 @@ else
 fi
 echo ""
 
+# --- Git Configuration ---
+echo "🔧 Configuring git user identity..."
+git config --global user.name "Diane DEFORES"
+git config --global user.email "deforesd@gmail.com"
+log "INFO" "✅ Git user identity configured"
+
 # --- 1. Installation de Neovim ---
 if [ "${SKIP_NEOVIM_INSTALL:-false}" = "true" ]; then
     log "INFO" "⏭️  Skipping Neovim installation (SKIP_NEOVIM_INSTALL=true)"
@@ -434,7 +440,7 @@ fi
 
 # Lier d'autres configs si présentes
 # Shell configuration is now integrated via shell-integration.sh
-# Add to your ~/.bashrc: source /workspaces/dotfiles/nvim/shell-integration.sh
+# Add to your ~/.bashrc: source $SCRIPT_DIR/nvim/shell-integration.sh
 
 # --- 5. Setup Neovim config switcher ---
 log "INFO" "🔄 Setting up Neovim config switcher..."
@@ -535,14 +541,14 @@ if ! grep -q "ds()" "$HOME/.bashrc" 2>/dev/null && ! grep -q "alias ds=" "$HOME/
     echo "    local script=\"\"" >> "$HOME/.bashrc"
     echo "    if [ -f \"\$HOME/.config/nvim/../doppler-setup.sh\" ]; then" >> "$HOME/.bashrc"
     echo "        script=\"\$HOME/.config/nvim/../doppler-setup.sh\"" >> "$HOME/.bashrc"
-    echo "    elif [ -f \"/workspaces/dotfiles/doppler-setup.sh\" ]; then" >> "$HOME/.bashrc"
-    echo "        script=\"/workspaces/dotfiles/doppler-setup.sh\"" >> "$HOME/.bashrc"
+    echo "    elif [ -f \"\$SOURCE_DIR/doppler-setup.sh\" ]; then" >> "$HOME/.bashrc"
+    echo "        script=\"\$SOURCE_DIR/doppler-setup.sh\"" >> "$HOME/.bashrc"
     echo "    elif [ -f \"\$HOME/dotfiles/doppler-setup.sh\" ]; then" >> "$HOME/.bashrc"
     echo "        script=\"\$HOME/dotfiles/doppler-setup.sh\"" >> "$HOME/.bashrc"
     echo "    elif [ -f \"\$HOME/storage/shared/dotfiles/doppler-setup.sh\" ]; then" >> "$HOME/.bashrc"
     echo "        script=\"\$HOME/storage/shared/dotfiles/doppler-setup.sh\"" >> "$HOME/.bashrc"
     echo "    else" >> "$HOME/.bashrc"
-    echo "        echo \"❌ doppler-setup.sh not found. Searched common locations.\"" >> "$HOME/.bashrc"
+    echo "        echo \"❌ doppler-setup.sh not found. Searched: \$HOME/.config/nvim/../, \$SOURCE_DIR/, \$HOME/dotfiles/, \$HOME/storage/shared/dotfiles/\"" >> "$HOME/.bashrc"
     echo "        return 1" >> "$HOME/.bashrc"
     echo "    fi" >> "$HOME/.bashrc"
     echo "    bash \"\$script\"" >> "$HOME/.bashrc"
