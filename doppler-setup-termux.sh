@@ -51,11 +51,49 @@ if [ ! -z "$ANTHROPIC_KEY" ]; then
     echo "✓ ANTHROPIC_API_KEY configuré"
 fi
 
-# GitHub
-read -p "GitHub Token (laissez vide pour skip): " GITHUB_TOKEN
+# GitHub - Auto-authenticate using token from Doppler (if available) or local .env
+GITHUB_TOKEN=""
+GITHUB_FROM_DOPPLER=""
+
+# Try Doppler first (if available)
+if command -v doppler &>/dev/null && doppler me &>/dev/null; then
+    GITHUB_FROM_DOPPLER=$(doppler secrets get GH_TOKEN --plain 2>/dev/null || doppler secrets get GITHUB_TOKEN --plain 2>/dev/null)
+    if [ ! -z "$GITHUB_FROM_DOPPLER" ]; then
+        GITHUB_TOKEN="$GITHUB_FROM_DOPPLER"
+        echo "✅ GITHUB_TOKEN trouvé dans Doppler"
+    fi
+fi
+
+# Fallback to local .env if Doppler not available
+if [ -z "$GITHUB_TOKEN" ] && [ -f "$ENV_FILE" ]; then
+    source "$ENV_FILE"
+    if [ ! -z "$GITHUB_TOKEN" ]; then
+        echo "✅ GITHUB_TOKEN trouvé dans le fichier local"
+    fi
+fi
+
 if [ ! -z "$GITHUB_TOKEN" ]; then
-    update_env "GITHUB_TOKEN" "$GITHUB_TOKEN"
-    echo "✓ GITHUB_TOKEN configuré"
+    # Auto-authenticate with GitHub CLI
+    if command -v gh &> /dev/null; then
+        if ! gh auth status &>/dev/null; then
+            echo "🔑 Authentication automatique avec GitHub CLI..."
+            echo "$GITHUB_TOKEN" | gh auth login --with-token >/dev/null 2>&1
+            
+            if gh auth status &>/dev/null; then
+                echo "✅ GitHub CLI authentifié automatiquement!"
+            else
+                echo "⚠️ L'authentification GitHub a échoué - vous devrez la faire manuellement"
+            fi
+        else
+            echo "✅ GitHub CLI déjà authentifié"
+        fi
+    else
+        echo "⚠️ GitHub CLI non installé (pkg install gh) - installez-le puis ré-authentifiez"
+    fi
+else
+    echo "⚠️ Aucun GITHUB_TOKEN trouvé"
+    echo "💡 Ajoutez-le avec: doppler secrets set GITHUB_TOKEN=\"ghp_votre_token\""
+    echo "   Ou configurez-le localement avec la section API keys ci-dessus"
 fi
 
 # Google AI (Gemini)

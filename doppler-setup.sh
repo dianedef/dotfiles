@@ -31,50 +31,64 @@ echo "⚙️  Configuration du projet dans ce répertoire..."
 doppler setup --project dotfiles --config dev --no-interactive
 
 echo ""
-echo "🔑 Ajout des API keys..."
+echo "🔑 Vérification des API keys dans Doppler..."
 echo ""
 
-# OpenAI
-read -p "OpenAI API Key (laissez vide pour skip): " OPENAI_KEY
-if [ ! -z "$OPENAI_KEY" ]; then
-    doppler secrets set OPENAI_API_KEY="$OPENAI_KEY" --silent
-    echo "✓ OPENAI_API_KEY configuré"
-fi
+# Function to check and display API key status
+check_api_key() {
+    local key_name=$1
+    local display_name=$2
+    local secret_key=$3
+    
+    local value=$(doppler secrets get "$secret_key" --plain 2>/dev/null)
+    if [ ! -z "$value" ]; then
+        echo "✅ $display_name trouvé dans Doppler"
+        return 0
+    else
+        echo "⚠️  $display_name non trouvé dans Doppler"
+        return 1
+    fi
+}
 
-# Anthropic (Claude)
-read -p "Anthropic API Key (laissez vide pour skip): " ANTHROPIC_KEY
-if [ ! -z "$ANTHROPIC_KEY" ]; then
-    doppler secrets set ANTHROPIC_API_KEY="$ANTHROPIC_KEY" --silent
-    echo "✓ ANTHROPIC_API_KEY configuré"
-fi
+# Check all API keys
+check_api_key "OPENAI_API_KEY" "OpenAI" "OPENAI_API_KEY"
+check_api_key "ANTHROPIC_API_KEY" "Anthropic (Claude)" "ANTHROPIC_API_KEY"
 
-# GitHub
-read -p "GitHub Token (laissez vide pour skip): " GITHUB_TOKEN
+# GitHub - Auto-authenticate using token from Doppler
+GITHUB_TOKEN=$(doppler secrets get GH_TOKEN --plain 2>/dev/null || doppler secrets get GITHUB_TOKEN --plain 2>/dev/null)
 if [ ! -z "$GITHUB_TOKEN" ]; then
-    doppler secrets set GITHUB_TOKEN="$GITHUB_TOKEN" --silent
-    echo "✓ GITHUB_TOKEN configuré"
+    echo "✅ GITHUB_TOKEN trouvé dans Doppler"
+    
+    # Auto-authenticate with GitHub CLI using the token from Doppler
+    if command -v gh &> /dev/null; then
+        if ! gh auth status &>/dev/null 2>&1; then
+            echo "🔑 Authentication automatique avec GitHub CLI..."
+            echo "$GITHUB_TOKEN" | gh auth login --with-token >/dev/null 2>&1
+            
+            if gh auth status &>/dev/null 2>&1; then
+                echo "✅ GitHub CLI authentifié automatiquement!"
+            else
+                echo "⚠️ L'authentification GitHub a échoué - vous devrez la faire manuellement"
+            fi
+        else
+            echo "✅ GitHub CLI déjà authentifié"
+        fi
+    else
+        echo "⚠️ GitHub CLI non installé - installez-le puis ré-authentifiez"
+    fi
+else
+    echo "⚠️ Aucun GITHUB_TOKEN trouvé dans Doppler"
 fi
 
-# Google AI (Gemini)
-read -p "Google AI API Key (laissez vide pour skip): " GOOGLE_AI_KEY
-if [ ! -z "$GOOGLE_AI_KEY" ]; then
-    doppler secrets set GOOGLE_AI_API_KEY="$GOOGLE_AI_KEY" --silent
-    echo "✓ GOOGLE_AI_API_KEY configuré"
-fi
+check_api_key "GEMINI_AI" "Google AI (Gemini)" "GEMINI_AI"
+check_api_key "GROQ" "Groq" "GROQ"
+check_api_key "DEEPSEEK_API_KEY" "Deepseek" "DEEPSEEK_API_KEY"
 
-# Groq
-read -p "Groq API Key (laissez vide pour skip): " GROQ_KEY
-if [ ! -z "$GROQ_KEY" ]; then
-    doppler secrets set GROQ_API_KEY="$GROQ_KEY" --silent
-    echo "✓ GROQ_API_KEY configuré"
-fi
-
-# Deepseek
-read -p "Deepseek API Key (laissez vide pour skip): " DEEPSEEK_KEY
-if [ ! -z "$DEEPSEEK_KEY" ]; then
-    doppler secrets set DEEPSEEK_API_KEY="$DEEPSEEK_KEY" --silent
-    echo "✓ DEEPSEEK_API_KEY configuré"
-fi
+echo ""
+echo "💡 Pour ajouter une API key manuellement:"
+echo "   doppler secrets set OPENAI_API_KEY=\"votre_key\""
+echo "   doppler secrets set GITHUB_TOKEN=\"ghp_votre_token\""
+echo "   etc."
 
 echo ""
 echo "🎨 Configuration d'OpenCode..."
