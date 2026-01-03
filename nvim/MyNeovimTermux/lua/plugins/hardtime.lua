@@ -11,7 +11,7 @@ return {
       hint = true,
       notification = true,
       allow_different_key = false,
-      enabled = true,
+      enabled = false,
       -- Touches restreintes (éviter l'utilisation excessive)
       restriction_mode = "block",
       restricted_keys = {
