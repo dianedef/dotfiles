@@ -1,0 +1,23 @@
+# Claude Code runtime files - generated automatically during usage
+# Only commit configuration files (settings.json, statusline scripts)
+
+# Debug logs and session data
+debug/
+statsig/
+stats-cache.json
+history.jsonl
+
+# Shell snapshots
+shell-snapshots/
+
+# Project-specific session data
+projects/
+
+# Todo lists (session-specific)
+todos/
+
+# File history (version control)
+file-history/
+
+# Plugins (managed separately)
+plugins/marketplaces/
