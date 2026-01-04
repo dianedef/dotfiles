@@ -1,0 +1,20 @@
+# Claude Code runtime files - generated automatically during usage
+# Configuration files, history, todos, and projects are now versioned
+
+# Debug logs and stats
+debug/
+statsig/
+stats-cache.json
+
+# Shell snapshots (temporary)
+shell-snapshots/
+
+# Session environment data (temporary)
+session-env/
+
+# File history (internal version control, too large)
+file-history/
+
+# Plugins - only exclude downloaded marketplaces content
+# The known_marketplaces.json config is versioned
+plugins/marketplaces/
