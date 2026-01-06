@@ -338,6 +338,20 @@ else
     log "INFO" "✅ LLM CLI already installed"
 fi
 
+# TLDR pages
+if ! command -v tldr &> /dev/null; then
+    log "INFO" "Installing TLDR pages..."
+    npm install -g tldr >/dev/null 2>&1
+    if command -v tldr &> /dev/null; then
+        log "INFO" "✅ TLDR pages installed"
+    else
+        log "WARN" "⚠️  TLDR pages installation failed"
+    fi
+else
+    log "INFO" "✅ TLDR pages already installed"
+fi
+fi
+
 # Configure API keys from Doppler (if available)
 if command -v doppler &>/dev/null && doppler me &>/dev/null; then
     log "INFO" "🔐 Configuring AI API keys from Doppler..."

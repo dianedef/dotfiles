@@ -247,13 +247,21 @@ elif command -v npm &> /dev/null; then
         log "WARN" "⚠️  Kilocode CLI installation may have failed"
     fi
     
-    # OpenCode AI
-    log "INFO" "Installing OpenCode AI..."
-    if npm install -g opencode-ai 2>&1 | tee -a "$LOG_FILE" | grep -q "added\|updated\|already"; then
-        log "INFO" "✅ OpenCode AI installed"
-    else
-        log "WARN" "⚠️  OpenCode AI installation may have failed"
-    fi
+     # OpenCode AI
+     log "INFO" "Installing OpenCode AI..."
+     if npm install -g opencode-ai 2>&1 | tee -a "$LOG_FILE" | grep -q "added\|updated\|already"; then
+         log "INFO" "✅ OpenCode AI installed"
+     else
+         log "WARN" "⚠️  OpenCode AI installation may have failed"
+     fi
+
+     # TLDR pages
+     log "INFO" "Installing TLDR pages..."
+     if npm install -g tldr 2>&1 | tee -a "$LOG_FILE" | grep -q "added\|updated\|already"; then
+         log "INFO" "✅ TLDR pages installed"
+     else
+         log "WARN" "⚠️  TLDR pages installation may have failed"
+     fi
     
     # Verify installations
     hash -r 2>/dev/null
