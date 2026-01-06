@@ -12,20 +12,7 @@ scan_timeout = 10
 command_timeout = 500
 
 # Format adapts based on environment
-format = """
-$custom.codespace\
-$custom.env\
-$username\
-$custom.hostname_short\
-$directory\
-$git_branch\
-$git_status\
-$nodejs\
-$python\
-$rust\
-$golang\
-$java\
-$cmd_duration
+format = """$custom.env $username $hostname $directory $git_branch $git_status $nodejs $python $rust $golang $java $cmd_duration
 $character"""
 
 # Prompt character with emoji
@@ -54,35 +41,37 @@ shell = ["bash", "--noprofile", "--norc"]
 
 # Custom codespace detection - ONLY in real codespaces
 # Reads cached display name from csrename, falls back to CODESPACE_NAME
-[custom.codespace]
-command = '''
-if [ -f ~/.codespace_displayname ]; then
-    cat ~/.codespace_displayname
-elif [ -n "$CODESPACE_NAME" ]; then
-    echo "$CODESPACE_NAME"
-fi
-'''
-when = '''test -n "$CODESPACE_NAME" && test "$CODESPACES" = "true"'''
-format = '[$output]($style) '
-style = 'bold cyan'
-shell = ["bash", "--noprofile", "--norc"]
+# DISABLED: Redundant - hostname already identifies the environment
+#[custom.codespace]
+#command = '''
+#if [ -f ~/.codespace_displayname ]; then
+#    cat ~/.codespace_displayname
+#elif [ -n "$CODESPACE_NAME" ]; then
+#    echo "$CODESPACE_NAME"
+#fi
+#'''
+#when = '''test -n "$CODESPACE_NAME" && test "$CODESPACES" = "true"'''
+#format = '[$output]($style) '
+#style = 'bold cyan'
+#shell = ["bash", "--noprofile", "--norc"]
 
 # Custom hostname with smart truncation - max 10 chars
-[custom.hostname_short]
-command = '''
-hostname=$(hostname)
-# Truncate at first dot or limit to 10 chars
-hostname=${hostname%%.*}
-if [ ${#hostname} -gt 10 ]; then
-    echo "${hostname:0:7}..."
-else
-    echo "$hostname"
-fi
-'''
-when = "true"
-format = '[$output]($style) '
-style = 'bold dimmed white'
-shell = ["bash", "--noprofile", "--norc"]
+# DISABLED: Using built-in hostname module instead
+#[custom.hostname_short]
+#command = '''
+#hostname=$(hostname)
+## Truncate at first dot or limit to 10 chars
+#hostname=${hostname%%.*}
+#if [ ${#hostname} -gt 10 ]; then
+#    echo "${hostname:0:7}..."
+#else
+#    echo "$hostname"
+#fi
+#'''
+#when = "true"
+#format = '[$output]($style) '
+#style = 'bold dimmed white'
+#shell = ["bash", "--noprofile", "--norc"]
 
 # Username - only show when not current user or in codespace
 [username]
@@ -92,9 +81,13 @@ style_root = "bold red"
 show_always = false
 disabled = false
 
-# Hostname - disabled in favor of custom.hostname_short
+# Hostname - built-in module
 [hostname]
-disabled = true
+disabled = false
+ssh_only = false
+trim_at = ""
+format = "[$hostname]($style) "
+style = "bold dimmed white"
 
 # Directory - smart formatting
 [directory]
