@@ -88,6 +88,7 @@ ssh_only = false
 trim_at = ""
 format = "[$hostname]($style) "
 style = "bold dimmed white"
+aliases = {"ubuntu-s-1vcpu-2gb-amd-ams3-01" = "cloud"}
 
 # Directory - smart formatting
 [directory]
