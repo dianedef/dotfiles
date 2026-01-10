@@ -93,13 +93,11 @@ aliases = {"ubuntu-s-1vcpu-2gb-amd-ams3-01" = "cloud"}
 # Directory - smart formatting
 [directory]
 truncation_length = 3
-truncate_to_repo = true
+truncate_to_repo = false
 format = "[$path]($style) "
 style = "bold cyan"
 read_only = "🔒"
 truncation_symbol = "…/"
-repo_root_format = "[$repo_name]($style)[$path]($style) "
-repo_root_style = "bold cyan"
 fish_style_pwd_dir_length = 1
 
 # Git branch - clean formatting

@@ -5,6 +5,10 @@
 - `./termux.sh` - Termux (Android) lightweight installation
 - `nvim --headless "+Lazy! sync" +qa` - Sync Neovim plugins
 
+## Essential Aliases
+- `dev` - Run the development menu (`/root/dokploy/cli/menu_simple_color.sh`)
+- `dev` provides a menu for managing Docker environments, navigating directories, and deploying GitHub repos
+
 ## Code Style
 
 ### Shell Scripts (Bash)
