@@ -85,6 +85,23 @@ install_neovim_tarball() {
     log "INFO" "Fetching latest Neovim stable release..."
     cd /tmp
     
+    # Détecter l'architecture du système
+    ARCH=$(uname -m)
+    case $ARCH in
+        x86_64)
+            NVIM_ARCH="x86_64"
+            ;;
+        aarch64|arm64)
+            NVIM_ARCH="arm64"
+            ;;
+        *)
+            log "INFO" "⚠️  Unsupported architecture: $ARCH, falling back to apt"
+            return 1
+            ;;
+    esac
+    
+    log "INFO" "🔍 Detected architecture: $ARCH (downloading nvim-linux-${NVIM_ARCH})"
+    
     # Récupérer la dernière version stable depuis GitHub API
     NVIM_VERSION=$(curl -s https://api.github.com/repos/neovim/neovim/releases/latest | grep '"tag_name":' | sed -E 's/.*"([^"]+)".*/\1/')
     
@@ -93,20 +110,25 @@ install_neovim_tarball() {
         NVIM_VERSION="v0.10.2"
     fi
     
-    log "INFO" "📦 Downloading Neovim $NVIM_VERSION (latest stable)..."
+    log "INFO" "📦 Downloading Neovim $NVIM_VERSION for ${NVIM_ARCH}..."
     
-    curl -sLO "https://github.com/neovim/neovim/releases/download/${NVIM_VERSION}/nvim-linux-x86_64.tar.gz"
+    curl -sLO "https://github.com/neovim/neovim/releases/download/${NVIM_VERSION}/nvim-linux-${NVIM_ARCH}.tar.gz"
+    
+    # Vérifier si le téléchargement a réussi
+    if [ ! -f "nvim-linux-${NVIM_ARCH}.tar.gz" ]; then
+        log "INFO" "❌ Download failed for ${NVIM_ARCH}, falling back to apt"
+        return 1
+    fi
     
     # Extraire et installer
     sudo rm -rf /opt/nvim 2>/dev/null
-    sudo tar -C /opt -xzf nvim-linux-x86_64.tar.gz 2>/dev/null
-    sudo mv /opt/nvim-linux-x86_64 /opt/nvim 2>/dev/null
+    sudo tar -C /opt -xzf nvim-linux-${NVIM_ARCH}.tar.gz 2>/dev/null
     
-    # Créer le lien symbolique
-    sudo ln -sf /opt/nvim/bin/nvim /usr/local/bin/nvim 2>/dev/null
+    # Créer le lien symbolique (le dossier extrait garde le nom nvim-linux-${NVIM_ARCH})
+    sudo ln -sf /opt/nvim-linux-${NVIM_ARCH}/bin/nvim /usr/local/bin/nvim 2>/dev/null
     
     # Nettoyer
-    rm nvim-linux-x86_64.tar.gz
+    rm nvim-linux-${NVIM_ARCH}.tar.gz
     
     cd - > /dev/null
 }
@@ -498,6 +520,19 @@ if command -v zoxide &> /dev/null; then
         log "INFO" "✅ Added zoxide integration to ~/.bashrc"
     else
         log "INFO" "✅ Zoxide integration already in ~/.bashrc"
+    fi
+fi
+
+# Configurer Neovim comme éditeur par défaut
+if command -v nvim &> /dev/null; then
+    if ! grep -q "export VISUAL=nvim" "$HOME/.bashrc" 2>/dev/null; then
+        echo "" >> "$HOME/.bashrc"
+        echo "# Set default editor" >> "$HOME/.bashrc"
+        echo "export VISUAL=nvim" >> "$HOME/.bashrc"
+        echo "export EDITOR=nvim" >> "$HOME/.bashrc"
+        log "INFO" "✅ Set Neovim as default editor (VISUAL/EDITOR)"
+    else
+        log "INFO" "✅ Neovim already set as default editor"
     fi
 fi
 
