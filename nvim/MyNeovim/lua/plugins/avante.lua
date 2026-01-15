@@ -1,7 +1,6 @@
 return {
   "yetone/avante.nvim",
   event = "VeryLazy",
-  lazy = false,
   build = "make",
   -- build = "make BUILD_FROM_SOURCE=true luajit",
   dependencies = {
@@ -10,6 +9,7 @@ return {
     "nvim-lua/plenary.nvim",
     "MunifTanjim/nui.nvim",
     "nvim-tree/nvim-web-devicons",
+    "zbirenbaum/copilot.lua",
     {
       "MeanderingProgrammer/render-markdown.nvim",
       opts = { file_types = { "Avante" }, latex = { enabled = false } },
@@ -17,7 +17,7 @@ return {
     },
   },
   opts = {
-    provider = "claude",
+    provider = "copilot",
     claude = {
       endpoint = "https://api.anthropic.com",
       model = "claude-3-5-sonnet-latest",

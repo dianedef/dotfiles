@@ -1,6 +1,5 @@
 return {
-  {
-    "dstein64/nvim-scrollview",
+  "dstein64/nvim-scrollview",
     event = "VeryLazy",
     opts = {
       excluded_filetypes = {
@@ -38,5 +37,4 @@ return {
     config = function(_, opts)
       require("scrollview").setup(opts)
     end,
-  },
 }
