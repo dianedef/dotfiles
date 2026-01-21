@@ -1,0 +1,286 @@
+{
+  "numStartups": 20,
+  "installMethod": "global",
+  "theme": "dark-daltonized",
+  "hasSeenTasksHint": true,
+  "tipsHistory": {
+    "new-user-warmup": 8,
+    "plan-mode-for-complex-tasks": 19,
+    "terminal-setup": 12,
+    "memory-command": 17,
+    "theme-command": 2,
+    "colorterm-truecolor": 2,
+    "status-line": 3,
+    "stickers-command": 3,
+    "prompt-queue": 3,
+    "enter-to-steer-in-relatime": 3,
+    "todo-list": 3,
+    "ide-upsell-external-terminal": 14,
+    "install-github-app": 13,
+    "install-slack-app": 13,
+    "double-esc-code-restore": 13,
+    "continue": 13,
+    "shift-tab": 14,
+    "image-paste": 3,
+    "web-app": 18,
+    "mobile-app": 18,
+    "custom-agents": 6,
+    "permissions": 11,
+    "rename-conversation": 11,
+    "custom-commands": 12
+  },
+  "promptQueueUseCount": 41,
+  "cachedStatsigGates": {
+    "tengu_prompt_suggestion": true
+  },
+  "cachedGrowthBookFeatures": {
+    "tengu_1p_event_batch_config": {
+      "scheduledDelayMillis": 5000,
+      "maxExportBatchSize": 200,
+      "maxQueueSize": 8192
+    },
+    "tengu_mcp_tool_search": true,
+    "tengu_scratch": false,
+    "tengu_disable_bypass_permissions_mode": false,
+    "tengu_log_segment_events": false,
+    "tengu_log_datadog_events": true,
+    "tengu_pid_based_version_locking": true,
+    "tengu_event_sampling_config": {},
+    "tengu_tool_pear": false,
+    "tengu_thinkback": false,
+    "tengu_sumi": true,
+    "tengu_c4w_usage_limit_notifications_enabled": true,
+    "tengu-top-of-feed-tip": {
+      "tip": "",
+      "color": ""
+    },
+    "tengu_react_vulnerability_warning": false,
+    "tengu_code_diff_cli": true,
+    "tengu_post_compact_survey": false,
+    "enhanced_telemetry_beta": false,
+    "tengu_tool_search_unsupported_models": null,
+    "tengu_ant_attribution_header_new": true,
+    "tengu_streaming_tool_execution2": false,
+    "tengu_session_memory": false,
+    "tengu_bash_haiku_prefetch": true,
+    "tengu_permission_explainer": false,
+    "tengu_sm_compact": false,
+    "tengu_compact_streaming_retry": false,
+    "tengu_plan_mode_interview_phase": false,
+    "tengu_prompt_suggestion": true
+  },
+  "userID": "d1baf149fa1aecfa6d22d40b4f1a799bb966d223d1522261b46ae3eecb572f59",
+  "firstStartTime": "2026-01-16T20:03:25.283Z",
+  "sonnet45MigrationComplete": true,
+  "opus45MigrationComplete": true,
+  "opusProMigrationComplete": true,
+  "thinkingMigrationComplete": true,
+  "cachedChromeExtensionInstalled": false,
+  "changelogLastFetched": 1768968344267,
+  "claudeCodeFirstTokenDate": "2026-01-01T21:28:03.260790Z",
+  "hasCompletedOnboarding": true,
+  "lastOnboardingVersion": "2.1.9",
+  "lastReleaseNotesSeen": "2.1.12",
+  "projects": {
+    "/root": {
+      "allowedTools": [],
+      "mcpContextUris": [],
+      "mcpServers": {
+        "playwright": {
+          "type": "stdio",
+          "command": "npx",
+          "args": [
+            "-y",
+            "@playwright/mcp"
+          ],
+          "env": {}
+        }
+      },
+      "enabledMcpjsonServers": [],
+      "disabledMcpjsonServers": [],
+      "hasTrustDialogAccepted": false,
+      "projectOnboardingSeenCount": 1,
+      "hasClaudeMdExternalIncludesApproved": false,
+      "hasClaudeMdExternalIncludesWarningShown": false,
+      "exampleFiles": [],
+      "reactVulnerabilityCache": {
+        "detected": false,
+        "package": null,
+        "packageName": null,
+        "version": null,
+        "packageManager": null
+      },
+      "lastCost": 0,
+      "lastAPIDuration": 0,
+      "lastAPIDurationWithoutRetries": 0,
+      "lastToolDuration": 0,
+      "lastDuration": 409677,
+      "lastLinesAdded": 0,
+      "lastLinesRemoved": 0,
+      "lastTotalInputTokens": 0,
+      "lastTotalOutputTokens": 0,
+      "lastTotalCacheCreationInputTokens": 0,
+      "lastTotalCacheReadInputTokens": 0,
+      "lastTotalWebSearchRequests": 0,
+      "lastModelUsage": {},
+      "lastSessionId": "964db1b9-c4a5-4e37-8b98-27ab49038a62"
+    },
+    "/root/my-robots": {
+      "allowedTools": [],
+      "mcpContextUris": [],
+      "mcpServers": {
+        "render": {
+          "type": "http",
+          "url": "https://mcp.render.com/mcp",
+          "headers": {
+            "Authorization": "Bearer rnd_oby8bSH97Bzq87UtAuOzfvPlk71e"
+          }
+        }
+      },
+      "enabledMcpjsonServers": [],
+      "disabledMcpjsonServers": [],
+      "hasTrustDialogAccepted": true,
+      "projectOnboardingSeenCount": 0,
+      "hasClaudeMdExternalIncludesApproved": false,
+      "hasClaudeMdExternalIncludesWarningShown": false,
+      "reactVulnerabilityCache": {
+        "detected": false,
+        "package": null,
+        "packageName": null,
+        "version": null,
+        "packageManager": null
+      },
+      "exampleFiles": [
+        "strategy_tools.py",
+        "content_strategist.py",
+        "route.ts",
+        "package.json",
+        "page.tsx"
+      ],
+      "exampleFilesGeneratedAt": 1768594921011,
+      "hasCompletedProjectOnboarding": true,
+      "lastCost": 5.8789511999999995,
+      "lastAPIDuration": 861870,
+      "lastAPIDurationWithoutRetries": 861811,
+      "lastToolDuration": 14473,
+      "lastDuration": 168675598,
+      "lastLinesAdded": 5690,
+      "lastLinesRemoved": 0,
+      "lastTotalInputTokens": 11675,
+      "lastTotalOutputTokens": 63018,
+      "lastTotalCacheCreationInputTokens": 598258,
+      "lastTotalCacheReadInputTokens": 1852570,
+      "lastTotalWebSearchRequests": 0,
+      "lastModelUsage": {
+        "claude-haiku-4-5-20251001": {
+          "inputTokens": 11415,
+          "outputTokens": 259,
+          "cacheReadInputTokens": 0,
+          "cacheCreationInputTokens": 0,
+          "webSearchRequests": 0,
+          "costUSD": 0.01271
+        },
+        "claude-sonnet-4-5-20250929": {
+          "inputTokens": 72,
+          "outputTokens": 13515,
+          "cacheReadInputTokens": 173674,
+          "cacheCreationInputTokens": 79761,
+          "webSearchRequests": 0,
+          "costUSD": 0.5541469499999999
+        },
+        "claude-opus-4-5-20251101": {
+          "inputTokens": 188,
+          "outputTokens": 49244,
+          "cacheReadInputTokens": 1678896,
+          "cacheCreationInputTokens": 518497,
+          "webSearchRequests": 0,
+          "costUSD": 5.31209425
+        }
+      },
+      "lastSessionId": "db0aeb45-5cc8-40f4-b9df-2f6b414a25e8"
+    },
+    "/root/tubeflow": {
+      "allowedTools": [],
+      "mcpContextUris": [],
+      "mcpServers": {},
+      "enabledMcpjsonServers": [],
+      "disabledMcpjsonServers": [],
+      "hasTrustDialogAccepted": true,
+      "projectOnboardingSeenCount": 354,
+      "hasClaudeMdExternalIncludesApproved": false,
+      "hasClaudeMdExternalIncludesWarningShown": false,
+      "reactVulnerabilityCache": {
+        "detected": false,
+        "package": null,
+        "packageName": null,
+        "version": null,
+        "packageManager": null
+      },
+      "exampleFiles": [
+        "page.tsx",
+        "utils.ts",
+        "Notes.tsx",
+        "videos.ts",
+        "openai.ts"
+      ],
+      "exampleFilesGeneratedAt": 1768596608933,
+      "lastCost": 0,
+      "lastAPIDuration": 0,
+      "lastAPIDurationWithoutRetries": 0,
+      "lastToolDuration": 0,
+      "lastDuration": 37203,
+      "lastLinesAdded": 0,
+      "lastLinesRemoved": 0,
+      "lastTotalInputTokens": 0,
+      "lastTotalOutputTokens": 0,
+      "lastTotalCacheCreationInputTokens": 0,
+      "lastTotalCacheReadInputTokens": 0,
+      "lastTotalWebSearchRequests": 0,
+      "lastModelUsage": {},
+      "lastSessionId": "1f0e7b4e-611f-4185-b935-9a370af94e4c",
+      "hasCompletedProjectOnboarding": true
+    }
+  },
+  "hasShownOpus45Notice": {
+    "54950075-df2f-419b-836b-b31c129a6336": true
+  },
+  "s1mAccessCache": {
+    "54950075-df2f-419b-836b-b31c129a6336": {
+      "hasAccess": false,
+      "hasAccessNotAsDefault": false,
+      "timestamp": 1768857100573
+    }
+  },
+  "groveConfigCache": {
+    "7ffdd23f-7eb7-49a5-acc9-3671ff846428": {
+      "grove_enabled": true,
+      "timestamp": 1768783821206
+    }
+  },
+  "officialMarketplaceAutoInstallAttempted": true,
+  "officialMarketplaceAutoInstalled": true,
+  "githubRepoPaths": {
+    "dianedef/my-robots": [
+      "/root/my-robots"
+    ],
+    "dianedef/tubeflow": [
+      "/root/tubeflow"
+    ]
+  },
+  "oauthAccount": {
+    "accountUuid": "7ffdd23f-7eb7-49a5-acc9-3671ff846428",
+    "emailAddress": "deforesd@gmail.com",
+    "organizationUuid": "54950075-df2f-419b-836b-b31c129a6336",
+    "hasExtraUsageEnabled": false,
+    "displayName": "Diane",
+    "organizationRole": "admin",
+    "workspaceRole": null,
+    "organizationName": "deforesd@gmail.com's Organization"
+  },
+  "skillUsage": {
+    "init": {
+      "usageCount": 1,
+      "lastUsedAt": 1768641410591
+    }
+  }
+}
