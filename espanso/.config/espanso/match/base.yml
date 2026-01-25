@@ -1,18 +1,44 @@
+# Espanso Configuration - Modern & French locale
+# Placeholders {{USER_NAME}} and {{USER_EMAIL}} are replaced during dotfiles install
+
 matches:
-  - trigger: ";espanso"
-    replace: "Hi there!"
-  - trigger: ";np"
-    replace: "No problem"
+  # ═══════════════════════════════════════════════════════════════════════════
+  # QUICK RESPONSES
+  # ═══════════════════════════════════════════════════════════════════════════
+  - trigger: ";thx"
+    replace: "Merci !"
   - trigger: ";ty"
-    replace: "thank you"
-  - trigger: ";Ty"
-    replace: "Thank you"
+    replace: "Thank you!"
+  - trigger: ";np"
+    replace: "Pas de souci"
+  - trigger: ";npp"
+    replace: "No problem"
+  - trigger: ";pls"
+    replace: "S'il te plaît"
+  - trigger: ";plz"
+    replace: "Please"
+  - trigger: ";cdlt"
+    replace: "Cordialement,"
   - trigger: ";kr"
     replace: "Kind regards,"
-  - trigger: ";lorem"
-    replace: "Lorem ipsum dolor sit amet, consectetur adipisici elit, sed eiusmod tempor incidunt ut labore et dolore magna aliqua."
+  - trigger: ";br"
+    replace: "Best regards,"
+  - trigger: ";asap"
+    replace: "dès que possible"
+  - trigger: ";afk"
+    replace: "Je reviens dans quelques minutes"
+  - trigger: ";omw"
+    replace: "J'arrive !"
+  - trigger: ";idk"
+    replace: "Je ne sais pas"
+  - trigger: ";lmk"
+    replace: "Tiens-moi au courant"
+  - trigger: ";fyi"
+    replace: "Pour info"
 
-  # DATE -------------------------------------------------------------------------------------------
+  # ═══════════════════════════════════════════════════════════════════════════
+  # DATE & TIME (French locale)
+  # ═══════════════════════════════════════════════════════════════════════════
   - trigger: ";date"
     replace: "{{out}}"
     vars:
@@ -20,6 +46,49 @@ matches:
         type: date
         params:
           format: "%d/%m/%Y"
+  - trigger: ";datel"
+    replace: "{{out}}"
+    vars:
+      - name: out
+        type: date
+        params:
+          format: "%A %d %B %Y"
+          locale: "fr-FR"
+  - trigger: ";time"
+    replace: "{{out}}"
+    vars:
+      - name: out
+        type: date
+        params:
+          format: "%H:%M"
+  - trigger: ";now"
+    replace: "{{out}}"
+    vars:
+      - name: out
+        type: date
+        params:
+          format: "%d/%m/%Y %H:%M"
+  - trigger: ";iso"
+    replace: "{{out}}"
+    vars:
+      - name: out
+        type: date
+        params:
+          format: "%Y-%m-%dT%H:%M:%S%z"
+  - trigger: ";ts"
+    replace: "{{out}}"
+    vars:
+      - name: out
+        type: date
+        params:
+          format: "%Y%m%d_%H%M%S"
+  - trigger: ";week"
+    replace: "Semaine {{out}}"
+    vars:
+      - name: out
+        type: date
+        params:
+          format: "%W"
   - trigger: ";dow"
     replace: "{{out}}"
     vars:
@@ -27,13 +96,7 @@ matches:
         type: date
         params:
           format: "%A"
-  - trigger: ";week"
-    replace: "{{out}}"
-    vars:
-      - name: out
-        type: date
-        params:
-          format: "%W"
+          locale: "fr-FR"
   - trigger: ";month"
     replace: "{{out}}"
     vars:
@@ -41,74 +104,135 @@ matches:
         type: date
         params:
           format: "%B"
-  - trigger: ";tz"
+          locale: "fr-FR"
+  - trigger: ";year"
     replace: "{{out}}"
     vars:
       - name: out
         type: date
         params:
-          format: "%Z"
-  - trigger: ";iso"
-    replace: "{{out}}"
-    vars:
-      - name: out
-        type: date
-        params:
-          format: "%Y-%m-%dT%T%z"
+          format: "%Y"
 
-  # SYSTEM -----------------------------------------------------------------------------------------
-  - trigger: ";user"
-    replace: "{{output}}"
-    vars:
-      - name: output
-        type: shell
-        params:
-          cmd: "whoami"
-  - trigger: ";host"
-    replace: "{{output}}"
-    vars:
-      - name: output
-        type: shell
-        params:
-          cmd: "hostnamectl hostname"
-  - trigger: ";kernel"
-    replace: "Linux {{output}}"
-    vars:
-      - name: output
-        type: shell
-        params:
-          cmd: "uname -r"
-  - trigger: ";locale"
-    replace: "{{output}}"
-    vars:
-      - name: output
-        type: shell
-        params:
-          cmd: "echo $LANG"
-
-  # PERSONAL ---------------------------------------------------------------------------------------
+  # ═══════════════════════════════════════════════════════════════════════════
+  # PERSONAL INFO (injected during install)
+  # ═══════════════════════════════════════════════════════════════════════════
   - trigger: ";name"
-    replace: "Rolv Apneseth"
+    replace: "{{USER_NAME}}"
   - trigger: ";email"
-    replace: "rolv.apneseth@gmail.com"
-  - trigger: ";web"
-    replace: "https://rolvapneseth.xyz"
+    replace: "{{USER_EMAIL}}"
   - trigger: ";gh"
-    replace: "https://github.com/Rolv-Apneseth"
-  - trigger: ";linked"
-    replace: "https://www.linkedin.com/in/rolv-apneseth-6b47401b5"
+    replace: "https://github.com/{{GITHUB_USERNAME}}"
+  - trigger: ";sig"
+    replace: |
+      --
+      {{USER_NAME}}
+      {{USER_EMAIL}}
 
-  # SYMBOLS ----------------------------------------------------------------------------------------
-  - trigger: ";copyright"
-    replace: "©"
+  # ═══════════════════════════════════════════════════════════════════════════
+  # DEV - Code snippets
+  # ═══════════════════════════════════════════════════════════════════════════
+  - trigger: ";todo"
+    replace: "// TODO: "
+  - trigger: ";fixme"
+    replace: "// FIXME: "
+  - trigger: ";hack"
+    replace: "// HACK: "
+  - trigger: ";note"
+    replace: "// NOTE: "
+  - trigger: ";bug"
+    replace: "// BUG: "
+  - trigger: ";clog"
+    replace: "console.log($|$)"
+  - trigger: ";plog"
+    replace: "print($|$)"
+  - trigger: ";dbg"
+    replace: "debugger;"
+  - trigger: ";imp"
+    replace: "import { $|$ } from '';"
+  - trigger: ";expd"
+    replace: "export default "
+  - trigger: ";afn"
+    replace: "async function $|$() {\n  \n}"
+  - trigger: ";arrow"
+    replace: "($|$) => {}"
+  - trigger: ";trycatch"
+    replace: |
+      try {
+        $|$
+      } catch (error) {
+        console.error(error);
+      }
+
+  # ═══════════════════════════════════════════════════════════════════════════
+  # DEV - Git
+  # ═══════════════════════════════════════════════════════════════════════════
+  - trigger: ";gca"
+    replace: "git commit -am \""
+  - trigger: ";gcm"
+    replace: "git commit -m \""
+  - trigger: ";gps"
+    replace: "git push origin "
+  - trigger: ";gpl"
+    replace: "git pull origin "
+  - trigger: ";gco"
+    replace: "git checkout "
+  - trigger: ";gbr"
+    replace: "git branch "
+  - trigger: ";gmr"
+    replace: "git merge "
+  - trigger: ";grb"
+    replace: "git rebase "
+  - trigger: ";gst"
+    replace: "git stash"
+  - trigger: ";gstp"
+    replace: "git stash pop"
+
+  # ═══════════════════════════════════════════════════════════════════════════
+  # MARKDOWN
+  # ═══════════════════════════════════════════════════════════════════════════
+  - trigger: ";h1"
+    replace: "# "
+  - trigger: ";h2"
+    replace: "## "
+  - trigger: ";h3"
+    replace: "### "
+  - trigger: ";cb"
+    replace: "```\n$|$\n```"
+  - trigger: ";cbjs"
+    replace: "```javascript\n$|$\n```"
+  - trigger: ";cbpy"
+    replace: "```python\n$|$\n```"
+  - trigger: ";cbsh"
+    replace: "```bash\n$|$\n```"
+  - trigger: ";link"
+    replace: "[$|$](url)"
+  - trigger: ";img"
+    replace: "![$|$](url)"
+  - trigger: ";task"
+    replace: "- [ ] "
+  - trigger: ";taskd"
+    replace: "- [x] "
+  - trigger: ";table"
+    replace: |
+      | Header 1 | Header 2 | Header 3 |
+      |----------|----------|----------|
+      | Cell 1   | Cell 2   | Cell 3   |
+
+  # ═══════════════════════════════════════════════════════════════════════════
+  # SYMBOLS & SPECIAL CHARS
+  # ═══════════════════════════════════════════════════════════════════════════
   # Arrows
-  - trigger: ";arrowr"
+  - trigger: ";->"
     replace: "→"
-  - trigger: ";arrowl"
+  - trigger: ";<-"
     replace: "←"
-  - trigger: ";arrowu"
+  - trigger: ";=>"
+    replace: "⇒"
+  - trigger: ";<="
+    replace: "⇐"
+  - trigger: ";up"
     replace: "↑"
-  - trigger: ";arrowd"
+  - trigger: ";down"
     replace: "↓"
   # Currency
   - trigger: ";eur"
@@ -118,106 +242,111 @@ matches:
   - trigger: ";usd"
     replace: "$"
   - trigger: ";btc"
-    replace: "฿"
+    replace: "₿"
+  # Math & Logic
+  - trigger: ";deg"
+    replace: "°"
+  - trigger: ";+-"
+    replace: "±"
+  - trigger: ";neq"
+    replace: "≠"
+  - trigger: ";leq"
+    replace: "≤"
+  - trigger: ";geq"
+    replace: "≥"
+  - trigger: ";inf"
+    replace: "∞"
+  - trigger: ";sqrt"
+    replace: "√"
+  - trigger: ";sum"
+    replace: "∑"
+  - trigger: ";pi"
+    replace: "π"
+  # Other
+  - trigger: ";copy"
+    replace: "©"
+  - trigger: ";reg"
+    replace: "®"
+  - trigger: ";tm"
+    replace: "™"
+  - trigger: ";check"
+    replace: "✓"
+  - trigger: ";cross"
+    replace: "✗"
+  - trigger: ";star"
+    replace: "★"
+  - trigger: ";heart"
+    replace: "♥"
+  - trigger: ";bullet"
+    replace: "•"
+  - trigger: ";ellip"
+    replace: "…"
+  - trigger: ";shrug"
+    replace: "¯\\_(ツ)_/¯"
+  - trigger: ";lenny"
+    replace: "( ͡° ͜ʖ ͡°)"
+  - trigger: ";flip"
+    replace: "(╯°□°)╯︵ ┻━┻"
 
-  # REQUESTS / APIS --------------------------------------------------------------------------------
-  # Random name
-  - trigger: ";Rname"
-    replace: "{{output}}"
-    vars:
-      - name: output
-        type: shell
-        params:
-          cmd: "curl 'https://randomuser.me/api/' | jq -r '.results[0].name.first, .results[0].name.last' | sd '\n' ' '"
-  # Random email
-  - trigger: ";Remail"
-    replace: "{{output}}"
-    vars:
-      - name: output
-        type: shell
-        params:
-          cmd: "curl 'https://randomuser.me/api/' | jq -r '.results[0].email'"
-  # Random username
-  - trigger: ";Ruser"
-    replace: "{{output}}"
-    vars:
-      - name: output
-        type: shell
-        params:
-          cmd: "curl 'https://randomuser.me/api/' | jq -r '.results[0].login.username'"
+  # ═══════════════════════════════════════════════════════════════════════════
+  # LOREM IPSUM
+  # ═══════════════════════════════════════════════════════════════════════════
+  - trigger: ";lorem"
+    replace: "Lorem ipsum dolor sit amet, consectetur adipiscing elit."
+  - trigger: ";loremp"
+    replace: "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat."
 
-  # IP
-  - trigger: ";ip4"
+  # ═══════════════════════════════════════════════════════════════════════════
+  # SYSTEM INFO (shell commands)
+  # ═══════════════════════════════════════════════════════════════════════════
+  - trigger: ";ip"
     replace: "{{output}}"
     vars:
       - name: output
         type: shell
         params:
-          cmd: "curl https://api.ipify.org"
-  - trigger: ";ip6"
+          cmd: "curl -s https://api.ipify.org"
+  - trigger: ";host"
     replace: "{{output}}"
     vars:
       - name: output
         type: shell
         params:
-          cmd: "curl https://api64.ipify.org"
+          cmd: "hostname"
+  - trigger: ";pwd"
+    replace: "{{output}}"
+    vars:
+      - name: output
+        type: shell
+        params:
+          cmd: "pwd"
+  - trigger: ";uuid"
+    replace: "{{output}}"
+    vars:
+      - name: output
+        type: shell
+        params:
+          cmd: "uuidgen 2>/dev/null || cat /proc/sys/kernel/random/uuid"
 
-  # Norwegian government pension fund value
-  - trigger: ";fund"
-    replace: "{{output}} NOK"
+  # ═══════════════════════════════════════════════════════════════════════════
+  # FORMS - Dynamic input
+  # ═══════════════════════════════════════════════════════════════════════════
+  - trigger: ";meet"
+    replace: "📅 Réunion: {{title}}\n📍 Lieu: {{location}}\n🕐 Heure: {{time}}\n👥 Participants: {{participants}}"
     vars:
-      - name: output
-        type: shell
+      - name: title
+        type: form
         params:
-          cmd: "curl 'https://www.nbim.no/LiveNavHandler/Current.ashx?key=263c30dd-d5ba-41d6-a9b1-c1fb59cf30da' | jq -r .d.liveNavList[0].values[0].Value"
-
-  # DICE -------------------------------------------------------------------------------------------
-  - trigger: ";d2"
-    replace: "{{output}}"
-    vars:
-      - name: output
-        type: random
+          layout: "Titre de la réunion: [[title]]"
+      - name: location
+        type: form
         params:
-          choices:
-            - "1"
-            - "2"
-  - trigger: ";d3"
-    replace: "{{output}}"
-    vars:
-      - name: output
-        type: random
+          layout: "Lieu: [[location]]"
+      - name: time
+        type: form
         params:
-          choices:
-            - "1"
-            - "2"
-            - "3"
-  - trigger: ";d6"
-    replace: "{{output}}"
-    vars:
-      - name: output
-        type: random
+          layout: "Heure: [[time]]"
+      - name: participants
+        type: form
         params:
-          choices:
-            - "1"
-            - "2"
-            - "3"
-            - "4"
-            - "5"
-            - "6"
-  - trigger: ";d10"
-    replace: "{{output}}"
-    vars:
-      - name: output
-        type: random
-        params:
-          choices:
-            - "1"
-            - "2"
-            - "3"
-            - "4"
-            - "5"
-            - "6"
-            - "7"
-            - "8"
-            - "9"
-            - "10"
+          layout: "Participants: [[participants]]"

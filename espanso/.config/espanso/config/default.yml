@@ -1,4 +1,29 @@
+# Espanso Configuration
+# https://espanso.org/docs/configuration/
+
+# Toggle espanso on/off with ALT key (double-tap)
 toggle_key: ALT
+
+# Automatically restart when config changes
 auto_restart: true
+
+# Hide system tray icon (cleaner desktop)
 show_icon: false
+
+# Allow undoing expansions with backspace
 undo_backspace: true
+
+# Preserve clipboard content after paste
+preserve_clipboard: true
+
+# Delay between key events (ms) - increase if expansions are glitchy
+inject_delay: 0
+
+# Use clipboard for pasting (faster, works better with special chars)
+backend: Clipboard
+
+# Search bar shortcut (ALT + Space to search triggers)
+search_shortcut: ALT+SPACE
+
+# Notification settings
+show_notifications: false

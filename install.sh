@@ -67,10 +67,58 @@ else
 fi
 echo ""
 
+# --- User Identity Configuration ---
+echo "👤 Configuring user identity..."
+
+# Get user info from .env, environment, or prompt
+get_user_info() {
+    # Priority: .env > environment > prompt
+
+    # USER_NAME
+    if [ -z "${USER_NAME}" ]; then
+        if [ -t 0 ]; then
+            read -p "📝 Enter your name (for git/espanso): " USER_NAME
+            USER_NAME="${USER_NAME:-Diane}"
+        else
+            USER_NAME="Diane"
+            log "INFO" "Using default name: $USER_NAME (set USER_NAME in .env to customize)"
+        fi
+    fi
+
+    # USER_EMAIL
+    if [ -z "${USER_EMAIL}" ]; then
+        if [ -t 0 ]; then
+            read -p "📧 Enter your email (for git/espanso): " USER_EMAIL
+            USER_EMAIL="${USER_EMAIL:-noreply@example.com}"
+        else
+            USER_EMAIL="35034946+dianedef@users.noreply.github.com"
+            log "INFO" "Using default email: $USER_EMAIL (set USER_EMAIL in .env to customize)"
+        fi
+    fi
+
+    # GITHUB_USERNAME
+    if [ -z "${GITHUB_USERNAME}" ]; then
+        # Try to extract from email if it's a GitHub noreply
+        if [[ "$USER_EMAIL" =~ \+(.+)@users\.noreply\.github\.com ]]; then
+            GITHUB_USERNAME="${BASH_REMATCH[1]}"
+        elif [ -t 0 ]; then
+            read -p "🐙 Enter your GitHub username: " GITHUB_USERNAME
+            GITHUB_USERNAME="${GITHUB_USERNAME:-dianedef}"
+        else
+            GITHUB_USERNAME="dianedef"
+        fi
+    fi
+
+    export USER_NAME USER_EMAIL GITHUB_USERNAME
+    log "INFO" "✅ User identity: $USER_NAME <$USER_EMAIL> (@$GITHUB_USERNAME)"
+}
+
+get_user_info
+
 # --- Git Configuration ---
 echo "🔧 Configuring git user identity..."
-git config --global user.name "Diane DEFORES"
-git config --global user.email "deforesd@gmail.com"
+git config --global user.name "$USER_NAME"
+git config --global user.email "$USER_EMAIL"
 log "INFO" "✅ Git user identity configured"
 
 # --- 1. Installation de Neovim ---
@@ -446,6 +494,44 @@ fi
 if [ -d "$SOURCE_DIR/ranger" ]; then
     log "INFO" "Linking ranger config..."
     create_symlink "$SOURCE_DIR/ranger" "$HOME/.config/ranger"
+fi
+
+# Configurer Espanso (si présent)
+if [ -d "$SOURCE_DIR/espanso/.config/espanso" ]; then
+    log "INFO" "Setting up Espanso text expander..."
+
+    # Inject user info into espanso config
+    ESPANSO_BASE="$SOURCE_DIR/espanso/.config/espanso/match/base.yml"
+    if [ -f "$ESPANSO_BASE" ]; then
+        log "INFO" "Injecting user info into Espanso config..."
+        sed -i "s/{{USER_NAME}}/$USER_NAME/g" "$ESPANSO_BASE"
+        sed -i "s/{{USER_EMAIL}}/$USER_EMAIL/g" "$ESPANSO_BASE"
+        sed -i "s/{{GITHUB_USERNAME}}/$GITHUB_USERNAME/g" "$ESPANSO_BASE"
+        log "INFO" "✅ Espanso config personalized"
+    fi
+
+    # Create symlink
+    create_symlink "$SOURCE_DIR/espanso/.config/espanso" "$HOME/.config/espanso"
+    log "INFO" "✅ Espanso config linked to $HOME/.config/espanso"
+
+    # Install espanso if not present
+    if ! command -v espanso &> /dev/null; then
+        log "INFO" "Installing Espanso..."
+        # Try snap first (most common on Ubuntu)
+        if command -v snap &> /dev/null; then
+            sudo snap install espanso --classic 2>/dev/null && log "INFO" "✅ Espanso installed via snap"
+        # Fallback to manual install
+        elif [ "$(uname -m)" = "x86_64" ]; then
+            cd /tmp
+            curl -sLO "https://github.com/espanso/espanso/releases/latest/download/espanso-debian-x11-amd64.deb"
+            sudo dpkg -i espanso-debian-x11-amd64.deb 2>/dev/null || sudo apt-get install -f -y 2>/dev/null
+            rm -f espanso-debian-x11-amd64.deb
+            cd - > /dev/null
+            command -v espanso &> /dev/null && log "INFO" "✅ Espanso installed"
+        fi
+    else
+        log "INFO" "✅ Espanso already installed: $(espanso --version 2>/dev/null || echo 'installed')"
+    fi
 fi
 
 # Configurer Starship avec détection automatique de l'environnement
