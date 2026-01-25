@@ -1,5 +1,5 @@
 # Claude Code runtime files - generated automatically during usage
-# Configuration files, history, todos, and projects are now versioned
+# Only config files are versioned (settings.json, statusline scripts)
 
 # Debug logs and stats
 debug/
@@ -16,5 +16,17 @@ session-env/
 file-history/
 
 # Plugins - only exclude downloaded marketplaces content
-# The known_marketplaces.json config is versioned
 plugins/marketplaces/
+
+# Session data (large, not needed in dotfiles)
+.claude/
+projects/
+history.jsonl
+cache/
+paste-cache/
+plans/
+tasks/
+todos/
+
+# Credentials (sensitive)
+.credentials.json
