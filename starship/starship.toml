@@ -12,7 +12,7 @@ scan_timeout = 10
 command_timeout = 500
 
 # Format adapts based on environment
-format = """$custom.env $username $hostname $directory $git_branch $git_status $nodejs $python $rust $golang $java $cmd_duration
+format = """$custom.env $username $hostname $directory $git_branch $git_status $custom.port $nodejs $python $rust $golang $java $cmd_duration
 $character"""
 
 # Prompt character with emoji
@@ -37,6 +37,19 @@ fi
 when = "true"
 format = '[$output]($style) '
 style = 'bold blue'
+shell = ["bash", "--noprofile", "--norc"]
+
+# Port from ecosystem.config.js (PM2)
+[custom.port]
+command = '''
+if [ -f ecosystem.config.js ]; then
+    port=$(grep -oP 'PORT["\s:]+\K\d+' ecosystem.config.js 2>/dev/null | head -1)
+    [ -n "$port" ] && echo ":$port"
+fi
+'''
+when = "test -f ecosystem.config.js"
+format = '[$output]($style)'
+style = 'bold yellow'
 shell = ["bash", "--noprofile", "--norc"]
 
 # Custom codespace detection - ONLY in real codespaces
