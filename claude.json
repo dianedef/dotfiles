@@ -1,5 +1,5 @@
 {
-  "numStartups": 39,
+  "numStartups": 40,
   "installMethod": "native",
   "autoUpdates": false,
   "theme": "dark-daltonized",
@@ -83,14 +83,14 @@
     "tengu_cache_plum_violet": false,
     "tengu_plank_river_frost": "user_intent",
     "tengu_scarf_coffee": false,
-    "tengu_keybinding_customization_release": false,
+    "tengu_keybinding_customization_release": true,
     "tengu_pr_status_cli": true,
     "tengu_marble_kite": false,
     "tengu_kv7_prompt_sort": false,
     "tengu_cork_m4q": false,
     "tengu_compact_cache_prefix": false,
     "tengu_plum_vx3": false,
-    "tengu_marble_anvil": false,
+    "tengu_marble_anvil": true,
     "tengu_coral_fern": false,
     "tengu_tst_kx7": false
   },
@@ -101,11 +101,11 @@
   "opusProMigrationComplete": true,
   "thinkingMigrationComplete": true,
   "cachedChromeExtensionInstalled": false,
-  "changelogLastFetched": 1769614154588,
+  "changelogLastFetched": 1769693700705,
   "claudeCodeFirstTokenDate": "2026-01-01T21:28:03.260790Z",
   "hasCompletedOnboarding": true,
   "lastOnboardingVersion": "2.1.9",
-  "lastReleaseNotesSeen": "2.1.20",
+  "lastReleaseNotesSeen": "2.1.23",
   "projects": {
     "/root": {
       "allowedTools": [],
@@ -593,6 +593,40 @@
         }
       },
       "lastSessionId": "6bba005f-2e2a-4694-bf27-559d98d62488"
+    },
+    "/home/claude": {
+      "allowedTools": [],
+      "mcpContextUris": [],
+      "mcpServers": {},
+      "enabledMcpjsonServers": [],
+      "disabledMcpjsonServers": [],
+      "hasTrustDialogAccepted": true,
+      "projectOnboardingSeenCount": 1,
+      "hasClaudeMdExternalIncludesApproved": false,
+      "hasClaudeMdExternalIncludesWarningShown": false,
+      "reactVulnerabilityCache": {
+        "detected": false,
+        "package": null,
+        "packageName": null,
+        "version": null,
+        "packageManager": null
+      },
+      "lastCost": 0,
+      "lastAPIDuration": 0,
+      "lastAPIDurationWithoutRetries": 0,
+      "lastToolDuration": 0,
+      "lastDuration": 159592,
+      "lastLinesAdded": 0,
+      "lastLinesRemoved": 0,
+      "lastTotalInputTokens": 0,
+      "lastTotalOutputTokens": 0,
+      "lastTotalCacheCreationInputTokens": 0,
+      "lastTotalCacheReadInputTokens": 0,
+      "lastTotalWebSearchRequests": 0,
+      "lastFpsAverage": 0.34,
+      "lastFpsLow1Pct": 48.71,
+      "lastModelUsage": {},
+      "lastSessionId": "758ac1e4-ce50-48e9-bd8d-f1d56e0641b5"
     }
   },
   "hasShownOpus45Notice": {
@@ -602,13 +636,13 @@
     "54950075-df2f-419b-836b-b31c129a6336": {
       "hasAccess": false,
       "hasAccessNotAsDefault": false,
-      "timestamp": 1769593044883
+      "timestamp": 1769693700685
     }
   },
   "groveConfigCache": {
     "7ffdd23f-7eb7-49a5-acc9-3671ff846428": {
       "grove_enabled": true,
-      "timestamp": 1769518084582
+      "timestamp": 1769693699916
     }
   },
   "officialMarketplaceAutoInstallAttempted": true,
@@ -663,7 +697,7 @@
         "referral_link": "https://claude.ai/referral/K5mbypOPRQ"
       },
       "referrer_reward": null,
-      "timestamp": 1769614280945
+      "timestamp": 1769693606885
     }
   },
   "passesUpsellSeenCount": 4,
