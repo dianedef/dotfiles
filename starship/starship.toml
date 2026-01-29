@@ -12,7 +12,7 @@ scan_timeout = 10
 command_timeout = 500
 
 # Format adapts based on environment
-format = """$custom.env $username $hostname $directory $git_branch $git_status $custom.port $nodejs $python $rust $golang $java $cmd_duration
+format = """${custom.env} $username $hostname $directory $git_branch $git_status ${custom.port} $nodejs $python $rust $golang $java $cmd_duration
 $character"""
 
 # Prompt character with emoji
@@ -39,16 +39,19 @@ format = '[$output]($style) '
 style = 'bold blue'
 shell = ["bash", "--noprofile", "--norc"]
 
-# Port from ecosystem.config.js (PM2)
+# Port from ecosystem.config.js/cjs (PM2)
 [custom.port]
 command = '''
-if [ -f ecosystem.config.js ]; then
-    port=$(grep -oP 'PORT["\s:]+\K\d+' ecosystem.config.js 2>/dev/null | head -1)
-    [ -n "$port" ] && echo ":$port"
+file=""
+[ -f ecosystem.config.js ] && file="ecosystem.config.js"
+[ -f ecosystem.config.cjs ] && file="ecosystem.config.cjs"
+if [ -n "$file" ]; then
+    port=$(grep -oP 'PORT["\s:]+\K\d+' "$file" 2>/dev/null | head -1)
+    [ -n "$port" ] && echo "⚓$port"
 fi
 '''
-when = "test -f ecosystem.config.js"
-format = '[$output]($style)'
+when = "test -f ecosystem.config.js || test -f ecosystem.config.cjs"
+format = '[$output]($style) '
 style = 'bold yellow'
 shell = ["bash", "--noprofile", "--norc"]
 

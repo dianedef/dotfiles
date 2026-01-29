@@ -4,7 +4,7 @@
     "command": "/bin/bash /root/.claude/statusline-starship.sh"
   },
   "permissions": {
-    "defaultMode": "acceptEdits",
+    "defaultMode": "bypassPermissions",
     "allow": [
       "Bash",
       "Edit",

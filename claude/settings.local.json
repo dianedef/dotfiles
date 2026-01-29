@@ -4,7 +4,15 @@
       "Bash(source /root/.bashrc)",
       "Bash(docker compose:*)",
       "Bash(docker ps:*)",
-      "Bash(docker logs:*)"
+      "Bash(docker logs:*)",
+      "WebSearch",
+      "WebFetch(domain:langfuse.com)",
+      "WebFetch(domain:github.com)",
+      "WebFetch(domain:www.npmjs.com)",
+      "WebFetch(domain:docs.questera.ai)",
+      "WebFetch(domain:react-gamification-demo-site.vercel.app)",
+      "WebFetch(domain:www.plgos.com)",
+      "WebFetch(domain:socket.dev)"
     ]
   }
 }
