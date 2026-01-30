@@ -1007,7 +1007,7 @@ if ! grep -q "# Productivity aliases" "$HOME/.bashrc" 2>/dev/null; then
     echo "# Git shortcuts" >> "$HOME/.bashrc"
     echo "alias gs='git status'" >> "$HOME/.bashrc"
     echo "alias ga='git add . && echo \"✓ All files staged\"'" >> "$HOME/.bashrc"
-    echo "alias gc='git commit -m'" >> "$HOME/.bashrc"
+    echo "gc() { git commit -m \"\${1:-up}\"; }" >> "$HOME/.bashrc"
     echo "alias gf='git fetch'" >> "$HOME/.bashrc"
     echo "alias gp='git push'" >> "$HOME/.bashrc"
     echo "alias gl='git pull'" >> "$HOME/.bashrc"

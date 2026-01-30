@@ -278,7 +278,7 @@ alias ...='cd ../..'
 # Git shortcuts
 alias gs='git status'
 alias ga='git add .'
-alias gc='git commit -m'
+gc() { git commit -m "${1:-up}"; }
 alias gp='git push'
 alias gl='git pull'
 alias gd='git diff'
