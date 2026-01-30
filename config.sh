@@ -60,14 +60,15 @@ export SKIP_NERD_FONTS="${SKIP_NERD_FONTS:-false}"
 export SKIP_NPM_TOOLS="${SKIP_NPM_TOOLS:-false}"
 export SKIP_YAZI_INSTALL="${SKIP_YAZI_INSTALL:-false}"
 export SKIP_DOPPLER_INSTALL="${SKIP_DOPPLER_INSTALL:-false}"
+export SKIP_MCP_INSTALL="${SKIP_MCP_INSTALL:-false}"
 export AUTO_INSTALL_NVIM_PLUGINS="${AUTO_INSTALL_NVIM_PLUGINS:-false}"
 export USER_LOCAL_MODE="${USER_LOCAL_MODE:-false}"
 
 # ============================================================================
 # PACKAGE LISTS
 # ============================================================================
-export DOTFILES_APT_PACKAGES="git curl wget unzip tar build-essential"
-export DOTFILES_NPM_PACKAGES="@anthropic-ai/claude-code"
+export DOTFILES_APT_PACKAGES="git curl wget unzip tar build-essential jq libsecret-1-0"
+export DOTFILES_NPM_PACKAGES="@anthropic-ai/claude-code @apify/mcpc"
 
 # ============================================================================
 # CACHE CONFIGURATION
@@ -84,7 +85,7 @@ export DOTFILES_DANGEROUS_CHARS_REGEX='[;&|$`]'
 # ============================================================================
 # AVAILABLE COMPONENTS (for --only flag)
 # ============================================================================
-export DOTFILES_ALL_COMPONENTS="neovim,fzf,nerd-fonts,node,npm-tools,starship,zoxide,yazi,doppler,configs,shell-integration"
+export DOTFILES_ALL_COMPONENTS="neovim,fzf,nerd-fonts,node,npm-tools,starship,zoxide,yazi,doppler,mcp,configs,shell-integration"
 
 # ============================================================================
 # CHECKSUMS (SHA256 for critical downloads - updated periodically)

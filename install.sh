@@ -99,7 +99,7 @@ setup_user_local_mode() {
     export PATH="$DOTFILES_BIN_DIR:$DOTFILES_NPM_DIR/bin:$PATH"
 
     if ! is_dry_run; then
-        append_to_bashrc '.local/bin' 'export PATH="$HOME/.local/bin:$HOME/.npm-global/bin:$PATH"' "User-local binaries"
+        append_to_bashrc '.local/bin' 'export PATH="$HOME/.local/bin:$HOME/.npm-global/bin:$PATH"' "User-local binaries" || true
     fi
 
     success "User-local paths configured"
@@ -440,7 +440,7 @@ install_npm_tools() {
     fi
 
     if is_dry_run; then
-        echo -e "${BLUE}[DRY-RUN]${NC} Would install npm tools: @github/copilot, @kilocode/cli, opencode-ai, tldr"
+        echo -e "${BLUE}[DRY-RUN]${NC} Would install npm tools: @github/copilot, @kilocode/cli, opencode-ai, tldr, @apify/mcpc"
         return 0
     fi
 
@@ -450,7 +450,7 @@ install_npm_tools() {
     export PATH="$DOTFILES_NPM_DIR/bin:$PATH"
 
     info "Installing CLI tools via npm..."
-    for pkg in "@github/copilot" "@kilocode/cli" "opencode-ai" "tldr"; do
+    for pkg in "@github/copilot" "@kilocode/cli" "opencode-ai" "tldr" "@apify/mcpc"; do
         npm install -g "$pkg" 2>/dev/null && success "$pkg installed" || warn "$pkg failed"
     done
 
@@ -602,6 +602,87 @@ install_doppler() {
 }
 
 # ============================================================================
+# MCP (MODEL CONTEXT PROTOCOL) CONFIGURATION
+# ============================================================================
+setup_mcp_config() {
+    if ! should_install "mcp"; then return 0; fi
+    if [ "$SKIP_MCP_INSTALL" = "true" ]; then
+        info "Skipping MCP config (SKIP_MCP_INSTALL=true)"
+        return 0
+    fi
+
+    if [ ! -f "$SCRIPT_DIR/mcp/mcp-servers.json" ]; then
+        log DEBUG "No mcp/mcp-servers.json found, skipping MCP setup"
+        return 0
+    fi
+
+    info "Setting up MCP server configurations..."
+
+    if is_dry_run; then
+        echo -e "${BLUE}[DRY-RUN]${NC} Would setup MCP configs for Claude Code, Kilocode, etc."
+        return 0
+    fi
+
+    # Function to merge MCP servers into existing JSON config
+    merge_mcp_config() {
+        local source_mcp="$1"
+        local target_file="$2"
+        local target_dir
+        target_dir=$(dirname "$target_file")
+
+        mkdir -p "$target_dir"
+
+        if is_installed jq; then
+            if [ -f "$target_file" ]; then
+                local mcp_servers
+                mcp_servers=$(jq '.mcpServers // {}' "$source_mcp" 2>/dev/null)
+                jq --argjson mcp "$mcp_servers" '.mcpServers = ($mcp + (.mcpServers // {}))' "$target_file" > "${target_file}.tmp" && mv "${target_file}.tmp" "$target_file"
+                log DEBUG "Merged MCP servers into $target_file"
+            else
+                jq '{mcpServers: .mcpServers}' "$source_mcp" > "$target_file"
+                log DEBUG "Created $target_file with MCP servers"
+            fi
+        else
+            ln -sf "$source_mcp" "${target_dir}/mcp-servers.json"
+            log DEBUG "Created symlink (jq not available)"
+        fi
+    }
+
+    # Claude Code: merge into ~/.claude/settings.json
+    if [ -d "$HOME/.claude" ]; then
+        local claude_settings="$HOME/.claude/settings.json"
+        if [ -f "$claude_settings" ]; then
+            merge_mcp_config "$SCRIPT_DIR/mcp/mcp-servers.json" "$claude_settings"
+        elif is_installed jq; then
+            jq '{mcpServers: .mcpServers, permissions: {allow: [], deny: []}}' "$SCRIPT_DIR/mcp/mcp-servers.json" > "$claude_settings"
+        fi
+        success "Claude Code MCP config updated"
+    fi
+
+    # Kilocode: symlink to settings directory
+    if [ -d "$HOME/.kilocode" ]; then
+        local kilocode_dir="$HOME/.kilocode/cli/global/settings"
+        mkdir -p "$kilocode_dir"
+        merge_mcp_config "$SCRIPT_DIR/mcp/mcp-servers.json" "$kilocode_dir/mcp_settings.json"
+        success "Kilocode MCP config updated"
+    fi
+
+    # Claude Desktop (if exists)
+    if [ -d "$HOME/.config/claude" ]; then
+        merge_mcp_config "$SCRIPT_DIR/mcp/mcp-servers.json" "$HOME/.config/claude/claude_desktop_config.json"
+        success "Claude Desktop MCP config updated"
+    fi
+
+    # Create reference symlink in ~/.config for easy access
+    mkdir -p "$HOME/.config/mcp"
+    ln -sf "$SCRIPT_DIR/mcp/mcp-servers.json" "$HOME/.config/mcp/servers.json"
+    ln -sf "$SCRIPT_DIR/mcp/README.md" "$HOME/.config/mcp/README.md"
+
+    success "MCP configuration complete"
+    info "Edit ~/dotfiles/mcp/mcp-servers.json to add your MCP servers"
+}
+
+# ============================================================================
 # CONFIGURATION SYMLINKS
 # ============================================================================
 setup_configs() {
@@ -723,6 +804,7 @@ alias y='yazi'
 # AI coding tools
 alias k='kilocode'
 alias o='opencode'
+alias mcp='mcpc'
 ALIASES
         success "Added productivity aliases"
     fi
@@ -764,6 +846,7 @@ fi
 
 install_npm_tools
 setup_configs
+setup_mcp_config
 setup_shell_integration
 
 # ============================================================================

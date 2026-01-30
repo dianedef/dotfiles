@@ -34,6 +34,7 @@ cd ~/dotfiles && ./install.sh
 | `y` | `yazi` | File manager (Linux/Windows) |
 | `r` | `ranger` | File manager (Termux) |
 | `z <dir>` | `zoxide` | Smart directory jump |
+| `mcp` | `mcpc` | MCP CLI client for testing servers |
 
 ## Architecture
 
@@ -42,6 +43,7 @@ cd ~/dotfiles && ./install.sh
 - **yazi/** - Yazi file manager with plugins and flavors
 - **starship/** - Shell prompt themes with `starship-switch.sh` for switching
 - **lazygit/** - Git TUI configuration
+- **mcp/** - MCP server configurations (single source of truth for Claude Code, Kilocode, etc.)
 - **_bmad/** - BMAD Method v6 (10 AI agents, 34 workflows)
 - **docs/** - Comprehensive documentation organized by category
 

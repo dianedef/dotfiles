@@ -527,6 +527,7 @@ run_health_check() {
     health_check_tool "lsd" "lsd" || ((failed++))
     health_check_tool "Git" "git" || ((failed++))
     health_check_tool "GitHub CLI" "gh" || ((failed++))
+    health_check_tool "mcpc (MCP CLI)" "mcpc" || ((failed++))
 
     echo ""
     echo "🔗 Symlinks:"
@@ -534,6 +535,7 @@ run_health_check() {
     health_check_symlink "Yazi config" "$HOME/.config/yazi" || ((failed++))
     health_check_symlink "Starship config" "$HOME/.config/starship.toml" || ((failed++))
     health_check_symlink "Tmux config" "$HOME/.tmux.conf" || ((failed++))
+    health_check_symlink "MCP config" "$HOME/.config/mcp/servers.json" || ((failed++))
 
     echo ""
     echo "🐚 Shell integration:"
@@ -912,6 +914,7 @@ Environment Variables:
   SKIP_NPM_TOOLS=true         Skip npm tools
   SKIP_YAZI_INSTALL=true      Skip Yazi
   SKIP_DOPPLER_INSTALL=true   Skip Doppler
+  SKIP_MCP_INSTALL=true       Skip MCP config setup
   USER_LOCAL_MODE=true        Install to ~/.local (no sudo)
 EOF
 }
