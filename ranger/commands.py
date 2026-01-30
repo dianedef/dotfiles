@@ -11,9 +11,70 @@ from __future__ import (absolute_import, division, print_function)
 
 # You can import any python module as needed.
 import os
+import subprocess
+import threading
 
 # You always need to import ranger.api.commands here to get the Command class:
 from ranger.api.commands import Command
+
+
+class git_fetch_all(Command):
+    """:git_fetch_all
+
+    Fetch git updates for all repositories in the current directory.
+    Runs 'git fetch' in parallel for each subdirectory that is a git repo.
+    Press 'gF' to use this command.
+    """
+
+    def execute(self):
+        cwd = self.fm.thisdir.path
+        repos = []
+
+        # Find all git repos in current directory
+        for name in os.listdir(cwd):
+            path = os.path.join(cwd, name)
+            if os.path.isdir(path) and os.path.isdir(os.path.join(path, '.git')):
+                repos.append((name, path))
+
+        if not repos:
+            self.fm.notify("No git repositories found in current directory", bad=True)
+            return
+
+        self.fm.notify(f"Fetching {len(repos)} repos...")
+
+        # Fetch in parallel using threads
+        results = {'success': 0, 'failed': 0}
+        lock = threading.Lock()
+
+        def fetch_repo(name, path):
+            try:
+                subprocess.run(
+                    ['git', 'fetch', '--all', '--quiet'],
+                    cwd=path,
+                    capture_output=True,
+                    timeout=30
+                )
+                with lock:
+                    results['success'] += 1
+            except Exception:
+                with lock:
+                    results['failed'] += 1
+
+        threads = []
+        for name, path in repos:
+            t = threading.Thread(target=fetch_repo, args=(name, path))
+            t.start()
+            threads.append(t)
+
+        # Wait for all fetches to complete in background, then notify
+        def wait_and_notify():
+            for t in threads:
+                t.join()
+            # Reload to update VCS status
+            self.fm.thisdir.load_content()
+            self.fm.notify(f"✓ Fetched {results['success']}/{len(repos)} repos")
+
+        threading.Thread(target=wait_and_notify).start()
 
 
 # Any class that is a subclass of "Command" will be integrated into ranger as a
