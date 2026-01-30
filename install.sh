@@ -914,6 +914,13 @@ if [ -d "$SOURCE_DIR/starship" ]; then
     fi
 fi
 
+# Configurer tmux
+if [ -f "$SOURCE_DIR/.tmux.conf" ]; then
+    log "INFO" "Setting up tmux configuration..."
+    create_symlink "$SOURCE_DIR/.tmux.conf" "$HOME/.tmux.conf"
+    log "INFO" "✅ Tmux config linked to $HOME/.tmux.conf"
+fi
+
 # Lier d'autres configs si présentes
 # Shell configuration is now integrated via shell-integration.sh
 # Add to your ~/.bashrc: source $SCRIPT_DIR/nvim/shell-integration.sh

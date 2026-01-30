@@ -1,0 +1,12 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(su - claude -c \"starship --version\")",
+      "Bash(starship:*)",
+      "Bash(su - claude -c 'echo \"\"CODESPACE_NAME=$CODESPACE_NAME\"\"; echo \"\"CODESPACES=$CODESPACES\"\"; env | grep -i codespace')",
+      "Bash(find:*)",
+      "Bash(chown:*)",
+      "Bash(git -C /home/claude/dotfiles status)"
+    ]
+  }
+}
