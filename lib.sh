@@ -404,3 +404,514 @@ validate_path() {
 
     return 0
 }
+
+# ============================================================================
+# DRY-RUN SUPPORT
+# ============================================================================
+# Wrapper that logs action in dry-run mode, executes otherwise
+run_action() {
+    local description="$1"
+    shift
+
+    if [ "${DOTFILES_DRY_RUN:-false}" = "true" ]; then
+        echo -e "${BLUE}[DRY-RUN]${NC} Would: $description"
+        return 0
+    else
+        "$@"
+    fi
+}
+
+# Check if we should skip due to dry-run
+is_dry_run() {
+    [ "${DOTFILES_DRY_RUN:-false}" = "true" ]
+}
+
+# ============================================================================
+# SELECTIVE INSTALLATION (--only flag)
+# ============================================================================
+# Check if a component should be installed
+should_install() {
+    local component="$1"
+
+    # If no --only specified, install everything
+    if [ -z "${DOTFILES_ONLY:-}" ]; then
+        return 0
+    fi
+
+    # Check if component is in the list
+    if [[ ",$DOTFILES_ONLY," == *",$component,"* ]]; then
+        return 0
+    fi
+
+    log DEBUG "Skipping $component (not in --only list)"
+    return 1
+}
+
+# ============================================================================
+# HEALTH CHECK (--check flag)
+# ============================================================================
+declare -A HEALTH_STATUS 2>/dev/null || true
+
+health_check_tool() {
+    local name="$1"
+    local cmd="$2"
+    local version_flag="${3:---version}"
+
+    if is_installed "$cmd"; then
+        local version
+        version=$("$cmd" $version_flag 2>&1 | head -1) || version="installed"
+        echo -e "${GREEN}✓${NC} $name: $version"
+        return 0
+    else
+        echo -e "${RED}✗${NC} $name: not installed"
+        return 1
+    fi
+}
+
+health_check_symlink() {
+    local name="$1"
+    local path="$2"
+
+    if [ -L "$path" ]; then
+        local target
+        target=$(readlink -f "$path" 2>/dev/null || readlink "$path")
+        if [ -e "$target" ]; then
+            echo -e "${GREEN}✓${NC} $name: $path -> $target"
+            return 0
+        else
+            echo -e "${YELLOW}⚠${NC} $name: broken symlink $path -> $target"
+            return 1
+        fi
+    elif [ -e "$path" ]; then
+        echo -e "${YELLOW}⚠${NC} $name: exists but not a symlink: $path"
+        return 1
+    else
+        echo -e "${RED}✗${NC} $name: missing $path"
+        return 1
+    fi
+}
+
+health_check_bashrc() {
+    local name="$1"
+    local pattern="$2"
+
+    if grep -q "$pattern" "$HOME/.bashrc" 2>/dev/null; then
+        echo -e "${GREEN}✓${NC} $name: configured in ~/.bashrc"
+        return 0
+    else
+        echo -e "${RED}✗${NC} $name: not in ~/.bashrc"
+        return 1
+    fi
+}
+
+run_health_check() {
+    echo "════════════════════════════════════════════════════════════════"
+    echo "                    DOTFILES HEALTH CHECK"
+    echo "════════════════════════════════════════════════════════════════"
+    echo ""
+
+    local failed=0
+
+    echo "📦 Tools:"
+    health_check_tool "Neovim" "nvim" || ((failed++))
+    health_check_tool "Node.js" "node" || ((failed++))
+    health_check_tool "npm" "npm" || ((failed++))
+    health_check_tool "fzf" "fzf" || ((failed++))
+    health_check_tool "Starship" "starship" || ((failed++))
+    health_check_tool "Zoxide" "zoxide" || ((failed++))
+    health_check_tool "Yazi" "yazi" || ((failed++))
+    health_check_tool "Doppler" "doppler" || ((failed++))
+    health_check_tool "ripgrep" "rg" || ((failed++))
+    health_check_tool "fd" "fd" || ((failed++))
+    health_check_tool "bat" "bat" || ((failed++))
+    health_check_tool "lsd" "lsd" || ((failed++))
+    health_check_tool "Git" "git" || ((failed++))
+    health_check_tool "GitHub CLI" "gh" || ((failed++))
+
+    echo ""
+    echo "🔗 Symlinks:"
+    health_check_symlink "Neovim config" "$HOME/.config/nvim" || ((failed++))
+    health_check_symlink "Yazi config" "$HOME/.config/yazi" || ((failed++))
+    health_check_symlink "Starship config" "$HOME/.config/starship.toml" || ((failed++))
+    health_check_symlink "Tmux config" "$HOME/.tmux.conf" || ((failed++))
+
+    echo ""
+    echo "🐚 Shell integration:"
+    health_check_bashrc "Starship" "starship init" || ((failed++))
+    health_check_bashrc "Zoxide" "zoxide init" || ((failed++))
+    health_check_bashrc "Shell integration" "shell-integration.sh" || ((failed++))
+    health_check_bashrc "PATH (local bin)" ".local/bin" || ((failed++))
+    health_check_bashrc "PATH (npm-global)" "npm-global" || ((failed++))
+
+    echo ""
+    echo "🔐 Authentication:"
+    if gh auth status &>/dev/null 2>&1; then
+        echo -e "${GREEN}✓${NC} GitHub CLI: authenticated"
+    else
+        echo -e "${RED}✗${NC} GitHub CLI: not authenticated"
+        ((failed++))
+    fi
+
+    if is_installed doppler && doppler me &>/dev/null 2>&1; then
+        echo -e "${GREEN}✓${NC} Doppler: authenticated"
+    else
+        echo -e "${YELLOW}⚠${NC} Doppler: not authenticated (optional)"
+    fi
+
+    echo ""
+    echo "════════════════════════════════════════════════════════════════"
+    if [ $failed -eq 0 ]; then
+        echo -e "${GREEN}All checks passed!${NC}"
+    else
+        echo -e "${YELLOW}$failed issue(s) found${NC}"
+    fi
+    echo "════════════════════════════════════════════════════════════════"
+
+    return $failed
+}
+
+# ============================================================================
+# UPDATE MODE (--update flag)
+# ============================================================================
+update_tool() {
+    local name="$1"
+    local current_version="$2"
+    local latest_version="$3"
+    local update_fn="$4"
+
+    if [ "$current_version" = "$latest_version" ]; then
+        success "$name is up to date ($current_version)"
+        return 0
+    fi
+
+    info "Updating $name: $current_version -> $latest_version"
+
+    if is_dry_run; then
+        echo -e "${BLUE}[DRY-RUN]${NC} Would update $name from $current_version to $latest_version"
+        return 0
+    fi
+
+    # Call the update function
+    "$update_fn"
+}
+
+get_installed_version() {
+    local tool="$1"
+
+    case "$tool" in
+        neovim)
+            nvim --version 2>/dev/null | head -1 | grep -oE 'v[0-9]+\.[0-9]+\.[0-9]+' || echo "unknown"
+            ;;
+        yazi)
+            yazi --version 2>/dev/null | grep -oE 'v?[0-9]+\.[0-9]+\.[0-9]+' | head -1 || echo "unknown"
+            ;;
+        starship)
+            starship --version 2>/dev/null | grep -oE '[0-9]+\.[0-9]+\.[0-9]+' || echo "unknown"
+            ;;
+        zoxide)
+            zoxide --version 2>/dev/null | grep -oE '[0-9]+\.[0-9]+\.[0-9]+' || echo "unknown"
+            ;;
+        fzf)
+            fzf --version 2>/dev/null | grep -oE '[0-9]+\.[0-9]+\.[0-9]+' || echo "unknown"
+            ;;
+        doppler)
+            doppler --version 2>/dev/null | grep -oE 'v?[0-9]+\.[0-9]+\.[0-9]+' | head -1 || echo "unknown"
+            ;;
+        *)
+            echo "unknown"
+            ;;
+    esac
+}
+
+# ============================================================================
+# UNINSTALL MODE (--uninstall flag)
+# ============================================================================
+uninstall_tool() {
+    local name="$1"
+    local binary_path="$2"
+    local config_paths="${3:-}"  # Comma-separated
+
+    info "Uninstalling $name..."
+
+    if is_dry_run; then
+        echo -e "${BLUE}[DRY-RUN]${NC} Would remove binary: $binary_path"
+        if [ -n "$config_paths" ]; then
+            echo -e "${BLUE}[DRY-RUN]${NC} Would remove configs: $config_paths"
+        fi
+        return 0
+    fi
+
+    # Remove binary
+    if [ -f "$binary_path" ] || [ -L "$binary_path" ]; then
+        rm -f "$binary_path"
+        log DEBUG "Removed: $binary_path"
+    fi
+
+    # Remove config directories
+    if [ -n "$config_paths" ]; then
+        IFS=',' read -ra paths <<< "$config_paths"
+        for path in "${paths[@]}"; do
+            if [ -e "$path" ] || [ -L "$path" ]; then
+                rm -rf "$path"
+                log DEBUG "Removed: $path"
+            fi
+        done
+    fi
+
+    success "Uninstalled $name"
+}
+
+remove_from_bashrc() {
+    local pattern="$1"
+    local description="$2"
+
+    if is_dry_run; then
+        echo -e "${BLUE}[DRY-RUN]${NC} Would remove from ~/.bashrc: $description"
+        return 0
+    fi
+
+    if grep -q "$pattern" "$HOME/.bashrc" 2>/dev/null; then
+        # Create backup
+        cp "$HOME/.bashrc" "$HOME/.bashrc.backup.$(date +%s)"
+        # Remove matching lines and the comment line before it
+        sed -i "/$pattern/d" "$HOME/.bashrc"
+        log DEBUG "Removed from ~/.bashrc: $pattern"
+    fi
+}
+
+run_uninstall() {
+    echo "════════════════════════════════════════════════════════════════"
+    echo "                    DOTFILES UNINSTALL"
+    echo "════════════════════════════════════════════════════════════════"
+    echo ""
+
+    warn "This will remove installed tools and configurations."
+
+    if ! is_dry_run && [ -t 0 ]; then
+        read -r -p "Are you sure? (y/N): " confirm
+        if [ "$confirm" != "y" ] && [ "$confirm" != "Y" ]; then
+            echo "Aborted."
+            return 1
+        fi
+    fi
+
+    echo ""
+
+    # Uninstall tools (user-local paths)
+    local bin_dir="$HOME/.local/bin"
+    local opt_dir="$HOME/.local"
+
+    uninstall_tool "Neovim" "$bin_dir/nvim" "$opt_dir/nvim,$HOME/.config/nvim,$HOME/.local/share/nvim,$HOME/.local/state/nvim"
+    uninstall_tool "Starship" "$bin_dir/starship" "$HOME/.config/starship.toml"
+    uninstall_tool "Zoxide" "$bin_dir/zoxide" ""
+    uninstall_tool "Yazi" "$bin_dir/yazi" "$HOME/.config/yazi"
+    uninstall_tool "fzf" "$bin_dir/fzf" "$HOME/.fzf"
+    uninstall_tool "Doppler" "$bin_dir/doppler" ""
+
+    # Remove shell integrations
+    echo ""
+    info "Removing shell integrations..."
+    remove_from_bashrc "starship init" "Starship prompt"
+    remove_from_bashrc "zoxide init" "Zoxide"
+    remove_from_bashrc "shell-integration.sh" "Neovim config switcher"
+    remove_from_bashrc "Productivity aliases" "Aliases"
+    remove_from_bashrc ".local/bin" "Local bin PATH"
+    remove_from_bashrc "npm-global" "npm global PATH"
+
+    echo ""
+    success "Uninstall complete. Run 'source ~/.bashrc' to apply changes."
+}
+
+# ============================================================================
+# PARALLEL EXECUTION
+# ============================================================================
+# Array to store background job PIDs
+declare -a PARALLEL_JOBS=()
+declare -a PARALLEL_NAMES=()
+
+parallel_run() {
+    local name="$1"
+    shift
+    local cmd="$*"
+
+    if [ "${DOTFILES_PARALLEL:-false}" = "true" ]; then
+        log DEBUG "Starting parallel: $name"
+        eval "$cmd" &
+        PARALLEL_JOBS+=($!)
+        PARALLEL_NAMES+=("$name")
+    else
+        eval "$cmd"
+    fi
+}
+
+parallel_wait() {
+    if [ "${DOTFILES_PARALLEL:-false}" != "true" ]; then
+        return 0
+    fi
+
+    if [ ${#PARALLEL_JOBS[@]} -eq 0 ]; then
+        return 0
+    fi
+
+    info "Waiting for parallel jobs to complete..."
+
+    local failed=0
+    for i in "${!PARALLEL_JOBS[@]}"; do
+        local pid="${PARALLEL_JOBS[$i]}"
+        local name="${PARALLEL_NAMES[$i]}"
+
+        if wait "$pid"; then
+            success "$name completed"
+        else
+            warn "$name failed"
+            ((failed++))
+        fi
+    done
+
+    # Reset arrays
+    PARALLEL_JOBS=()
+    PARALLEL_NAMES=()
+
+    return $failed
+}
+
+# ============================================================================
+# CHECKSUM VERIFICATION
+# ============================================================================
+verify_checksum() {
+    local file="$1"
+    local expected_sha256="$2"
+
+    if [ -z "$expected_sha256" ]; then
+        log DEBUG "No checksum provided, skipping verification"
+        return 0
+    fi
+
+    if ! is_installed sha256sum && ! is_installed shasum; then
+        warn "No sha256sum or shasum available, skipping verification"
+        return 0
+    fi
+
+    local actual_sha256
+    if is_installed sha256sum; then
+        actual_sha256=$(sha256sum "$file" | cut -d' ' -f1)
+    else
+        actual_sha256=$(shasum -a 256 "$file" | cut -d' ' -f1)
+    fi
+
+    if [ "$actual_sha256" = "$expected_sha256" ]; then
+        log DEBUG "Checksum verified: $file"
+        return 0
+    else
+        error "Checksum mismatch for $file"
+        error "Expected: $expected_sha256"
+        error "Got:      $actual_sha256"
+        return 1
+    fi
+}
+
+# Download with optional checksum verification
+download_verified() {
+    local url="$1"
+    local output="$2"
+    local expected_sha256="${3:-}"
+
+    if ! download_file "$url" "$output"; then
+        return 1
+    fi
+
+    if [ -n "$expected_sha256" ]; then
+        if ! verify_checksum "$output" "$expected_sha256"; then
+            rm -f "$output"
+            return 1
+        fi
+    fi
+
+    return 0
+}
+
+# ============================================================================
+# CLI ARGUMENT PARSING
+# ============================================================================
+parse_arguments() {
+    while [[ $# -gt 0 ]]; do
+        case "$1" in
+            --dry-run|-n)
+                export DOTFILES_DRY_RUN=true
+                info "Dry-run mode enabled"
+                ;;
+            --update|-u)
+                export DOTFILES_UPDATE_MODE=true
+                ;;
+            --uninstall)
+                export DOTFILES_UNINSTALL_MODE=true
+                ;;
+            --check|-c)
+                export DOTFILES_CHECK_MODE=true
+                ;;
+            --only=*)
+                export DOTFILES_ONLY="${1#*=}"
+                info "Installing only: $DOTFILES_ONLY"
+                ;;
+            --only)
+                shift
+                export DOTFILES_ONLY="$1"
+                info "Installing only: $DOTFILES_ONLY"
+                ;;
+            --parallel|-p)
+                export DOTFILES_PARALLEL=true
+                info "Parallel mode enabled"
+                ;;
+            --help|-h)
+                show_help
+                exit 0
+                ;;
+            --debug)
+                export DOTFILES_DEBUG_MODE=true
+                export DOTFILES_LOG_LEVEL=DEBUG
+                ;;
+            *)
+                warn "Unknown option: $1"
+                ;;
+        esac
+        shift
+    done
+}
+
+show_help() {
+    cat << 'EOF'
+Dotfiles Installation Script
+
+Usage: ./install.sh [OPTIONS]
+
+Options:
+  -n, --dry-run      Show what would be done without making changes
+  -u, --update       Update installed tools to latest versions
+  -c, --check        Run health check on installed components
+  --uninstall        Remove installed tools and configurations
+  --only=COMPONENTS  Install only specified components (comma-separated)
+                     Available: neovim,fzf,nerd-fonts,node,npm-tools,
+                                starship,zoxide,yazi,doppler,configs,
+                                shell-integration
+  -p, --parallel     Run independent installations in parallel
+  --debug            Enable debug output
+  -h, --help         Show this help message
+
+Examples:
+  ./install.sh                      # Full installation
+  ./install.sh --dry-run            # Preview what would be installed
+  ./install.sh --check              # Check installation health
+  ./install.sh --update             # Update all tools
+  ./install.sh --only=neovim,yazi   # Install only Neovim and Yazi
+  ./install.sh --uninstall          # Remove everything
+  ./install.sh --parallel           # Parallel installation (faster)
+
+Environment Variables:
+  SKIP_NEOVIM_INSTALL=true    Skip Neovim
+  SKIP_NERD_FONTS=true        Skip Nerd Fonts
+  SKIP_NPM_TOOLS=true         Skip npm tools
+  SKIP_YAZI_INSTALL=true      Skip Yazi
+  SKIP_DOPPLER_INSTALL=true   Skip Doppler
+  USER_LOCAL_MODE=true        Install to ~/.local (no sudo)
+EOF
+}

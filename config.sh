@@ -6,6 +6,16 @@
 # Values can be overridden via environment variables or .env file.
 
 # ============================================================================
+# RUNTIME FLAGS
+# ============================================================================
+export DOTFILES_DRY_RUN="${DOTFILES_DRY_RUN:-false}"
+export DOTFILES_UPDATE_MODE="${DOTFILES_UPDATE_MODE:-false}"
+export DOTFILES_UNINSTALL_MODE="${DOTFILES_UNINSTALL_MODE:-false}"
+export DOTFILES_CHECK_MODE="${DOTFILES_CHECK_MODE:-false}"
+export DOTFILES_ONLY="${DOTFILES_ONLY:-}"  # Comma-separated list: neovim,starship,yazi
+export DOTFILES_PARALLEL="${DOTFILES_PARALLEL:-false}"
+
+# ============================================================================
 # DIRECTORY CONFIGURATION
 # ============================================================================
 export DOTFILES_DIR="${DOTFILES_DIR:-$HOME/dotfiles}"
@@ -70,3 +80,14 @@ export DOTFILES_CACHE_TTL="${DOTFILES_CACHE_TTL:-300}"  # 5 minutes
 # ============================================================================
 export DOTFILES_SAFE_PATH_REGEX='^(/home/|/root/|/opt/)'
 export DOTFILES_DANGEROUS_CHARS_REGEX='[;&|$`]'
+
+# ============================================================================
+# AVAILABLE COMPONENTS (for --only flag)
+# ============================================================================
+export DOTFILES_ALL_COMPONENTS="neovim,fzf,nerd-fonts,node,npm-tools,starship,zoxide,yazi,doppler,configs,shell-integration"
+
+# ============================================================================
+# CHECKSUMS (SHA256 for critical downloads - updated periodically)
+# ============================================================================
+# Format: DOTFILES_CHECKSUM_<TOOL>_<VERSION>="sha256hash"
+# Leave empty to skip verification (for latest/dynamic versions)
