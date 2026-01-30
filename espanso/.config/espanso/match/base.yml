@@ -1,5 +1,5 @@
 # Espanso Configuration - Modern & French locale
-# Placeholders {{USER_NAME}} and {{USER_EMAIL}} are replaced during dotfiles install
+# Placeholders Diane and noreply@example.com are replaced during dotfiles install
 
 matches:
   # ═══════════════════════════════════════════════════════════════════════════
@@ -117,16 +117,16 @@ matches:
   # PERSONAL INFO (injected during install)
   # ═══════════════════════════════════════════════════════════════════════════
   - trigger: ";name"
-    replace: "{{USER_NAME}}"
+    replace: "Diane"
   - trigger: ";email"
-    replace: "{{USER_EMAIL}}"
+    replace: "noreply@example.com"
   - trigger: ";gh"
-    replace: "https://github.com/{{GITHUB_USERNAME}}"
+    replace: "https://github.com/dianedef"
   - trigger: ";sig"
     replace: |
       --
-      {{USER_NAME}}
-      {{USER_EMAIL}}
+      Diane
+      noreply@example.com
 
   # ═══════════════════════════════════════════════════════════════════════════
   # DEV - Code snippets

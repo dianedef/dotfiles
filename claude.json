@@ -1,5 +1,5 @@
 {
-  "numStartups": 44,
+  "numStartups": 45,
   "installMethod": "global",
   "autoUpdates": false,
   "theme": "dark-daltonized",
@@ -14,15 +14,15 @@
     "status-line": 41,
     "stickers-command": 3,
     "prompt-queue": 3,
-    "enter-to-steer-in-relatime": 23,
-    "todo-list": 23,
+    "enter-to-steer-in-relatime": 45,
+    "todo-list": 45,
     "ide-upsell-external-terminal": 20,
-    "install-github-app": 33,
+    "install-github-app": 45,
     "install-slack-app": 33,
     "double-esc-code-restore": 33,
     "continue": 33,
     "shift-tab": 34,
-    "image-paste": 23,
+    "image-paste": 45,
     "web-app": 33,
     "mobile-app": 33,
     "custom-agents": 37,
@@ -33,7 +33,7 @@
     "guest-passes": 41,
     "frontend-design-plugin": 39
   },
-  "promptQueueUseCount": 47,
+  "promptQueueUseCount": 48,
   "showExpandedTodos": true,
   "cachedStatsigGates": {
     "tengu_prompt_suggestion": true
@@ -67,7 +67,7 @@
       "haiku"
     ],
     "tengu_ant_attribution_header_new": true,
-    "tengu_streaming_tool_execution2": false,
+    "tengu_streaming_tool_execution2": true,
     "tengu_session_memory": false,
     "tengu_bash_haiku_prefetch": true,
     "tengu_permission_explainer": true,
@@ -103,11 +103,11 @@
   "opusProMigrationComplete": true,
   "thinkingMigrationComplete": true,
   "cachedChromeExtensionInstalled": false,
-  "changelogLastFetched": 1769772924923,
+  "changelogLastFetched": 1769775392385,
   "claudeCodeFirstTokenDate": "2026-01-01T21:28:03.260790Z",
   "hasCompletedOnboarding": true,
   "lastOnboardingVersion": "2.1.9",
-  "lastReleaseNotesSeen": "2.1.23",
+  "lastReleaseNotesSeen": "2.1.25",
   "projects": {
     "/root": {
       "allowedTools": [],
@@ -296,7 +296,7 @@
       "enabledMcpjsonServers": [],
       "disabledMcpjsonServers": [],
       "hasTrustDialogAccepted": true,
-      "projectOnboardingSeenCount": 3,
+      "projectOnboardingSeenCount": 4,
       "hasClaudeMdExternalIncludesApproved": false,
       "hasClaudeMdExternalIncludesWarningShown": false,
       "lastCost": 0.5752792500000001,
@@ -344,7 +344,8 @@
         "codespace-aliases.sh",
         "shell-integration.sh"
       ],
-      "exampleFilesGeneratedAt": 1769382407134
+      "exampleFilesGeneratedAt": 1769382407134,
+      "hasCompletedProjectOnboarding": true
     },
     "/root/BuildFlowz": {
       "allowedTools": [],
