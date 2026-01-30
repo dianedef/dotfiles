@@ -28,6 +28,9 @@ venv/
 # Secrets
 .dotfiles-secrets.env
 
+# Claude Code (local state/stats)
+claude.json
+
 # Logs and databases
 *.log
 *.sqlite

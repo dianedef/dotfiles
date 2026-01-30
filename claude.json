@@ -18,10 +18,10 @@
     "todo-list": 45,
     "ide-upsell-external-terminal": 20,
     "install-github-app": 45,
-    "install-slack-app": 33,
-    "double-esc-code-restore": 33,
-    "continue": 33,
-    "shift-tab": 34,
+    "install-slack-app": 45,
+    "double-esc-code-restore": 45,
+    "continue": 45,
+    "shift-tab": 45,
     "image-paste": 45,
     "web-app": 33,
     "mobile-app": 33,
@@ -30,7 +30,7 @@
     "rename-conversation": 42,
     "custom-commands": 42,
     "agent-flag": 35,
-    "guest-passes": 41,
+    "guest-passes": 45,
     "frontend-design-plugin": 39
   },
   "promptQueueUseCount": 48,
@@ -299,37 +299,37 @@
       "projectOnboardingSeenCount": 4,
       "hasClaudeMdExternalIncludesApproved": false,
       "hasClaudeMdExternalIncludesWarningShown": false,
-      "lastCost": 0.5752792500000001,
-      "lastAPIDuration": 199337,
-      "lastAPIDurationWithoutRetries": 199306,
-      "lastToolDuration": 345,
-      "lastDuration": 56719698,
-      "lastLinesAdded": 24,
-      "lastLinesRemoved": 8,
-      "lastTotalInputTokens": 3988,
-      "lastTotalOutputTokens": 6215,
-      "lastTotalCacheCreationInputTokens": 28325,
-      "lastTotalCacheReadInputTokens": 490402,
+      "lastCost": 0.2773535,
+      "lastAPIDuration": 49952,
+      "lastAPIDurationWithoutRetries": 49913,
+      "lastToolDuration": 1999,
+      "lastDuration": 259230,
+      "lastLinesAdded": 3,
+      "lastLinesRemoved": 0,
+      "lastTotalInputTokens": 2107,
+      "lastTotalOutputTokens": 1859,
+      "lastTotalCacheCreationInputTokens": 20264,
+      "lastTotalCacheReadInputTokens": 207763,
       "lastTotalWebSearchRequests": 0,
       "lastModelUsage": {
         "claude-haiku-4-5-20251001": {
-          "inputTokens": 3807,
-          "outputTokens": 352,
+          "inputTokens": 2047,
+          "outputTokens": 100,
           "cacheReadInputTokens": 0,
           "cacheCreationInputTokens": 0,
           "webSearchRequests": 0,
-          "costUSD": 0.005567000000000001
+          "costUSD": 0.002547
         },
         "claude-opus-4-5-20251101": {
-          "inputTokens": 181,
-          "outputTokens": 5863,
-          "cacheReadInputTokens": 490402,
-          "cacheCreationInputTokens": 28325,
+          "inputTokens": 60,
+          "outputTokens": 1759,
+          "cacheReadInputTokens": 207763,
+          "cacheCreationInputTokens": 20264,
           "webSearchRequests": 0,
-          "costUSD": 0.5697122500000001
+          "costUSD": 0.2748065
         }
       },
-      "lastSessionId": "1e22ff86-4cd6-41d4-a2c5-a994809da05d",
+      "lastSessionId": "6e7bf93f-d7ad-4205-b480-fc38f312476c",
       "reactVulnerabilityCache": {
         "detected": false,
         "package": null,
@@ -345,7 +345,9 @@
         "shell-integration.sh"
       ],
       "exampleFilesGeneratedAt": 1769382407134,
-      "hasCompletedProjectOnboarding": true
+      "hasCompletedProjectOnboarding": true,
+      "lastFpsAverage": 16.41,
+      "lastFpsLow1Pct": 105.25
     },
     "/root/BuildFlowz": {
       "allowedTools": [],
