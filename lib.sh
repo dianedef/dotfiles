@@ -864,6 +864,12 @@ parse_arguments() {
                 export DOTFILES_PARALLEL=true
                 info "Parallel mode enabled"
                 ;;
+            --interactive|-i)
+                export DOTFILES_INTERACTIVE=true
+                ;;
+            --no-gum)
+                export DOTFILES_NO_GUM=true
+                ;;
             --help|-h)
                 show_help
                 exit 0
@@ -887,6 +893,7 @@ Dotfiles Installation Script
 Usage: ./install.sh [OPTIONS]
 
 Options:
+  -i, --interactive  Interactive mode with UI menu (uses gum)
   -n, --dry-run      Show what would be done without making changes
   -u, --update       Update installed tools to latest versions
   -c, --check        Run health check on installed components
@@ -896,11 +903,13 @@ Options:
                                 starship,zoxide,yazi,doppler,configs,
                                 shell-integration
   -p, --parallel     Run independent installations in parallel
+  --no-gum           Disable gum UI (use plain text)
   --debug            Enable debug output
   -h, --help         Show this help message
 
 Examples:
   ./install.sh                      # Full installation
+  ./install.sh -i                   # Interactive mode with menu
   ./install.sh --dry-run            # Preview what would be installed
   ./install.sh --check              # Check installation health
   ./install.sh --update             # Update all tools
@@ -917,4 +926,280 @@ Environment Variables:
   SKIP_MCP_INSTALL=true       Skip MCP config setup
   USER_LOCAL_MODE=true        Install to ~/.local (no sudo)
 EOF
+}
+
+# ============================================================================
+# GUM INTERACTIVE UI (https://github.com/charmbracelet/gum)
+# ============================================================================
+
+# Install gum if not present
+install_gum() {
+    if is_installed gum; then
+        return 0
+    fi
+
+    info "Installing gum (interactive UI)..."
+
+    local gum_version="0.14.5"
+    local gum_file=""
+
+    case "$OS-$ARCH" in
+        linux-x86_64) gum_file="gum_${gum_version}_Linux_x86_64.tar.gz" ;;
+        linux-arm64) gum_file="gum_${gum_version}_Linux_arm64.tar.gz" ;;
+        macos-x86_64) gum_file="gum_${gum_version}_Darwin_x86_64.tar.gz" ;;
+        macos-arm64) gum_file="gum_${gum_version}_Darwin_arm64.tar.gz" ;;
+        *)
+            warn "Gum not available for $OS-$ARCH"
+            return 1
+            ;;
+    esac
+
+    local url="https://github.com/charmbracelet/gum/releases/download/v${gum_version}/${gum_file}"
+    local tmp_dir
+    tmp_dir=$(mktemp -d)
+
+    if download_and_extract "$url" "$tmp_dir"; then
+        mv "$tmp_dir/gum" "$DOTFILES_BIN_DIR/gum" 2>/dev/null
+        chmod +x "$DOTFILES_BIN_DIR/gum"
+        success "gum installed"
+        return 0
+    else
+        warn "Failed to install gum"
+        return 1
+    fi
+
+    rm -rf "$tmp_dir"
+}
+
+# Check if gum is available and should be used
+use_gum() {
+    [ "${DOTFILES_NO_GUM:-false}" = "true" ] && return 1
+    [ ! -t 0 ] && return 1  # Non-interactive
+    is_installed gum
+}
+
+# Styled header
+gum_header() {
+    local title="$1"
+    if use_gum; then
+        gum style \
+            --foreground 212 --border-foreground 99 --border double \
+            --align center --width 60 --margin "1 2" --padding "1 2" \
+            "$title"
+    else
+        echo ""
+        echo "════════════════════════════════════════════════════════════════"
+        echo "  $title"
+        echo "════════════════════════════════════════════════════════════════"
+        echo ""
+    fi
+}
+
+# Confirmation dialog
+gum_confirm() {
+    local prompt="$1"
+    local default="${2:-yes}"
+
+    if use_gum; then
+        if [ "$default" = "yes" ]; then
+            gum confirm --default=true "$prompt"
+        else
+            gum confirm --default=false "$prompt"
+        fi
+    else
+        local yn
+        if [ "$default" = "yes" ]; then
+            read -r -p "$prompt [Y/n] " yn
+            [ -z "$yn" ] || [ "$yn" = "y" ] || [ "$yn" = "Y" ]
+        else
+            read -r -p "$prompt [y/N] " yn
+            [ "$yn" = "y" ] || [ "$yn" = "Y" ]
+        fi
+    fi
+}
+
+# Text input
+gum_input() {
+    local prompt="$1"
+    local default="${2:-}"
+    local placeholder="${3:-}"
+
+    if use_gum; then
+        gum input --prompt "$prompt " --value "$default" --placeholder "$placeholder"
+    else
+        local value
+        read -r -p "$prompt [$default] " value
+        echo "${value:-$default}"
+    fi
+}
+
+# Spinner for long operations
+gum_spin() {
+    local title="$1"
+    shift
+
+    if use_gum; then
+        gum spin --title "$title" -- "$@"
+    else
+        echo -n "$title... "
+        if "$@" >/dev/null 2>&1; then
+            echo "done"
+            return 0
+        else
+            echo "failed"
+            return 1
+        fi
+    fi
+}
+
+# Multi-select checkboxes
+gum_choose_multi() {
+    local header="$1"
+    shift
+    local options=("$@")
+
+    if use_gum; then
+        printf '%s\n' "${options[@]}" | gum choose --no-limit --header "$header"
+    else
+        # Fallback: show numbered list
+        echo "$header"
+        echo "(Enter numbers separated by spaces, or 'all' for everything)"
+        local i=1
+        for opt in "${options[@]}"; do
+            echo "  $i) $opt"
+            ((i++))
+        done
+        read -r -p "Selection: " selection
+
+        if [ "$selection" = "all" ]; then
+            printf '%s\n' "${options[@]}"
+        else
+            for num in $selection; do
+                if [ "$num" -ge 1 ] && [ "$num" -le "${#options[@]}" ]; then
+                    echo "${options[$((num-1))]}"
+                fi
+            done
+        fi
+    fi
+}
+
+# Single select
+gum_choose() {
+    local header="$1"
+    shift
+    local options=("$@")
+
+    if use_gum; then
+        printf '%s\n' "${options[@]}" | gum choose --header "$header"
+    else
+        echo "$header"
+        local i=1
+        for opt in "${options[@]}"; do
+            echo "  $i) $opt"
+            ((i++))
+        done
+        read -r -p "Selection [1]: " selection
+        selection="${selection:-1}"
+        if [ "$selection" -ge 1 ] && [ "$selection" -le "${#options[@]}" ]; then
+            echo "${options[$((selection-1))]}"
+        else
+            echo "${options[0]}"
+        fi
+    fi
+}
+
+# Interactive component selection menu
+run_interactive_menu() {
+    gum_header "🚀 Dotfiles Installer"
+
+    # Ask what to do
+    local action
+    action=$(gum_choose "What would you like to do?" \
+        "📦 Install (full)" \
+        "🎯 Install (select components)" \
+        "🔄 Update installed tools" \
+        "🩺 Health check" \
+        "🗑️  Uninstall" \
+        "❌ Cancel")
+
+    case "$action" in
+        *"Install (full)"*)
+            return 0  # Continue with normal install
+            ;;
+        *"Install (select"*)
+            select_components
+            ;;
+        *"Update"*)
+            export DOTFILES_UPDATE_MODE=true
+            ;;
+        *"Health check"*)
+            run_health_check
+            exit $?
+            ;;
+        *"Uninstall"*)
+            run_uninstall
+            exit $?
+            ;;
+        *"Cancel"*)
+            echo "Cancelled."
+            exit 0
+            ;;
+    esac
+}
+
+# Component selection submenu
+select_components() {
+    local components
+    components=$(gum_choose_multi "Select components to install:" \
+        "neovim      │ Neovim editor" \
+        "fzf         │ Fuzzy finder" \
+        "nerd-fonts  │ Nerd Fonts (icons)" \
+        "node        │ Node.js + npm" \
+        "npm-tools   │ CLI tools (copilot, tldr...)" \
+        "starship    │ Shell prompt" \
+        "zoxide      │ Smart cd" \
+        "yazi        │ File manager" \
+        "doppler     │ Secrets manager" \
+        "configs     │ Config symlinks" \
+        "shell       │ Shell integration")
+
+    if [ -z "$components" ]; then
+        warn "No components selected"
+        exit 1
+    fi
+
+    # Extract component names (before the │)
+    local selected=""
+    while IFS= read -r line; do
+        local comp
+        comp=$(echo "$line" | cut -d'│' -f1 | xargs)
+        [ "$comp" = "shell" ] && comp="shell-integration"
+        if [ -n "$selected" ]; then
+            selected="$selected,$comp"
+        else
+            selected="$comp"
+        fi
+    done <<< "$components"
+
+    export DOTFILES_ONLY="$selected"
+    info "Selected: $DOTFILES_ONLY"
+}
+
+# Progress display for installations
+show_progress() {
+    local current="$1"
+    local total="$2"
+    local name="$3"
+
+    if use_gum; then
+        local pct=$((current * 100 / total))
+        local filled=$((pct / 5))
+        local empty=$((20 - filled))
+        local bar=""
+        for ((i=0; i<filled; i++)); do bar+="█"; done
+        for ((i=0; i<empty; i++)); do bar+="░"; done
+        echo -e "\r\033[K[$bar] $pct% │ $name"
+    else
+        echo "[$current/$total] $name"
+    fi
 }

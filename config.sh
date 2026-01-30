@@ -14,6 +14,20 @@ export DOTFILES_UNINSTALL_MODE="${DOTFILES_UNINSTALL_MODE:-false}"
 export DOTFILES_CHECK_MODE="${DOTFILES_CHECK_MODE:-false}"
 export DOTFILES_ONLY="${DOTFILES_ONLY:-}"  # Comma-separated list: neovim,starship,yazi
 export DOTFILES_PARALLEL="${DOTFILES_PARALLEL:-false}"
+export DOTFILES_INTERACTIVE="${DOTFILES_INTERACTIVE:-auto}"  # auto, true, false
+export DOTFILES_NO_GUM="${DOTFILES_NO_GUM:-false}"
+
+# ============================================================================
+# GUM STYLING (https://github.com/charmbracelet/gum)
+# ============================================================================
+export GUM_CHOOSE_CURSOR_FOREGROUND="212"
+export GUM_CHOOSE_SELECTED_FOREGROUND="212"
+export GUM_CHOOSE_HEADER_FOREGROUND="99"
+export GUM_SPIN_SPINNER="dot"
+export GUM_SPIN_SPINNER_FOREGROUND="212"
+export GUM_CONFIRM_PROMPT_FOREGROUND="99"
+export GUM_INPUT_CURSOR_FOREGROUND="212"
+export GUM_INPUT_PROMPT_FOREGROUND="99"
 
 # ============================================================================
 # DIRECTORY CONFIGURATION

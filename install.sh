@@ -6,6 +6,7 @@
 #
 # Usage:
 #   ./install.sh                      # Full installation
+#   ./install.sh -i                   # Interactive mode with UI menu
 #   ./install.sh --dry-run            # Preview what would be installed
 #   ./install.sh --check              # Check installation health
 #   ./install.sh --update             # Update all tools
@@ -57,6 +58,24 @@ fi
 if [ "${DOTFILES_UNINSTALL_MODE:-false}" = "true" ]; then
     run_uninstall
     exit $?
+fi
+
+# ============================================================================
+# INTERACTIVE MODE
+# ============================================================================
+# Install gum if interactive mode requested or auto-detect
+if [ "${DOTFILES_INTERACTIVE:-auto}" = "true" ] || \
+   { [ "${DOTFILES_INTERACTIVE:-auto}" = "auto" ] && [ -t 0 ] && [ -z "${DOTFILES_ONLY:-}" ]; }; then
+
+    # Try to install gum if not present and interactive
+    if [ -t 0 ] && ! is_installed gum && [ "${DOTFILES_NO_GUM:-false}" != "true" ]; then
+        install_gum 2>/dev/null || true
+    fi
+
+    # Run interactive menu if gum is available and explicitly requested
+    if [ "${DOTFILES_INTERACTIVE:-auto}" = "true" ] && use_gum; then
+        run_interactive_menu
+    fi
 fi
 
 # ============================================================================
