@@ -357,10 +357,24 @@ install_fzf() {
     fi
 
     info "Installing fzf..."
-    git clone --depth 1 --quiet https://github.com/junegunn/fzf.git ~/.fzf 2>/dev/null || true
-    ~/.fzf/install --bin >/dev/null 2>&1
-    ln -sf ~/.fzf/bin/fzf "$DOTFILES_BIN_DIR/fzf" 2>/dev/null
-    success "fzf installed"
+
+    # Clone if not exists
+    if [ ! -d ~/.fzf ]; then
+        git clone --depth 1 https://github.com/junegunn/fzf.git ~/.fzf
+    fi
+
+    # Install binary
+    ~/.fzf/install --bin
+
+    # Link to local bin
+    mkdir -p "$DOTFILES_BIN_DIR"
+    ln -sf ~/.fzf/bin/fzf "$DOTFILES_BIN_DIR/fzf"
+
+    if is_installed fzf; then
+        success "fzf installed: $(fzf --version 2>/dev/null | head -1)"
+    else
+        warn "fzf installation may have failed"
+    fi
 }
 
 # ============================================================================
@@ -474,12 +488,18 @@ install_starship() {
     fi
 
     info "Installing Starship..."
+    local install_result=0
     if [ "$USER_LOCAL_MODE" = "true" ]; then
-        curl -sS https://starship.rs/install.sh 2>/dev/null | sh -s -- -y -b "$DOTFILES_BIN_DIR" >/dev/null 2>&1
+        curl -sS https://starship.rs/install.sh | sh -s -- -y -b "$DOTFILES_BIN_DIR" || install_result=1
     else
-        curl -sS https://starship.rs/install.sh 2>/dev/null | sh -s -- -y >/dev/null 2>&1
+        curl -sS https://starship.rs/install.sh | sh -s -- -y || install_result=1
     fi
-    success "Starship installed"
+
+    if [ $install_result -eq 0 ] && is_installed starship; then
+        success "Starship installed: $(starship --version 2>/dev/null | head -1)"
+    else
+        warn "Starship installation failed"
+    fi
 }
 
 # ============================================================================
@@ -499,8 +519,21 @@ install_zoxide() {
     fi
 
     info "Installing Zoxide..."
-    curl -sS https://raw.githubusercontent.com/ajeetdsouza/zoxide/main/install.sh 2>/dev/null | bash >/dev/null 2>&1
-    success "Zoxide installed"
+
+    # Zoxide installs to ~/.local/bin by default
+    if curl -sS https://raw.githubusercontent.com/ajeetdsouza/zoxide/main/install.sh | bash; then
+        # Refresh PATH to find newly installed binary
+        export PATH="$HOME/.local/bin:$PATH"
+        hash -r 2>/dev/null
+
+        if is_installed zoxide; then
+            success "Zoxide installed: $(zoxide --version 2>/dev/null || echo 'OK')"
+        else
+            warn "Zoxide installed but not in PATH. Add ~/.local/bin to PATH"
+        fi
+    else
+        warn "Zoxide installation failed"
+    fi
 }
 
 # ============================================================================
