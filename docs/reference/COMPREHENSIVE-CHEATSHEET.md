@@ -52,6 +52,7 @@ csurl
 | `r` | `ranger` | Termux | File manager |
 | `y` | `yazi` | Linux/Win | Modern file manager |
 | `z <dir>` | `zoxide` | All | Smart directory jump |
+| `re` | `source ~/.bashrc` | All | Reload shell config |
 | `reload` | `source ~/.bashrc` | All | Reload shell config |
 | `cls` | `clear` | All | Clear terminal |
 | `h` | `history` | All | Command history |
@@ -111,6 +112,25 @@ csurl
 | `v` | Checkout GitHub PR |
 | `q` | Quit |
 
+### Ranger
+| Key | Action |
+|-----|--------|
+| `gF` | Fetch all git repos (parallel) |
+| `zV` | Toggle VCS display on/off |
+| `zh` | Toggle hidden files |
+| `R` | Reload directory |
+
+#### Ranger VCS Status Icons (Git)
+| Icône | Signification |
+|-------|---------------|
+| `✓` | Repo propre (clean) |
+| `+` | Fichiers stagés |
+| `=` | Fichiers modifiés |
+| `?` | Fichiers untracked |
+| `>` | Ahead (commits à push) |
+| `<` | Behind (commits à pull) |
+| `⌂` | Repo avec stash |
+
 ---
 
 ## ⌨️ 5. Tool-Specific Hotkeys
@@ -149,7 +169,21 @@ csurl
 | `gp` | `git push` | Push to remote |
 | `gl` | `git pull` | Pull changes |
 | `gd` | `git diff` | Show differences |
+| `gr` | `git restore` | Restore file(s) |
 | `glog` | `git log --oneline --graph` | Visual log |
+
+### AI Coding Tools
+| Alias | Command | Description |
+|-------|---------|-------------|
+| `k` | `kilocode` | Kilocode CLI |
+| `o` | `opencode` | OpenCode AI |
+| `c` | `claude` | Claude Code |
+
+### SSH/Mosh Connections
+| Alias | Command | Description |
+|-------|---------|-------------|
+| `root` | `mosh root@hetzner` | SSH as root + tmux |
+| `cuser` | `mosh claude@hetzner` | SSH as claude + tmux |
 
 ### API Keys & Setup
 | Command | Description |
