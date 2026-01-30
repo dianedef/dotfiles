@@ -12,7 +12,7 @@ scan_timeout = 10
 command_timeout = 500
 
 # Format adapts based on environment
-format = """${custom.env} $username $hostname $directory $git_branch $git_status ${custom.port} $nodejs $python $rust $golang $java $cmd_duration
+format = """$custom.env$username$hostname$directory$git_branch$git_status$custom.port$nodejs$python$rust$golang$java$cmd_duration
 $character"""
 
 # Prompt character with emoji
