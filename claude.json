@@ -1,5 +1,5 @@
 {
-  "numStartups": 47,
+  "numStartups": 48,
   "installMethod": "global",
   "autoUpdates": false,
   "theme": "dark-daltonized",
@@ -23,8 +23,8 @@
     "continue": 45,
     "shift-tab": 45,
     "image-paste": 45,
-    "web-app": 33,
-    "mobile-app": 33,
+    "web-app": 48,
+    "mobile-app": 48,
     "custom-agents": 37,
     "permissions": 41,
     "rename-conversation": 42,
@@ -685,7 +685,7 @@
     "54950075-df2f-419b-836b-b31c129a6336": {
       "hasAccess": false,
       "hasAccessNotAsDefault": false,
-      "timestamp": 1769783575022
+      "timestamp": 1769853442389
     }
   },
   "groveConfigCache": {
@@ -751,7 +751,8 @@
         "referral_link": "https://claude.ai/referral/K5mbypOPRQ"
       },
       "referrer_reward": null,
-      "timestamp": 1769783575030
+      "remaining_passes": 3,
+      "timestamp": 1769853442395
     }
   },
   "passesUpsellSeenCount": 4,
