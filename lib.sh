@@ -1643,27 +1643,43 @@ run_interactive_menu() {
 # Component selection submenu
 select_components() {
     local components
-    # Pass options as arguments (not via pipe) to preserve TTY
-    components=$(gum choose --no-limit --header "Select components to install (SPACE=select, ENTER=confirm):" \
-        "neovim      │ Neovim editor" \
-        "fzf         │ Fuzzy finder" \
-        "nerd-fonts  │ Nerd Fonts (icons)" \
-        "node        │ Node.js + npm" \
-        "npm-tools   │ CLI tools (copilot, tldr...)" \
-        "starship    │ Shell prompt" \
-        "zoxide      │ Smart cd" \
-        "yazi        │ File manager" \
-        "doppler     │ Secrets manager" \
-        "gh          │ GitHub CLI" \
-        "bat         │ cat with syntax highlighting" \
-        "lsd         │ ls with icons" \
-        "configs     │ Config symlinks" \
-        "shell       │ Shell integration")
 
-    if [ -z "$components" ]; then
-        warn "No components selected"
-        return 1
-    fi
+    # Loop until something is selected or user cancels
+    while true; do
+        # Pass options as arguments (not via pipe) to preserve TTY
+        components=$(gum choose --no-limit --header "Select components (SPACE=select, ENTER=confirm, ESC=cancel):" \
+            "neovim      │ Neovim editor" \
+            "fzf         │ Fuzzy finder" \
+            "nerd-fonts  │ Nerd Fonts (icons)" \
+            "node        │ Node.js + npm" \
+            "npm-tools   │ CLI tools (copilot, tldr...)" \
+            "starship    │ Shell prompt" \
+            "zoxide      │ Smart cd" \
+            "yazi        │ File manager" \
+            "doppler     │ Secrets manager" \
+            "gh          │ GitHub CLI" \
+            "bat         │ cat with syntax highlighting" \
+            "lsd         │ ls with icons" \
+            "configs     │ Config symlinks" \
+            "shell       │ Shell integration" 2>/dev/null)
+        local gum_exit=$?
+
+        # ESC pressed = cancel
+        if [ $gum_exit -ne 0 ]; then
+            info "Cancelled"
+            return 1
+        fi
+
+        # Nothing selected = show message and retry
+        if [ -z "$components" ]; then
+            warn "⚠️  Use SPACE to select, then ENTER to confirm"
+            sleep 1
+            continue
+        fi
+
+        # Got selection, exit loop
+        break
+    done
 
     # Extract component names (before the │)
     local selected=""
