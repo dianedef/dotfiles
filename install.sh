@@ -927,11 +927,8 @@ setup_configs() {
         mv "$NVIM_CONFIG_DIR" "${NVIM_CONFIG_DIR}.backup.$(date +%s)" 2>/dev/null || true
     fi
 
-    if [ -d "$SCRIPT_DIR/nvim" ] && [ -f "$SCRIPT_DIR/nvim/init.lua" ]; then
-        create_symlink "$SCRIPT_DIR/nvim" "$NVIM_CONFIG_DIR" false
-    else
-        git clone --quiet https://github.com/LazyVim/starter "$NVIM_CONFIG_DIR" 2>/dev/null
-        rm -rf "$NVIM_CONFIG_DIR/.git"
+    if [ -d "$SCRIPT_DIR/nvim/MyNeovim" ]; then
+        create_symlink "$SCRIPT_DIR/nvim/MyNeovim" "$NVIM_CONFIG_DIR" false
     fi
 
     # Yazi

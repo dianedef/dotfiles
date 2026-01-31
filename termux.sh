@@ -196,15 +196,11 @@ create_symlink() {
     log "INFO" "Linked: $TARGET -> $SOURCE"
 }
 
-# Neovim config - Use MyNeovimTermux
-if [ -d "$SOURCE_DIR/nvim/MyNeovimTermux" ] && [ -f "$SOURCE_DIR/nvim/MyNeovimTermux/init.lua" ]; then
+# Neovim config - Use MyNeovimTermux, fallback to MyNeovim
+if [ -d "$SOURCE_DIR/nvim/MyNeovimTermux" ]; then
     create_symlink "$SOURCE_DIR/nvim/MyNeovimTermux" "$NVIM_CONFIG_DIR"
-elif [ -d "$SOURCE_DIR/nvim/MyNeovim" ] && [ -f "$SOURCE_DIR/nvim/MyNeovim/init.lua" ]; then
-    # Fallback to MyNeovim if MyNeovimTermux not found
+elif [ -d "$SOURCE_DIR/nvim/MyNeovim" ]; then
     create_symlink "$SOURCE_DIR/nvim/MyNeovim" "$NVIM_CONFIG_DIR"
-elif [ -d "$SOURCE_DIR/nvim" ] && [ -f "$SOURCE_DIR/nvim/init.lua" ]; then
-    # Fallback to nvim root
-    create_symlink "$SOURCE_DIR/nvim" "$NVIM_CONFIG_DIR"
 fi
 
 # Ranger (primary file manager for Termux)
