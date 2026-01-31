@@ -27,6 +27,7 @@ venv/
 
 # Secrets
 .dotfiles-secrets.env
+env
 
 # Claude Code (local state/stats)
 claude.json
