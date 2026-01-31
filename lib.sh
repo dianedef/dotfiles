@@ -619,10 +619,158 @@ get_installed_version() {
         doppler)
             doppler --version 2>/dev/null | grep -oE 'v?[0-9]+\.[0-9]+\.[0-9]+' | head -1 || echo "unknown"
             ;;
+        node)
+            node --version 2>/dev/null | grep -oE 'v?[0-9]+\.[0-9]+\.[0-9]+' || echo "unknown"
+            ;;
+        gum)
+            gum --version 2>/dev/null | grep -oE 'v?[0-9]+\.[0-9]+\.[0-9]+' | head -1 || echo "unknown"
+            ;;
         *)
             echo "unknown"
             ;;
     esac
+}
+
+# Normalize version string (remove 'v' prefix, handle different formats)
+normalize_version() {
+    local version="$1"
+    echo "$version" | sed 's/^v//' | grep -oE '[0-9]+\.[0-9]+\.[0-9]+' | head -1
+}
+
+# Compare two version strings: returns 0 if v1 >= v2, 1 otherwise
+version_gte() {
+    local v1="$1"
+    local v2="$2"
+
+    v1=$(normalize_version "$v1")
+    v2=$(normalize_version "$v2")
+
+    [ -z "$v1" ] && return 1
+    [ -z "$v2" ] && return 0
+
+    # Use sort -V for version comparison
+    local highest
+    highest=$(printf '%s\n%s' "$v1" "$v2" | sort -V | tail -1)
+    [ "$v1" = "$highest" ]
+}
+
+# Get latest version for a tool
+get_latest_version() {
+    local tool="$1"
+
+    case "$tool" in
+        neovim)
+            get_latest_release "$DOTFILES_REPO_NEOVIM" "$DOTFILES_NVIM_VERSION"
+            ;;
+        yazi)
+            get_latest_release "$DOTFILES_REPO_YAZI" "$DOTFILES_YAZI_VERSION"
+            ;;
+        starship)
+            get_latest_release "starship/starship" "v1.18.0"
+            ;;
+        zoxide)
+            get_latest_release "ajeetdsouza/zoxide" "v0.9.0"
+            ;;
+        fzf)
+            get_latest_release "$DOTFILES_REPO_FZF" "0.50.0"
+            ;;
+        doppler)
+            get_latest_release "$DOTFILES_REPO_DOPPLER" "$DOTFILES_DOPPLER_VERSION"
+            ;;
+        gum)
+            get_latest_release "charmbracelet/gum" "v0.14.0"
+            ;;
+        *)
+            echo "unknown"
+            ;;
+    esac
+}
+
+# Run update check and display status
+run_update_check() {
+    echo "════════════════════════════════════════════════════════════════"
+    echo "                    DOTFILES UPDATE CHECK"
+    echo "════════════════════════════════════════════════════════════════"
+    echo ""
+
+    local tools=("neovim" "yazi" "starship" "zoxide" "fzf" "doppler" "gum")
+    local updates_available=()
+
+    info "Checking for updates..."
+    echo ""
+
+    printf "%-15s %-15s %-15s %s\n" "Tool" "Installed" "Latest" "Status"
+    printf "%-15s %-15s %-15s %s\n" "────" "─────────" "──────" "──────"
+
+    for tool in "${tools[@]}"; do
+        local installed latest status_icon
+
+        if ! is_installed "$tool" && [ "$tool" != "neovim" ]; then
+            # Check for nvim vs neovim
+            [ "$tool" = "neovim" ] && ! is_installed nvim && continue
+            continue
+        fi
+
+        # Special case for neovim binary name
+        [ "$tool" = "neovim" ] && ! is_installed nvim && continue
+
+        installed=$(get_installed_version "$tool")
+        latest=$(get_latest_version "$tool")
+
+        installed_norm=$(normalize_version "$installed")
+        latest_norm=$(normalize_version "$latest")
+
+        if [ "$installed_norm" = "$latest_norm" ]; then
+            status_icon="${GREEN}✓ up to date${NC}"
+        elif version_gte "$installed" "$latest"; then
+            status_icon="${GREEN}✓ up to date${NC}"
+        else
+            status_icon="${YELLOW}⬆ update available${NC}"
+            updates_available+=("$tool")
+        fi
+
+        printf "%-15s %-15s %-15s %b\n" "$tool" "$installed_norm" "$latest_norm" "$status_icon"
+    done
+
+    echo ""
+
+    if [ ${#updates_available[@]} -eq 0 ]; then
+        success "All tools are up to date!"
+        return 0
+    else
+        echo "Updates available for: ${updates_available[*]}"
+        echo ""
+        return 1
+    fi
+}
+
+# Interactive update with selection
+run_interactive_update() {
+    if ! run_update_check; then
+        echo ""
+
+        if use_gum; then
+            if gum confirm "Install available updates?"; then
+                # Get list of tools that need updates
+                local tools_to_update
+                tools_to_update=$(gum_choose_multi "Select tools to update:" "${updates_available[@]}")
+
+                if [ -n "$tools_to_update" ]; then
+                    export DOTFILES_ONLY=$(echo "$tools_to_update" | tr '\n' ',' | sed 's/,$//')
+                    export DOTFILES_UPDATE_MODE=true
+                    return 0  # Continue with installation
+                fi
+            fi
+        else
+            read -r -p "Install available updates? (y/N): " confirm
+            if [ "$confirm" = "y" ] || [ "$confirm" = "Y" ]; then
+                export DOTFILES_UPDATE_MODE=true
+                return 0
+            fi
+        fi
+    fi
+
+    exit 0
 }
 
 # ============================================================================
@@ -1130,7 +1278,7 @@ run_interactive_menu() {
             select_components
             ;;
         *"Update"*)
-            export DOTFILES_UPDATE_MODE=true
+            run_interactive_update
             ;;
         *"Health check"*)
             run_health_check

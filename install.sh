@@ -60,6 +60,19 @@ if [ "${DOTFILES_UNINSTALL_MODE:-false}" = "true" ]; then
     exit $?
 fi
 
+# Update mode: show what needs updating first
+if [ "${DOTFILES_UPDATE_MODE:-false}" = "true" ] && [ "${DOTFILES_INTERACTIVE:-auto}" != "true" ]; then
+    run_update_check
+    echo ""
+    if [ -t 0 ]; then
+        read -r -p "Proceed with updates? (y/N): " confirm
+        if [ "$confirm" != "y" ] && [ "$confirm" != "Y" ]; then
+            echo "Cancelled."
+            exit 0
+        fi
+    fi
+fi
+
 # ============================================================================
 # INTERACTIVE MODE
 # ============================================================================
@@ -857,6 +870,10 @@ alias y='yazi'
 alias k='kilocode'
 alias o='opencode'
 alias mcp='mcpc'
+
+# Dotfiles management
+alias dot='~/dotfiles/install.sh'
+alias dotfiles='~/dotfiles/install.sh -i'
 ALIASES
         success "Added productivity aliases"
     fi
