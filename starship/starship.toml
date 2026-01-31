@@ -48,7 +48,7 @@ else
 fi
 '''
 when = true
-format = '[$output]($style) '
+format = '[$output]($style)'
 style = 'bold blue'
 shell = ["bash", "--noprofile", "--norc"]
 
@@ -69,7 +69,7 @@ shell = ["bash", "--noprofile", "--norc"]
 
 # Username - only show when not current user or in codespace
 [username]
-format = "[$user]($style)@"
+format = " [$user]($style) on "
 style_user = "bold green"
 style_root = "bold red"
 show_always = false
@@ -77,7 +77,7 @@ disabled = false
 
 # Hostname - only show in SSH or codespace
 [hostname]
-format = "[$hostname]($style) "
+format = "[$hostname]($style)"
 style = "bold dimmed white"
 ssh_only = false
 disabled = false
@@ -86,17 +86,17 @@ disabled = false
 [directory]
 truncation_length = 3
 truncate_to_repo = true
-format = "[$path]($style) "
+format = " in [$path]($style)"
 style = "bold cyan"
 read_only = "🔒"
 truncation_symbol = "…/"
-repo_root_format = "[$repo_root]($style)[$path]($style) "
+repo_root_format = " in [$repo_root]($style)[$path]($style)"
 repo_root_style = "bold cyan"
 fish_style_pwd_dir_length = 1
 
 # Git branch - clean formatting
 [git_branch]
-format = "[$symbol$branch]($style) "
+format = " on [$symbol$branch]($style)"
 symbol = " "
 style = "bold purple"
 truncation_length = 15
@@ -104,7 +104,7 @@ truncation_symbol = "…"
 
 # Git status - with emojis
 [git_status]
-format = '([\[$all_status$ahead_behind\]]($style) )'
+format = '( [\[$all_status$ahead_behind\]]($style))'
 style = "bold yellow"
 conflicted = "= "
 ahead = "📤${count} "
@@ -120,32 +120,32 @@ deleted = "🧹${count} "
 # Command duration - only if slow
 [cmd_duration]
 min_time = 2000
-format = "[⏱ $duration]($style) "
+format = " [⏱ $duration]($style)"
 style = "bold yellow"
 
-# Languages - minimal icons
+# Languages - minimal icons with "via"
 [nodejs]
-format = "[$symbol$version]($style) "
+format = " via [$symbol$version]($style)"
 symbol = "⬢ "
 style = "green"
 
 [python]
-format = "[$symbol$version]($style) "
+format = " via [$symbol$version]($style)"
 symbol = "🐍 "
 style = "yellow"
 
 [rust]
-format = "[$symbol$version]($style) "
+format = " via [$symbol$version]($style)"
 symbol = "🦀 "
 style = "red"
 
 [golang]
-format = "[$symbol$version]($style) "
+format = " via [$symbol$version]($style)"
 symbol = "🐹 "
 style = "cyan"
 
 [java]
-format = "[$symbol$version]($style) "
+format = " via [$symbol$version]($style)"
 symbol = "☕ "
 style = "red"
 
