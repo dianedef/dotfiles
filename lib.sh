@@ -1614,8 +1614,9 @@ run_interactive_menu() {
                 return 0  # Continue with normal install
                 ;;
             *"Install (select"*)
-                select_components
-                return 0  # Continue with install
+                select_components || true
+                echo ""
+                read -rp "Press Enter to return to menu..."
                 ;;
             *"Update"*)
                 run_interactive_update
@@ -1643,60 +1644,219 @@ run_interactive_menu() {
 # Component selection submenu
 select_components() {
     local components
+    # Pass options as arguments (not via pipe) to preserve TTY
+    components=$(gum choose --no-limit --header "Select components to install (SPACE=select, ENTER=confirm):" \
+        "neovim      │ Neovim editor" \
+        "fzf         │ Fuzzy finder" \
+        "nerd-fonts  │ Nerd Fonts (icons)" \
+        "node        │ Node.js + npm" \
+        "npm-tools   │ CLI tools (copilot, tldr...)" \
+        "starship    │ Shell prompt" \
+        "zoxide      │ Smart cd" \
+        "yazi        │ File manager" \
+        "doppler     │ Secrets manager" \
+        "gh          │ GitHub CLI" \
+        "bat         │ cat with syntax highlighting" \
+        "lsd         │ ls with icons" \
+        "configs     │ Config symlinks" \
+        "shell       │ Shell integration")
 
-    # Loop until something is selected or user cancels
-    while true; do
-        # Pass options as arguments (not via pipe) to preserve TTY
-        components=$(gum choose --no-limit --header "Select components (SPACE=select, ENTER=confirm, ESC=cancel):" \
-            "neovim      │ Neovim editor" \
-            "fzf         │ Fuzzy finder" \
-            "nerd-fonts  │ Nerd Fonts (icons)" \
-            "node        │ Node.js + npm" \
-            "npm-tools   │ CLI tools (copilot, tldr...)" \
-            "starship    │ Shell prompt" \
-            "zoxide      │ Smart cd" \
-            "yazi        │ File manager" \
-            "doppler     │ Secrets manager" \
-            "gh          │ GitHub CLI" \
-            "bat         │ cat with syntax highlighting" \
-            "lsd         │ ls with icons" \
-            "configs     │ Config symlinks" \
-            "shell       │ Shell integration" 2>/dev/null)
-        local gum_exit=$?
+    if [ -z "$components" ]; then
+        warn "No components selected"
+        return 1
+    fi
 
-        # ESC pressed = cancel
-        if [ $gum_exit -ne 0 ]; then
-            info "Cancelled"
-            return 1
-        fi
-
-        # Nothing selected = show message and retry
-        if [ -z "$components" ]; then
-            warn "⚠️  Use SPACE to select, then ENTER to confirm"
-            sleep 1
-            continue
-        fi
-
-        # Got selection, exit loop
-        break
-    done
-
-    # Extract component names (before the │)
-    local selected=""
+    # Extract component names and install directly
+    local selected=()
     while IFS= read -r line; do
         local comp
         # Use awk instead of cut (cut doesn't handle Unicode delimiters)
         comp=$(echo "$line" | awk -F'│' '{print $1}' | xargs)
         [ "$comp" = "shell" ] && comp="shell-integration"
-        if [ -n "$selected" ]; then
-            selected="$selected,$comp"
-        else
-            selected="$comp"
-        fi
+        selected+=("$comp")
     done <<< "$components"
 
-    export DOTFILES_ONLY="$selected"
-    info "Selected: $DOTFILES_ONLY"
+    info "Installing: ${selected[*]}"
+    echo ""
+
+    # Install each selected component directly
+    for comp in "${selected[@]}"; do
+        install_component "$comp"
+    done
+
+    echo ""
+    success "Installation completed!"
+    echo ""
+    info "Run 're' or 'source ~/.bashrc' to reload your shell"
+}
+
+# Install a single component directly
+install_component() {
+    local comp="$1"
+    local script_dir="${DOTFILES_DIR:-$HOME/dotfiles}"
+
+    case "$comp" in
+        neovim)
+            info "Installing Neovim..."
+            local latest
+            latest=$(get_latest_release "neovim/neovim" "v0.10.0")
+            local arch="linux64"
+            [ "$(uname -m)" = "aarch64" ] && arch="linux-arm64"
+            curl -fsSL "https://github.com/neovim/neovim/releases/download/${latest}/nvim-${arch}.tar.gz" -o /tmp/nvim.tar.gz 2>/dev/null
+            if [ -f /tmp/nvim.tar.gz ]; then
+                sudo rm -rf /opt/nvim 2>/dev/null || rm -rf ~/.local/nvim 2>/dev/null
+                sudo mkdir -p /opt 2>/dev/null && sudo tar -C /opt -xzf /tmp/nvim.tar.gz 2>/dev/null || tar -C ~/.local -xzf /tmp/nvim.tar.gz 2>/dev/null
+                sudo ln -sf /opt/nvim-${arch}/bin/nvim /usr/local/bin/nvim 2>/dev/null || ln -sf ~/.local/nvim-${arch}/bin/nvim ~/.local/bin/nvim 2>/dev/null
+                rm -f /tmp/nvim.tar.gz
+                success "Neovim installed ($latest)"
+            else
+                warn "Failed to download Neovim"
+            fi
+            ;;
+        starship)
+            info "Installing Starship..."
+            curl -fsSL https://starship.rs/install.sh -o /tmp/starship-install.sh 2>/dev/null
+            if [ -f /tmp/starship-install.sh ]; then
+                sh /tmp/starship-install.sh -y </dev/null >/dev/null 2>&1
+                rm -f /tmp/starship-install.sh
+                success "Starship installed"
+            else
+                warn "Failed to download Starship"
+            fi
+            ;;
+        zoxide)
+            info "Installing Zoxide..."
+            curl -fsSL https://raw.githubusercontent.com/ajeetdsouza/zoxide/main/install.sh -o /tmp/zoxide-install.sh 2>/dev/null
+            if [ -f /tmp/zoxide-install.sh ]; then
+                bash /tmp/zoxide-install.sh </dev/null >/dev/null 2>&1
+                rm -f /tmp/zoxide-install.sh
+                success "Zoxide installed"
+            else
+                warn "Failed to download Zoxide"
+            fi
+            ;;
+        yazi)
+            info "Installing Yazi..."
+            local latest arch
+            latest=$(get_latest_release "sxyazi/yazi" "v0.4.0")
+            arch="x86_64"
+            [ "$(uname -m)" = "aarch64" ] && arch="aarch64"
+            curl -fsSL "https://github.com/sxyazi/yazi/releases/download/${latest}/yazi-${arch}-unknown-linux-gnu.zip" -o /tmp/yazi.zip 2>/dev/null
+            if [ -f /tmp/yazi.zip ]; then
+                unzip -o /tmp/yazi.zip -d /tmp >/dev/null 2>&1
+                sudo mv /tmp/yazi-${arch}-unknown-linux-gnu/yazi /usr/local/bin/ 2>/dev/null || mv /tmp/yazi-${arch}-unknown-linux-gnu/yazi ~/.local/bin/ 2>/dev/null
+                rm -rf /tmp/yazi.zip /tmp/yazi-*
+                success "Yazi installed ($latest)"
+            else
+                warn "Failed to download Yazi"
+            fi
+            ;;
+        fzf)
+            info "Installing fzf..."
+            if [ -d "$HOME/.fzf" ]; then
+                cd "$HOME/.fzf" && git pull >/dev/null 2>&1
+            else
+                git clone --depth 1 https://github.com/junegunn/fzf.git "$HOME/.fzf" >/dev/null 2>&1
+            fi
+            "$HOME/.fzf/install" --all </dev/null >/dev/null 2>&1
+            success "fzf installed"
+            ;;
+        doppler)
+            info "Installing Doppler..."
+            curl -fsSL https://cli.doppler.com/install.sh -o /tmp/doppler-install.sh 2>/dev/null
+            if [ -f /tmp/doppler-install.sh ]; then
+                sudo sh /tmp/doppler-install.sh </dev/null >/dev/null 2>&1
+                rm -f /tmp/doppler-install.sh
+                success "Doppler installed"
+            else
+                warn "Failed to download Doppler"
+            fi
+            ;;
+        gh)
+            info "Installing GitHub CLI..."
+            local latest arch_deb
+            latest=$(get_latest_release "cli/cli" "v2.40.0")
+            arch_deb="amd64"
+            [ "$(uname -m)" = "aarch64" ] && arch_deb="arm64"
+            curl -fsSL "https://github.com/cli/cli/releases/download/${latest}/gh_${latest#v}_linux_${arch_deb}.deb" -o /tmp/gh.deb 2>/dev/null
+            if [ -f /tmp/gh.deb ]; then
+                sudo dpkg -i /tmp/gh.deb >/dev/null 2>&1 && success "GitHub CLI installed ($latest)" || warn "gh install failed"
+                rm -f /tmp/gh.deb
+            fi
+            ;;
+        bat)
+            info "Installing bat..."
+            local latest arch_deb
+            latest=$(get_latest_release "sharkdp/bat" "v0.24.0")
+            arch_deb="amd64"
+            [ "$(uname -m)" = "aarch64" ] && arch_deb="arm64"
+            curl -fsSL "https://github.com/sharkdp/bat/releases/download/${latest}/bat_${latest#v}_${arch_deb}.deb" -o /tmp/bat.deb 2>/dev/null
+            if [ -f /tmp/bat.deb ]; then
+                sudo dpkg -i /tmp/bat.deb >/dev/null 2>&1 && success "bat installed ($latest)" || warn "bat install failed"
+                rm -f /tmp/bat.deb
+            fi
+            ;;
+        lsd)
+            info "Installing lsd..."
+            local latest arch_deb
+            latest=$(get_latest_release "lsd-rs/lsd" "v1.0.0")
+            arch_deb="amd64"
+            [ "$(uname -m)" = "aarch64" ] && arch_deb="arm64"
+            curl -fsSL "https://github.com/lsd-rs/lsd/releases/download/${latest}/lsd_${latest#v}_${arch_deb}.deb" -o /tmp/lsd.deb 2>/dev/null
+            if [ -f /tmp/lsd.deb ]; then
+                sudo dpkg -i /tmp/lsd.deb >/dev/null 2>&1 && success "lsd installed ($latest)" || warn "lsd install failed"
+                rm -f /tmp/lsd.deb
+            fi
+            ;;
+        node)
+            warn "Node.js requires manual installation:"
+            echo "  → curl -fsSL https://deb.nodesource.com/setup_lts.x | sudo -E bash -"
+            echo "  → sudo apt install -y nodejs"
+            ;;
+        npm-tools)
+            info "Installing npm tools..."
+            if is_installed npm; then
+                for pkg in "@anthropic-ai/claude-code" "@apify/mcpc" "tldr"; do
+                    npm install -g "$pkg" </dev/null >/dev/null 2>&1 && success "$pkg installed" || warn "$pkg failed"
+                done
+            else
+                warn "npm not found, install Node.js first"
+            fi
+            ;;
+        nerd-fonts)
+            info "Installing Nerd Fonts..."
+            mkdir -p ~/.local/share/fonts
+            local font_url="https://github.com/ryanoasis/nerd-fonts/releases/latest/download/JetBrainsMono.zip"
+            curl -fsSL "$font_url" -o /tmp/nerd-font.zip 2>/dev/null
+            if [ -f /tmp/nerd-font.zip ]; then
+                unzip -o /tmp/nerd-font.zip -d ~/.local/share/fonts >/dev/null 2>&1
+                fc-cache -fv >/dev/null 2>&1
+                rm -f /tmp/nerd-font.zip
+                success "Nerd Fonts installed"
+            else
+                warn "Failed to download Nerd Fonts"
+            fi
+            ;;
+        configs)
+            info "Setting up config symlinks..."
+            mkdir -p ~/.config
+            ln -sf "$script_dir/nvim" ~/.config/nvim 2>/dev/null && success "nvim config linked"
+            ln -sf "$script_dir/yazi" ~/.config/yazi 2>/dev/null && success "yazi config linked"
+            ln -sf "$script_dir/starship/starship.toml" ~/.config/starship.toml 2>/dev/null && success "starship config linked"
+            ln -sf "$script_dir/.tmux.conf" ~/.tmux.conf 2>/dev/null && success "tmux config linked"
+            ;;
+        shell-integration)
+            info "Setting up shell integration..."
+            # Add to bashrc if not present
+            local bashrc="$HOME/.bashrc"
+            grep -q "starship init" "$bashrc" 2>/dev/null || echo 'eval "$(starship init bash)"' >> "$bashrc"
+            grep -q "zoxide init" "$bashrc" 2>/dev/null || echo 'eval "$(zoxide init bash)"' >> "$bashrc"
+            success "Shell integration configured"
+            ;;
+        *)
+            warn "Unknown component: $comp"
+            ;;
+    esac
 }
 
 # Progress display for installations
