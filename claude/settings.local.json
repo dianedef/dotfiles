@@ -12,7 +12,19 @@
       "WebFetch(domain:docs.questera.ai)",
       "WebFetch(domain:react-gamification-demo-site.vercel.app)",
       "WebFetch(domain:www.plgos.com)",
-      "WebFetch(domain:socket.dev)"
+      "WebFetch(domain:socket.dev)",
+      "Bash(tree:*)",
+      "Bash(gh repo create:*)",
+      "Bash(git config:*)",
+      "Bash(gh api:*)",
+      "Bash(git commit:*)",
+      "Bash(git push:*)",
+      "Bash(gh run list:*)",
+      "Bash(gh run view:*)",
+      "Bash(git rm:*)",
+      "Bash(git add:*)",
+      "Bash(git tag:*)",
+      "Bash(gh run rerun:*)"
     ]
   }
 }
