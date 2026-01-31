@@ -27,7 +27,7 @@ return {
             to_color = visual,
           },
           reverse_fade = {
-            from_color = U.color.darken(Snacks.util.color("FlashLabel", "bg"), 0.5),
+            from_color = Snacks.util.color("FlashLabel", "bg"),
             to_color = visual,
           },
         }
