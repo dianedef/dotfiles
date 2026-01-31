@@ -2050,7 +2050,7 @@ run_interactive_menu() {
             "🔑 Setup API Keys" \
             "🩺 Health check" \
             "🆘 Help" \
-            "🗑️  Uninstall" \
+            "🗑️ Uninstall" \
             "❌ Exit")
 
         case "$action" in
