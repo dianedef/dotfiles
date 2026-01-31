@@ -513,37 +513,37 @@ run_health_check() {
     local failed=0
 
     echo "📦 Tools:"
-    health_check_tool "Neovim" "nvim" || ((failed++))
-    health_check_tool "Node.js" "node" || ((failed++))
-    health_check_tool "npm" "npm" || ((failed++))
-    health_check_tool "fzf" "fzf" || ((failed++))
-    health_check_tool "Starship" "starship" || ((failed++))
-    health_check_tool "Zoxide" "zoxide" || ((failed++))
-    health_check_tool "Yazi" "yazi" || ((failed++))
-    health_check_tool "Doppler" "doppler" || ((failed++))
-    health_check_tool "ripgrep" "rg" || ((failed++))
-    health_check_tool "fd" "fd" || ((failed++))
-    health_check_tool "bat" "bat" || ((failed++))
-    health_check_tool "lsd" "lsd" || ((failed++))
-    health_check_tool "Git" "git" || ((failed++))
-    health_check_tool "GitHub CLI" "gh" || ((failed++))
-    health_check_tool "mcpc (MCP CLI)" "mcpc" || ((failed++))
+    health_check_tool "Neovim" "nvim" || failed=$((failed + 1))
+    health_check_tool "Node.js" "node" || failed=$((failed + 1))
+    health_check_tool "npm" "npm" || failed=$((failed + 1))
+    health_check_tool "fzf" "fzf" || failed=$((failed + 1))
+    health_check_tool "Starship" "starship" || failed=$((failed + 1))
+    health_check_tool "Zoxide" "zoxide" || failed=$((failed + 1))
+    health_check_tool "Yazi" "yazi" || failed=$((failed + 1))
+    health_check_tool "Doppler" "doppler" || failed=$((failed + 1))
+    health_check_tool "ripgrep" "rg" || failed=$((failed + 1))
+    health_check_tool "fd" "fd" || failed=$((failed + 1))
+    health_check_tool "bat" "bat" || failed=$((failed + 1))
+    health_check_tool "lsd" "lsd" || failed=$((failed + 1))
+    health_check_tool "Git" "git" || failed=$((failed + 1))
+    health_check_tool "GitHub CLI" "gh" || failed=$((failed + 1))
+    health_check_tool "mcpc (MCP CLI)" "mcpc" || failed=$((failed + 1))
 
     echo ""
     echo "🔗 Symlinks:"
-    health_check_symlink "Neovim config" "$HOME/.config/nvim" || ((failed++))
-    health_check_symlink "Yazi config" "$HOME/.config/yazi" || ((failed++))
-    health_check_symlink "Starship config" "$HOME/.config/starship.toml" || ((failed++))
-    health_check_symlink "Tmux config" "$HOME/.tmux.conf" || ((failed++))
-    health_check_symlink "MCP config" "$HOME/.config/mcp/servers.json" || ((failed++))
+    health_check_symlink "Neovim config" "$HOME/.config/nvim" || failed=$((failed + 1))
+    health_check_symlink "Yazi config" "$HOME/.config/yazi" || failed=$((failed + 1))
+    health_check_symlink "Starship config" "$HOME/.config/starship.toml" || failed=$((failed + 1))
+    health_check_symlink "Tmux config" "$HOME/.tmux.conf" || failed=$((failed + 1))
+    health_check_symlink "MCP config" "$HOME/.config/mcp/servers.json" || failed=$((failed + 1))
 
     echo ""
     echo "🐚 Shell integration:"
-    health_check_bashrc "Starship" "starship init" || ((failed++))
-    health_check_bashrc "Zoxide" "zoxide init" || ((failed++))
-    health_check_bashrc "Shell integration" "shell-integration.sh" || ((failed++))
-    health_check_bashrc "PATH (local bin)" ".local/bin" || ((failed++))
-    health_check_bashrc "PATH (npm-global)" "npm-global" || ((failed++))
+    health_check_bashrc "Starship" "starship init" || failed=$((failed + 1))
+    health_check_bashrc "Zoxide" "zoxide init" || failed=$((failed + 1))
+    health_check_bashrc "Shell integration" "shell-integration.sh" || failed=$((failed + 1))
+    health_check_bashrc "PATH (local bin)" ".local/bin" || failed=$((failed + 1))
+    health_check_bashrc "PATH (npm-global)" "npm-global" || failed=$((failed + 1))
 
     echo ""
     echo "🔐 Authentication:"
@@ -551,7 +551,7 @@ run_health_check() {
         echo -e "${GREEN}✓${NC} GitHub CLI: authenticated"
     else
         echo -e "${RED}✗${NC} GitHub CLI: not authenticated"
-        ((failed++))
+        failed=$((failed + 1))
     fi
 
     if is_installed doppler && doppler me &>/dev/null 2>&1; then
@@ -802,10 +802,10 @@ run_update_check() {
         local auto_update=() manual_update=()
         for item in "${DOTFILES_UPDATES_AVAILABLE[@]}"; do
             case "$item" in
-                neovim|yazi|starship|zoxide|fzf|doppler|gum|gh|node|bat|lsd|npm:*)
+                neovim|yazi|starship|zoxide|fzf|doppler|gum|gh|bat|lsd|npm:*)
                     auto_update+=("$item")
                     ;;
-                lazygit)
+                node|lazygit)
                     manual_update+=("$item")
                     ;;
             esac
@@ -816,6 +816,29 @@ run_update_check() {
         fi
         if [ ${#manual_update[@]} -gt 0 ]; then
             echo -e "${YELLOW}Manual update: ${manual_update[*]}${NC}"
+            # Show instructions for manual updates
+            for item in "${manual_update[@]}"; do
+                case "$item" in
+                    node)
+                        if [ -d "$HOME/.nvm" ]; then
+                            echo -e "  ${BLUE}→ nvm install --lts && nvm use --lts${NC}"
+                        elif command -v n >/dev/null 2>&1; then
+                            echo -e "  ${BLUE}→ sudo n lts${NC}"
+                        elif command -v fnm >/dev/null 2>&1; then
+                            echo -e "  ${BLUE}→ fnm install --lts && fnm use lts${NC}"
+                        elif command -v volta >/dev/null 2>&1; then
+                            echo -e "  ${BLUE}→ volta install node@lts${NC}"
+                        elif [ -f /usr/bin/node ]; then
+                            echo -e "  ${BLUE}→ sudo apt update && sudo apt install -y nodejs${NC}"
+                        else
+                            echo -e "  ${BLUE}→ Check your package manager${NC}"
+                        fi
+                        ;;
+                    lazygit)
+                        echo -e "  ${BLUE}→ go install github.com/jesseduffield/lazygit@latest${NC}"
+                        ;;
+                esac
+            done
         fi
         echo ""
         return 1
@@ -917,14 +940,22 @@ update_tool() {
             fi
             ;;
         node)
-            info "Updating Node.js..."
-            bash -c '
-                export NVM_DIR="$HOME/.nvm"
-                [ -s "$NVM_DIR/nvm.sh" ] && source "$NVM_DIR/nvm.sh"
-                nvm install --lts
-                nvm use --lts
-            ' </dev/null >/dev/null 2>&1
-            success "Node.js updated"
+            # Node has too many install methods (nvm, n, apt, snap, brew, fnm, volta...)
+            # Safer to show manual instructions
+            warn "Node.js requires manual update:"
+            if [ -d "$HOME/.nvm" ]; then
+                echo "  → nvm install --lts && nvm use --lts"
+            elif command -v n >/dev/null 2>&1; then
+                echo "  → sudo n lts"
+            elif command -v fnm >/dev/null 2>&1; then
+                echo "  → fnm install --lts && fnm use lts"
+            elif command -v volta >/dev/null 2>&1; then
+                echo "  → volta install node@lts"
+            elif [ -f /usr/bin/node ]; then
+                echo "  → sudo apt update && sudo apt install -y nodejs"
+            else
+                echo "  → Check your package manager (apt, brew, snap...)"
+            fi
             ;;
         lsd)
             info "Updating lsd..."
@@ -990,6 +1021,8 @@ run_direct_updates() {
 
     echo ""
     success "Updates completed!"
+    echo ""
+    info "Run 're' or 'source ~/.bashrc' to reload your shell"
 }
 
 # Interactive update with selection
@@ -1000,14 +1033,14 @@ run_interactive_update() {
         # Separate npm packages from tools (only auto-updatable)
         local all_auto=()
         for item in "${DOTFILES_UPDATES_AVAILABLE[@]}"; do
-            if [[ "$item" == npm:* ]] || [[ "$item" =~ ^(neovim|yazi|starship|zoxide|fzf|doppler|gum|gh|node|bat|lsd)$ ]]; then
+            if [[ "$item" == npm:* ]] || [[ "$item" =~ ^(neovim|yazi|starship|zoxide|fzf|doppler|gum|gh|bat|lsd)$ ]]; then
                 all_auto+=("$item")
             fi
         done
 
         if [ ${#all_auto[@]} -eq 0 ]; then
             info "No auto-updatable tools available"
-            exit 0
+            return 0
         fi
 
         local selected_tools=()
@@ -1043,7 +1076,7 @@ run_interactive_update() {
                         ;;
                     *)
                         info "Cancelled"
-                        exit 0
+                        return 0
                         ;;
                 esac
             done
@@ -1061,7 +1094,7 @@ run_interactive_update() {
         fi
     fi
 
-    exit 0
+    return 0
 }
 
 # ============================================================================
@@ -1205,7 +1238,7 @@ parallel_wait() {
             success "$name completed"
         else
             warn "$name failed"
-            ((failed++))
+            failed=$((failed + 1))
         fi
     done
 
@@ -1549,41 +1582,49 @@ gum_choose() {
 
 # Interactive component selection menu
 run_interactive_menu() {
-    gum_header "🚀 Dotfiles Installer"
+    while true; do
+        clear
+        gum_header "🚀 Dotfiles Installer"
 
-    # Ask what to do
-    local action
-    action=$(gum_choose "What would you like to do?" \
-        "📦 Install (full)" \
-        "🎯 Install (select components)" \
-        "🔄 Update installed tools" \
-        "🩺 Health check" \
-        "🗑️  Uninstall" \
-        "❌ Cancel")
+        # Ask what to do
+        local action
+        action=$(gum_choose "What would you like to do?" \
+            "📦 Install (full)" \
+            "🎯 Install (select components)" \
+            "🔄 Update installed tools" \
+            "🩺 Health check" \
+            "🗑️  Uninstall" \
+            "❌ Exit")
 
-    case "$action" in
-        *"Install (full)"*)
-            return 0  # Continue with normal install
-            ;;
-        *"Install (select"*)
-            select_components
-            ;;
-        *"Update"*)
-            run_interactive_update
-            ;;
-        *"Health check"*)
-            run_health_check
-            exit $?
-            ;;
-        *"Uninstall"*)
-            run_uninstall
-            exit $?
-            ;;
-        *"Cancel"*)
-            echo "Cancelled."
-            exit 0
-            ;;
-    esac
+        case "$action" in
+            *"Install (full)"*)
+                return 0  # Continue with normal install
+                ;;
+            *"Install (select"*)
+                select_components
+                return 0  # Continue with install
+                ;;
+            *"Update"*)
+                run_interactive_update
+                echo ""
+                read -rp "Press Enter to return to menu..."
+                ;;
+            *"Health check"*)
+                run_health_check || true
+                echo ""
+                read -rp "Press Enter to return to menu..."
+                ;;
+            *"Uninstall"*)
+                run_uninstall
+                echo ""
+                read -rp "Press Enter to return to menu..."
+                ;;
+            *"Exit"*|"")
+                echo "Bye!"
+                exit 0
+                ;;
+        esac
+    done
 }
 
 # Component selection submenu
