@@ -696,9 +696,21 @@ get_latest_version() {
             get_latest_release "cli/cli" "v2.40.0"
             ;;
         node)
-            # Node has too many sources (apt, nodesource, nvm, n, etc.)
-            # Just return current version to avoid false "update available"
-            node --version 2>/dev/null | grep -oE 'v?[0-9]+\.[0-9]+\.[0-9]+' || echo "unknown"
+            # Detect install source and check version from same source
+            if [ -d "$HOME/.nvm" ]; then
+                # nvm: check latest LTS
+                export NVM_DIR="$HOME/.nvm"
+                [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh" 2>/dev/null
+                nvm ls-remote --lts 2>/dev/null | tail -1 | grep -oE 'v[0-9]+\.[0-9]+\.[0-9]+' || echo "unknown"
+            elif [ -f /usr/bin/node ] && command -v apt-cache >/dev/null 2>&1; then
+                # apt/nodesource: check candidate version
+                apt-cache policy nodejs 2>/dev/null | grep Candidate | grep -oE '[0-9]+\.[0-9]+\.[0-9]+' || echo "unknown"
+            elif command -v n >/dev/null 2>&1; then
+                # n: check latest lts
+                n --lts 2>/dev/null | head -1 || echo "unknown"
+            else
+                echo "unknown"
+            fi
             ;;
         bat)
             get_latest_release "sharkdp/bat" "v0.24.0"
