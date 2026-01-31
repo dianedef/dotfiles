@@ -60,17 +60,10 @@ if [ "${DOTFILES_UNINSTALL_MODE:-false}" = "true" ]; then
     exit $?
 fi
 
-# Update mode: show what needs updating first
-if [ "${DOTFILES_UPDATE_MODE:-false}" = "true" ] && [ "${DOTFILES_INTERACTIVE:-auto}" != "true" ]; then
-    run_update_check
-    echo ""
-    if [ -t 0 ]; then
-        read -r -p "Proceed with updates? (y/N): " confirm
-        if [ "$confirm" != "y" ] && [ "$confirm" != "Y" ]; then
-            echo "Cancelled."
-            exit 0
-        fi
-    fi
+# Update mode: run interactive update and exit
+if [ "${DOTFILES_UPDATE_MODE:-false}" = "true" ]; then
+    run_interactive_update  # This function handles everything and exits
+    exit 0  # Should not reach here, but just in case
 fi
 
 # ============================================================================
@@ -148,10 +141,8 @@ fi
 echo ""
 
 # ============================================================================
-# USER IDENTITY CONFIGURATION
+# USER IDENTITY CONFIGURATION (skip in update mode)
 # ============================================================================
-echo "👤 Configuring user identity..."
-
 get_user_info() {
     if [ -z "${USER_NAME:-}" ]; then
         if [ -t 0 ]; then
@@ -186,14 +177,18 @@ get_user_info() {
     success "User identity: $USER_NAME <$USER_EMAIL> (@$GITHUB_USERNAME)"
 }
 
-get_user_info
+# Skip identity config in update mode
+if [ "${DOTFILES_UPDATE_MODE:-false}" != "true" ]; then
+    echo "👤 Configuring user identity..."
+    get_user_info
 
-# Git configuration
-if ! is_dry_run; then
-    git config --global user.name "$USER_NAME"
-    git config --global user.email "$USER_EMAIL"
+    # Git configuration
+    if ! is_dry_run; then
+        git config --global user.name "$USER_NAME"
+        git config --global user.email "$USER_EMAIL"
+    fi
+    success "Git user identity configured"
 fi
-success "Git user identity configured"
 
 # ============================================================================
 # NEOVIM INSTALLATION
@@ -450,7 +445,23 @@ install_nerd_fonts() {
 install_node() {
     if ! should_install "node"; then return 0; fi
 
-    if is_installed node; then
+    # Update mode: upgrade to latest LTS
+    if [ "${DOTFILES_UPDATE_MODE:-false}" = "true" ] && is_installed node; then
+        if is_dry_run; then
+            echo -e "${BLUE}[DRY-RUN]${NC} Would update Node.js via nvm"
+            return 0
+        fi
+        info "Updating Node.js via nvm..."
+        export NVM_DIR="$HOME/.nvm"
+        # shellcheck disable=SC1091
+        [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
+        nvm install --lts >/dev/null 2>&1
+        nvm use --lts >/dev/null 2>&1
+        success "Node.js updated to $(node --version)"
+        return 0
+    fi
+
+    if is_installed node && [ "${DOTFILES_UPDATE_MODE:-false}" != "true" ]; then
         success "Node.js already installed: $(node --version)"
         return 0
     fi
@@ -501,6 +512,154 @@ install_npm_tools() {
     done
 
     hash -r 2>/dev/null
+}
+
+# ============================================================================
+# GITHUB CLI INSTALLATION
+# ============================================================================
+install_gh() {
+    if ! should_install "gh"; then return 0; fi
+
+    # Update mode
+    if [ "${DOTFILES_UPDATE_MODE:-false}" = "true" ] && is_installed gh; then
+        if is_dry_run; then
+            echo -e "${BLUE}[DRY-RUN]${NC} Would update GitHub CLI"
+            return 0
+        fi
+        info "Updating GitHub CLI..."
+        if gh extension upgrade --all 2>/dev/null; then
+            success "GitHub CLI extensions updated"
+        fi
+        # gh itself is updated via apt or the gh upgrade command if available
+        if gh upgrade 2>/dev/null; then
+            success "GitHub CLI updated"
+        else
+            # Fallback: reinstall from GitHub releases
+            local latest
+            latest=$(get_latest_release "cli/cli" "v2.40.0")
+            local current
+            current=$(gh --version | head -1 | grep -oE '[0-9]+\.[0-9]+\.[0-9]+')
+            if [ "$current" != "${latest#v}" ]; then
+                curl -fsSL "https://github.com/cli/cli/releases/download/${latest}/gh_${latest#v}_linux_amd64.deb" -o /tmp/gh.deb 2>/dev/null
+                if [ -f /tmp/gh.deb ]; then
+                    run_with_sudo dpkg -i /tmp/gh.deb >/dev/null 2>&1 && success "GitHub CLI updated to $latest" || warn "GitHub CLI update failed"
+                    rm -f /tmp/gh.deb
+                fi
+            fi
+        fi
+        return 0
+    fi
+
+    if is_installed gh && [ "${DOTFILES_UPDATE_MODE:-false}" != "true" ]; then
+        success "GitHub CLI already installed: $(gh --version | head -1)"
+        return 0
+    fi
+
+    if is_dry_run; then
+        echo -e "${BLUE}[DRY-RUN]${NC} Would install GitHub CLI"
+        return 0
+    fi
+
+    info "Installing GitHub CLI..."
+    curl -fsSL https://cli.github.com/packages/githubcli-archive-keyring.gpg | run_with_sudo dd of=/usr/share/keyrings/githubcli-archive-keyring.gpg 2>/dev/null
+    echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/githubcli-archive-keyring.gpg] https://cli.github.com/packages stable main" | run_with_sudo tee /etc/apt/sources.list.d/github-cli.list > /dev/null
+    run_with_sudo apt update >/dev/null 2>&1
+    run_with_sudo apt install -y gh >/dev/null 2>&1
+    success "GitHub CLI installed"
+}
+
+# ============================================================================
+# LSD INSTALLATION (LSDeluxe - modern ls replacement)
+# ============================================================================
+install_lsd() {
+    if ! should_install "lsd"; then return 0; fi
+
+    local current latest
+    if is_installed lsd; then
+        current=$(lsd --version 2>/dev/null | grep -oE '[0-9]+\.[0-9]+\.[0-9]+')
+    fi
+
+    # Update mode
+    if [ "${DOTFILES_UPDATE_MODE:-false}" = "true" ] && is_installed lsd; then
+        if is_dry_run; then
+            echo -e "${BLUE}[DRY-RUN]${NC} Would update lsd"
+            return 0
+        fi
+        latest=$(get_latest_release "lsd-rs/lsd" "v1.0.0")
+        latest="${latest#v}"
+        if [ "$current" = "$latest" ]; then
+            success "lsd is up to date ($current)"
+            return 0
+        fi
+        info "Updating lsd: $current -> $latest"
+    elif is_installed lsd && [ "${DOTFILES_UPDATE_MODE:-false}" != "true" ]; then
+        success "lsd already installed: $current"
+        return 0
+    fi
+
+    if is_dry_run; then
+        echo -e "${BLUE}[DRY-RUN]${NC} Would install lsd"
+        return 0
+    fi
+
+    info "Installing lsd..."
+    latest="${latest:-$(get_latest_release "lsd-rs/lsd" "v1.0.0")}"
+    latest="${latest#v}"
+    local url="https://github.com/lsd-rs/lsd/releases/download/v${latest}/lsd_${latest}_amd64.deb"
+    curl -fsSL "$url" -o /tmp/lsd.deb 2>/dev/null
+    if [ -f /tmp/lsd.deb ]; then
+        run_with_sudo dpkg -i /tmp/lsd.deb >/dev/null 2>&1 && success "lsd installed ($latest)" || warn "lsd installation failed"
+        rm -f /tmp/lsd.deb
+    else
+        warn "Failed to download lsd"
+    fi
+}
+
+# ============================================================================
+# BAT INSTALLATION (cat with syntax highlighting)
+# ============================================================================
+install_bat() {
+    if ! should_install "bat"; then return 0; fi
+
+    local current latest
+    if is_installed bat; then
+        current=$(bat --version 2>/dev/null | grep -oE '[0-9]+\.[0-9]+\.[0-9]+' | head -1)
+    fi
+
+    # Update mode
+    if [ "${DOTFILES_UPDATE_MODE:-false}" = "true" ] && is_installed bat; then
+        if is_dry_run; then
+            echo -e "${BLUE}[DRY-RUN]${NC} Would update bat"
+            return 0
+        fi
+        latest=$(get_latest_release "sharkdp/bat" "v0.24.0")
+        latest="${latest#v}"
+        if [ "$current" = "$latest" ]; then
+            success "bat is up to date ($current)"
+            return 0
+        fi
+        info "Updating bat: $current -> $latest"
+    elif is_installed bat && [ "${DOTFILES_UPDATE_MODE:-false}" != "true" ]; then
+        success "bat already installed: $current"
+        return 0
+    fi
+
+    if is_dry_run; then
+        echo -e "${BLUE}[DRY-RUN]${NC} Would install bat"
+        return 0
+    fi
+
+    info "Installing bat..."
+    latest="${latest:-$(get_latest_release "sharkdp/bat" "v0.24.0")}"
+    latest="${latest#v}"
+    local url="https://github.com/sharkdp/bat/releases/download/v${latest}/bat_${latest}_amd64.deb"
+    curl -fsSL "$url" -o /tmp/bat.deb 2>/dev/null
+    if [ -f /tmp/bat.deb ]; then
+        run_with_sudo dpkg -i /tmp/bat.deb >/dev/null 2>&1 && success "bat installed ($latest)" || warn "bat installation failed"
+        rm -f /tmp/bat.deb
+    else
+        warn "Failed to download bat"
+    fi
 }
 
 # ============================================================================
@@ -876,6 +1035,17 @@ alias dot='~/dotfiles/install.sh'
 alias dotfiles='~/dotfiles/install.sh -i'
 ALIASES
         success "Added productivity aliases"
+    else
+        # Ensure dotfiles aliases exist even if section was added previously
+        if ! grep -q "alias dot=" "$HOME/.bashrc" 2>/dev/null; then
+            cat >> "$HOME/.bashrc" << 'DOTALIASES'
+
+# Dotfiles management
+alias dot='~/dotfiles/install.sh'
+alias dotfiles='~/dotfiles/install.sh -i'
+DOTALIASES
+            success "Added dotfiles aliases"
+        fi
     fi
 
     # Source for current session
@@ -901,6 +1071,9 @@ if [ "${DOTFILES_PARALLEL:-false}" = "true" ]; then
     parallel_run "Zoxide" install_zoxide
     parallel_run "Yazi" install_yazi
     parallel_run "Doppler" install_doppler
+    parallel_run "GitHub CLI" install_gh
+    parallel_run "lsd" install_lsd
+    parallel_run "bat" install_bat
     parallel_wait
 else
     install_neovim
@@ -911,6 +1084,9 @@ else
     install_zoxide
     install_yazi
     install_doppler
+    install_gh
+    install_lsd
+    install_bat
 fi
 
 install_npm_tools

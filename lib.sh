@@ -625,6 +625,18 @@ get_installed_version() {
         gum)
             gum --version 2>/dev/null | grep -oE 'v?[0-9]+\.[0-9]+\.[0-9]+' | head -1 || echo "unknown"
             ;;
+        gh)
+            gh --version 2>/dev/null | head -1 | grep -oE '[0-9]+\.[0-9]+\.[0-9]+' || echo "unknown"
+            ;;
+        bat)
+            bat --version 2>/dev/null | grep -oE '[0-9]+\.[0-9]+\.[0-9]+' | head -1 || echo "unknown"
+            ;;
+        lsd)
+            lsd --version 2>/dev/null | grep -oE '[0-9]+\.[0-9]+\.[0-9]+' || echo "unknown"
+            ;;
+        lazygit)
+            lazygit --version 2>/dev/null | grep -oE '[0-9]+\.[0-9]+\.[0-9]+' | head -1 || echo "unknown"
+            ;;
         *)
             echo "unknown"
             ;;
@@ -680,11 +692,30 @@ get_latest_version() {
         gum)
             get_latest_release "charmbracelet/gum" "v0.14.0"
             ;;
+        gh)
+            get_latest_release "cli/cli" "v2.40.0"
+            ;;
+        node)
+            # Get latest LTS version from nodejs.org
+            curl -sL https://nodejs.org/dist/index.json 2>/dev/null | grep -oE '"version":"v[0-9]+\.[0-9]+\.[0-9]+"' | head -1 | grep -oE 'v[0-9]+\.[0-9]+\.[0-9]+' || echo "unknown"
+            ;;
+        bat)
+            get_latest_release "sharkdp/bat" "v0.24.0"
+            ;;
+        lsd)
+            get_latest_release "lsd-rs/lsd" "v1.0.0"
+            ;;
+        lazygit)
+            get_latest_release "jesseduffield/lazygit" "v0.40.0"
+            ;;
         *)
             echo "unknown"
             ;;
     esac
 }
+
+# Global array for updates available (used by run_interactive_update)
+declare -a DOTFILES_UPDATES_AVAILABLE=()
 
 # Run update check and display status
 run_update_check() {
@@ -693,8 +724,8 @@ run_update_check() {
     echo "════════════════════════════════════════════════════════════════"
     echo ""
 
-    local tools=("neovim" "yazi" "starship" "zoxide" "fzf" "doppler" "gum")
-    local updates_available=()
+    local tools=("neovim" "yazi" "starship" "zoxide" "fzf" "doppler" "gum" "gh" "node" "bat" "lsd" "lazygit")
+    DOTFILES_UPDATES_AVAILABLE=()
 
     info "Checking for updates..."
     echo ""
@@ -726,22 +757,239 @@ run_update_check() {
             status_icon="${GREEN}✓ up to date${NC}"
         else
             status_icon="${YELLOW}⬆ update available${NC}"
-            updates_available+=("$tool")
+            DOTFILES_UPDATES_AVAILABLE+=("$tool")
         fi
 
         printf "%-15s %-15s %-15s %b\n" "$tool" "$installed_norm" "$latest_norm" "$status_icon"
     done
 
+    # Check npm global packages
+    if is_installed npm; then
+        echo ""
+        echo "NPM Global Packages:"
+        printf "%-20s %-15s %-15s %s\n" "Package" "Installed" "Latest" "Status"
+        printf "%-20s %-15s %-15s %s\n" "───────" "─────────" "──────" "──────"
+
+        local npm_packages=("@anthropic-ai/claude-code" "@apify/mcpc" "@kilocode/cli" "opencode-ai" "tldr")
+        for pkg in "${npm_packages[@]}"; do
+            local pkg_installed pkg_latest pkg_status
+            pkg_installed=$(npm list -g "$pkg" 2>/dev/null | grep -oE '[0-9]+\.[0-9]+\.[0-9]+' | head -1)
+
+            if [ -z "$pkg_installed" ]; then
+                continue  # Package not installed
+            fi
+
+            pkg_latest=$(npm view "$pkg" version 2>/dev/null || echo "unknown")
+
+            if [ "$pkg_installed" = "$pkg_latest" ]; then
+                pkg_status="${GREEN}✓ up to date${NC}"
+            else
+                pkg_status="${YELLOW}⬆ update available${NC}"
+                DOTFILES_UPDATES_AVAILABLE+=("npm:$pkg")
+            fi
+
+            printf "%-20s %-15s %-15s %b\n" "$pkg" "$pkg_installed" "$pkg_latest" "$pkg_status"
+        done
+    fi
+
     echo ""
 
-    if [ ${#updates_available[@]} -eq 0 ]; then
+    if [ ${#DOTFILES_UPDATES_AVAILABLE[@]} -eq 0 ]; then
         success "All tools are up to date!"
         return 0
     else
-        echo "Updates available for: ${updates_available[*]}"
+        # Separate auto-updatable from manual updates
+        local auto_update=() manual_update=()
+        for item in "${DOTFILES_UPDATES_AVAILABLE[@]}"; do
+            case "$item" in
+                neovim|yazi|starship|zoxide|fzf|doppler|gum|gh|node|bat|lsd|npm:*)
+                    auto_update+=("$item")
+                    ;;
+                lazygit)
+                    manual_update+=("$item")
+                    ;;
+            esac
+        done
+
+        if [ ${#auto_update[@]} -gt 0 ]; then
+            echo "Auto-update available: ${auto_update[*]}"
+        fi
+        if [ ${#manual_update[@]} -gt 0 ]; then
+            echo -e "${YELLOW}Manual update: ${manual_update[*]}${NC}"
+        fi
         echo ""
         return 1
     fi
+}
+
+# Update npm packages
+update_npm_packages() {
+    local packages=("$@")
+    for pkg in "${packages[@]}"; do
+        # Remove npm: prefix
+        pkg="${pkg#npm:}"
+        info "Updating $pkg..."
+        npm install -g "$pkg" 2>/dev/null && success "$pkg updated" || warn "$pkg update failed"
+    done
+}
+
+# Direct update for a single tool (without full install)
+update_tool() {
+    local tool="$1"
+    local script_dir="${DOTFILES_DIR:-$HOME/dotfiles}"
+
+    case "$tool" in
+        neovim)
+            info "Updating Neovim..."
+            local latest
+            latest=$(get_latest_release "neovim/neovim" "v0.10.0")
+            curl -fsSL "https://github.com/neovim/neovim/releases/download/${latest}/nvim-linux64.tar.gz" -o /tmp/nvim.tar.gz 2>/dev/null
+            if [ -f /tmp/nvim.tar.gz ]; then
+                sudo rm -rf /opt/nvim 2>/dev/null
+                sudo tar -C /opt -xzf /tmp/nvim.tar.gz 2>/dev/null
+                sudo ln -sf /opt/nvim-linux64/bin/nvim /usr/local/bin/nvim 2>/dev/null
+                rm -f /tmp/nvim.tar.gz
+                success "Neovim updated to $latest"
+            fi
+            ;;
+        starship)
+            info "Updating Starship..."
+            curl -fsSL https://starship.rs/install.sh -o /tmp/starship-install.sh 2>/dev/null
+            if [ -f /tmp/starship-install.sh ]; then
+                sh /tmp/starship-install.sh -y </dev/null >/dev/null 2>&1
+                rm -f /tmp/starship-install.sh
+                success "Starship updated"
+            else
+                warn "Failed to download starship installer"
+            fi
+            ;;
+        zoxide)
+            info "Updating Zoxide..."
+            curl -fsSL https://raw.githubusercontent.com/ajeetdsouza/zoxide/main/install.sh -o /tmp/zoxide-install.sh 2>/dev/null
+            if [ -f /tmp/zoxide-install.sh ]; then
+                bash /tmp/zoxide-install.sh </dev/null >/dev/null 2>&1
+                rm -f /tmp/zoxide-install.sh
+                success "Zoxide updated"
+            else
+                warn "Failed to download zoxide installer"
+            fi
+            ;;
+        fzf)
+            info "Updating fzf..."
+            if [ -d "$HOME/.fzf" ]; then
+                cd "$HOME/.fzf" && git pull >/dev/null 2>&1 && ./install --all >/dev/null 2>&1
+                success "fzf updated"
+            fi
+            ;;
+        doppler)
+            info "Updating Doppler..."
+            curl -fsSL https://cli.doppler.com/install.sh -o /tmp/doppler-install.sh 2>/dev/null
+            if [ -f /tmp/doppler-install.sh ]; then
+                sudo sh /tmp/doppler-install.sh </dev/null >/dev/null 2>&1
+                rm -f /tmp/doppler-install.sh
+                success "Doppler updated"
+            else
+                warn "Failed to download doppler installer"
+            fi
+            ;;
+        gum)
+            info "Updating gum..."
+            local latest
+            latest=$(get_latest_release "charmbracelet/gum" "v0.14.0")
+            curl -fsSL "https://github.com/charmbracelet/gum/releases/download/${latest}/gum_${latest#v}_Linux_x86_64.tar.gz" -o /tmp/gum.tar.gz 2>/dev/null
+            if [ -f /tmp/gum.tar.gz ]; then
+                tar -xzf /tmp/gum.tar.gz -C /tmp gum 2>/dev/null
+                sudo mv /tmp/gum /usr/local/bin/ 2>/dev/null || mv /tmp/gum ~/.local/bin/ 2>/dev/null
+                rm -f /tmp/gum.tar.gz
+                success "gum updated to $latest"
+            fi
+            ;;
+        gh)
+            info "Updating GitHub CLI..."
+            local latest arch_deb
+            latest=$(get_latest_release "cli/cli" "v2.40.0")
+            arch_deb="amd64"
+            [ "$(uname -m)" = "aarch64" ] && arch_deb="arm64"
+            curl -fsSL "https://github.com/cli/cli/releases/download/${latest}/gh_${latest#v}_linux_${arch_deb}.deb" -o /tmp/gh.deb 2>/dev/null
+            if [ -f /tmp/gh.deb ]; then
+                sudo dpkg -i /tmp/gh.deb >/dev/null 2>&1 && success "GitHub CLI updated to $latest" || warn "gh update failed"
+                rm -f /tmp/gh.deb
+            fi
+            ;;
+        node)
+            info "Updating Node.js..."
+            bash -c '
+                export NVM_DIR="$HOME/.nvm"
+                [ -s "$NVM_DIR/nvm.sh" ] && source "$NVM_DIR/nvm.sh"
+                nvm install --lts
+                nvm use --lts
+            ' </dev/null >/dev/null 2>&1
+            success "Node.js updated"
+            ;;
+        lsd)
+            info "Updating lsd..."
+            local latest arch_deb
+            latest=$(get_latest_release "lsd-rs/lsd" "v1.0.0")
+            arch_deb="amd64"
+            [ "$(uname -m)" = "aarch64" ] && arch_deb="arm64"
+            curl -fsSL "https://github.com/lsd-rs/lsd/releases/download/${latest}/lsd_${latest#v}_${arch_deb}.deb" -o /tmp/lsd.deb 2>/dev/null
+            if [ -f /tmp/lsd.deb ]; then
+                sudo dpkg -i /tmp/lsd.deb >/dev/null 2>&1 && success "lsd updated to $latest" || warn "lsd update failed"
+                rm -f /tmp/lsd.deb
+            fi
+            ;;
+        bat)
+            info "Updating bat..."
+            local latest arch_deb
+            latest=$(get_latest_release "sharkdp/bat" "v0.24.0")
+            arch_deb="amd64"
+            [ "$(uname -m)" = "aarch64" ] && arch_deb="arm64"
+            curl -fsSL "https://github.com/sharkdp/bat/releases/download/${latest}/bat_${latest#v}_${arch_deb}.deb" -o /tmp/bat.deb 2>/dev/null
+            if [ -f /tmp/bat.deb ]; then
+                sudo dpkg -i /tmp/bat.deb >/dev/null 2>&1 && success "bat updated to $latest" || warn "bat update failed"
+                rm -f /tmp/bat.deb
+            fi
+            ;;
+        yazi)
+            info "Updating Yazi..."
+            local latest
+            latest=$(get_latest_release "sxyazi/yazi" "v0.4.0")
+            local arch="x86_64"
+            [ "$(uname -m)" = "aarch64" ] && arch="aarch64"
+            curl -fsSL "https://github.com/sxyazi/yazi/releases/download/${latest}/yazi-${arch}-unknown-linux-gnu.zip" -o /tmp/yazi.zip 2>/dev/null
+            if [ -f /tmp/yazi.zip ]; then
+                unzip -o /tmp/yazi.zip -d /tmp >/dev/null 2>&1
+                sudo mv /tmp/yazi-${arch}-unknown-linux-gnu/yazi /usr/local/bin/ 2>/dev/null || mv /tmp/yazi-${arch}-unknown-linux-gnu/yazi ~/.local/bin/ 2>/dev/null
+                rm -rf /tmp/yazi.zip /tmp/yazi-*
+                success "Yazi updated to $latest"
+            fi
+            ;;
+        *)
+            warn "Unknown tool: $tool"
+            ;;
+    esac
+}
+
+# Run direct updates for selected tools
+run_direct_updates() {
+    local tools=("$@")
+
+    echo ""
+    info "Running updates..."
+    echo ""
+
+    for tool in "${tools[@]}"; do
+        if [[ "$tool" == npm:* ]]; then
+            local pkg="${tool#npm:}"
+            info "Updating $pkg..."
+            npm install -g "$pkg" </dev/null >/dev/null 2>&1 && success "$pkg updated" || warn "$pkg update failed"
+        else
+            update_tool "$tool"
+        fi
+    done
+
+    echo ""
+    success "Updates completed!"
 }
 
 # Interactive update with selection
@@ -749,24 +997,67 @@ run_interactive_update() {
     if ! run_update_check; then
         echo ""
 
-        if use_gum; then
-            if gum confirm "Install available updates?"; then
-                # Get list of tools that need updates
-                local tools_to_update
-                tools_to_update=$(gum_choose_multi "Select tools to update:" "${updates_available[@]}")
+        # Separate npm packages from tools (only auto-updatable)
+        local all_auto=()
+        for item in "${DOTFILES_UPDATES_AVAILABLE[@]}"; do
+            if [[ "$item" == npm:* ]] || [[ "$item" =~ ^(neovim|yazi|starship|zoxide|fzf|doppler|gum|gh|node|bat|lsd)$ ]]; then
+                all_auto+=("$item")
+            fi
+        done
 
-                if [ -n "$tools_to_update" ]; then
-                    export DOTFILES_ONLY=$(echo "$tools_to_update" | tr '\n' ',' | sed 's/,$//')
-                    export DOTFILES_UPDATE_MODE=true
-                    return 0  # Continue with installation
-                fi
-            fi
+        if [ ${#all_auto[@]} -eq 0 ]; then
+            info "No auto-updatable tools available"
+            exit 0
+        fi
+
+        local selected_tools=()
+
+        if use_gum && [ -t 0 ]; then
+            # Menu loop (ESC in sub-menu returns here)
+            while true; do
+                local choice
+                choice=$(gum choose --header "How to update?" "✨ Update all" "🔧 Select tools" "❌ Cancel")
+
+                case "$choice" in
+                    "✨ Update all")
+                        selected_tools=("${all_auto[@]}")
+                        break
+                        ;;
+                    "🔧 Select tools")
+                        local tools_to_update
+                        tools_to_update=$(gum choose --no-limit --header "Select tools (SPACE=select, ENTER=confirm, ESC=back):" "${all_auto[@]}" 2>/dev/null)
+                        local gum_exit=$?
+
+                        # ESC pressed or error = back to main menu
+                        if [ $gum_exit -ne 0 ]; then
+                            continue
+                        fi
+
+                        if [ -n "$tools_to_update" ]; then
+                            while IFS= read -r item; do
+                                [ -n "$item" ] && selected_tools+=("$item")
+                            done <<< "$tools_to_update"
+                            break
+                        fi
+                        # Empty selection = back to main menu
+                        ;;
+                    *)
+                        info "Cancelled"
+                        exit 0
+                        ;;
+                esac
+            done
         else
-            read -r -p "Install available updates? (y/N): " confirm
+            # Non-gum: ask once then update all
+            read -r -p "Update all? (y/N): " confirm
             if [ "$confirm" = "y" ] || [ "$confirm" = "Y" ]; then
-                export DOTFILES_UPDATE_MODE=true
-                return 0
+                selected_tools=("${all_auto[@]}")
             fi
+        fi
+
+        # Run direct updates if tools were selected
+        if [ ${#selected_tools[@]} -gt 0 ]; then
+            run_direct_updates "${selected_tools[@]}"
         fi
     fi
 

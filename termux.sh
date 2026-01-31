@@ -270,6 +270,8 @@ cat >> "$BASHRC" << 'EOF'
 # Termux aliases
 alias reload='source "$HOME/.bashrc" && echo "✓ Shell rechargé!"'
 alias i='bash ~/dotfiles/termux.sh'
+alias dot='~/dotfiles/termux.sh'
+alias dotfiles='~/dotfiles/termux.sh'
 alias ds='bash ~/dotfiles/doppler-setup-termux.sh'
 alias cls='clear'
 alias ..='cd ..'
