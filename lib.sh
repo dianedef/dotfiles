@@ -799,6 +799,135 @@ EOF
     gum_pager "$content"
 }
 
+# ============================================================================
+# API KEYS SETUP
+# ============================================================================
+run_api_keys_setup() {
+    clear
+    echo "════════════════════════════════════════════════════════════════"
+    echo "                    🔑 API KEYS SETUP"
+    echo "════════════════════════════════════════════════════════════════"
+    echo ""
+
+    # Check if Doppler is installed
+    if ! is_installed doppler; then
+        warn "Doppler CLI not installed"
+        echo ""
+        echo "Doppler is a secrets manager that syncs your API keys across devices."
+        echo ""
+
+        local choice
+        choice=$(gum_choose "What would you like to do?" \
+            "📦 Install Doppler" \
+            "📝 Manual setup (show instructions)" \
+            "⬅️  Back")
+
+        case "$choice" in
+            *"Install"*)
+                info "Installing Doppler..."
+                curl -sL https://cli.doppler.com/install.sh | sh
+                if is_installed doppler; then
+                    success "Doppler installed!"
+                    echo ""
+                    run_api_keys_setup  # Recurse to continue setup
+                    return
+                else
+                    error "Doppler installation failed"
+                    return 1
+                fi
+                ;;
+            *"Manual"*)
+                echo ""
+                echo "Manual API Keys Setup:"
+                echo "─────────────────────"
+                echo ""
+                echo "Add to your ~/.bashrc or ~/.env:"
+                echo ""
+                echo "  export ANTHROPIC_API_KEY=\"sk-ant-...\""
+                echo "  export OPENAI_API_KEY=\"sk-...\""
+                echo "  export GITHUB_TOKEN=\"ghp_...\""
+                echo ""
+                echo "Then reload: source ~/.bashrc"
+                return 0
+                ;;
+            *)
+                return 0
+                ;;
+        esac
+    fi
+
+    # Doppler is installed - check auth
+    info "Checking Doppler authentication..."
+    if ! doppler me &>/dev/null; then
+        warn "Not logged in to Doppler"
+        echo ""
+        info "Launching Doppler login..."
+        doppler login
+    else
+        local email
+        email=$(doppler me --json 2>/dev/null | grep -o '"email":"[^"]*"' | cut -d'"' -f4)
+        success "Logged in as: $email"
+    fi
+    echo ""
+
+    # Setup project
+    info "Setting up 'dotfiles' project..."
+    doppler projects create dotfiles --description "Dotfiles secrets" 2>/dev/null || true
+    doppler setup --project dotfiles --config dev --no-interactive 2>/dev/null || true
+    echo ""
+
+    # Check API keys
+    echo "API Keys Status:"
+    echo "────────────────"
+    check_doppler_key "ANTHROPIC_API_KEY" "Anthropic (Claude)"
+    check_doppler_key "OPENAI_API_KEY" "OpenAI"
+    check_doppler_key "GH_TOKEN" "GitHub" || check_doppler_key "GITHUB_TOKEN" "GitHub"
+    check_doppler_key "GEMINI_AI" "Google Gemini"
+    check_doppler_key "GROQ" "Groq"
+    check_doppler_key "DEEPSEEK_API_KEY" "Deepseek"
+    echo ""
+
+    # GitHub CLI auto-auth
+    if is_installed gh; then
+        if ! gh auth status &>/dev/null 2>&1; then
+            local gh_token
+            gh_token=$(doppler secrets get GH_TOKEN --plain 2>/dev/null || doppler secrets get GITHUB_TOKEN --plain 2>/dev/null)
+            if [ -n "$gh_token" ]; then
+                info "Auto-authenticating GitHub CLI..."
+                echo "$gh_token" | gh auth login --with-token 2>/dev/null
+                if gh auth status &>/dev/null 2>&1; then
+                    success "GitHub CLI authenticated!"
+                fi
+            fi
+        else
+            success "GitHub CLI already authenticated"
+        fi
+    fi
+    echo ""
+
+    # Show helpful commands
+    echo "Useful commands:"
+    echo "────────────────"
+    echo "  doppler secrets           # List all secrets"
+    echo "  doppler secrets set KEY   # Add a secret"
+    echo "  doppler open              # Open web dashboard"
+}
+
+# Helper to check a Doppler key
+check_doppler_key() {
+    local key=$1
+    local name=$2
+    local value
+    value=$(doppler secrets get "$key" --plain 2>/dev/null)
+    if [ -n "$value" ]; then
+        echo "  ✅ $name"
+        return 0
+    else
+        echo "  ⚠️  $name (not set)"
+        return 1
+    fi
+}
+
 run_health_check() {
     echo "════════════════════════════════════════════════════════════════"
     echo "                    DOTFILES HEALTH CHECK"
@@ -1918,6 +2047,7 @@ run_interactive_menu() {
             "📦 Install (full)" \
             "🎯 Install (select components)" \
             "🔄 Update installed tools" \
+            "🔑 Setup API Keys" \
             "🩺 Health check" \
             "🆘 Help" \
             "🗑️  Uninstall" \
@@ -1939,6 +2069,11 @@ run_interactive_menu() {
                 ;;
             *"Health check"*)
                 run_health_check || true
+                echo ""
+                read -rp "Press Enter to return to menu..."
+                ;;
+            *"API Keys"*)
+                run_api_keys_setup
                 echo ""
                 read -rp "Press Enter to return to menu..."
                 ;;
