@@ -877,13 +877,17 @@ update_tool() {
     case "$tool" in
         neovim)
             info "Updating Neovim..."
-            local latest
+            local latest arch
             latest=$(get_latest_release "neovim/neovim" "v0.10.0")
-            curl -fsSL "https://github.com/neovim/neovim/releases/download/${latest}/nvim-linux64.tar.gz" -o /tmp/nvim.tar.gz 2>/dev/null
+            arch="linux64"
+            [ "$(uname -m)" = "aarch64" ] && arch="linux-arm64"
+            curl -fsSL "https://github.com/neovim/neovim/releases/download/${latest}/nvim-${arch}.tar.gz" -o /tmp/nvim.tar.gz 2>/dev/null
             if [ -f /tmp/nvim.tar.gz ]; then
-                sudo rm -rf /opt/nvim 2>/dev/null
-                sudo tar -C /opt -xzf /tmp/nvim.tar.gz 2>/dev/null
-                sudo ln -sf /opt/nvim-linux64/bin/nvim /usr/local/bin/nvim 2>/dev/null
+                mkdir -p ~/.local
+                rm -rf ~/.local/nvim-${arch} 2>/dev/null
+                tar -C ~/.local -xzf /tmp/nvim.tar.gz 2>/dev/null
+                mkdir -p ~/.local/bin
+                ln -sf ~/.local/nvim-${arch}/bin/nvim ~/.local/bin/nvim
                 rm -f /tmp/nvim.tar.gz
                 success "Neovim updated to $latest"
             fi
@@ -930,12 +934,15 @@ update_tool() {
             ;;
         gum)
             info "Updating gum..."
-            local latest
+            local latest arch
             latest=$(get_latest_release "charmbracelet/gum" "v0.14.0")
-            curl -fsSL "https://github.com/charmbracelet/gum/releases/download/${latest}/gum_${latest#v}_Linux_x86_64.tar.gz" -o /tmp/gum.tar.gz 2>/dev/null
+            arch="x86_64"
+            [ "$(uname -m)" = "aarch64" ] && arch="arm64"
+            curl -fsSL "https://github.com/charmbracelet/gum/releases/download/${latest}/gum_${latest#v}_Linux_${arch}.tar.gz" -o /tmp/gum.tar.gz 2>/dev/null
             if [ -f /tmp/gum.tar.gz ]; then
                 tar -xzf /tmp/gum.tar.gz -C /tmp gum 2>/dev/null
-                sudo mv /tmp/gum /usr/local/bin/ 2>/dev/null || mv /tmp/gum ~/.local/bin/ 2>/dev/null
+                mkdir -p ~/.local/bin
+                mv /tmp/gum ~/.local/bin/
                 rm -f /tmp/gum.tar.gz
                 success "gum updated to $latest"
             fi
@@ -996,14 +1003,15 @@ update_tool() {
             ;;
         yazi)
             info "Updating Yazi..."
-            local latest
+            local latest arch
             latest=$(get_latest_release "sxyazi/yazi" "v0.4.0")
-            local arch="x86_64"
+            arch="x86_64"
             [ "$(uname -m)" = "aarch64" ] && arch="aarch64"
             curl -fsSL "https://github.com/sxyazi/yazi/releases/download/${latest}/yazi-${arch}-unknown-linux-gnu.zip" -o /tmp/yazi.zip 2>/dev/null
             if [ -f /tmp/yazi.zip ]; then
                 unzip -o /tmp/yazi.zip -d /tmp >/dev/null 2>&1
-                sudo mv /tmp/yazi-${arch}-unknown-linux-gnu/yazi /usr/local/bin/ 2>/dev/null || mv /tmp/yazi-${arch}-unknown-linux-gnu/yazi ~/.local/bin/ 2>/dev/null
+                mkdir -p ~/.local/bin
+                mv /tmp/yazi-${arch}-unknown-linux-gnu/yazi ~/.local/bin/
                 rm -rf /tmp/yazi.zip /tmp/yazi-*
                 success "Yazi updated to $latest"
             fi
@@ -1704,9 +1712,11 @@ install_component() {
             [ "$(uname -m)" = "aarch64" ] && arch="linux-arm64"
             curl -fsSL "https://github.com/neovim/neovim/releases/download/${latest}/nvim-${arch}.tar.gz" -o /tmp/nvim.tar.gz 2>/dev/null
             if [ -f /tmp/nvim.tar.gz ]; then
-                sudo rm -rf /opt/nvim 2>/dev/null || rm -rf ~/.local/nvim 2>/dev/null
-                sudo mkdir -p /opt 2>/dev/null && sudo tar -C /opt -xzf /tmp/nvim.tar.gz 2>/dev/null || tar -C ~/.local -xzf /tmp/nvim.tar.gz 2>/dev/null
-                sudo ln -sf /opt/nvim-${arch}/bin/nvim /usr/local/bin/nvim 2>/dev/null || ln -sf ~/.local/nvim-${arch}/bin/nvim ~/.local/bin/nvim 2>/dev/null
+                mkdir -p ~/.local
+                rm -rf ~/.local/nvim-${arch} 2>/dev/null
+                tar -C ~/.local -xzf /tmp/nvim.tar.gz 2>/dev/null
+                mkdir -p ~/.local/bin
+                ln -sf ~/.local/nvim-${arch}/bin/nvim ~/.local/bin/nvim
                 rm -f /tmp/nvim.tar.gz
                 success "Neovim installed ($latest)"
             else
@@ -1744,7 +1754,8 @@ install_component() {
             curl -fsSL "https://github.com/sxyazi/yazi/releases/download/${latest}/yazi-${arch}-unknown-linux-gnu.zip" -o /tmp/yazi.zip 2>/dev/null
             if [ -f /tmp/yazi.zip ]; then
                 unzip -o /tmp/yazi.zip -d /tmp >/dev/null 2>&1
-                sudo mv /tmp/yazi-${arch}-unknown-linux-gnu/yazi /usr/local/bin/ 2>/dev/null || mv /tmp/yazi-${arch}-unknown-linux-gnu/yazi ~/.local/bin/ 2>/dev/null
+                mkdir -p ~/.local/bin
+                mv /tmp/yazi-${arch}-unknown-linux-gnu/yazi ~/.local/bin/ 2>/dev/null
                 rm -rf /tmp/yazi.zip /tmp/yazi-*
                 success "Yazi installed ($latest)"
             else
