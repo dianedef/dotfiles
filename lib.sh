@@ -696,8 +696,9 @@ get_latest_version() {
             get_latest_release "cli/cli" "v2.40.0"
             ;;
         node)
-            # Get latest LTS version from nodejs.org
-            curl -sL https://nodejs.org/dist/index.json 2>/dev/null | grep -oE '"version":"v[0-9]+\.[0-9]+\.[0-9]+"' | head -1 | grep -oE 'v[0-9]+\.[0-9]+\.[0-9]+' || echo "unknown"
+            # Node has too many sources (apt, nodesource, nvm, n, etc.)
+            # Just return current version to avoid false "update available"
+            node --version 2>/dev/null | grep -oE 'v?[0-9]+\.[0-9]+\.[0-9]+' || echo "unknown"
             ;;
         bat)
             get_latest_release "sharkdp/bat" "v0.24.0"
