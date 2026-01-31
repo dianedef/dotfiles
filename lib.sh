@@ -1665,7 +1665,8 @@ select_components() {
     local selected=""
     while IFS= read -r line; do
         local comp
-        comp=$(echo "$line" | cut -d'│' -f1 | xargs)
+        # Use awk instead of cut (cut doesn't handle Unicode delimiters)
+        comp=$(echo "$line" | awk -F'│' '{print $1}' | xargs)
         [ "$comp" = "shell" ] && comp="shell-integration"
         if [ -n "$selected" ]; then
             selected="$selected,$comp"
