@@ -504,6 +504,301 @@ health_check_bashrc() {
     fi
 }
 
+# ============================================================================
+# HELP MENU
+# ============================================================================
+run_help_menu() {
+    while true; do
+        clear
+        echo "════════════════════════════════════════════════════════════════"
+        echo "                         🆘 HELP"
+        echo "════════════════════════════════════════════════════════════════"
+        echo ""
+
+        local choice
+        choice=$(gum choose --header "Select a topic:" \
+            "🚀 Quick Start" \
+            "⌨️  Aliases & Commands" \
+            "🔑 API Keys Setup" \
+            "🛠️  Troubleshooting" \
+            "📖 About this project" \
+            "⬅️  Back to main menu")
+
+        case "$choice" in
+            *"Quick Start"*)
+                show_help_quickstart
+                ;;
+            *"Aliases"*)
+                show_help_aliases
+                ;;
+            *"API Keys"*)
+                show_help_apikeys
+                ;;
+            *"Troubleshooting"*)
+                show_help_troubleshooting
+                ;;
+            *"About"*)
+                show_help_about
+                ;;
+            *"Back"*|"")
+                return 0
+                ;;
+        esac
+    done
+}
+
+show_help_quickstart() {
+    local content
+    content=$(cat <<'EOF'
+══════════════════════════════════════════════════════════════
+                    🚀 QUICK START
+══════════════════════════════════════════════════════════════
+
+## First Time Setup
+
+1. Clone the repository:
+   git clone https://github.com/dianedef/dotfiles.git ~/dotfiles
+
+2. Run installation:
+   cd ~/dotfiles && ./install.sh
+
+3. (Optional) Setup API keys:
+   ds    # Doppler setup - configures all keys
+
+4. Reload your shell:
+   re    # or: source ~/.bashrc
+
+## Platforms
+
+┌─────────────┬────────────────────────────────────┐
+│ Platform    │ Command                            │
+├─────────────┼────────────────────────────────────┤
+│ Linux       │ ./install.sh                       │
+│ Codespaces  │ (runs automatically)               │
+│ Termux      │ ./termux.sh                        │
+│ Windows     │ .\windows.ps1 (as admin)           │
+└─────────────┴────────────────────────────────────┘
+
+## After Installation
+
+- Use 'dot -i' for interactive menu
+- Use 'dot -u' to check for updates
+- Use 'dot -c' for health check
+
+EOF
+)
+    echo "$content" | gum pager
+}
+
+show_help_aliases() {
+    local content
+    content=$(cat <<'EOF'
+══════════════════════════════════════════════════════════════
+                   ⌨️  ALIASES & COMMANDS
+══════════════════════════════════════════════════════════════
+
+## Shell Aliases
+
+┌─────────┬─────────────────────────┬─────────────────────────┐
+│ Alias   │ Command                 │ Description             │
+├─────────┼─────────────────────────┼─────────────────────────┤
+│ re      │ source ~/.bashrc        │ Reload shell            │
+│ c       │ claude                  │ Claude Code CLI         │
+│ dot     │ ~/dotfiles/install.sh   │ Run installer           │
+│ ds      │ doppler-setup.sh        │ Setup API keys          │
+├─────────┼─────────────────────────┼─────────────────────────┤
+│ y       │ yazi                    │ File manager            │
+│ r       │ ranger                  │ File manager (Termux)   │
+│ z <dir> │ zoxide                  │ Smart cd                │
+├─────────┼─────────────────────────┼─────────────────────────┤
+│ gs      │ git status              │ Git status              │
+│ ga      │ git add .               │ Stage all               │
+│ gc      │ git commit -m           │ Commit                  │
+│ gp      │ git push                │ Push                    │
+│ gl      │ git pull                │ Pull                    │
+│ glog    │ git log --oneline       │ Log graph               │
+└─────────┴─────────────────────────┴─────────────────────────┘
+
+## Dotfiles Commands
+
+┌──────────┬──────────────────────────────────────────────────┐
+│ Command  │ Description                                      │
+├──────────┼──────────────────────────────────────────────────┤
+│ dot      │ Run installer (same as ./install.sh)             │
+│ dot -i   │ Interactive menu                                 │
+│ dot -u   │ Check & install updates                          │
+│ dot -c   │ Health check                                     │
+│ dot -n   │ Dry-run (preview changes)                        │
+│ dot -h   │ Show help                                        │
+└──────────┴──────────────────────────────────────────────────┘
+
+EOF
+)
+    echo "$content" | gum pager
+}
+
+show_help_apikeys() {
+    local content
+    content=$(cat <<'EOF'
+══════════════════════════════════════════════════════════════
+                     🔑 API KEYS SETUP
+══════════════════════════════════════════════════════════════
+
+## Quick Setup with Doppler
+
+Run: ds (or doppler-setup.sh)
+
+This will prompt for all keys and store them securely.
+
+## Manual Setup
+
+Add to ~/.bashrc or use Doppler:
+
+┌─────────────┬─────────────────────────────────────────────────┐
+│ Service     │ Get your key at                                 │
+├─────────────┼─────────────────────────────────────────────────┤
+│ GitHub      │ github.com/settings/tokens                      │
+│ OpenAI      │ platform.openai.com/api-keys                    │
+│ Anthropic   │ console.anthropic.com/settings/keys             │
+│ Gemini      │ aistudio.google.com/apikey                      │
+│ Groq        │ console.groq.com/keys                           │
+└─────────────┴─────────────────────────────────────────────────┘
+
+## GitHub Token Scopes Required
+
+✅ repo        - Repository access
+✅ read:org    - Organization membership
+✅ gist        - Create gists
+✅ workflow    - GitHub Actions (optional)
+
+## Verify Setup
+
+doppler secrets        # List all secrets
+gh auth status         # Check GitHub auth
+echo $ANTHROPIC_API_KEY # Check if key is set
+
+EOF
+)
+    echo "$content" | gum pager
+}
+
+show_help_troubleshooting() {
+    local content
+    content=$(cat <<'EOF'
+══════════════════════════════════════════════════════════════
+                    🛠️  TROUBLESHOOTING
+══════════════════════════════════════════════════════════════
+
+## Command not found after install
+
+→ Reload your shell:
+  re   # or: source ~/.bashrc
+
+→ Check PATH includes ~/.local/bin:
+  echo $PATH | tr ':' '\n' | grep local
+
+## GitHub auth failed
+
+→ Check token:
+  doppler secrets get GH_TOKEN
+
+→ Re-authenticate:
+  gh auth login
+
+## Doppler not working
+
+→ Re-login:
+  doppler login
+  ds
+
+→ Verify:
+  doppler me
+  doppler secrets
+
+## Neovim plugins not loading
+
+→ Sync plugins:
+  nvim --headless "+Lazy! sync" +qa
+
+→ Check health:
+  nvim
+  :checkhealth
+
+## Tool not updating
+
+→ Check if installed via apt (manual update):
+  which <tool>
+
+→ If in /usr/bin, update via apt:
+  sudo apt update && sudo apt upgrade
+
+## Yazi/Neovim not found after install
+
+→ Ensure ~/.local/bin is in PATH:
+  echo 'export PATH="$HOME/.local/bin:$PATH"' >> ~/.bashrc
+  re
+
+## Permission denied
+
+→ Don't use sudo with this installer
+→ Everything installs to ~/.local/bin
+
+EOF
+)
+    echo "$content" | gum pager
+}
+
+show_help_about() {
+    local content
+    content=$(cat <<'EOF'
+══════════════════════════════════════════════════════════════
+                   📖 ABOUT THIS PROJECT
+══════════════════════════════════════════════════════════════
+
+## Dotfiles Repository
+
+Multi-platform dotfiles for developers who work across:
+- GitHub Codespaces
+- Linux servers (SSH)
+- Termux (Android)
+- Windows
+
+## What's Included
+
+📦 Tools installed:
+   - Neovim (with LazyVim)
+   - Starship prompt
+   - Zoxide (smart cd)
+   - Yazi (file manager)
+   - fzf (fuzzy finder)
+   - bat, lsd, ripgrep, fd
+
+🔧 Configurations:
+   - Shell aliases & functions
+   - Git config
+   - Tmux config
+   - MCP servers for Claude
+
+## Philosophy
+
+- No sudo required (installs to ~/.local/bin)
+- Symlinks configs (easy updates with git pull)
+- Fast & lightweight (optimized for SSH)
+- Interactive menu (dot -i)
+
+## Repository
+
+github.com/dianedef/dotfiles
+
+## Credits
+
+Built with Claude Code 🤖
+
+EOF
+)
+    echo "$content" | gum pager
+}
+
 run_health_check() {
     echo "════════════════════════════════════════════════════════════════"
     echo "                    DOTFILES HEALTH CHECK"
@@ -1614,6 +1909,7 @@ run_interactive_menu() {
             "🎯 Install (select components)" \
             "🔄 Update installed tools" \
             "🩺 Health check" \
+            "🆘 Help" \
             "🗑️  Uninstall" \
             "❌ Exit")
 
@@ -1635,6 +1931,9 @@ run_interactive_menu() {
                 run_health_check || true
                 echo ""
                 read -rp "Press Enter to return to menu..."
+                ;;
+            *"Help"*)
+                run_help_menu
                 ;;
             *"Uninstall"*)
                 run_uninstall
