@@ -1643,7 +1643,8 @@ run_interactive_menu() {
 # Component selection submenu
 select_components() {
     local components
-    components=$(gum_choose_multi "Select components to install:" \
+    # Pass options as arguments (not via pipe) to preserve TTY
+    components=$(gum choose --no-limit --header "Select components to install (SPACE=select, ENTER=confirm):" \
         "neovim      │ Neovim editor" \
         "fzf         │ Fuzzy finder" \
         "nerd-fonts  │ Nerd Fonts (icons)" \
@@ -1653,12 +1654,15 @@ select_components() {
         "zoxide      │ Smart cd" \
         "yazi        │ File manager" \
         "doppler     │ Secrets manager" \
+        "gh          │ GitHub CLI" \
+        "bat         │ cat with syntax highlighting" \
+        "lsd         │ ls with icons" \
         "configs     │ Config symlinks" \
         "shell       │ Shell integration")
 
     if [ -z "$components" ]; then
         warn "No components selected"
-        exit 1
+        return 1
     fi
 
     # Extract component names (before the │)
