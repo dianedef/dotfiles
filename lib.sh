@@ -516,7 +516,7 @@ run_help_menu() {
         echo ""
 
         local choice
-        choice=$(gum choose --header "Select a topic:" \
+        choice=$(gum_choose "Select a topic:" \
             "🚀 Quick Start" \
             "⌨️  Aliases & Commands" \
             "🔑 API Keys Setup" \
@@ -587,7 +587,7 @@ show_help_quickstart() {
 
 EOF
 )
-    echo "$content" | gum pager
+    gum_pager "$content"
 }
 
 show_help_aliases() {
@@ -634,7 +634,7 @@ show_help_aliases() {
 
 EOF
 )
-    echo "$content" | gum pager
+    gum_pager "$content"
 }
 
 show_help_apikeys() {
@@ -679,7 +679,7 @@ echo $ANTHROPIC_API_KEY # Check if key is set
 
 EOF
 )
-    echo "$content" | gum pager
+    gum_pager "$content"
 }
 
 show_help_troubleshooting() {
@@ -745,7 +745,7 @@ show_help_troubleshooting() {
 
 EOF
 )
-    echo "$content" | gum pager
+    gum_pager "$content"
 }
 
 show_help_about() {
@@ -796,7 +796,7 @@ Built with Claude Code 🤖
 
 EOF
 )
-    echo "$content" | gum pager
+    gum_pager "$content"
 }
 
 run_health_check() {
@@ -1893,6 +1893,16 @@ gum_choose() {
         else
             echo "${options[0]}"
         fi
+    fi
+}
+
+# Pager with fallback
+gum_pager() {
+    local content="$1"
+    if use_gum; then
+        echo "$content" | gum pager
+    else
+        echo "$content" | less -R 2>/dev/null || echo "$content" | more 2>/dev/null || echo "$content"
     fi
 }
 
