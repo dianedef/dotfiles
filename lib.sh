@@ -2102,7 +2102,7 @@ select_components() {
         "fzf         │ Fuzzy finder" \
         "nerd-fonts  │ Nerd Fonts (icons)" \
         "node        │ Node.js + npm" \
-        "npm-tools   │ CLI tools (mcpc, tldr...)" \
+        "npm-tools   │ CLI tools (mcpc, tldr)" \
         "starship    │ Shell prompt" \
         "zoxide      │ Smart cd" \
         "yazi        │ File manager" \
@@ -2112,6 +2112,10 @@ select_components() {
         "lsd         │ ls with icons" \
         "claude-code │ Claude Code (native binary)" \
         "claude-chill│ PTY proxy for Claude (mosh)" \
+        "copilot     │ GitHub Copilot CLI" \
+        "kilocode    │ Kilocode CLI" \
+        "opencode    │ OpenCode AI" \
+        "crush       │ Crush (Charmbracelet)" \
         "configs     │ Config symlinks" \
         "shell       │ Shell integration")
 
@@ -2151,12 +2155,16 @@ install_component() {
 
     case "$comp" in
         neovim)
+            if is_installed nvim; then
+                success "Neovim already installed"
+                return 0
+            fi
             info "Installing Neovim..."
-            local latest
-            latest=$(get_latest_release "neovim/neovim" "v0.10.0")
+            local version
+            version=$(get_latest_release "neovim/neovim" "v0.10.0")
             local arch="linux64"
             [ "$(uname -m)" = "aarch64" ] && arch="linux-arm64"
-            curl -fsSL "https://github.com/neovim/neovim/releases/download/${latest}/nvim-${arch}.tar.gz" -o /tmp/nvim.tar.gz 2>/dev/null
+            curl -fsSL "https://github.com/neovim/neovim/releases/download/${version}/nvim-${arch}.tar.gz" -o /tmp/nvim.tar.gz 2>/dev/null
             if [ -f /tmp/nvim.tar.gz ]; then
                 mkdir -p ~/.local
                 rm -rf ~/.local/nvim-${arch} 2>/dev/null
@@ -2164,179 +2172,273 @@ install_component() {
                 mkdir -p ~/.local/bin
                 ln -sf ~/.local/nvim-${arch}/bin/nvim ~/.local/bin/nvim
                 rm -f /tmp/nvim.tar.gz
-                success "Neovim installed ($latest)"
+                success "Neovim installed ($version)"
             else
-                warn "Failed to download Neovim"
+                warn "Neovim installation failed"
             fi
             ;;
         starship)
+            if is_installed starship; then
+                success "Starship already installed"
+                return 0
+            fi
             info "Installing Starship..."
             curl -fsSL https://starship.rs/install.sh -o /tmp/starship-install.sh 2>/dev/null
             if [ -f /tmp/starship-install.sh ]; then
                 sh /tmp/starship-install.sh -y </dev/null >/dev/null 2>&1
                 rm -f /tmp/starship-install.sh
-                success "Starship installed"
+                is_installed starship && success "Starship installed" || warn "Starship installation failed"
             else
-                warn "Failed to download Starship"
+                warn "Starship installation failed"
             fi
             ;;
         zoxide)
+            if is_installed zoxide; then
+                success "Zoxide already installed"
+                return 0
+            fi
             info "Installing Zoxide..."
             curl -fsSL https://raw.githubusercontent.com/ajeetdsouza/zoxide/main/install.sh -o /tmp/zoxide-install.sh 2>/dev/null
             if [ -f /tmp/zoxide-install.sh ]; then
                 bash /tmp/zoxide-install.sh </dev/null >/dev/null 2>&1
                 rm -f /tmp/zoxide-install.sh
-                success "Zoxide installed"
+                is_installed zoxide && success "Zoxide installed" || warn "Zoxide installation failed"
             else
-                warn "Failed to download Zoxide"
+                warn "Zoxide installation failed"
             fi
             ;;
         yazi)
+            if is_installed yazi; then
+                success "Yazi already installed"
+                return 0
+            fi
             info "Installing Yazi..."
-            local latest arch
-            latest=$(get_latest_release "sxyazi/yazi" "v0.4.0")
+            local version arch
+            version=$(get_latest_release "sxyazi/yazi" "v0.4.0")
             arch="x86_64"
             [ "$(uname -m)" = "aarch64" ] && arch="aarch64"
-            curl -fsSL "https://github.com/sxyazi/yazi/releases/download/${latest}/yazi-${arch}-unknown-linux-gnu.zip" -o /tmp/yazi.zip 2>/dev/null
+            curl -fsSL "https://github.com/sxyazi/yazi/releases/download/${version}/yazi-${arch}-unknown-linux-gnu.zip" -o /tmp/yazi.zip 2>/dev/null
             if [ -f /tmp/yazi.zip ]; then
                 unzip -o /tmp/yazi.zip -d /tmp >/dev/null 2>&1
                 mkdir -p ~/.local/bin
                 mv /tmp/yazi-${arch}-unknown-linux-gnu/yazi ~/.local/bin/ 2>/dev/null
                 rm -rf /tmp/yazi.zip /tmp/yazi-*
-                success "Yazi installed ($latest)"
+                success "Yazi installed ($version)"
             else
-                warn "Failed to download Yazi"
+                warn "Yazi installation failed"
             fi
             ;;
         fzf)
-            info "Installing fzf..."
-            if [ -d "$HOME/.fzf" ]; then
-                cd "$HOME/.fzf" && git pull >/dev/null 2>&1
-            else
-                git clone --depth 1 https://github.com/junegunn/fzf.git "$HOME/.fzf" >/dev/null 2>&1
+            if is_installed fzf; then
+                success "fzf already installed"
+                return 0
             fi
+            info "Installing fzf..."
+            git clone --depth 1 https://github.com/junegunn/fzf.git "$HOME/.fzf" >/dev/null 2>&1
             "$HOME/.fzf/install" --all </dev/null >/dev/null 2>&1
-            success "fzf installed"
+            is_installed fzf && success "fzf installed" || warn "fzf installation failed"
             ;;
         doppler)
+            if is_installed doppler; then
+                success "Doppler already installed"
+                return 0
+            fi
             info "Installing Doppler..."
             curl -fsSL https://cli.doppler.com/install.sh -o /tmp/doppler-install.sh 2>/dev/null
             if [ -f /tmp/doppler-install.sh ]; then
                 sudo sh /tmp/doppler-install.sh </dev/null >/dev/null 2>&1
                 rm -f /tmp/doppler-install.sh
-                success "Doppler installed"
+                is_installed doppler && success "Doppler installed" || warn "Doppler installation failed"
             else
-                warn "Failed to download Doppler"
+                warn "Doppler installation failed"
             fi
             ;;
         gh)
-            info "Installing GitHub CLI..."
-            local latest arch_deb
-            latest=$(get_latest_release "cli/cli" "v2.40.0")
+            if is_installed gh; then
+                success "gh already installed"
+                return 0
+            fi
+            info "Installing gh..."
+            local version arch_deb
+            version=$(get_latest_release "cli/cli" "v2.40.0")
             arch_deb="amd64"
             [ "$(uname -m)" = "aarch64" ] && arch_deb="arm64"
-            curl -fsSL "https://github.com/cli/cli/releases/download/${latest}/gh_${latest#v}_linux_${arch_deb}.deb" -o /tmp/gh.deb 2>/dev/null
+            curl -fsSL "https://github.com/cli/cli/releases/download/${version}/gh_${version#v}_linux_${arch_deb}.deb" -o /tmp/gh.deb 2>/dev/null
             if [ -f /tmp/gh.deb ]; then
-                sudo dpkg -i /tmp/gh.deb >/dev/null 2>&1 && success "GitHub CLI installed ($latest)" || warn "gh install failed"
+                sudo dpkg -i /tmp/gh.deb >/dev/null 2>&1
                 rm -f /tmp/gh.deb
+                is_installed gh && success "gh installed ($version)" || warn "gh installation failed"
+            else
+                warn "gh installation failed"
             fi
             ;;
         bat)
+            if is_installed bat; then
+                success "bat already installed"
+                return 0
+            fi
             info "Installing bat..."
-            local latest arch_deb
-            latest=$(get_latest_release "sharkdp/bat" "v0.24.0")
+            local version arch_deb
+            version=$(get_latest_release "sharkdp/bat" "v0.24.0")
             arch_deb="amd64"
             [ "$(uname -m)" = "aarch64" ] && arch_deb="arm64"
-            curl -fsSL "https://github.com/sharkdp/bat/releases/download/${latest}/bat_${latest#v}_${arch_deb}.deb" -o /tmp/bat.deb 2>/dev/null
+            curl -fsSL "https://github.com/sharkdp/bat/releases/download/${version}/bat_${version#v}_${arch_deb}.deb" -o /tmp/bat.deb 2>/dev/null
             if [ -f /tmp/bat.deb ]; then
-                sudo dpkg -i /tmp/bat.deb >/dev/null 2>&1 && success "bat installed ($latest)" || warn "bat install failed"
+                sudo dpkg -i /tmp/bat.deb >/dev/null 2>&1
                 rm -f /tmp/bat.deb
+                is_installed bat && success "bat installed ($version)" || warn "bat installation failed"
+            else
+                warn "bat installation failed"
             fi
             ;;
         lsd)
+            if is_installed lsd; then
+                success "lsd already installed"
+                return 0
+            fi
             info "Installing lsd..."
-            local latest arch_deb
-            latest=$(get_latest_release "lsd-rs/lsd" "v1.0.0")
+            local version arch_deb
+            version=$(get_latest_release "lsd-rs/lsd" "v1.0.0")
             arch_deb="amd64"
             [ "$(uname -m)" = "aarch64" ] && arch_deb="arm64"
-            curl -fsSL "https://github.com/lsd-rs/lsd/releases/download/${latest}/lsd_${latest#v}_${arch_deb}.deb" -o /tmp/lsd.deb 2>/dev/null
+            curl -fsSL "https://github.com/lsd-rs/lsd/releases/download/${version}/lsd_${version#v}_${arch_deb}.deb" -o /tmp/lsd.deb 2>/dev/null
             if [ -f /tmp/lsd.deb ]; then
-                sudo dpkg -i /tmp/lsd.deb >/dev/null 2>&1 && success "lsd installed ($latest)" || warn "lsd install failed"
+                sudo dpkg -i /tmp/lsd.deb >/dev/null 2>&1
                 rm -f /tmp/lsd.deb
+                is_installed lsd && success "lsd installed ($version)" || warn "lsd installation failed"
+            else
+                warn "lsd installation failed"
             fi
             ;;
         node)
+            if is_installed node; then
+                success "Node.js already installed"
+                return 0
+            fi
+            info "Installing Node.js..."
             warn "Node.js requires manual installation:"
-            echo "  → curl -fsSL https://deb.nodesource.com/setup_lts.x | sudo -E bash -"
-            echo "  → sudo apt install -y nodejs"
+            echo "  curl -fsSL https://deb.nodesource.com/setup_lts.x | sudo -E bash -"
+            echo "  sudo apt install -y nodejs"
             ;;
         npm-tools)
             info "Installing npm tools..."
             if is_installed npm; then
                 for pkg in "@apify/mcpc" "tldr"; do
-                    npm install -g "$pkg" </dev/null >/dev/null 2>&1 && success "$pkg installed" || warn "$pkg failed"
+                    if npm list -g "$pkg" >/dev/null 2>&1; then
+                        success "$pkg already installed"
+                    else
+                        npm install -g "$pkg" </dev/null >/dev/null 2>&1 && success "$pkg installed" || warn "$pkg installation failed"
+                    fi
                 done
             else
-                warn "npm not found, install Node.js first"
+                warn "npm required (install Node.js first)"
             fi
             ;;
         nerd-fonts)
+            if fc-list 2>/dev/null | grep -qi "jetbrains"; then
+                success "Nerd Fonts already installed"
+                return 0
+            fi
             info "Installing Nerd Fonts..."
             mkdir -p ~/.local/share/fonts
-            local font_url="https://github.com/ryanoasis/nerd-fonts/releases/latest/download/JetBrainsMono.zip"
-            curl -fsSL "$font_url" -o /tmp/nerd-font.zip 2>/dev/null
+            curl -fsSL "https://github.com/ryanoasis/nerd-fonts/releases/latest/download/JetBrainsMono.zip" -o /tmp/nerd-font.zip 2>/dev/null
             if [ -f /tmp/nerd-font.zip ]; then
                 unzip -o /tmp/nerd-font.zip -d ~/.local/share/fonts >/dev/null 2>&1
                 fc-cache -fv >/dev/null 2>&1
                 rm -f /tmp/nerd-font.zip
                 success "Nerd Fonts installed"
             else
-                warn "Failed to download Nerd Fonts"
+                warn "Nerd Fonts installation failed"
             fi
             ;;
         configs)
-            info "Setting up config symlinks..."
+            info "Linking configs..."
             mkdir -p ~/.config
-            ln -sf "$script_dir/nvim" ~/.config/nvim 2>/dev/null && success "nvim config linked"
-            ln -sf "$script_dir/yazi" ~/.config/yazi 2>/dev/null && success "yazi config linked"
-            ln -sf "$script_dir/starship/starship.toml" ~/.config/starship.toml 2>/dev/null && success "starship config linked"
-            ln -sf "$script_dir/.tmux.conf" ~/.tmux.conf 2>/dev/null && success "tmux config linked"
+            ln -sf "$script_dir/nvim" ~/.config/nvim 2>/dev/null && success "nvim config linked" || warn "nvim config failed"
+            ln -sf "$script_dir/yazi" ~/.config/yazi 2>/dev/null && success "yazi config linked" || warn "yazi config failed"
+            ln -sf "$script_dir/starship/starship.toml" ~/.config/starship.toml 2>/dev/null && success "starship config linked" || warn "starship config failed"
+            ln -sf "$script_dir/.tmux.conf" ~/.tmux.conf 2>/dev/null && success "tmux config linked" || warn "tmux config failed"
             ;;
         shell-integration)
-            info "Setting up shell integration..."
-            # Add to bashrc if not present
+            info "Configuring shell..."
             local bashrc="$HOME/.bashrc"
             grep -q "starship init" "$bashrc" 2>/dev/null || echo 'eval "$(starship init bash)"' >> "$bashrc"
             grep -q "zoxide init" "$bashrc" 2>/dev/null || echo 'eval "$(zoxide init bash)"' >> "$bashrc"
-            success "Shell integration configured"
+            success "Shell configured"
             ;;
         claude-code)
-            info "Installing Claude Code (native binary)..."
             if is_installed claude; then
                 success "Claude Code already installed"
-            else
-                curl -fsSL https://claude.ai/install.sh | bash </dev/null >/dev/null 2>&1
-                if is_installed claude; then
-                    success "Claude Code installed"
-                else
-                    warn "Claude Code installation failed"
-                fi
+                return 0
             fi
+            info "Installing Claude Code..."
+            curl -fsSL https://claude.ai/install.sh | bash </dev/null >/dev/null 2>&1
+            is_installed claude && success "Claude Code installed" || warn "Claude Code installation failed"
             ;;
         claude-chill)
-            info "Installing claude-chill (PTY proxy)..."
             if is_installed claude-chill; then
                 success "claude-chill already installed"
-            elif is_installed cargo; then
-                cargo install --git https://github.com/davidbeesley/claude-chill </dev/null >/dev/null 2>&1
-                if is_installed claude-chill; then
-                    success "claude-chill installed"
-                else
-                    warn "claude-chill installation failed"
-                fi
-            else
-                warn "Rust/cargo not found. Install with: curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh"
+                return 0
             fi
+            if ! is_installed cargo; then
+                warn "cargo required (curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh)"
+                return 1
+            fi
+            info "Installing claude-chill..."
+            cargo install --git https://github.com/davidbeesley/claude-chill </dev/null >/dev/null 2>&1
+            is_installed claude-chill && success "claude-chill installed" || warn "claude-chill installation failed"
+            ;;
+        copilot)
+            if is_installed github-copilot-cli; then
+                success "Copilot already installed"
+                return 0
+            fi
+            if ! is_installed npm; then
+                warn "npm required (install Node.js first)"
+                return 1
+            fi
+            info "Installing Copilot..."
+            npm install -g @github/copilot </dev/null >/dev/null 2>&1
+            is_installed github-copilot-cli && success "Copilot installed" || warn "Copilot installation failed"
+            ;;
+        kilocode)
+            if is_installed kilocode; then
+                success "Kilocode already installed"
+                return 0
+            fi
+            if ! is_installed npm; then
+                warn "npm required (install Node.js first)"
+                return 1
+            fi
+            info "Installing Kilocode..."
+            npm install -g @kilocode/cli </dev/null >/dev/null 2>&1
+            is_installed kilocode && success "Kilocode installed" || warn "Kilocode installation failed"
+            ;;
+        opencode)
+            if is_installed opencode; then
+                success "OpenCode already installed"
+                return 0
+            fi
+            if ! is_installed npm; then
+                warn "npm required (install Node.js first)"
+                return 1
+            fi
+            info "Installing OpenCode..."
+            npm install -g opencode-ai </dev/null >/dev/null 2>&1
+            is_installed opencode && success "OpenCode installed" || warn "OpenCode installation failed"
+            ;;
+        crush)
+            if is_installed crush; then
+                success "Crush already installed"
+                return 0
+            fi
+            if ! is_installed npm; then
+                warn "npm required (install Node.js first)"
+                return 1
+            fi
+            info "Installing Crush..."
+            npm install -g @charmland/crush </dev/null >/dev/null 2>&1
+            is_installed crush && success "Crush installed" || warn "Crush installation failed"
             ;;
         *)
             warn "Unknown component: $comp"

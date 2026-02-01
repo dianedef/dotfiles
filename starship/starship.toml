@@ -13,15 +13,13 @@ command_timeout = 500
 
 # Format adapts based on environment
 format = """
-${custom.codespace}\
+$custom.codespace\
+$custom.env\
 $username\
-${custom.env}\
 $hostname\
 $directory\
 $git_branch\
 $git_status\
-${custom.port}\
-$bun\
 $nodejs\
 $python\
 $rust\
@@ -30,10 +28,10 @@ $java\
 $cmd_duration
 $character"""
 
-# Prompt character
+# Prompt character with emoji
 [character]
-success_symbol = "[❯](bold green)"
-error_symbol = "[❯](bold red)"
+success_symbol = "[➜](bold green)"
+error_symbol = "[✗](bold red)"
 vicmd_symbol = "[❮](bold green)"
 
 # Environment indicator (codespace/local/docker)
@@ -49,24 +47,8 @@ else
     echo "💻"
 fi
 '''
-when = true
 format = '[$output]($style) '
 style = 'bold blue'
-shell = ["bash", "--noprofile", "--norc"]
-
-# Port from ecosystem.config (PM2)
-[custom.port]
-command = '''
-for f in ecosystem.config.cjs ecosystem.config.js; do
-    if [ -f "$f" ]; then
-        port=$(grep -oP 'PORT[=:\s]+\K\d+' "$f" 2>/dev/null | head -1)
-        [ -n "$port" ] && echo "⚓$port" && break
-    fi
-done
-'''
-when = "test -f ecosystem.config.cjs || test -f ecosystem.config.js"
-format = ' [$output]($style)'
-style = 'bold yellow'
 shell = ["bash", "--noprofile", "--norc"]
 
 # Custom codespace detection - ONLY in real codespaces
@@ -86,7 +68,7 @@ shell = ["bash", "--noprofile", "--norc"]
 
 # Username - only show when not current user or in codespace
 [username]
-format = "[$user]($style) in "
+format = "[$user]($style)@"
 style_user = "bold green"
 style_root = "bold red"
 show_always = false
@@ -94,7 +76,7 @@ disabled = false
 
 # Hostname - only show in SSH or codespace
 [hostname]
-format = "[$hostname]($style) in "
+format = "[$hostname]($style) "
 style = "bold dimmed white"
 ssh_only = false
 disabled = false
@@ -102,71 +84,68 @@ disabled = false
 # Directory - smart formatting
 [directory]
 truncation_length = 3
-truncate_to_repo = false
-format = "[$path]($style)"
+truncate_to_repo = true
+format = "[$path]($style) "
 style = "bold cyan"
 read_only = "🔒"
 truncation_symbol = "…/"
-fish_style_pwd_dir_length = 0
+repo_root_format = "[$repo_name]($style)[$path]($style) "
+repo_root_style = "bold cyan"
+fish_style_pwd_dir_length = 1
 
 # Git branch - clean formatting
 [git_branch]
-format = " on [$symbol$branch]($style)"
-symbol = " "
+format = "[$symbol$branch]($style) "
+symbol = " "
 style = "bold purple"
 truncation_length = 15
 truncation_symbol = "…"
 
 # Git status - with emojis
 [git_status]
-format = '( [\[$all_status$ahead_behind\]]($style))'
+format = '([\[$all_status$ahead_behind\]]($style) )'
 style = "bold yellow"
-conflicted = "="
-ahead = "📤${count}"
-behind = "📬${count}"
-diverged = "📤${ahead_count}📬${behind_count}"
-up_to_date = "✅"
-untracked = "⚠️${count}"
-stashed = "⏳${count}"
-modified = "📝${count}"
-staged = "🚀${count}"
-deleted = "🧹${count}"
+conflicted = "= "
+ahead = "📤${count} "
+behind = "📬${count} "
+diverged = "⇕ "
+up_to_date = "✅ "
+untracked = "⚠️ ${count} "
+stashed = "⏳${count} "
+modified = "📝${count} "
+staged = "🚀${count} "
+deleted = "🧹${count} "
 
 # Command duration - only if slow
 [cmd_duration]
 min_time = 2000
-format = " [⏱ $duration]($style)"
+format = "[⏱ $duration]($style) "
 style = "bold yellow"
 
-# Languages - minimal icons with "via"
-[bun]
-format = " via [$symbol]($style)"
-symbol = "🥟"
-style = "bold white"
-
+# Languages - minimal icons
 [nodejs]
-format = " via [$symbol$version]($style)"
+format = "[$symbol$version]($style) "
 symbol = "⬢ "
 style = "green"
 
 [python]
-format = " via [$symbol $version]($style)"
-symbol = "🐍"
+format = "[$symbol$version]($style) "
+symbol = "🐍 "
 style = "yellow"
 
 [rust]
-format = " via [$symbol $version]($style)"
-symbol = "🦀"
+format = "[$symbol$version]($style) "
+symbol = "🦀 "
 style = "red"
 
 [golang]
-format = " via [$symbol $version]($style)"
-symbol = "🐹"
+format = "[$symbol$version]($style) "
+symbol = "🐹 "
 style = "cyan"
 
 [java]
-format = " via [$symbol $version]($style)"
-symbol = "☕"
+format = "[$symbol$version]($style) "
+symbol = "☕ "
 style = "red"
 
 # Docker - only when needed

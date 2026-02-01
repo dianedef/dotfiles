@@ -497,7 +497,7 @@ install_npm_tools() {
     fi
 
     if is_dry_run; then
-        echo -e "${BLUE}[DRY-RUN]${NC} Would install npm tools: @github/copilot, @kilocode/cli, opencode-ai, tldr, @apify/mcpc"
+        echo -e "${BLUE}[DRY-RUN]${NC} Would install npm tools: tldr, @apify/mcpc"
         return 0
     fi
 
@@ -507,7 +507,7 @@ install_npm_tools() {
     export PATH="$DOTFILES_NPM_DIR/bin:$PATH"
 
     info "Installing CLI tools via npm..."
-    for pkg in "@github/copilot" "@kilocode/cli" "opencode-ai" "tldr" "@apify/mcpc"; do
+    for pkg in "tldr" "@apify/mcpc"; do
         npm install -g "$pkg" 2>/dev/null && success "$pkg installed" || warn "$pkg failed"
     done
 
