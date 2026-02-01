@@ -2102,7 +2102,7 @@ select_components() {
         "fzf         │ Fuzzy finder" \
         "nerd-fonts  │ Nerd Fonts (icons)" \
         "node        │ Node.js + npm" \
-        "npm-tools   │ CLI tools (copilot, tldr...)" \
+        "npm-tools   │ CLI tools (mcpc, tldr...)" \
         "starship    │ Shell prompt" \
         "zoxide      │ Smart cd" \
         "yazi        │ File manager" \
@@ -2110,6 +2110,8 @@ select_components() {
         "gh          │ GitHub CLI" \
         "bat         │ cat with syntax highlighting" \
         "lsd         │ ls with icons" \
+        "claude-code │ Claude Code (native binary)" \
+        "claude-chill│ PTY proxy for Claude (mosh)" \
         "configs     │ Config symlinks" \
         "shell       │ Shell integration")
 
@@ -2271,7 +2273,7 @@ install_component() {
         npm-tools)
             info "Installing npm tools..."
             if is_installed npm; then
-                for pkg in "@anthropic-ai/claude-code" "@apify/mcpc" "tldr"; do
+                for pkg in "@apify/mcpc" "tldr"; do
                     npm install -g "$pkg" </dev/null >/dev/null 2>&1 && success "$pkg installed" || warn "$pkg failed"
                 done
             else
@@ -2307,6 +2309,34 @@ install_component() {
             grep -q "starship init" "$bashrc" 2>/dev/null || echo 'eval "$(starship init bash)"' >> "$bashrc"
             grep -q "zoxide init" "$bashrc" 2>/dev/null || echo 'eval "$(zoxide init bash)"' >> "$bashrc"
             success "Shell integration configured"
+            ;;
+        claude-code)
+            info "Installing Claude Code (native binary)..."
+            if is_installed claude; then
+                success "Claude Code already installed"
+            else
+                curl -fsSL https://claude.ai/install.sh | bash </dev/null >/dev/null 2>&1
+                if is_installed claude; then
+                    success "Claude Code installed"
+                else
+                    warn "Claude Code installation failed"
+                fi
+            fi
+            ;;
+        claude-chill)
+            info "Installing claude-chill (PTY proxy)..."
+            if is_installed claude-chill; then
+                success "claude-chill already installed"
+            elif is_installed cargo; then
+                cargo install --git https://github.com/davidbeesley/claude-chill </dev/null >/dev/null 2>&1
+                if is_installed claude-chill; then
+                    success "claude-chill installed"
+                else
+                    warn "claude-chill installation failed"
+                fi
+            else
+                warn "Rust/cargo not found. Install with: curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh"
+            fi
             ;;
         *)
             warn "Unknown component: $comp"

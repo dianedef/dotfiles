@@ -82,7 +82,7 @@ export USER_LOCAL_MODE="${USER_LOCAL_MODE:-false}"
 # PACKAGE LISTS
 # ============================================================================
 export DOTFILES_APT_PACKAGES="git curl wget unzip tar build-essential jq libsecret-1-0"
-export DOTFILES_NPM_PACKAGES="@anthropic-ai/claude-code @apify/mcpc"
+export DOTFILES_NPM_PACKAGES="@apify/mcpc tldr"
 
 # ============================================================================
 # CACHE CONFIGURATION
@@ -99,7 +99,7 @@ export DOTFILES_DANGEROUS_CHARS_REGEX='[;&|$`]'
 # ============================================================================
 # AVAILABLE COMPONENTS (for --only flag)
 # ============================================================================
-export DOTFILES_ALL_COMPONENTS="neovim,fzf,nerd-fonts,node,npm-tools,starship,zoxide,yazi,doppler,gh,lsd,bat,mcp,configs,shell-integration"
+export DOTFILES_ALL_COMPONENTS="neovim,fzf,nerd-fonts,node,npm-tools,starship,zoxide,yazi,doppler,gh,lsd,bat,claude-code,claude-chill,mcp,configs,shell-integration"
 
 # ============================================================================
 # CHECKSUMS (SHA256 for critical downloads - updated periodically)
