@@ -67,8 +67,14 @@ if [ "${DOTFILES_UPDATE_MODE:-false}" = "true" ]; then
 fi
 
 # ============================================================================
-# INTERACTIVE MODE
+# INTERACTIVE vs AUTOMATIC MODE
 # ============================================================================
+# Logic:
+#   - Terminal present (interactive) → show menu to select components
+#   - No terminal (CI/script) → full auto install
+#   - --only=... flag → install only specified components
+#   - -i flag → force interactive menu
+
 # Install gum if interactive mode requested or auto-detect
 if [ "${DOTFILES_INTERACTIVE:-auto}" = "true" ] || \
    { [ "${DOTFILES_INTERACTIVE:-auto}" = "auto" ] && [ -t 0 ] && [ -z "${DOTFILES_ONLY:-}" ]; }; then
@@ -78,9 +84,10 @@ if [ "${DOTFILES_INTERACTIVE:-auto}" = "true" ] || \
         install_gum 2>/dev/null || true
     fi
 
-    # Run interactive menu if gum is available and explicitly requested
-    if [ "${DOTFILES_INTERACTIVE:-auto}" = "true" ] && use_gum; then
+    # Run interactive menu if gum is available
+    if use_gum; then
         run_interactive_menu
+        # run_interactive_menu exits or sets DOTFILES_ONLY - either way, continue to main install
     fi
 fi
 
@@ -1088,7 +1095,6 @@ fi
 
 install_npm_tools
 setup_configs
-setup_mcp_config
 setup_shell_integration
 
 # ============================================================================

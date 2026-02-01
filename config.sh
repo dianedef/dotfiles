@@ -99,7 +99,7 @@ export DOTFILES_DANGEROUS_CHARS_REGEX='[;&|$`]'
 # ============================================================================
 # AVAILABLE COMPONENTS (for --only flag)
 # ============================================================================
-export DOTFILES_ALL_COMPONENTS="neovim,fzf,nerd-fonts,node,npm-tools,starship,zoxide,yazi,doppler,gh,lsd,bat,claude-code,claude-chill,copilot,kilocode,opencode,crush,mcp,configs,shell-integration"
+export DOTFILES_ALL_COMPONENTS="neovim,fzf,gum,nerd-fonts,node,npm-tools,starship,zoxide,yazi,ranger,doppler,gh,lsd,bat,claude-code,claude-chill,copilot,kilocode,opencode,crush,vercel,mcp,configs,shell-integration"
 
 # ============================================================================
 # CHECKSUMS (SHA256 for critical downloads - updated periodically)

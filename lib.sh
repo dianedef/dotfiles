@@ -2044,23 +2044,21 @@ run_interactive_menu() {
         # Ask what to do
         local action
         action=$(gum_choose "What would you like to do?" \
-            "📦 Install (full)" \
-            "🎯 Install (select components)" \
-            "🔄 Update installed tools" \
-            "🔑 Setup API Keys" \
+            "📦 Install" \
+            "🔄 Update" \
+            "🔑 API Keys" \
             "🩺 Health check" \
             "🆘 Help" \
             "🗑️ Uninstall" \
             "❌ Exit")
 
         case "$action" in
-            *"Install (full)"*)
-                return 0  # Continue with normal install
-                ;;
-            *"Install (select"*)
-                select_components || true
-                echo ""
-                read -rp "Press Enter to return to menu..."
+            *"Install"*)
+                # Select components submenu
+                if select_components; then
+                    echo ""
+                    read -rp "Press Enter to return to menu..."
+                fi
                 ;;
             *"Update"*)
                 run_interactive_update
@@ -2097,15 +2095,17 @@ run_interactive_menu() {
 select_components() {
     local components
     # Pass options as arguments (not via pipe) to preserve TTY
-    components=$(gum choose --no-limit --header "Select components to install (SPACE=select, ENTER=confirm):" \
+    components=$(gum choose --no-limit --height=25 --header "Select components to install (SPACE=select, ENTER=confirm):" \
         "neovim      │ Neovim editor" \
         "fzf         │ Fuzzy finder" \
         "nerd-fonts  │ Nerd Fonts (icons)" \
         "node        │ Node.js + npm" \
         "npm-tools   │ CLI tools (mcpc, tldr)" \
+        "gum         │ Terminal UI (menus)" \
         "starship    │ Shell prompt" \
         "zoxide      │ Smart cd" \
         "yazi        │ File manager" \
+        "ranger      │ File manager (classic)" \
         "doppler     │ Secrets manager" \
         "gh          │ GitHub CLI" \
         "bat         │ cat with syntax highlighting" \
@@ -2116,6 +2116,8 @@ select_components() {
         "kilocode    │ Kilocode CLI" \
         "opencode    │ OpenCode AI" \
         "crush       │ Crush (Charmbracelet)" \
+        "vercel      │ Vercel CLI" \
+        "mcp         │ MCP server configs" \
         "configs     │ Config symlinks" \
         "shell       │ Shell integration")
 
@@ -2237,6 +2239,39 @@ install_component() {
             git clone --depth 1 https://github.com/junegunn/fzf.git "$HOME/.fzf" >/dev/null 2>&1
             "$HOME/.fzf/install" --all </dev/null >/dev/null 2>&1
             is_installed fzf && success "fzf installed" || warn "fzf installation failed"
+            ;;
+        gum)
+            if is_installed gum; then
+                success "gum already installed"
+                return 0
+            fi
+            info "Installing gum..."
+            local gum_version="0.14.5"
+            local arch="amd64"
+            [ "$(uname -m)" = "aarch64" ] && arch="arm64"
+            curl -fsSL "https://github.com/charmbracelet/gum/releases/download/v${gum_version}/gum_${gum_version}_Linux_${arch}.tar.gz" -o /tmp/gum.tar.gz 2>/dev/null
+            if [ -f /tmp/gum.tar.gz ]; then
+                tar -xzf /tmp/gum.tar.gz -C /tmp gum 2>/dev/null
+                mkdir -p ~/.local/bin
+                mv /tmp/gum ~/.local/bin/ 2>/dev/null
+                rm -f /tmp/gum.tar.gz
+                is_installed gum && success "gum installed" || warn "gum installation failed"
+            else
+                warn "gum installation failed"
+            fi
+            ;;
+        ranger)
+            if is_installed ranger; then
+                success "ranger already installed"
+                return 0
+            fi
+            info "Installing ranger..."
+            if command -v apt-get >/dev/null 2>&1; then
+                sudo apt-get install -y ranger </dev/null >/dev/null 2>&1
+            elif command -v pip3 >/dev/null 2>&1; then
+                pip3 install --user ranger-fm </dev/null >/dev/null 2>&1
+            fi
+            is_installed ranger && success "ranger installed" || warn "ranger installation failed"
             ;;
         doppler)
             if is_installed doppler; then
@@ -2439,6 +2474,34 @@ install_component() {
             info "Installing Crush..."
             npm install -g @charmland/crush </dev/null >/dev/null 2>&1
             is_installed crush && success "Crush installed" || warn "Crush installation failed"
+            ;;
+        vercel)
+            if is_installed vercel; then
+                success "Vercel already installed"
+                return 0
+            fi
+            if ! is_installed npm; then
+                warn "npm required (install Node.js first)"
+                return 1
+            fi
+            info "Installing Vercel..."
+            npm install -g vercel </dev/null >/dev/null 2>&1
+            is_installed vercel && success "Vercel installed" || warn "Vercel installation failed"
+            ;;
+        mcp)
+            info "Configuring MCP..."
+            local mcp_source="$script_dir/mcp/mcp-servers.json"
+            if [ ! -f "$mcp_source" ]; then
+                warn "MCP config not found ($mcp_source)"
+                return 1
+            fi
+            mkdir -p "$HOME/.config/mcp"
+            ln -sf "$mcp_source" "$HOME/.config/mcp/servers.json" && success "MCP config linked"
+            # Claude Code
+            if [ -d "$HOME/.claude" ]; then
+                mkdir -p "$HOME/.claude"
+                ln -sf "$mcp_source" "$HOME/.claude/mcp-servers.json" && success "Claude Code MCP linked"
+            fi
             ;;
         *)
             warn "Unknown component: $comp"
