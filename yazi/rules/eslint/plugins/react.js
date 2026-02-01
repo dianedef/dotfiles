@@ -1,7 +1,7 @@
 import reactPlugin from "eslint-plugin-react"
 import reactHooksPlugin from "eslint-plugin-react-hooks"
 
-/** @type { import('eslint').Linter.FlatConfig[] } */
+/** @type { import('eslint').Linter.Config[] } */
 export const react = [
 	{
 		files  : ["**/*.{ts,tsx,js,jsx,cjs,mjs,cts,mts}"],
@@ -15,13 +15,13 @@ export const react = [
 			},
 		},
 		rules: {
-			...reactPlugin.configs.recommended.rules,
+			...reactPlugin.configs.flat.recommended.rules,
 			...reactHooksPlugin.configs.recommended.rules,
 		},
 	},
 ]
 
-/** @type { import('eslint').Linter.FlatConfig[] } */
+/** @type { import('eslint').Linter.Config[] } */
 export const preact = [
 	{
 		files  : ["**/*.{ts,tsx,js,jsx,cjs,mjs,cts,mts}"],
@@ -35,11 +35,10 @@ export const preact = [
 			},
 		},
 		rules: {
-			...reactPlugin.configs.recommended.rules,
+			...reactPlugin.configs.flat.recommended.rules,
 			...reactHooksPlugin.configs.recommended.rules,
 
 			"react/react-in-jsx-scope": "off",
 		},
 	},
 ]
-

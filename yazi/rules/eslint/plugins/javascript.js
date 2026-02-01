@@ -5,7 +5,7 @@ export const jsRules = {
 	"no-case-declarations": "off",
 }
 
-/** @type { import('eslint').Linter.FlatConfig[] } */
+/** @type { import('eslint').Linter.Config[] } */
 export const javascript = [
 	{
 		files          : ["**/*.{js,jsx,cjs,mjs}"],
@@ -17,7 +17,7 @@ export const javascript = [
 			},
 		},
 		linterOptions: {
-			reportUnusedDisableDirectives: true,
+			reportUnusedDisableDirectives: "error",
 		},
 		rules: {
 			...eslint.configs.recommended.rules,
@@ -37,4 +37,3 @@ export const javascript = [
 		},
 	},
 ]
-

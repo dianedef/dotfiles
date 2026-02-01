@@ -1,8 +1,6 @@
-import jsonSchemaPlugin, { configs as jsonSchemaConfigs } from "eslint-plugin-json-schema-validator"
-import tomlPlugin, { configs as tomlConfigs } from "eslint-plugin-toml"
+import jsonSchemaPlugin from "eslint-plugin-json-schema-validator"
+import tomlPlugin from "eslint-plugin-toml"
 import tomlParser from "toml-eslint-parser"
-
-import { fmRules } from "./formatting.js"
 
 export const tomlRules = {
 	// https://ota-meshi.github.io/eslint-plugin-toml/rules/#toml-rules
@@ -16,17 +14,17 @@ export const tomlRules = {
 	"toml/tables-order"               : "warn",
 
 	// https://ota-meshi.github.io/eslint-plugin-toml/rules/#extension-rules
-	"toml/array-bracket-newline"     : fmRules["array-bracket-newline"],
-	"toml/array-bracket-spacing"     : fmRules["array-bracket-spacing"],
-	"toml/array-element-newline"     : fmRules["array-element-newline"],
-	"toml/comma-style"               : fmRules["comma-style"],
-	"toml/inline-table-curly-spacing": fmRules["object-curly-spacing"],
+	"toml/array-bracket-newline"     : ["warn", "consistent"],
+	"toml/array-bracket-spacing"     : "warn",
+	"toml/array-element-newline"     : ["warn", "consistent"],
+	"toml/comma-style"               : "warn",
+	"toml/inline-table-curly-spacing": ["warn", "always"],
 	"toml/key-spacing"               : ["warn", { align: "equal" }],
 	"toml/spaced-comment"            : ["warn", "always", { markers: ["#"] }],
-	"toml/table-bracket-spacing"     : fmRules["array-bracket-spacing"],
+	"toml/table-bracket-spacing"     : "warn",
 }
 
-/** @type { import('eslint').Linter.FlatConfig[] } */
+/** @type { import('eslint').Linter.Config[] } */
 export const toml = [
 	{
 		files          : ["**/*.toml"],
@@ -37,11 +35,11 @@ export const toml = [
 		},
 		rules: {
 			// eslint-plugin-toml
-			...tomlConfigs.recommended.rules,
+			...tomlPlugin.configs["flat/recommended"].rules,
 			...tomlRules,
 
 			// eslint-plugin-json-schema-validator
-			...jsonSchemaConfigs.recommended.rules,
+			...jsonSchemaPlugin.configs["flat/recommended"].rules,
 		},
 	},
 ]

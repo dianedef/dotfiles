@@ -1,4 +1,4 @@
-import importPlugin from "eslint-plugin-import"
+import importPlugin from "eslint-plugin-import-x"
 import unicornPlugin from "eslint-plugin-unicorn"
 
 const unicorn = {
@@ -97,15 +97,15 @@ const unicorn = {
 const imports = {
 	...importPlugin.configs.recommended.rules,
 
-	"import/no-empty-named-blocks"          : "warn",
-	"import/no-import-module-exports"       : "warn",
-	"import/no-absolute-path"               : "warn",
-	"import/no-relative-packages"           : "warn",
-	"import/no-useless-path-segments"       : ["warn", { noUselessIndex: true, commonjs: true }],
-	"import/consistent-type-specifier-style": "warn",
-	"import/first"                          : "warn",
-	"import/newline-after-import"           : ["warn", { considerComments: true }],
-	"import/order"                          : ["warn", {
+	"import-x/no-empty-named-blocks"          : "warn",
+	"import-x/no-import-module-exports"       : "warn",
+	"import-x/no-absolute-path"               : "warn",
+	"import-x/no-relative-packages"           : "warn",
+	"import-x/no-useless-path-segments"       : ["warn", { noUselessIndex: true, commonjs: true }],
+	"import-x/consistent-type-specifier-style": "warn",
+	"import-x/first"                          : "warn",
+	"import-x/newline-after-import"           : ["warn", { considerComments: true }],
+	"import-x/order"                          : ["warn", {
 		"groups"                 : ["builtin", "external", "internal", "parent", "sibling", "index", "object", "type"],
 		"pathGroups"             : [{ pattern: "@/**", group: "internal" }],
 		"newlines-between"       : "always",
@@ -114,7 +114,7 @@ const imports = {
 	}],
 }
 
-/** @type { import('eslint').Linter.FlatConfig[] } */
+/** @type { import('eslint').Linter.Config[] } */
 export const extended = [
 	// eslint-plugin-unicorn
 	{
@@ -123,43 +123,35 @@ export const extended = [
 		rules  : unicorn,
 	},
 
-	// eslint-plugin-import
+	// eslint-plugin-import-x
 	{
 		files          : ["**/*.{js,jsx,mjs}"],
-		// A hack to make the `eslint-plugin-import` works with ESLint's flat-config.
 		languageOptions: {
 			parserOptions: { ecmaVersion: "latest", sourceType: "module" },
 		},
-		plugins : { import: importPlugin },
+		plugins : { "import-x": importPlugin },
 		settings: {
-			"import/extensions": [".js", ".jsx", ".mjs"],
-			"import/parsers"   : { espree: [".js", ".jsx", ".mjs"] },
-			"import/resolver"  : { node: true },
+			"import-x/extensions": [".js", ".jsx", ".mjs"],
+			"import-x/resolver"  : { node: true },
 		},
 		rules: imports,
 	},
 	{
 		files   : ["**/*.{ts,tsx,mts}"],
-		plugins : { import: importPlugin },
+		plugins : { "import-x": importPlugin },
 		settings: {
-			"import/extensions": [".ts", ".tsx", ".d.ts", ".js", ".jsx", ".mjs", ".mts"],
-			"import/parsers"   : {
-				"espree"                   : [".js", ".jsx", ".mjs"],
-				"@typescript-eslint/parser": [".ts", ".tsx", ".d.ts", ".mts"],
-			},
-			"import/resolver"               : { typescript: true },
-			"import/external-module-folders": ["node_modules", "node_modules/@types"],
+			"import-x/extensions": [".ts", ".tsx", ".d.ts", ".js", ".jsx", ".mjs", ".mts"],
+			"import-x/resolver"  : { typescript: true },
 		},
 		rules: {
 			// TypeScript compilation already ensures that named imports exist in the referenced module
-			"import/named": "off",
+			"import-x/named": "off",
 		},
 	},
 	{
 		files: ["eslint.config.js"],
 		rules: {
-			"import/no-useless-path-segments": ["warn", { noUselessIndex: false }],
+			"import-x/no-useless-path-segments": ["warn", { noUselessIndex: false }],
 		},
 	},
 ]
-

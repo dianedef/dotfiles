@@ -1,28 +1,27 @@
 import eslint from "@eslint/js"
-import tsPlugin from "@typescript-eslint/eslint-plugin"
-import tsParser from "@typescript-eslint/parser"
+import tseslint from "typescript-eslint"
 
 import { jsRules } from "./javascript.js"
 
-/** @type { import('eslint').Linter.FlatConfig[] } */
+/** @type { import('eslint').Linter.Config[] } */
 export const typescript = [
 	{
 		files          : ["**/*.{ts,tsx,cts,mts}"],
 		languageOptions: {
-			parser       : tsParser,
-			parserOptions: { project: true },
+			parser       : tseslint.parser,
+			parserOptions: { projectService: true },
 		},
 		linterOptions: {
-			reportUnusedDisableDirectives: true,
+			reportUnusedDisableDirectives: "error",
 		},
 		plugins: {
-			"@typescript-eslint": tsPlugin,
+			"@typescript-eslint": tseslint.plugin,
 		},
 		rules: {
 			...eslint.configs.recommended.rules,
-			...tsPlugin.configs["eslint-recommended"].overrides[0].rules,
-			...tsPlugin.configs.recommended.rules,
-			...tsPlugin.configs["recommended-requiring-type-checking"].rules,
+			...tseslint.configs.eslintRecommended.rules,
+			...tseslint.configs.recommended.reduce((acc, cfg) => ({ ...acc, ...cfg.rules }), {}),
+			...tseslint.configs.recommendedTypeChecked.reduce((acc, cfg) => ({ ...acc, ...cfg.rules }), {}),
 
 			...jsRules,
 			"@typescript-eslint/ban-ts-comment"       : "off",
@@ -30,4 +29,3 @@ export const typescript = [
 		},
 	},
 ]
-

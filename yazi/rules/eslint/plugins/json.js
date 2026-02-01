@@ -1,8 +1,6 @@
-import jsonSchemaPlugin, { configs as jsonSchemaConfigs } from "eslint-plugin-json-schema-validator"
-import jsoncPlugin, { configs as jsoncConfigs } from "eslint-plugin-jsonc"
+import jsonSchemaPlugin from "eslint-plugin-json-schema-validator"
+import jsoncPlugin from "eslint-plugin-jsonc"
 import jsoncParser from "jsonc-eslint-parser"
-
-import { fmRules } from "./formatting.js"
 
 export const jsoncRules = {
 	// https://ota-meshi.github.io/eslint-plugin-jsonc/rules/#jsonc-rules
@@ -20,23 +18,23 @@ export const jsoncRules = {
 	"jsonc/valid-json-number"               : "warn",
 
 	// https://ota-meshi.github.io/eslint-plugin-jsonc/rules/#extension-rules
-	"jsonc/array-bracket-newline"  : fmRules["array-bracket-newline"],
-	"jsonc/array-bracket-spacing"  : fmRules["array-bracket-spacing"],
-	"jsonc/array-element-newline"  : fmRules["array-element-newline"],
+	"jsonc/array-bracket-newline"  : ["warn", "consistent"],
+	"jsonc/array-bracket-spacing"  : "warn",
+	"jsonc/array-element-newline"  : ["warn", "consistent"],
 	"jsonc/comma-dangle"           : ["warn", "never"],
-	"jsonc/comma-style"            : fmRules["comma-style"],
-	"jsonc/indent"                 : fmRules.indent,
-	"jsonc/key-spacing"            : fmRules["key-spacing"],
-	"jsonc/no-floating-decimal"    : fmRules["no-floating-decimal"],
-	"jsonc/object-curly-newline"   : fmRules["object-curly-newline"],
-	"jsonc/object-curly-spacing"   : fmRules["object-curly-spacing"],
-	"jsonc/object-property-newline": fmRules["object-property-newline"],
+	"jsonc/comma-style"            : "warn",
+	"jsonc/indent"                 : ["warn", "tab"],
+	"jsonc/key-spacing"            : ["warn", { align: "colon" }],
+	"jsonc/no-floating-decimal"    : "warn",
+	"jsonc/object-curly-newline"   : "warn",
+	"jsonc/object-curly-spacing"   : ["warn", "always"],
+	"jsonc/object-property-newline": ["warn", { allowAllPropertiesOnSameLine: true }],
 	"jsonc/quote-props"            : "warn",
-	"jsonc/quotes"                 : fmRules.quotes,
-	"jsonc/space-unary-ops"        : fmRules["space-unary-ops"],
+	"jsonc/quotes"                 : ["warn", "double", { avoidEscape: true, allowTemplateLiterals: true }],
+	"jsonc/space-unary-ops"        : ["warn", { words: true, nonwords: false }],
 }
 
-/** @type { import('eslint').Linter.FlatConfig[] } */
+/** @type { import('eslint').Linter.Config[] } */
 export const json = [
 	{
 		files          : ["**/*.{json,jsonc}"],
@@ -47,11 +45,11 @@ export const json = [
 		},
 		rules: {
 			// eslint-plugin-jsonc
-			...jsoncConfigs["recommended-with-jsonc"].rules,
+			...jsoncPlugin.configs["flat/recommended-with-jsonc"].rules,
 			...jsoncRules,
 
 			// eslint-plugin-json-schema-validator
-			...jsonSchemaConfigs.recommended.rules,
+			...jsonSchemaPlugin.configs["flat/recommended"].rules,
 		},
 	},
 	{
@@ -63,18 +61,18 @@ export const json = [
 		},
 		rules: {
 			// eslint-plugin-jsonc
-			...jsoncConfigs["recommended-with-json5"].rules,
+			...jsoncPlugin.configs["flat/recommended-with-json5"].rules,
 			...jsoncRules,
 
 			"jsonc/no-hexadecimal-numeric-literals": "off",
 			"jsonc/no-plus-sign"                   : "off",
 			"jsonc/valid-json-number"              : "off",
 
-			"jsonc/comma-dangle": fmRules["comma-dangle"],
-			"jsonc/quote-props" : fmRules["quote-props"],
+			"jsonc/comma-dangle": ["warn", "always-multiline"],
+			"jsonc/quote-props" : ["warn", "consistent-as-needed"],
 
 			// eslint-plugin-json-schema-validator
-			...jsonSchemaConfigs.recommended.rules,
+			...jsonSchemaPlugin.configs["flat/recommended"].rules,
 		},
 	},
 	{
@@ -143,4 +141,3 @@ export const json = [
 		},
 	},
 ]
-
