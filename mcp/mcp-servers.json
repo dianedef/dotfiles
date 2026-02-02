@@ -1,22 +1,24 @@
 {
-  "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "_comment": "MCP Server Configuration - Single source of truth for all AI tools",
-  "_docs": "https://modelcontextprotocol.io/docs/concepts/servers",
   "mcpServers": {
-    "_example_stdio": {
-      "_comment": "Example: stdio-based MCP server (runs as subprocess)",
-      "command": "npx",
-      "args": ["-y", "@example/mcp-server"],
-      "env": {
-        "API_KEY": "${EXAMPLE_API_KEY}"
-      }
+    "context7": {
+      "type": "http",
+      "url": "https://mcp.context7.com/mcp"
     },
-    "_example_http": {
-      "_comment": "Example: HTTP-based MCP server (connects to URL)",
-      "url": "https://mcp.example.com/sse",
-      "headers": {
-        "Authorization": "Bearer ${EXAMPLE_TOKEN}"
-      }
+    "vercel": {
+      "type": "http",
+      "url": "https://mcp.vercel.com"
+    },
+    "github": {
+      "type": "http",
+      "url": "https://api.githubcopilot.com/mcp/"
+    },
+    "composio": {
+      "command": "npx",
+      "args": ["-y", "composio-mcp@latest", "start"]
+    },
+    "playwright": {
+      "command": "npx",
+      "args": ["-y", "@playwright/mcp@latest"]
     }
   }
 }

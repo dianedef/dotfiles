@@ -11,9 +11,15 @@
 #   ./install.sh --check              # Check installation health
 #   ./install.sh --update             # Update all tools
 #   ./install.sh --only=neovim,yazi   # Install only specific components
+#   ./install.sh --only=mcp           # Setup MCP servers only
 #   ./install.sh --uninstall          # Remove everything
 #   ./install.sh --parallel           # Parallel installation (faster)
 #   ./install.sh --help               # Show help
+#
+# MCP Servers:
+#   Edit mcp/mcp-servers.json to configure MCP servers for Claude Code,
+#   Kilocode, and Claude Desktop. Run ./install.sh --only=mcp to apply.
+#   Manual: claude mcp add --transport http <name> <url> --scope user
 
 set -euo pipefail
 
@@ -184,8 +190,13 @@ get_user_info() {
     success "User identity: $USER_NAME <$USER_EMAIL> (@$GITHUB_USERNAME)"
 }
 
-# Skip identity config in update mode
-if [ "${DOTFILES_UPDATE_MODE:-false}" != "true" ]; then
+# Skip identity config in update mode or when only installing components that don't need it
+# Components needing identity: configs (espanso uses USER_NAME, USER_EMAIL, GITHUB_USERNAME)
+needs_identity() {
+    [ -z "${DOTFILES_ONLY:-}" ] || [[ ",$DOTFILES_ONLY," == *",configs,"* ]]
+}
+
+if [ "${DOTFILES_UPDATE_MODE:-false}" != "true" ] && needs_identity; then
     echo "👤 Configuring user identity..."
     get_user_info
 
@@ -879,15 +890,42 @@ setup_mcp_config() {
         fi
     }
 
-    # Claude Code: merge into ~/.claude/settings.json
-    if [ -d "$HOME/.claude" ]; then
-        local claude_settings="$HOME/.claude/settings.json"
-        if [ -f "$claude_settings" ]; then
-            merge_mcp_config "$SCRIPT_DIR/mcp/mcp-servers.json" "$claude_settings"
-        elif is_installed jq; then
-            jq '{mcpServers: .mcpServers, permissions: {allow: [], deny: []}}' "$SCRIPT_DIR/mcp/mcp-servers.json" > "$claude_settings"
+    # Claude Code: use `claude mcp add` command (stores in ~/.claude.json)
+    if is_installed claude; then
+        log DEBUG "Configuring Claude Code MCP servers via CLI..."
+
+        # Read servers from mcp-servers.json and add them via CLI
+        if is_installed jq; then
+            local servers
+            servers=$(jq -r '.mcpServers | to_entries[] | .key' "$SCRIPT_DIR/mcp/mcp-servers.json" 2>/dev/null)
+
+            for server_name in $servers; do
+                local server_type server_url server_command server_args
+                server_type=$(jq -r ".mcpServers[\"$server_name\"].type // \"stdio\"" "$SCRIPT_DIR/mcp/mcp-servers.json")
+                server_url=$(jq -r ".mcpServers[\"$server_name\"].url // empty" "$SCRIPT_DIR/mcp/mcp-servers.json")
+                server_command=$(jq -r ".mcpServers[\"$server_name\"].command // empty" "$SCRIPT_DIR/mcp/mcp-servers.json")
+
+                # Skip if server already exists
+                if claude mcp get "$server_name" &>/dev/null; then
+                    log DEBUG "MCP server '$server_name' already configured, skipping"
+                    continue
+                fi
+
+                if [ -n "$server_url" ]; then
+                    # HTTP/SSE remote server
+                    claude mcp add --transport "$server_type" "$server_name" "$server_url" --scope user 2>/dev/null || true
+                    log DEBUG "Added remote MCP server: $server_name"
+                elif [ -n "$server_command" ]; then
+                    # Stdio local server
+                    server_args=$(jq -r ".mcpServers[\"$server_name\"].args | @sh" "$SCRIPT_DIR/mcp/mcp-servers.json" 2>/dev/null | tr -d "'")
+                    eval "claude mcp add --transport stdio \"$server_name\" --scope user -- $server_command $server_args" 2>/dev/null || true
+                    log DEBUG "Added stdio MCP server: $server_name"
+                fi
+            done
         fi
         success "Claude Code MCP config updated"
+    else
+        log DEBUG "Claude Code CLI not installed, skipping MCP setup for Claude Code"
     fi
 
     # Kilocode: symlink to settings directory
@@ -907,10 +945,8 @@ setup_mcp_config() {
     # Create reference symlink in ~/.config for easy access
     mkdir -p "$HOME/.config/mcp"
     ln -sf "$SCRIPT_DIR/mcp/mcp-servers.json" "$HOME/.config/mcp/servers.json"
-    ln -sf "$SCRIPT_DIR/mcp/README.md" "$HOME/.config/mcp/README.md"
 
     success "MCP configuration complete"
-    info "Edit ~/dotfiles/mcp/mcp-servers.json to add your MCP servers"
 }
 
 # ============================================================================
@@ -1061,8 +1097,18 @@ DOTALIASES
 # ============================================================================
 # RUN INSTALLATION
 # ============================================================================
-info "Installing dependencies..."
-install_system_packages
+# Only install system packages for full install or components that need them
+needs_system_packages() {
+    [ -z "${DOTFILES_ONLY:-}" ] || \
+    [[ ",$DOTFILES_ONLY," == *",neovim,"* ]] || \
+    [[ ",$DOTFILES_ONLY," == *",yazi,"* ]] || \
+    [[ ",$DOTFILES_ONLY," == *",fzf,"* ]]
+}
+
+if needs_system_packages; then
+    info "Installing dependencies..."
+    install_system_packages
+fi
 
 # Parallel or sequential installation
 if [ "${DOTFILES_PARALLEL:-false}" = "true" ]; then
@@ -1095,6 +1141,7 @@ fi
 
 install_npm_tools
 setup_configs
+setup_mcp_config
 setup_shell_integration
 
 # ============================================================================
@@ -1107,9 +1154,15 @@ if [ "${AUTO_INSTALL_NVIM_PLUGINS:-false}" = "true" ] && ! is_dry_run; then
 fi
 
 # ============================================================================
-# AUTHENTICATION
+# AUTHENTICATION (only for full install or auth-related components)
 # ============================================================================
-if ! is_dry_run; then
+needs_auth() {
+    [ -z "${DOTFILES_ONLY:-}" ] || \
+    [[ ",$DOTFILES_ONLY," == *",doppler,"* ]] || \
+    [[ ",$DOTFILES_ONLY," == *",gh,"* ]]
+}
+
+if ! is_dry_run && needs_auth; then
     DOPPLER_AUTHENTICATED=false
     if is_installed doppler; then
         if [ -n "${DOPPLER_TOKEN:-}" ]; then

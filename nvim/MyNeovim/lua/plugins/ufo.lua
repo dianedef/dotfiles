@@ -2,9 +2,12 @@ return {
   "kevinhwang91/nvim-ufo",
   event = "VeryLazy",
   opts = {
-    provider_selector = function()
+    provider_selector = function(_, filetype, _)
+      -- Treesitter pour markdown (fold les headings)
+      if filetype == "markdown" then
+        return { "treesitter", "indent" }
+      end
       return { "lsp", "indent" }
-      -- return {'treesitter', 'indent'}
     end,
     preview = {
       win_config = {
