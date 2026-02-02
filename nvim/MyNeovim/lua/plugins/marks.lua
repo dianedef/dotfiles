@@ -4,9 +4,9 @@ return {
   opts = {
     default_mappings = false,
     mappings = {
-      set_next = "",
-      next = "",
-      prev = "",
+      set_next = false,
+      next = false,
+      prev = false,
       delete_line = "mx",
       delete_buf = "mX",
     },

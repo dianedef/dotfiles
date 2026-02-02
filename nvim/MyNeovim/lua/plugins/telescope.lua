@@ -167,7 +167,7 @@ return {
         },
       },
     })
-    telescope.load_extension("fzf")
+    pcall(telescope.load_extension, "fzf") -- may fail if not compiled
     telescope.load_extension("zoxide")
     telescope.load_extension("scope")
     telescope.load_extension("egrepify")

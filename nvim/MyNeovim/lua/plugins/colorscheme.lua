@@ -1,4 +1,18 @@
 return {
+  -- Synthwave / Cyberpunk themes
+  { "samharju/synthweave.nvim", lazy = true },
+  { "maxmx03/fluoromachine.nvim", lazy = true },
+  { "artanikin/vim-synthwave84", lazy = true },
+  { "Zeioth/neon.nvim", lazy = true },
+  { "samueljoli/cyberpunk.nvim", lazy = true },
+  { "akai54/2077.nvim", lazy = true },
+  { "hyperb1iss/silkcircuit-nvim", lazy = true },
+  { "Rigellute/shades-of-purple.vim", lazy = true },
+  { "0xhealer/aura-neovim", lazy = true },
+  { "olivercederborg/poimandres.nvim", lazy = true },
+
+  -- Main theme
+  {
   "rebelot/kanagawa.nvim",
   lazy = false, -- load immediately when starting Neovim
   priority = 5000, -- Load the colorscheme before other non-lazy-loaded plugins
@@ -55,4 +69,5 @@ return {
     require("kanagawa").setup(opts)
     vim.cmd("colorscheme kanagawa")
   end,
+  },
 }
