@@ -5,6 +5,19 @@ vim.keymap.set("t", "<Esc>", "<C-\\><C-n>", { desc = "Exit terminal mode" })
 vim.keymap.set("n", "<leader>uw", ":set wrap!<CR>", { desc = "Toggle wrap" })
 
 -- Notifications (which-key group)
+local function copy_to_clipboard(text)
+  -- OSC 52 pour copier via terminal (fonctionne sur SSH/Termux)
+  local b64 = vim.base64.encode(text)
+  local osc52 = string.format("\027]52;c;%s\027\\", b64)
+  io.stdout:write(osc52)
+  -- Aussi sauvegarder dans un fichier
+  local f = io.open("/tmp/nvim_notif.txt", "w")
+  if f then
+    f:write(text)
+    f:close()
+  end
+end
+
 vim.keymap.set("n", "<leader>nn", "<cmd>Noice history<cr>", { desc = "Afficher notifications" })
 
 vim.keymap.set("n", "<leader>nc", function()
@@ -14,8 +27,8 @@ vim.keymap.set("n", "<leader>nc", function()
     if messages and #messages > 0 then
       local last = messages[#messages]
       local text = last:content()
-      vim.fn.setreg("+", text)
-      vim.notify("Copié !", "info")
+      copy_to_clipboard(text)
+      vim.notify("Copié ! (aussi dans /tmp/nvim_notif.txt)", "info")
       return
     end
   end
@@ -31,8 +44,9 @@ vim.keymap.set("n", "<leader>nC", function()
       for _, msg in ipairs(messages) do
         table.insert(texts, msg:content())
       end
-      vim.fn.setreg("+", table.concat(texts, "\n\n"))
-      vim.notify(#messages .. " messages copiés !", "info")
+      local text = table.concat(texts, "\n\n")
+      copy_to_clipboard(text)
+      vim.notify(#messages .. " messages copiés ! (aussi dans /tmp/nvim_notif.txt)", "info")
       return
     end
   end
