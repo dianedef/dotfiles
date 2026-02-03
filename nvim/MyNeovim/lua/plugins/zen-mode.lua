@@ -1,6 +1,7 @@
 return {
   {
     "folke/twilight.nvim",
+    enabled = false,
     cmd = "Twilight",
     opts = {
       context = 20, -- default value: 10
@@ -8,6 +9,7 @@ return {
   },
   {
     "folke/zen-mode.nvim",
+    enabled = false,
     cmd = "ZenMode",
     keys = {
       {

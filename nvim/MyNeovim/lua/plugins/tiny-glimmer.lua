@@ -5,6 +5,7 @@ return {
 
   {
     "rachartier/tiny-glimmer.nvim",
+    enabled = false,
     dependencies = {
       {
         "gbprod/yanky.nvim",

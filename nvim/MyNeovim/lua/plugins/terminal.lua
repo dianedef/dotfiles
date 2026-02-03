@@ -1,5 +1,6 @@
 -- Custom terminal module (not a plugin, just config)
 return {
+  enabled = false,
   dir = vim.fn.stdpath("config"),
   name = "custom-terminal",
   virtual = true,

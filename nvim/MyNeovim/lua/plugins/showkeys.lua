@@ -1,6 +1,7 @@
 return {
   {
     "nvchad/showkeys",
+    enabled = false,
     cmd = "ShowkeysToggle",
     keys = {
       { "<leader>uk", "<cmd>ShowkeysToggle<cr>", desc = "Show keys" },

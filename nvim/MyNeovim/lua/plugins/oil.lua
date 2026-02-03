@@ -1,5 +1,6 @@
 return {
   "stevearc/oil.nvim",
+  enabled = false,
   event = "VeryLazy",
   opts = {
     -- See :help oil-columns

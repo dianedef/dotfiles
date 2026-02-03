@@ -1,5 +1,6 @@
 return {
   "pmizio/typescript-tools.nvim",
+  enabled = false,
   opts = {
     -- disable formatting because using `prettier`
     on_attach = function(client, bufnr)

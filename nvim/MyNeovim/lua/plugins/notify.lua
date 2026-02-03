@@ -1,5 +1,6 @@
 return {
   "rcarriga/nvim-notify",
+  enabled = false,
   config = function()
     local banned_patterns = { "removed %d+ missing entries." }
     vim.notify = function(msg, ...)

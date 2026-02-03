@@ -1,5 +1,6 @@
 return {
   "AckslD/nvim-neoclip.lua",
+  enabled = false,
   event = "VeryLazy",
   dependencies = { "nvim-telescope/telescope.nvim" },
   opts = {

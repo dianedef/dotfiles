@@ -1,5 +1,6 @@
 return {
   "chrishrb/gx.nvim",
+  enabled = false,
   dependencies = { "nvim-lua/plenary.nvim" },
   event = "VeryLazy",
   keys = { { "gx", "<cmd>Browse<cr>", mode = { "n", "x" } } },

@@ -1,5 +1,6 @@
 return {
   "gbprod/cutlass.nvim",
+  enabled = false,
   event = "VeryLazy",
   opts = {
     -- leap.nvim integration

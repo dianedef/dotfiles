@@ -1,5 +1,6 @@
 return {
   "MagicDuck/grug-far.nvim",
+  enabled = false,
   event = "VeryLazy",
   opts = {
     -- shortcuts for the actions you see at the top of the buffer

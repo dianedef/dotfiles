@@ -1,5 +1,6 @@
 return {
   "mg979/vim-visual-multi",
+  enabled = false,
   init = function()
     -- NOTE: do not enable `VM_leader`
     -- vim.g.VM_leader = " "

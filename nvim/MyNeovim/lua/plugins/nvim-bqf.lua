@@ -1,5 +1,6 @@
 return {
   "kevinhwang91/nvim-bqf",
+  enabled = false,
   dependencies = { "junegunn/fzf" },
   event = "VeryLazy",
   ft = "qf",

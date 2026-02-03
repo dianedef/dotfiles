@@ -1,5 +1,6 @@
 return {
   "andymass/vim-matchup",
+  enabled = false,
   lazy = false,
   dependencies = { "nvim-treesitter/nvim-treesitter-textobjects" },
   init = function()

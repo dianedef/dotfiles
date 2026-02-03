@@ -1,5 +1,6 @@
 return {
   "hiphish/rainbow-delimiters.nvim",
+  enabled = false,
   event = "VeryLazy",
   init = function()
     vim.g.rainbow_delimiters = {

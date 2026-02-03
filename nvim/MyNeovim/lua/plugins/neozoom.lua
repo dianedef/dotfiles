@@ -1,5 +1,6 @@
 return {
   "nyngwang/NeoZoom.lua",
+  enabled = false,
   opts = {
     winopts = {
       offset = {
