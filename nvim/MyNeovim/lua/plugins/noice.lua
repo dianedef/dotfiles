@@ -1,6 +1,6 @@
 return {
   "folke/noice.nvim",
-  enabled = false,
+  enabled = true,
   lazy = false, -- else flashes when opening
   dependencies = {
     "MunifTanjim/nui.nvim",

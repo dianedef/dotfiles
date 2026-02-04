@@ -1,6 +1,6 @@
 return {
   "nvim-lualine/lualine.nvim",
-  enabled = false,
+  enabled = true,
   lazy = false,
   config = function()
     -- colorscheme kanagawa-wave

@@ -1,6 +1,6 @@
 -- mini.nvim collection (enable individual modules as needed)
 return {
-  "echasnovski/mini.nvim",
+  "nvim-mini/mini.nvim",
   enabled = false,
   version = "*",
   config = function()

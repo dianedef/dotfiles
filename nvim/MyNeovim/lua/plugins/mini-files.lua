@@ -1,6 +1,6 @@
 return {
-  "echasnovski/mini.files",
-  enabled = false,
+  "nvim-mini/mini.files",
+  enabled = true,
   version = "*",
   opts = {
     mappings = {

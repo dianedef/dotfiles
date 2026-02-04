@@ -1,22 +1,22 @@
 return {
   -- Synthwave / Cyberpunk themes
-  { "samharju/synthweave.nvim", enabled = false, lazy = true },
-  { "maxmx03/fluoromachine.nvim", enabled = false, lazy = true },
-  { "artanikin/vim-synthwave84", enabled = false, lazy = true },
-  { "Zeioth/neon.nvim", enabled = false, lazy = true },
-  { "samueljoli/cyberpunk.nvim", enabled = false, lazy = true },
-  { "akai54/2077.nvim", enabled = false, lazy = true },
-  { "hyperb1iss/silkcircuit-nvim", enabled = false, lazy = true },
-  { "Rigellute/shades-of-purple.vim", enabled = false, lazy = true },
-  { "olivercederborg/poimandres.nvim", enabled = false, lazy = true },
-  { "scottmckendry/cyberdream.nvim", enabled = false, lazy = true },
-  { "catppuccin/nvim", name = "catppuccin", enabled = false, lazy = true },
-  { "EdenEast/nightfox.nvim", enabled = false, lazy = true },
+  { "samharju/synthweave.nvim", enabled = true, lazy = false },
+  { "maxmx03/fluoromachine.nvim", enabled = true, lazy = false },
+  { "artanikin/vim-synthwave84", enabled = true, lazy = false },
+  { "Zeioth/neon.nvim", enabled = true, lazy = false },
+  { "samueljoli/cyberpunk.nvim", enabled = true, lazy = false },
+  { "akai54/2077.nvim", enabled = true, lazy = false },
+  { "hyperb1iss/silkcircuit-nvim", enabled = true, lazy = false },
+  { "Rigellute/shades-of-purple.vim", enabled = true, lazy = false },
+  { "olivercederborg/poimandres.nvim", enabled = true, lazy = false },
+  { "scottmckendry/cyberdream.nvim", enabled = true, lazy = false },
+  { "catppuccin/nvim", name = "catppuccin", enabled = true, lazy = false },
+  { "EdenEast/nightfox.nvim", enabled = true, lazy = false },
 
   -- Main theme
   {
   "rebelot/kanagawa.nvim",
-  enabled = false,
+  enabled = true,
   lazy = false, -- load immediately when starting Neovim
   priority = 5000, -- Load the colorscheme before other non-lazy-loaded plugins
   opts = {

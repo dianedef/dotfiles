@@ -1,6 +1,6 @@
 return {
   "saghen/blink.cmp",
-  enabled = false,
+  enabled = true,
   lazy = false,
   version = "*",
   dependencies = { "rafamadriz/friendly-snippets" },

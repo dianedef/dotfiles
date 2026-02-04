@@ -1,6 +1,6 @@
 return {
   "kdheepak/lazygit.nvim",
-  enabled = false,
+  enabled = true,
   dependencies = { "nvim-lua/plenary.nvim" },
   event = "VeryLazy",
   init = function()
