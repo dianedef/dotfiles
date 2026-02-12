@@ -1,7 +1,7 @@
 local wezterm = require 'wezterm'
 local config = wezterm.config_builder()
 
--- Définition des couleurs de base
+-- Couleurs de base
 local c = {
 	fg = "#FFFFFF",
 	bg = "#000000",
@@ -25,24 +25,12 @@ local c = {
 
 return {
 	adjust_window_size_when_changing_font_size = false,
-	-- color_scheme = 'termnial.sexy',
 	color_scheme = 'Catppuccin Mocha',
 	enable_tab_bar = false,
 	font_size = 16.0,
 	font = wezterm.font('JetBrains Mono'),
-	-- macos_window_background_blur = 40,
-	macos_window_background_blur = 30,
-	
-	-- window_background_image = '/Users/omerhamerman/Downloads/3840x1080-Wallpaper-041.jpg',
-	-- window_background_image_hsb = {
-	-- 	brightness = 0.01,
-	-- 	hue = 1.0,
-	-- 	saturation = 0.5,
-	-- },
-	-- window_background_opacity = 0.92,
+
 	window_background_opacity = 1.0,
-	-- window_background_opacity = 0.78,
-	-- window_background_opacity = 0.20,
 	window_decorations = 'RESIZE',
 	automatically_reload_config = true,
 	harfbuzz_features = { "calt=0" },
@@ -59,6 +47,17 @@ return {
 		top = 15,
 		bottom = 0,
 	},
+
+	-- Scrollback: 0 = let tmux own all scrollback
+	-- Fixes: "other panes content bleeding in" when scrolling
+	scrollback_lines = 0,
+
+	-- TERM: xterm-256color is safe over SSH, avoids terminfo issues
+	term = "xterm-256color",
+
+	-- Enable mouse reporting passthrough to tmux
+	enable_scroll_bar = false,
+
 	keys = {
 		{
 			key = 'q',
@@ -77,7 +76,7 @@ return {
 		},
 		{
 			key = "RightArrow",
-			mods = "OPT", 
+			mods = "OPT",
 			action = wezterm.action({ SendString = "\x1bf" }),
 		},
 	},
@@ -89,28 +88,27 @@ return {
 			action = wezterm.action.PasteFrom("PrimarySelection"),
 		},
 
-		-- Modification du comportement par défaut du clic pour sélectionner le texte sans ouvrir les liens
+		-- Sélectionner le texte sans ouvrir les liens
 		{
 			event = { Up = { streak = 1, button = "Left" } },
 			mods = "NONE",
 			action = wezterm.action.CompleteSelection("ClipboardAndPrimarySelection"),
 		},
 
-		-- Utilisation de SUPER+Clic pour ouvrir les liens
+		-- SUPER+Clic pour ouvrir les liens
 		{
 			event = { Up = { streak = 1, button = "Left" } },
 			mods = "SUPER",
 			action = wezterm.action.CompleteSelectionOrOpenLinkAtMouseCursor("ClipboardAndPrimarySelection"),
 		},
 
-		-- Désactivation de l'événement Down de SUPER+Clic pour éviter les comportements étranges
+		-- Désactivation du Down de SUPER+Clic
 		{
 			event = { Down = { streak = 1, button = "Left" } },
 			mods = "SUPER",
 			action = wezterm.action.Nop,
 		},
 	},
-	term = "xterm-kitty",
 	send_composed_key_when_left_alt_is_pressed = true,
 	default_cursor_style = "SteadyBlock",
 	cursor_blink_ease_out = "Constant",
@@ -126,35 +124,19 @@ return {
 		selection_bg = c.colour13,
 		scrollbar_thumb = c.colour8,
 		split = c.colour7,
-		
-		-- Palette ANSI standard
+
 		ansi = {
-			c.colour0,
-			c.colour1,
-			c.colour2,
-			c.colour3,
-			c.colour4,
-			c.colour5,
-			c.colour6,
-			c.colour7,
+			c.colour0, c.colour1, c.colour2, c.colour3,
+			c.colour4, c.colour5, c.colour6, c.colour7,
 		},
-		
-		-- Palette ANSI brillante
+
 		brights = {
-			c.colour8,
-			c.colour9,
-			c.colour10,
-			c.colour11,
-			c.colour12,
-			c.colour13,
-			c.colour14,
-			c.colour15,
+			c.colour8, c.colour9, c.colour10, c.colour11,
+			c.colour12, c.colour13, c.colour14, c.colour15,
 		},
-		
-		-- Couleur du curseur pendant la composition IME
+
 		compose_cursor = c.colour3,
-		
-		-- Couleurs pour le mode copie et la sélection rapide
+
 		copy_mode_active_highlight_bg = { Color = c.bg },
 		copy_mode_active_highlight_fg = { AnsiColor = "Black" },
 		copy_mode_inactive_highlight_bg = { Color = "#52ad70" },
@@ -164,5 +146,4 @@ return {
 		quick_select_match_bg = { AnsiColor = "Navy" },
 		quick_select_match_fg = { Color = "#ffffff" },
 	},
-	scrollback_lines = 50000,  -- Augmentation de l'historique de défilement
 }

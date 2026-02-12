@@ -8,10 +8,6 @@ return {
     },
     spec = {
       { "<leader>o", group = "opencode", icon = "🔥" },
-      -- Notification keymaps with explicit icons (no category letters)
-      { "<leader>nn", icon = "󰵅" },
-      { "<leader>nc", icon = "󱥰" },
-      { "<leader>nC", icon = "󱥰" },
     },
   },
 }

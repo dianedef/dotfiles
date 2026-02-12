@@ -1,0 +1,37 @@
+# Ghostty — optimized for SSH + tmux + Claude Code workflow
+
+# Font — match existing setup
+font-family = JetBrainsMono Nerd Font
+font-size = 15
+
+# Scrollback — let tmux own it entirely
+# This is the key fix: Ghostty won't interfere with tmux's scrollback
+scrollback-limit = 0
+
+# Mouse — passthrough to tmux (Ghostty respects mouse reporting by default)
+mouse-scroll-multiplier = 1
+
+# Window
+window-padding-x = 4
+window-padding-y = 4
+window-save-state = always
+confirm-close-surface = true
+
+# Cursor
+cursor-style = block
+cursor-style-blink = false
+
+# Clipboard
+clipboard-read = allow
+clipboard-write = allow
+copy-on-select = clipboard
+
+# Shell integration
+shell-integration = detect
+
+# Performance
+bold-is-bright = false
+
+# Theme — dark, clean
+background = 0f0f0f
+foreground = e0e0e0

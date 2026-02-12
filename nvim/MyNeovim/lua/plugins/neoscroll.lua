@@ -2,7 +2,7 @@ return {
   -- stylua: ignore
   -- smooth scrolling
   "karb94/neoscroll.nvim",
-  enabled = false,
+  enabled = true,
   event = "VeryLazy",
   opts = {
     mappings = { "<C-u>", "<C-d>", "zz" },

@@ -3,3 +3,7 @@
 -- Add any additional options here
 vim.opt.wrap = true
 vim.opt.linebreak = true
+
+-- Ensure mouse is fully enabled (scroll + click in all modes)
+vim.opt.mouse = "a"
+vim.opt.mousescroll = "ver:3,hor:6"

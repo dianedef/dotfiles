@@ -16,10 +16,6 @@ return {
       python = { "black" },
       sh = { "shfmt" },
     },
-    format_on_save = {
-      timeout_ms = 500,
-      lsp_fallback = true,
-    },
   },
   keys = {
     { "<leader>cf", function() require("conform").format({ async = true }) end, desc = "Format buffer" },

@@ -994,6 +994,12 @@ setup_configs() {
     # Tmux
     [ -f "$SCRIPT_DIR/.tmux.conf" ] && create_symlink "$SCRIPT_DIR/.tmux.conf" "$HOME/.tmux.conf" false
 
+    # Ghostty
+    if [ -d "$SCRIPT_DIR/ghostty" ]; then
+        mkdir -p "$HOME/.config/ghostty"
+        create_symlink "$SCRIPT_DIR/ghostty/config" "$HOME/.config/ghostty/config" false
+    fi
+
     # Espanso
     if [ -d "$SCRIPT_DIR/espanso/.config/espanso" ]; then
         espanso_base="$SCRIPT_DIR/espanso/.config/espanso/match/base.yml"

@@ -4,6 +4,12 @@
 vim.keymap.set("t", "<Esc>", "<C-\\><C-n>", { desc = "Exit terminal mode" })
 vim.keymap.set("n", "<leader>uw", ":set wrap!<CR>", { desc = "Toggle wrap" })
 
+-- Explicit mouse wheel scroll (fixes scroll down through mosh/tmux)
+vim.keymap.set({ "n", "v", "x" }, "<ScrollWheelUp>", "3<C-y>", { desc = "Scroll up" })
+vim.keymap.set({ "n", "v", "x" }, "<ScrollWheelDown>", "3<C-e>", { desc = "Scroll down" })
+vim.keymap.set("i", "<ScrollWheelUp>", "<C-o>3<C-y>", { desc = "Scroll up" })
+vim.keymap.set("i", "<ScrollWheelDown>", "<C-o>3<C-e>", { desc = "Scroll down" })
+
 -- Notifications (which-key group)
 local function copy_to_clipboard(text)
   -- OSC 52 pour copier via terminal (fonctionne sur SSH/Termux)
