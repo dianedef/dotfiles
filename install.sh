@@ -1010,6 +1010,12 @@ setup_configs() {
         fi
         create_symlink "$SCRIPT_DIR/espanso/.config/espanso" "$HOME/.config/espanso" false
     fi
+
+    # Claude Code skills
+    if [ -d "$SCRIPT_DIR/claude/skills" ]; then
+        mkdir -p "$HOME/.claude"
+        create_symlink "$SCRIPT_DIR/claude/skills" "$HOME/.claude/skills" false
+    fi
 }
 
 # ============================================================================
