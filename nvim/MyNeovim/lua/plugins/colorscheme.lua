@@ -70,7 +70,21 @@ return {
       verthoriz = "╋",
     })
     require("kanagawa").setup(opts)
-    vim.cmd("colorscheme kanagawa")
+
+    -- Persist colorscheme across restarts
+    local cache_file = vim.fn.stdpath("data") .. "/last_colorscheme"
+    local saved = vim.fn.filereadable(cache_file) == 1 and vim.fn.readfile(cache_file)[1] or nil
+    local ok = saved and pcall(vim.cmd, "colorscheme " .. saved)
+    if not ok then
+      vim.cmd("colorscheme kanagawa")
+    end
+
+    vim.api.nvim_create_autocmd("ColorScheme", {
+      group = vim.api.nvim_create_augroup("PersistColorscheme", { clear = true }),
+      callback = function(ev)
+        vim.fn.writefile({ ev.match }, cache_file)
+      end,
+    })
   end,
   },
 }
