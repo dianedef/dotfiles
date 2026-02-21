@@ -118,46 +118,91 @@ source ~/.bashrc
 
 This repo includes a full suite of Claude Code skills (global slash commands) in `claude/skills/`. They're symlinked to `~/.claude/skills/` on install.
 
-### Audit System
+### Audit System (8 domains)
 
-Run `/audit` in any project to launch a full multi-domain audit (code, design, copy, SEO, GTM, translation) with parallel agents. Or run individual domain audits:
+Run `/shipflow-audit` in any project to launch a full 8-domain audit (code, design, copy, SEO, GTM, translation, dependencies, performance) with parallel agents. Three modes:
 
 ```bash
-/audit                      # Full project — all domains in parallel
-/audit-seo @src/pages/index.astro   # Single page, single domain
-/audit-code                 # Full project, code only
+# Page mode — audit a single file
+/shipflow-audit-seo @src/pages/index.astro
+
+# Project mode — audit the current project
+/shipflow-audit-code
+/shipflow-audit                      # All 8 domains in parallel
+
+# Global mode — audit ALL projects in the workspace
+/shipflow-audit-seo global           # SEO across all web projects
+/shipflow-audit global               # Everything, everywhere, all at once
+/shipflow-deps global                # Dependencies across all projects
 ```
+
+Global mode reads `~/ShipFlow/PROJECTS.md` (private, 8-domain applicability matrix) and launches parallel agents per project.
 
 Each audit:
 - Scores every category A/B/C/D
-- Fixes issues directly (or asks first for `/audit` master)
+- Fixes issues directly (or asks first for `/shipflow-audit` master)
 - Logs scores to `AUDIT_LOG.md` (global + project-local)
 - Creates tasks in `TASKS.md` for all issues found
 
 ### Task Tracking
 
 ```bash
-/tasks       # Update task tracker
-/backlog     # Capture ideas
-/priorities  # Re-rank by impact/effort
-/review      # Session review + planning
-/ship        # Commit, push, sync workspace
+/shipflow-tasks       # Update task tracker
+/shipflow-backlog     # Capture ideas
+/shipflow-priorities  # Re-rank by impact/effort
+/shipflow-review      # Session review + planning
+/shipflow-ship        # Commit, push, sync ShipFlow
 ```
 
-### Content
+### DevOps & Shipping
 
 ```bash
-/check       # Typecheck + lint + build + auto-fix
-/enrich @file  # Web research + content upgrade
+/shipflow-check       # Typecheck + lint + build + auto-fix
+/shipflow-deploy      # Full deploy: check → ship → restart → verify
+/shipflow-status      # Cross-project git dashboard
 ```
 
-### Workspace Data (Private)
+### Scaffolding & Init
 
-Personal tracking data lives in a separate private repo (`~/workspace/`):
+```bash
+/shipflow-init        # Bootstrap new project for ShipFlow tracking
+/shipflow-scaffold page about    # Generate files matching project patterns
+```
+
+### Research & Documentation
+
+```bash
+/shipflow-research "topic"  # Deep web research → saved report
+/shipflow-docs readme       # Generate/update docs from code
+/shipflow-enrich @file      # Web research + content upgrade
+```
+
+### Upgrades
+
+```bash
+/shipflow-migrate astro@5   # Framework upgrade assistant
+/shipflow-changelog         # Auto-generate CHANGELOG from git
+```
+
+### Interactive Prompts
+
+All skills are **context-aware** with interactive selection prompts:
+
+- **Workspace root detection** — Run any skill from `~/` and it detects you're not inside a project. Instead of failing, it asks "Which project(s)?" with checkboxes.
+- **Scope selection** — `/shipflow-review` asks time scope (daily/weekly/sprint), `/shipflow-check` asks which checks (typecheck/lint/build/test), `/shipflow-audit` asks which domains.
+- **Global mode** — `/shipflow-audit global` prompts both "Which projects?" and "Which domains?" before launching.
+- **Content targeting** — `/shipflow-enrich` with a folder prompts which files to process.
+
+When arguments are provided explicitly, prompts are skipped.
+
+### ShipFlow Data (Private)
+
+Personal tracking data lives in a separate private repo (`~/ShipFlow/`):
 - `TASKS.md` — master tracker across all projects
 - `AUDIT_LOG.md` — audit history with scores over time
+- `PROJECTS.md` — project registry with domain applicability matrix
 
-`install.sh` clones it automatically. Create yours with `gh repo create workspace --private`.
+`install.sh` clones it automatically. Create yours with `gh repo create ShipFlow --private`.
 
 ## BMAD Method Integration
 

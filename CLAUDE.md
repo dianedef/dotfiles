@@ -78,32 +78,61 @@ cd ~/dotfiles && ./install.sh
 Global skills live in `claude/skills/` and are symlinked to `~/.claude/skills/`. Available across all projects.
 
 ### Task & Workflow Skills
-- `/tasks` — Update TASKS.md, mark completed items, suggest next steps
-- `/backlog` — Capture ideas, defer non-urgent tasks
-- `/priorities` — Re-rank tasks by impact/effort
-- `/review` — Session review, update docs, plan next
-- `/ship` — Stage, commit, push + auto-sync workspace data
+- `/shipflow-tasks` — Update TASKS.md, mark completed items, suggest next steps
+- `/shipflow-backlog` — Capture ideas, defer non-urgent tasks
+- `/shipflow-priorities` — Re-rank tasks by impact/effort
+- `/shipflow-review` — Session review, update docs, plan next
+- `/shipflow-ship` — Stage, commit, push + auto-sync ShipFlow data
 
-### Audit Skills (all: `@file` = page mode, no arg = full project)
-- `/audit` — Master orchestrator: launches all domains in parallel
-- `/audit-code` — Architecture, performance, security, reliability
-- `/audit-design` — UI/UX, accessibility, responsiveness
-- `/audit-copy` — Copywriting, tone, CTAs, grammar
-- `/audit-seo` — Meta tags, structured data, internal linking
-- `/audit-gtm` — Go-to-market, conversion, trust, analytics
-- `/audit-translate` — i18n completeness, consistency, terminology
+### Audit Skills (8 domains, 3 modes: `@file` = page, no arg = project, `global` = all projects)
+- `/shipflow-audit` — Master orchestrator: launches all 8 domains in parallel
+- `/shipflow-audit-code` — Architecture, security, reliability
+- `/shipflow-audit-design` — UI/UX, accessibility, responsiveness
+- `/shipflow-audit-copy` — Copywriting, tone, CTAs, grammar
+- `/shipflow-audit-seo` — Meta tags, structured data, internal linking
+- `/shipflow-audit-gtm` — Go-to-market, conversion, trust, analytics
+- `/shipflow-audit-translate` — i18n completeness, consistency, terminology
+- `/shipflow-deps` — Dependencies: vulnerabilities, outdated, unused, licenses
+- `/shipflow-perf` — Performance: bundle, rendering, CWV, data fetching
 
-### Content Skills
-- `/check` — Typecheck + lint + build, auto-fix errors
-- `/enrich` — Web research + content upgrade
+Project registry for global mode: `~/ShipFlow/PROJECTS.md` (private) — lists all projects with domain applicability matrix (8 domains).
 
-### Workspace Data
+### DevOps & Shipping Skills
+- `/shipflow-check` — Typecheck + lint + build, auto-fix errors
+- `/shipflow-deploy` — Full deploy cycle: check → ship → restart → verify
+- `/shipflow-status` — Cross-project git dashboard
 
-The `workspace` private repo (`~/workspace/`) stores personal tracking data:
+### Scaffolding & Init Skills
+- `/shipflow-init` — Bootstrap new project for ShipFlow tracking
+- `/shipflow-scaffold` — Generate files matching existing project patterns
+
+### Research & Documentation Skills
+- `/shipflow-research` — Deep web research → structured markdown report
+- `/shipflow-docs` — Generate/update docs from code (README, API, components)
+- `/shipflow-enrich` — Web research + content upgrade
+
+### Upgrade Skills
+- `/shipflow-migrate` — Framework upgrade assistant with backup branch
+- `/shipflow-changelog` — Auto-generate CHANGELOG.md from git history
+
+### Interactive Prompts
+
+All skills use `AskUserQuestion` for interactive selection when context is ambiguous:
+
+- **Workspace root detection**: Every skill detects when run from `~/` (no project markers) and prompts "Which project(s)?" instead of failing silently.
+- **Scope selection**: `/shipflow-review` prompts for time scope (daily/weekly/sprint/release). `/shipflow-check` prompts for which checks (typecheck/lint/build/test). `/shipflow-audit` prompts for which domains.
+- **Global mode**: `/shipflow-audit global` and `/shipflow-audit-* global` prompt for project and domain selection with multiSelect checkboxes.
+- **Content selection**: `/shipflow-enrich` with folder arg prompts which files to enrich.
+
+When arguments are provided explicitly, prompts are skipped — the skill runs directly.
+
+### ShipFlow Data
+
+The `ShipFlow` private repo (`~/ShipFlow/`) stores personal tracking data:
 - `TASKS.md` — master task tracker (symlinked to `~/TASKS.md`)
 - `AUDIT_LOG.md` — cross-project audit history (symlinked to `~/AUDIT_LOG.md`)
 
-`install.sh` clones it automatically via `git@github.com:${GITHUB_USERNAME}/workspace.git`.
+`install.sh` clones it automatically via `git@github.com:${GITHUB_USERNAME}/ShipFlow.git`.
 
 ## Key Conventions
 
