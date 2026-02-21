@@ -114,6 +114,51 @@ source ~/.bashrc
 | OpenCode AI | ✅ | ✅ | ✅ (Alpine) |
 | Doppler | ✅ | ✅ | ✅ |
 
+## Claude Code Skills
+
+This repo includes a full suite of Claude Code skills (global slash commands) in `claude/skills/`. They're symlinked to `~/.claude/skills/` on install.
+
+### Audit System
+
+Run `/audit` in any project to launch a full multi-domain audit (code, design, copy, SEO, GTM, translation) with parallel agents. Or run individual domain audits:
+
+```bash
+/audit                      # Full project — all domains in parallel
+/audit-seo @src/pages/index.astro   # Single page, single domain
+/audit-code                 # Full project, code only
+```
+
+Each audit:
+- Scores every category A/B/C/D
+- Fixes issues directly (or asks first for `/audit` master)
+- Logs scores to `AUDIT_LOG.md` (global + project-local)
+- Creates tasks in `TASKS.md` for all issues found
+
+### Task Tracking
+
+```bash
+/tasks       # Update task tracker
+/backlog     # Capture ideas
+/priorities  # Re-rank by impact/effort
+/review      # Session review + planning
+/ship        # Commit, push, sync workspace
+```
+
+### Content
+
+```bash
+/check       # Typecheck + lint + build + auto-fix
+/enrich @file  # Web research + content upgrade
+```
+
+### Workspace Data (Private)
+
+Personal tracking data lives in a separate private repo (`~/workspace/`):
+- `TASKS.md` — master tracker across all projects
+- `AUDIT_LOG.md` — audit history with scores over time
+
+`install.sh` clones it automatically. Create yours with `gh repo create workspace --private`.
+
 ## BMAD Method Integration
 
 This repository now includes the **BMAD (Build More, Architect Dreams) Method** - a structured AI-driven development framework.

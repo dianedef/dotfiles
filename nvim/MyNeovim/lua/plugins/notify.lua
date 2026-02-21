@@ -2,6 +2,9 @@ return {
   "rcarriga/nvim-notify",
   enabled = true,
   config = function()
+    require("notify").setup({
+      timeout = 10000,
+    })
     local banned_patterns = { "removed %d+ missing entries." }
     vim.notify = function(msg, ...)
       for _, pattern in ipairs(banned_patterns) do

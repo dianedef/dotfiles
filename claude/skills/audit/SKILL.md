@@ -139,7 +139,7 @@ Add audit findings as tasks. Two files to update:
 **1. Project-local TASKS.md** (e.g., `./TASKS.md` in the current project):
 - Create it if it doesn't exist.
 - Add an `## Audit Findings` section (or update it if it already exists — replace old findings with fresh ones).
-- List critical and high issues as tasks:
+- List all issues (critical, high, and medium) as tasks:
 
 ```markdown
 ## Audit Findings
@@ -151,14 +151,16 @@ Add audit findings as tasks. Two files to update:
 | 🔴 | Add missing meta descriptions on 8 pages | SEO | 📋 todo |
 | 🟠 | Standardize button styles across 12 components | Design | 📋 todo |
 | 🟠 | Rewrite homepage headline — benefit-driven | Copy | 📋 todo |
+| 🟡 | Add alt text to 5 decorative images | SEO | 📋 todo |
+| 🟡 | French typographic spaces before colons | Translate | 📋 todo |
 ```
 
-- Only include critical (🔴) and high (🟠) issues as tasks. Medium issues go in the detailed reports only.
+- Use 🔴 for critical, 🟠 for high, 🟡 for medium.
 - If a previous `## Audit Findings` section exists, replace it entirely with fresh findings (don't accumulate stale issues).
 
 **2. Master `/home/claude/TASKS.md`**:
 - Find the section for the current project.
-- Add or update an `### Audit` subsection with a summary line and the critical/high tasks.
+- Add or update an `### Audit` subsection with a summary line and all issues as tasks.
 - Update the Dashboard table's "Top Priority" column if audit found critical issues (they take precedence).
 
 ### Step 6: Apply fixes

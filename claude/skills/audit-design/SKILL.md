@@ -236,7 +236,7 @@ Create either file if missing.
 
 ### Update TASKS.md
 
-1. **Local TASKS.md** (project root): add/replace an `### Audit: Design` subsection with critical (🔴) and high (🟠) issues as task rows.
+1. **Local TASKS.md** (project root): add/replace an `### Audit: Design` subsection with critical (🔴), high (🟠), and medium (🟡) issues as task rows.
 2. **Master `/home/claude/TASKS.md`**: find the project's section, add/replace an `### Audit: Design` subsection with the same tasks. Update the Dashboard "Top Priority" if critical issues found.
 
 ---

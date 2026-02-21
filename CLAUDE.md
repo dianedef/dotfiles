@@ -73,6 +73,38 @@ cd ~/dotfiles && ./install.sh
 ### JavaScript/TypeScript (yazi/rules)
 - Format with Prettier: tabs, no semicolons, double quotes, 120 print width
 
+## Claude Code Skills
+
+Global skills live in `claude/skills/` and are symlinked to `~/.claude/skills/`. Available across all projects.
+
+### Task & Workflow Skills
+- `/tasks` — Update TASKS.md, mark completed items, suggest next steps
+- `/backlog` — Capture ideas, defer non-urgent tasks
+- `/priorities` — Re-rank tasks by impact/effort
+- `/review` — Session review, update docs, plan next
+- `/ship` — Stage, commit, push + auto-sync workspace data
+
+### Audit Skills (all: `@file` = page mode, no arg = full project)
+- `/audit` — Master orchestrator: launches all domains in parallel
+- `/audit-code` — Architecture, performance, security, reliability
+- `/audit-design` — UI/UX, accessibility, responsiveness
+- `/audit-copy` — Copywriting, tone, CTAs, grammar
+- `/audit-seo` — Meta tags, structured data, internal linking
+- `/audit-gtm` — Go-to-market, conversion, trust, analytics
+- `/audit-translate` — i18n completeness, consistency, terminology
+
+### Content Skills
+- `/check` — Typecheck + lint + build, auto-fix errors
+- `/enrich` — Web research + content upgrade
+
+### Workspace Data
+
+The `workspace` private repo (`~/workspace/`) stores personal tracking data:
+- `TASKS.md` — master task tracker (symlinked to `~/TASKS.md`)
+- `AUDIT_LOG.md` — cross-project audit history (symlinked to `~/AUDIT_LOG.md`)
+
+`install.sh` clones it automatically via `git@github.com:${GITHUB_USERNAME}/workspace.git`.
+
 ## Key Conventions
 
 - Test changes in Codespaces first, then Termux if Android-specific

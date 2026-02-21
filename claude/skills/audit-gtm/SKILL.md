@@ -245,7 +245,7 @@ Create either file if missing.
 
 ### Update TASKS.md
 
-1. **Local TASKS.md** (project root): add/replace an `### Audit: GTM` subsection with critical (🔴) and high (🟠) issues as task rows.
+1. **Local TASKS.md** (project root): add/replace an `### Audit: GTM` subsection with critical (🔴), high (🟠), and medium (🟡) issues as task rows.
 2. **Master `/home/claude/TASKS.md`**: find the project's section, add/replace an `### Audit: GTM` subsection with the same tasks.
 
 ---
