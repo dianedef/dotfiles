@@ -1027,6 +1027,7 @@ setup_configs() {
     if [ -d "$workspace_dir" ]; then
         [ -f "$workspace_dir/TASKS.md" ] && create_symlink "$workspace_dir/TASKS.md" "$HOME/TASKS.md" false
         [ -f "$workspace_dir/AUDIT_LOG.md" ] && create_symlink "$workspace_dir/AUDIT_LOG.md" "$HOME/AUDIT_LOG.md" false
+        [ -f "$workspace_dir/CLAUDE.md" ] && create_symlink "$workspace_dir/CLAUDE.md" "$HOME/CLAUDE.md" false
         success "Workspace linked"
     fi
 }
