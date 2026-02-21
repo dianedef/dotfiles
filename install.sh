@@ -1016,6 +1016,19 @@ setup_configs() {
         mkdir -p "$HOME/.claude"
         create_symlink "$SCRIPT_DIR/claude/skills" "$HOME/.claude/skills" false
     fi
+
+    # Claude workspace (private repo — TASKS.md, AUDIT_LOG.md)
+    local workspace_dir="$HOME/workspace"
+    if [ ! -d "$workspace_dir" ]; then
+        info "Cloning workspace (private)..."
+        git clone "git@github.com:${GITHUB_USERNAME}/workspace.git" "$workspace_dir" 2>/dev/null || \
+            warn "Could not clone workspace repo — create it with: gh repo create workspace --private"
+    fi
+    if [ -d "$workspace_dir" ]; then
+        [ -f "$workspace_dir/TASKS.md" ] && create_symlink "$workspace_dir/TASKS.md" "$HOME/TASKS.md" false
+        [ -f "$workspace_dir/AUDIT_LOG.md" ] && create_symlink "$workspace_dir/AUDIT_LOG.md" "$HOME/AUDIT_LOG.md" false
+        success "Workspace linked"
+    fi
 }
 
 # ============================================================================
