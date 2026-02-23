@@ -20,4 +20,4 @@
 | 14 | Update `shipflow-help` | Modify | ✅ Done |
 | 15 | Update `PROJECTS.md` + `AUDIT_LOG.md` | Modify | ✅ Done |
 | 16 | Update docs (`CLAUDE.md`, `dotfiles/CLAUDE.md`, `README.md`) | Modify | ✅ Done |
-| 17 | Ship everything | Git | ⬜ Pending |
+| 17 | Ship everything | Git | ✅ Done |

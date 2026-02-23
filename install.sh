@@ -1017,18 +1017,18 @@ setup_configs() {
         create_symlink "$SCRIPT_DIR/claude/skills" "$HOME/.claude/skills" false
     fi
 
-    # Claude workspace (private repo — TASKS.md, AUDIT_LOG.md)
-    local workspace_dir="$HOME/workspace"
-    if [ ! -d "$workspace_dir" ]; then
-        info "Cloning workspace (private)..."
-        git clone "git@github.com:${GITHUB_USERNAME}/workspace.git" "$workspace_dir" 2>/dev/null || \
-            warn "Could not clone workspace repo — create it with: gh repo create workspace --private"
+    # ShipFlow (private repo — TASKS.md, AUDIT_LOG.md)
+    local shipflow_dir="$HOME/ShipFlow"
+    if [ ! -d "$shipflow_dir" ]; then
+        info "Cloning ShipFlow (private)..."
+        git clone "git@github.com:${GITHUB_USERNAME}/ShipFlow.git" "$shipflow_dir" 2>/dev/null || \
+            warn "Could not clone ShipFlow repo — create it with: gh repo create ShipFlow --private"
     fi
-    if [ -d "$workspace_dir" ]; then
-        [ -f "$workspace_dir/TASKS.md" ] && create_symlink "$workspace_dir/TASKS.md" "$HOME/TASKS.md" false
-        [ -f "$workspace_dir/AUDIT_LOG.md" ] && create_symlink "$workspace_dir/AUDIT_LOG.md" "$HOME/AUDIT_LOG.md" false
-        [ -f "$workspace_dir/CLAUDE.md" ] && create_symlink "$workspace_dir/CLAUDE.md" "$HOME/CLAUDE.md" false
-        success "Workspace linked"
+    if [ -d "$shipflow_dir" ]; then
+        [ -f "$shipflow_dir/TASKS.md" ] && create_symlink "$shipflow_dir/TASKS.md" "$HOME/TASKS.md" false
+        [ -f "$shipflow_dir/AUDIT_LOG.md" ] && create_symlink "$shipflow_dir/AUDIT_LOG.md" "$HOME/AUDIT_LOG.md" false
+        [ -f "$shipflow_dir/CLAUDE.md" ] && create_symlink "$shipflow_dir/CLAUDE.md" "$HOME/CLAUDE.md" false
+        success "ShipFlow linked"
     fi
 }
 
