@@ -84,7 +84,23 @@ If the current directory has no project markers (not inside a specific project) 
      - Move tasks between sections as needed (Todo → In Progress → Completed)
      - Preserve existing notes and context
 
-5. **Suggest next steps**:
+5. **Update CHANGELOG.md**:
+   - Look for a `CHANGELOG.md` in the current project directory
+   - If it doesn't exist, create it with a standard Keep a Changelog structure
+   - Add an entry under `## [Unreleased]` (or today's date if releasing) for every task marked done in this session
+   - Group entries by type: `### Added`, `### Changed`, `### Fixed`
+   - Keep entries concise and user-facing (what changed, not how)
+   - Example format:
+     ```markdown
+     ## [Unreleased]
+     ### Added
+     - Page /quiz dédiée fullscreen (FR + EN) avec redirection de tous les CTAs
+     - Minimum 2 semaines imposé avant toute réservation (validation Zod + Calendar)
+     ### Changed
+     - BookingForm : typography et spacing réduits pour tenir sur un écran sans scroll
+     ```
+
+6. **Suggest next steps**:
    - Analyze the remaining tasks
    - Recommend the highest priority item based on:
      - Blockers (tasks that unblock other work)

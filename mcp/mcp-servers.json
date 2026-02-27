@@ -18,7 +18,7 @@
     },
     "playwright": {
       "command": "npx",
-      "args": ["-y", "@playwright/mcp@latest"]
+      "args": ["-y", "mcp-chromium-arm64"]
     },
     "exa": {
       "type": "http",
@@ -27,6 +27,10 @@
     "clerk": {
       "type": "http",
       "url": "https://mcp.clerk.com/mcp"
+    },
+    "unicon": {
+      "command": "npx",
+      "args": ["-y", "@webrenew/unicon-mcp-server"]
     }
   }
 }
