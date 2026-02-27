@@ -40,9 +40,24 @@ Then `cd` into the selected project and continue with the steps below.
 5. **Push to the remote** using `git push`. If the branch has no upstream, use `git push -u origin <branch>`.
 6. **Confirm success** by running `git status` after push.
 
+### Also: update TASKS and CHANGELOG
+
+After a successful push, always run these two steps automatically — no need to ask:
+
+1. **Update TASKS.md** — invoke the `shipflow-tasks` skill to mark completed items and capture any new tasks discovered during the session.
+2. **Update CHANGELOG.md** — invoke the `shipflow-changelog` skill to append an entry for the commit just pushed.
+
+Use the Skill tool for both:
+```
+Skill("shipflow-tasks")
+Skill("shipflow-changelog")
+```
+
+Run them sequentially (tasks first, then changelog).
+
 ### Also: sync ShipFlow data
 
-After shipping the current project, check if `/home/claude/ShipFlow` has uncommitted changes (TASKS.md or AUDIT_LOG.md may have been updated during this session). If yes, auto-commit and push ShipFlow too:
+After all of the above, check if `/home/claude/ShipFlow` has uncommitted changes (TASKS.md or AUDIT_LOG.md may have been updated during this session). If yes, auto-commit and push ShipFlow too:
 
 ```bash
 cd /home/claude/ShipFlow && git add -A && git diff --cached --quiet || git commit -m "sync" && git push
