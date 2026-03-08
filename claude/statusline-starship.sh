@@ -124,7 +124,7 @@ if [ -n "$used_pct" ] && [ "$used_pct" != "null" ]; then
     fi
 
     line2+=$(printf "  ${ctx_color}%s %d%%\033[00m" "$bar" "$remaining_int")
-    line2+=$(printf "\033[02;37m ctx left\033[00m")
+    line2+=$(printf "\033[02;37m context left\033[00m")
 fi
 
 # Cost
@@ -134,11 +134,14 @@ if [ -n "$cost" ] && [ "$cost" != "null" ] && [ "$cost" != "0" ]; then
     line2+=$(printf "  \033[02;37m\$%s\033[00m" "$cost_fmt")
 fi
 
-# Session ID (short)
+# Session name (set via /name skill)
 session_id=$(echo "$input" | jq -r '.session_id // empty' 2>/dev/null)
 if [ -n "$session_id" ]; then
-    short_id="${session_id:0:8}"
-    line2+=$(printf "  \033[02;37m#%s\033[00m" "$short_id")
+    note_file="$HOME/.claude/session_notes/${session_id}"
+    if [ -f "$note_file" ]; then
+        session_name=$(cat "$note_file")
+        line2+=$(printf "  \033[01;33m📌 %s\033[00m" "$session_name")
+    fi
 fi
 
 # ── OUTPUT ────────────────────────────────────────────────────────────────────
