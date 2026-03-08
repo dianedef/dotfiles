@@ -1017,6 +1017,23 @@ setup_configs() {
         create_symlink "$SCRIPT_DIR/claude/skills" "$HOME/.claude/skills" false
     fi
 
+    # Claude Code settings (statusLine, etc.)
+    if is_installed jq; then
+        local claude_settings="$HOME/.claude/settings.json"
+        mkdir -p "$HOME/.claude"
+        if [ ! -f "$claude_settings" ]; then
+            echo '{}' > "$claude_settings"
+        fi
+        # Inject statusLine if not already set
+        if ! jq -e '.statusLine' "$claude_settings" &>/dev/null; then
+            jq '.statusLine = {"type": "command", "command": "bash ~/dotfiles/claude/statusline-starship.sh"}' \
+                "$claude_settings" > "${claude_settings}.tmp" && mv "${claude_settings}.tmp" "$claude_settings"
+            success "Claude Code statusLine configured"
+        else
+            log DEBUG "Claude Code statusLine already configured, skipping"
+        fi
+    fi
+
     # ShipFlow (private repo — TASKS.md, AUDIT_LOG.md)
     local shipflow_dir="$HOME/ShipFlow"
     if [ ! -d "$shipflow_dir" ]; then

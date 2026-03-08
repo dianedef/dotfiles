@@ -2,7 +2,9 @@
 
 # Starship-inspired status line for Claude Code
 # Based on /root/.config/starship.toml
+# Reads JSON from stdin (Claude Code statusLine protocol)
 
+input=$(cat)
 output=""
 
 # Environment indicator (codespace/SSH/docker/local)
@@ -43,8 +45,12 @@ if [ "$CODESPACES" = "true" ] || [ -n "$SSH_CLIENT" ] || [ -n "$SSH_TTY" ]; then
     output+=$(printf "\033[02;37m%s\033[00m " "$hostname")
 fi
 
-# Directory - truncate to repo if in git repo
-cwd=$(pwd)
+# Directory - use cwd from JSON input (Claude Code provides this), fall back to pwd
+cwd=$(echo "$input" | jq -r '.cwd // empty' 2>/dev/null)
+[ -z "$cwd" ] && cwd=$(pwd)
+# cd into the session's cwd so git commands and file checks work correctly
+[ -d "$cwd" ] && cd "$cwd" 2>/dev/null
+
 if git rev-parse --is-inside-work-tree >/dev/null 2>&1; then
     repo_root=$(git rev-parse --show-toplevel 2>/dev/null)
     repo_name=$(basename "$repo_root")
@@ -101,13 +107,13 @@ if git rev-parse --is-inside-work-tree >/dev/null 2>&1; then
 fi
 
 # Python version (if in project with Python files)
-if command -v python3 >/dev/null 2>&1 && [ -f "$(pwd)/requirements.txt" ] || [ -f "$(pwd)/pyproject.toml" ] || [ -f "$(pwd)/setup.py" ]; then
+if command -v python3 >/dev/null 2>&1 && { [ -f "$cwd/requirements.txt" ] || [ -f "$cwd/pyproject.toml" ] || [ -f "$cwd/setup.py" ]; }; then
     py_version=$(python3 --version 2>&1 | cut -d' ' -f2 | cut -d'.' -f1-2)
     output+=$(printf "\033[33m🐍 %s\033[00m " "$py_version")
 fi
 
 # Node.js version (if in project with package.json)
-if command -v node >/dev/null 2>&1 && [ -f "$(pwd)/package.json" ]; then
+if command -v node >/dev/null 2>&1 && [ -f "$cwd/package.json" ]; then
     node_version=$(node --version | sed 's/v//')
     output+=$(printf "\033[32m⬢ %s\033[00m " "$node_version")
 fi
