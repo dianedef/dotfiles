@@ -277,7 +277,7 @@ alias ...='cd ../..'
 alias gs='git status'
 alias ga='git add .'
 gc() { git commit -m "${1:-up}"; }
-gp() { if [ -n "$(git status --porcelain)" ]; then git add -A && git commit -m "${1:-up}"; fi; git push; }
+function gp { if [ -n "$(git status --porcelain)" ]; then git add -A && git commit -m "${1:-up}"; fi; git push; }
 alias gl='git pull'
 alias gd='git diff'
 

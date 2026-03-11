@@ -1085,7 +1085,7 @@ alias ...='cd ../..'
 alias gs='git status'
 alias ga='git add .'
 gc() { git commit -m "${1:-up}"; }
-gp() { if [ -n "$(git status --porcelain)" ]; then git add -A && git commit -m "${1:-up}"; fi; git push; }
+function gp { if [ -n "$(git status --porcelain)" ]; then git add -A && git commit -m "${1:-up}"; fi; git push; }
 alias gl='git pull'
 alias glog='git log --oneline --graph'
 
@@ -1108,6 +1108,16 @@ alias dotfiles='~/dotfiles/install.sh -i'
 ALIASES
         success "Added productivity aliases"
     else
+        # Migrate old gc/gp aliases to functions
+        if grep -q "alias gc='git commit -m'" "$HOME/.bashrc" 2>/dev/null; then
+            sed -i "s|alias gc='git commit -m'|function gc { git commit -m \"\${1:-up}\"; }|" "$HOME/.bashrc"
+            success "Migrated gc alias to function"
+        fi
+        if grep -q "alias gp='git push'" "$HOME/.bashrc" 2>/dev/null; then
+            sed -i "s|alias gp='git push'|function gp { if [ -n \"\$(git status --porcelain)\" ]; then git add -A \&\& git commit -m \"\${1:-up}\"; fi; git push; }|" "$HOME/.bashrc"
+            success "Migrated gp alias to smart function"
+        fi
+
         # Ensure dotfiles aliases exist even if section was added previously
         if ! grep -q "alias dot=" "$HOME/.bashrc" 2>/dev/null; then
             cat >> "$HOME/.bashrc" << 'DOTALIASES'
