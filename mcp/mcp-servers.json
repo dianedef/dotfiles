@@ -31,6 +31,10 @@
     "unicon": {
       "command": "npx",
       "args": ["-y", "@webrenew/unicon-mcp-server"]
+    },
+    "posthog": {
+      "type": "http",
+      "url": "https://mcp.posthog.com/mcp"
     }
   }
 }
