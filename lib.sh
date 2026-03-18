@@ -1207,7 +1207,7 @@ run_update_check() {
         printf "%-20s %-15s %-15s %s\n" "Package" "Installed" "Latest" "Status"
         printf "%-20s %-15s %-15s %s\n" "───────" "─────────" "──────" "──────"
 
-        local npm_packages=("@anthropic-ai/claude-code" "@apify/mcpc" "@kilocode/cli" "opencode-ai" "tldr")
+        local npm_packages=("@anthropic-ai/claude-code" "@apify/mcpc" "@google/gemini-cli" "@kilocode/cli" "opencode-ai" "tldr")
         for pkg in "${npm_packages[@]}"; do
             local pkg_installed pkg_latest pkg_status
             pkg_installed=$(npm list -g "$pkg" 2>/dev/null | grep -oE '[0-9]+\.[0-9]+\.[0-9]+' | head -1)
@@ -1817,8 +1817,10 @@ Options:
   --uninstall        Remove installed tools and configurations
   --only=COMPONENTS  Install only specified components (comma-separated)
                      Available: neovim,fzf,nerd-fonts,node,npm-tools,
-                                starship,zoxide,yazi,doppler,configs,
-                                shell-integration
+                                starship,zoxide,yazi,ranger,doppler,gh,
+                                lsd,bat,claude-code,claude-chill,copilot,
+                                kilocode,opencode,gemini,crush,vercel,mcp,
+                                configs,shell-integration
   -p, --parallel     Run independent installations in parallel
   --no-gum           Disable gum UI (use plain text)
   --debug            Enable debug output
@@ -2115,6 +2117,7 @@ select_components() {
         "copilot     │ GitHub Copilot CLI" \
         "kilocode    │ Kilocode CLI" \
         "opencode    │ OpenCode AI" \
+        "gemini      │ Google Gemini CLI" \
         "crush       │ Crush (Charmbracelet)" \
         "vercel      │ Vercel CLI" \
         "mcp         │ MCP server configs" \
@@ -2461,6 +2464,19 @@ install_component() {
             info "Installing OpenCode..."
             npm install -g opencode-ai </dev/null >/dev/null 2>&1
             is_installed opencode && success "OpenCode installed" || warn "OpenCode installation failed"
+            ;;
+        gemini)
+            if is_installed gemini; then
+                success "Gemini CLI already installed"
+                return 0
+            fi
+            if ! is_installed npm; then
+                warn "npm required (install Node.js first)"
+                return 1
+            fi
+            info "Installing Gemini CLI..."
+            npm install -g @google/gemini-cli </dev/null >/dev/null 2>&1
+            is_installed gemini && success "Gemini CLI installed" || warn "Gemini CLI installation failed"
             ;;
         crush)
             if is_installed crush; then

@@ -7,8 +7,7 @@ return {
       rules = false, -- Disable icon auto-detection rules (fixes extra letters in descriptions)
     },
     spec = {
-      { "<leader>a", group = "AI (Claude)", icon = "🤖" },
-      { "<leader>o", group = "opencode", icon = "🔥" },
+      { "<leader>a", group = "AI", icon = "🤖" },
     },
   },
 }

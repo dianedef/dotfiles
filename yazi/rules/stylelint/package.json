@@ -12,5 +12,10 @@
 	},
 	"devDependencies": {
 		"stylelint": "^15.6.1"
+	},
+	"pnpm": {
+		"overrides": {
+			"flatted": ">=3.4.0"
+		}
 	}
 }

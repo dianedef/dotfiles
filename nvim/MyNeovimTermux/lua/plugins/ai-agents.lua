@@ -56,23 +56,6 @@ return {
         end,
         desc = "Open Sheikh CLI",
       },
-      {
-        "<leader>ao",
-        function()
-          local term = require("toggleterm.terminal").Terminal:new({
-            cmd = "proot-distro login alpine -- /root/opencode_termux_alpine_aarch64/opencode-termux-wrapper.sh",
-            direction = "float",
-            close_on_exit = false,
-            float_opts = {
-              border = "curved",
-              width = math.floor(vim.o.columns * 0.9),
-              height = math.floor(vim.o.lines * 0.9),
-            },
-          })
-          term:toggle()
-        end,
-        desc = "Open OpenCode (Alpine)",
-      },
     },
   },
 
@@ -141,7 +124,6 @@ return {
     opts = {
       spec = {
         { "<leader>a", group = "ai-agents", icon = "🤖" },
-        { "<leader>o", group = "opencode", icon = "🔥" },
       },
     },
   },
