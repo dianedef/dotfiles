@@ -8,10 +8,6 @@
       "type": "http",
       "url": "https://mcp.vercel.com"
     },
-    "github": {
-      "type": "http",
-      "url": "https://api.githubcopilot.com/mcp/"
-    },
     "composio": {
       "command": "npx",
       "args": ["-y", "composio-mcp@latest", "start"]
@@ -39,6 +35,13 @@
     "firecrawl": {
       "type": "http",
       "url": "https://mcp.firecrawl.dev/FIRECRAWL_API_KEY/v2/mcp"
+    },
+    "deepl": {
+      "command": "npx",
+      "args": ["-y", "deepl-mcp-server"],
+      "env": {
+        "DEEPL_API_KEY": "YOUR_DEEPL_API_KEY"
+      }
     }
   }
 }
