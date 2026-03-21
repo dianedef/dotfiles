@@ -21,7 +21,7 @@
 #   Kilocode, and Claude Desktop. Run ./install.sh --only=mcp to apply.
 #   Manual: claude mcp add --transport http <name> <url> --scope user
 
-set -euo pipefail
+set -uo pipefail
 
 # ============================================================================
 # INITIALIZATION
@@ -157,9 +157,28 @@ echo ""
 # USER IDENTITY CONFIGURATION (skip in update mode)
 # ============================================================================
 get_user_info() {
+    # Try to auto-detect from GitHub CLI if authenticated
+    if is_installed gh && gh auth status &>/dev/null; then
+        if [ -z "${GITHUB_USERNAME:-}" ]; then
+            GITHUB_USERNAME=$(gh api user --jq '.login' 2>/dev/null || echo "")
+        fi
+        if [ -z "${USER_NAME:-}" ]; then
+            USER_NAME=$(gh api user --jq '.name // empty' 2>/dev/null || echo "")
+        fi
+        if [ -z "${USER_EMAIL:-}" ] && [ -n "${GITHUB_USERNAME:-}" ]; then
+            # Use GitHub noreply email by default
+            local gh_id
+            gh_id=$(gh api user --jq '.id' 2>/dev/null || echo "")
+            if [ -n "$gh_id" ]; then
+                USER_EMAIL="${gh_id}+${GITHUB_USERNAME}@users.noreply.github.com"
+            fi
+        fi
+    fi
+
+    # Fallback: ask interactively or use defaults
     if [ -z "${USER_NAME:-}" ]; then
         if [ -t 0 ]; then
-            read -r -p "📝 Enter your name (for git/espanso): " USER_NAME
+            read -r -p "📝 Enter your name (for git): " USER_NAME
             USER_NAME="${USER_NAME:-Diane}"
         else
             USER_NAME="Diane"
@@ -168,7 +187,7 @@ get_user_info() {
 
     if [ -z "${USER_EMAIL:-}" ]; then
         if [ -t 0 ]; then
-            read -r -p "📧 Enter your email (for git/espanso): " USER_EMAIL
+            read -r -p "📧 Enter your email (for git): " USER_EMAIL
             USER_EMAIL="${USER_EMAIL:-noreply@example.com}"
         else
             USER_EMAIL="35034946+dianedef@users.noreply.github.com"
@@ -176,9 +195,7 @@ get_user_info() {
     fi
 
     if [ -z "${GITHUB_USERNAME:-}" ]; then
-        if [[ "$USER_EMAIL" =~ \+(.+)@users\.noreply\.github\.com ]]; then
-            GITHUB_USERNAME="${BASH_REMATCH[1]}"
-        elif [ -t 0 ]; then
+        if [ -t 0 ]; then
             read -r -p "🐙 Enter your GitHub username: " GITHUB_USERNAME
             GITHUB_USERNAME="${GITHUB_USERNAME:-dianedef}"
         else
@@ -191,7 +208,7 @@ get_user_info() {
 }
 
 # Skip identity config in update mode or when only installing components that don't need it
-# Components needing identity: configs (espanso uses USER_NAME, USER_EMAIL, GITHUB_USERNAME)
+# Components needing identity: configs (git uses USER_NAME, USER_EMAIL, GITHUB_USERNAME)
 needs_identity() {
     [ -z "${DOTFILES_ONLY:-}" ] || [[ ",$DOTFILES_ONLY," == *",configs,"* ]]
 }
@@ -326,15 +343,15 @@ install_github_binary() {
     curl -sLO "$download_url"
 
     if [[ "$filename" == *.tar.gz ]]; then
-        tar -xzf "$filename" 2>/dev/null
-        find . -maxdepth 2 -name "$binary" -type f -exec mv {} "$DOTFILES_BIN_DIR/" \; 2>/dev/null
+        tar -xzf "$filename" 2>/dev/null || true
+        find . -maxdepth 2 -name "$binary" -type f -exec mv {} "$DOTFILES_BIN_DIR/" \; 2>/dev/null || true
     elif [[ "$filename" == *.zip ]]; then
-        unzip -q "$filename" 2>/dev/null
-        find . -maxdepth 2 -name "$binary" -type f -exec mv {} "$DOTFILES_BIN_DIR/" \; 2>/dev/null
+        unzip -q "$filename" 2>/dev/null || true
+        find . -maxdepth 2 -name "$binary" -type f -exec mv {} "$DOTFILES_BIN_DIR/" \; 2>/dev/null || true
     fi
 
-    rm -rf "$filename" "${filename%.tar.gz}" "${filename%.zip}" 2>/dev/null
-    chmod +x "$DOTFILES_BIN_DIR/$binary" 2>/dev/null
+    rm -rf "$filename" "${filename%.tar.gz}" "${filename%.zip}" 2>/dev/null || true
+    chmod +x "$DOTFILES_BIN_DIR/$binary" 2>/dev/null || true
     cd - > /dev/null
 
     if is_installed "$binary"; then
@@ -375,7 +392,7 @@ install_system_packages() {
         else
             if [[ "$DISTRO_FAMILY" == *"debian"* ]] || [ "$DISTRO" = "ubuntu" ] || [ "$DISTRO" = "debian" ]; then
                 info "Installing via apt-get..."
-                sudo apt-get update >/dev/null 2>&1
+                sudo apt-get update >/dev/null 2>&1 || true
                 sudo apt-get install -y git curl wget unzip build-essential python3-pip ripgrep fd-find xclip bat lsd trash-cli >/dev/null 2>&1 || true
                 if [ -f /usr/bin/fdfind ] && [ ! -f /usr/bin/fd ]; then
                     sudo ln -s /usr/bin/fdfind /usr/bin/fd 2>/dev/null || true
@@ -450,7 +467,7 @@ install_nerd_fonts() {
     local url="https://github.com/ryanoasis/nerd-fonts/releases/download/$font_version/JetBrainsMono.zip"
 
     if download_and_extract "$url" "$DOTFILES_FONTS_DIR/JetBrainsMono" "zip"; then
-        fc-cache -fv "$DOTFILES_FONTS_DIR" >/dev/null 2>&1
+        fc-cache -fv "$DOTFILES_FONTS_DIR" >/dev/null 2>&1 || true
         success "Nerd Fonts installed"
     else
         warn "Failed to install Nerd Fonts"
@@ -515,7 +532,7 @@ install_npm_tools() {
     fi
 
     if is_dry_run; then
-        echo -e "${BLUE}[DRY-RUN]${NC} Would install npm tools: tldr, @apify/mcpc"
+        echo -e "${BLUE}[DRY-RUN]${NC} Would install npm tools: tldr, @apify/mcpc, @openai/codex"
         return 0
     fi
 
@@ -525,7 +542,7 @@ install_npm_tools() {
     export PATH="$DOTFILES_NPM_DIR/bin:$PATH"
 
     info "Installing CLI tools via npm..."
-    for pkg in "tldr" "@apify/mcpc"; do
+    for pkg in "tldr" "@apify/mcpc" "@openai/codex"; do
         npm install -g "$pkg" 2>/dev/null && success "$pkg installed" || warn "$pkg failed"
     done
 
@@ -558,7 +575,9 @@ install_gh() {
             local current
             current=$(gh --version | head -1 | grep -oE '[0-9]+\.[0-9]+\.[0-9]+')
             if [ "$current" != "${latest#v}" ]; then
-                curl -fsSL "https://github.com/cli/cli/releases/download/${latest}/gh_${latest#v}_linux_amd64.deb" -o /tmp/gh.deb 2>/dev/null
+                local gh_arch="amd64"
+                [ "$ARCH" = "arm64" ] && gh_arch="arm64"
+                curl -fsSL "https://github.com/cli/cli/releases/download/${latest}/gh_${latest#v}_linux_${gh_arch}.deb" -o /tmp/gh.deb 2>/dev/null
                 if [ -f /tmp/gh.deb ]; then
                     run_with_sudo dpkg -i /tmp/gh.deb >/dev/null 2>&1 && success "GitHub CLI updated to $latest" || warn "GitHub CLI update failed"
                     rm -f /tmp/gh.deb
@@ -623,7 +642,9 @@ install_lsd() {
     info "Installing lsd..."
     latest="${latest:-$(get_latest_release "lsd-rs/lsd" "v1.0.0")}"
     latest="${latest#v}"
-    local url="https://github.com/lsd-rs/lsd/releases/download/v${latest}/lsd_${latest}_amd64.deb"
+    local deb_arch="amd64"
+    [ "$ARCH" = "arm64" ] && deb_arch="arm64"
+    local url="https://github.com/lsd-rs/lsd/releases/download/v${latest}/lsd_${latest}_${deb_arch}.deb"
     curl -fsSL "$url" -o /tmp/lsd.deb 2>/dev/null
     if [ -f /tmp/lsd.deb ]; then
         run_with_sudo dpkg -i /tmp/lsd.deb >/dev/null 2>&1 && success "lsd installed ($latest)" || warn "lsd installation failed"
@@ -670,7 +691,9 @@ install_bat() {
     info "Installing bat..."
     latest="${latest:-$(get_latest_release "sharkdp/bat" "v0.24.0")}"
     latest="${latest#v}"
-    local url="https://github.com/sharkdp/bat/releases/download/v${latest}/bat_${latest}_amd64.deb"
+    local deb_arch="amd64"
+    [ "$ARCH" = "arm64" ] && deb_arch="arm64"
+    local url="https://github.com/sharkdp/bat/releases/download/v${latest}/bat_${latest}_${deb_arch}.deb"
     curl -fsSL "$url" -o /tmp/bat.deb 2>/dev/null
     if [ -f /tmp/bat.deb ]; then
         run_with_sudo dpkg -i /tmp/bat.deb >/dev/null 2>&1 && success "bat installed ($latest)" || warn "bat installation failed"
@@ -702,6 +725,27 @@ install_starship() {
         curl -sS https://starship.rs/install.sh | sh -s -- -y -b "$DOTFILES_BIN_DIR" || install_result=1
     else
         curl -sS https://starship.rs/install.sh | sh -s -- -y || install_result=1
+    fi
+
+    # Fallback: build from source if prebuilt binary unavailable (arm64)
+    if [ $install_result -ne 0 ]; then
+        # Source rustup cargo (not system cargo which may be too old)
+        [ -f "$HOME/.cargo/env" ] && source "$HOME/.cargo/env"
+
+        # Install rustup if cargo not available
+        if ! is_installed cargo; then
+            info "Installing Rust toolchain for Starship compilation..."
+            curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y 2>/dev/null || true
+            [ -f "$HOME/.cargo/env" ] && source "$HOME/.cargo/env"
+        fi
+
+        if is_installed cargo; then
+            info "No prebuilt binary for arm64, building Starship from source (~5 min)..."
+            install_result=0
+            cargo install starship 2>/dev/null || install_result=1
+            # Symlink to local bin
+            [ -f "$HOME/.cargo/bin/starship" ] && ln -sf "$HOME/.cargo/bin/starship" "$DOTFILES_BIN_DIR/starship" 2>/dev/null || true
+        fi
     fi
 
     if [ $install_result -eq 0 ] && is_installed starship; then
@@ -858,6 +902,16 @@ setup_mcp_config() {
         return 0
     fi
 
+    # Guard: jq required for parsing MCP config
+    if ! is_installed jq; then
+        warn "jq not installed, skipping MCP setup (install jq and re-run with --only=mcp)"
+        return 0
+    fi
+
+    # Ensure claude CLI is discoverable
+    export PATH="$HOME/.local/bin:$HOME/.npm-global/bin:$PATH"
+    hash -r 2>/dev/null || true
+
     info "Setting up MCP server configurations..."
 
     if is_dry_run; then
@@ -946,6 +1000,69 @@ setup_mcp_config() {
     mkdir -p "$HOME/.config/mcp"
     ln -sf "$SCRIPT_DIR/mcp/mcp-servers.json" "$HOME/.config/mcp/servers.json"
 
+    # Interactive API key prompts for optional MCP servers
+    if [ -t 0 ] && is_installed claude && ! is_dry_run; then
+        echo ""
+        info "Optional MCP servers requiring API keys (Enter to skip):"
+        echo ""
+
+        # Firecrawl
+        local firecrawl_key="${FIRECRAWL_API_KEY:-}"
+        if [ -z "$firecrawl_key" ]; then
+            if use_gum; then
+                firecrawl_key=$(gum input --placeholder "fc-..." --header "Firecrawl API key (firecrawl.dev):" 2>/dev/null || echo "")
+            elif [ -t 0 ]; then
+                read -r -p "  Firecrawl API key (Enter to skip): " firecrawl_key
+            fi
+        fi
+        if [ -n "$firecrawl_key" ]; then
+            claude mcp add --transport http firecrawl "https://mcp.firecrawl.dev/${firecrawl_key}/v2/mcp" --scope user 2>/dev/null || true
+            success "Firecrawl MCP configured"
+        fi
+
+        # DeepL
+        local deepl_key="${DEEPL_API_KEY:-}"
+        if [ -z "$deepl_key" ]; then
+            if use_gum; then
+                deepl_key=$(gum input --placeholder "..." --header "DeepL API key (deepl.com/pro-api):" 2>/dev/null || echo "")
+            elif [ -t 0 ]; then
+                read -r -p "  DeepL API key (Enter to skip): " deepl_key
+            fi
+        fi
+        if [ -n "$deepl_key" ]; then
+            DEEPL_API_KEY="$deepl_key" claude mcp add --transport stdio deepl --scope user -- npx -y deepl-mcp-server 2>/dev/null || true
+            success "DeepL MCP configured"
+        fi
+
+        # DataForSEO
+        local dfs_key="${DFS_API_KEY:-}"
+        if [ -z "$dfs_key" ]; then
+            if use_gum; then
+                dfs_key=$(gum input --placeholder "user:pass en Base64" --header "DataForSEO Authorization Basic token:" 2>/dev/null || echo "")
+            elif [ -t 0 ]; then
+                read -r -p "  DataForSEO Basic auth token (Enter to skip): " dfs_key
+            fi
+        fi
+        if [ -n "$dfs_key" ]; then
+            claude mcp add --transport http dfs-mcp "https://mcp.dataforseo.com/http" --header "Authorization: Basic $dfs_key" --scope user 2>/dev/null || true
+            success "DataForSEO MCP configured"
+        fi
+
+        # PostHog
+        local posthog_key="${POSTHOG_API_KEY:-}"
+        if [ -z "$posthog_key" ]; then
+            if use_gum; then
+                posthog_key=$(gum input --placeholder "phx_..." --header "PostHog API key (posthog.com):" 2>/dev/null || echo "")
+            elif [ -t 0 ]; then
+                read -r -p "  PostHog API key (Enter to skip): " posthog_key
+            fi
+        fi
+        if [ -n "$posthog_key" ]; then
+            claude mcp add posthog --scope user -- npx -y @anthropic-ai/mcp-remote@latest "https://mcp.posthog.com/sse" --header "Authorization: Bearer $posthog_key" 2>/dev/null || true
+            success "PostHog MCP configured"
+        fi
+    fi
+
     success "MCP configuration complete"
 }
 
@@ -984,7 +1101,7 @@ setup_configs() {
     if [ -d "$SCRIPT_DIR/starship" ]; then
         mkdir -p "$HOME/.config"
         if [ -f "$SCRIPT_DIR/starship/starship-switch.sh" ]; then
-            chmod +x "$SCRIPT_DIR/starship/starship-switch.sh"
+            chmod +x "$SCRIPT_DIR/starship/starship-switch.sh" 2>/dev/null || true
             "$SCRIPT_DIR/starship/starship-switch.sh" auto 2>/dev/null || true
         else
             create_symlink "$SCRIPT_DIR/starship/starship.toml" "$HOME/.config/starship.toml" false
@@ -1000,17 +1117,6 @@ setup_configs() {
         create_symlink "$SCRIPT_DIR/ghostty/config" "$HOME/.config/ghostty/config" false
     fi
 
-    # Espanso
-    if [ -d "$SCRIPT_DIR/espanso/.config/espanso" ]; then
-        espanso_base="$SCRIPT_DIR/espanso/.config/espanso/match/base.yml"
-        if [ -f "$espanso_base" ]; then
-            sed -i "s/{{USER_NAME}}/$USER_NAME/g" "$espanso_base" 2>/dev/null || true
-            sed -i "s/{{USER_EMAIL}}/$USER_EMAIL/g" "$espanso_base" 2>/dev/null || true
-            sed -i "s/{{GITHUB_USERNAME}}/$GITHUB_USERNAME/g" "$espanso_base" 2>/dev/null || true
-        fi
-        create_symlink "$SCRIPT_DIR/espanso/.config/espanso" "$HOME/.config/espanso" false
-    fi
-
     # Claude Code skills (flat symlinks — one per skill)
     if [ -d "$SCRIPT_DIR/claude/skills" ]; then
         mkdir -p "$HOME/.claude/skills"
@@ -1023,18 +1129,28 @@ setup_configs() {
     # Claude Code statusLine — now managed by ShipFlow/install.sh
     log DEBUG "Claude Code statusLine is configured by ShipFlow install"
 
-    # ShipFlow (private repo — TASKS.md, AUDIT_LOG.md)
-    local shipflow_dir="$HOME/ShipFlow"
-    if [ ! -d "$shipflow_dir" ]; then
-        info "Cloning ShipFlow (private)..."
-        git clone "git@github.com:${GITHUB_USERNAME}/ShipFlow.git" "$shipflow_dir" 2>/dev/null || \
-            warn "Could not clone ShipFlow repo — create it with: gh repo create ShipFlow --private"
-    fi
-    if [ -d "$shipflow_dir" ]; then
-        [ -f "$shipflow_dir/TASKS.md" ] && create_symlink "$shipflow_dir/TASKS.md" "$HOME/TASKS.md" false
-        [ -f "$shipflow_dir/AUDIT_LOG.md" ] && create_symlink "$shipflow_dir/AUDIT_LOG.md" "$HOME/AUDIT_LOG.md" false
-        [ -f "$shipflow_dir/CLAUDE.md" ] && create_symlink "$shipflow_dir/CLAUDE.md" "$HOME/CLAUDE.md" false
-        success "ShipFlow linked"
+    # ShipFlow
+    if [ "${SKIP_SHIPFLOW:-false}" != "true" ]; then
+        local shipflow_dir="$HOME/ShipFlow"
+        if [ ! -d "$shipflow_dir" ]; then
+            info "Cloning ShipFlow..."
+            # Try SSH first, fallback to HTTPS
+            git clone "git@github.com:${GITHUB_USERNAME:-dianedef}/ShipFlow.git" "$shipflow_dir" 2>/dev/null || \
+                git clone "https://github.com/${GITHUB_USERNAME:-dianedef}/ShipFlow.git" "$shipflow_dir" 2>/dev/null || \
+                warn "Could not clone ShipFlow repo"
+        fi
+        if [ -d "$shipflow_dir" ]; then
+            [ -f "$shipflow_dir/TASKS.md" ] && create_symlink "$shipflow_dir/TASKS.md" "$HOME/TASKS.md" false
+            [ -f "$shipflow_dir/AUDIT_LOG.md" ] && create_symlink "$shipflow_dir/AUDIT_LOG.md" "$HOME/AUDIT_LOG.md" false
+            [ -f "$shipflow_dir/CLAUDE.md" ] && create_symlink "$shipflow_dir/CLAUDE.md" "$HOME/CLAUDE.md" false
+            success "ShipFlow linked"
+
+            # Run ShipFlow installer automatically
+            if [ -f "$shipflow_dir/install.sh" ] && ! is_dry_run; then
+                info "Running ShipFlow installer (PM2, Flox, Caddy)..."
+                bash "$shipflow_dir/install.sh" 2>&1 || warn "ShipFlow installation had issues"
+            fi
+        fi
     fi
 }
 
@@ -1053,20 +1169,23 @@ setup_shell_integration() {
 
     # Make scripts executable
     for script in "switch-config.sh" "nvim-multi" "aliases.sh" "shell-integration.sh"; do
-        [ -f "$SCRIPT_DIR/nvim/$script" ] && chmod +x "$SCRIPT_DIR/nvim/$script"
+        [ -f "$SCRIPT_DIR/nvim/$script" ] && chmod +x "$SCRIPT_DIR/nvim/$script" 2>/dev/null || true
     done
 
     # Shell integration
-    append_to_bashrc "shell-integration.sh" "source $SCRIPT_DIR/nvim/shell-integration.sh" "Neovim config switcher"
+    append_to_bashrc "shell-integration.sh" "source $SCRIPT_DIR/nvim/shell-integration.sh" "Neovim config switcher" || true
 
     # Starship
-    is_installed starship && append_to_bashrc 'starship init' 'eval "$(starship init bash)"' "Starship prompt"
+    is_installed starship && append_to_bashrc 'starship init' 'eval "$(starship init bash)"' "Starship prompt" || true
 
     # Zoxide
-    is_installed zoxide && append_to_bashrc 'zoxide init' 'eval "$(zoxide init bash)"' "Zoxide - smart cd"
+    is_installed zoxide && append_to_bashrc 'zoxide init' 'eval "$(zoxide init bash)"' "Zoxide - smart cd" || true
 
     # Default editor
-    is_installed nvim && append_to_bashrc 'export VISUAL=nvim' $'export VISUAL=nvim\nexport EDITOR=nvim' "Default editor"
+    is_installed nvim && append_to_bashrc 'export VISUAL=nvim' $'export VISUAL=nvim\nexport EDITOR=nvim' "Default editor" || true
+
+    # Cargo/Rustup PATH
+    [ -f "$HOME/.cargo/env" ] && append_to_bashrc 'cargo/env' 'source "$HOME/.cargo/env"' "Rust/Cargo PATH" || true
 
     # Productivity aliases
     if ! grep -q "# Productivity aliases" "$HOME/.bashrc" 2>/dev/null; then
@@ -1152,17 +1271,12 @@ if needs_system_packages; then
     install_system_packages
 fi
 
-# Parallel or sequential installation
+# --- Phase 2: Tools (no dependencies between them) ---
 if [ "${DOTFILES_PARALLEL:-false}" = "true" ]; then
     info "Running installations in parallel..."
     parallel_run "Neovim" install_neovim
     parallel_run "fzf" install_fzf
     parallel_run "Nerd Fonts" install_nerd_fonts
-    parallel_run "Node.js" install_node
-    parallel_run "Starship" install_starship
-    parallel_run "Zoxide" install_zoxide
-    parallel_run "Yazi" install_yazi
-    parallel_run "Doppler" install_doppler
     parallel_run "GitHub CLI" install_gh
     parallel_run "lsd" install_lsd
     parallel_run "bat" install_bat
@@ -1171,17 +1285,78 @@ else
     install_neovim
     install_fzf
     install_nerd_fonts
-    install_node
-    install_starship
-    install_zoxide
-    install_yazi
-    install_doppler
     install_gh
     install_lsd
     install_bat
 fi
 
+# --- Phase 3: Node.js ecosystem (order matters) ---
+install_node
+
+# Refresh PATH so npm/node are available for subsequent steps
+export NVM_DIR="${NVM_DIR:-$HOME/.nvm}"
+[ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh" 2>/dev/null || true
+export PATH="$HOME/.npm-global/bin:${DOTFILES_NPM_DIR:-$HOME/.npm-global}/bin:$PATH"
+hash -r 2>/dev/null || true
+
 install_npm_tools
+
+# --- Phase 4: Shell tools ---
+if [ "${DOTFILES_PARALLEL:-false}" = "true" ]; then
+    parallel_run "Starship" install_starship
+    parallel_run "Zoxide" install_zoxide
+    parallel_run "Yazi" install_yazi
+    parallel_run "Doppler" install_doppler
+    parallel_wait
+else
+    install_starship
+    install_zoxide
+    install_yazi
+    install_doppler
+fi
+
+# --- Phase 5: AI Coding Tools ---
+install_ai_tools() {
+    if ! should_install "ai-tools"; then return 0; fi
+
+    # Claude Code
+    if ! is_installed claude; then
+        if is_installed npm; then
+            info "Installing Claude Code..."
+            if is_dry_run; then
+                echo -e "${BLUE}[DRY-RUN]${NC} Would install @anthropic-ai/claude-code"
+            else
+                npm install -g @anthropic-ai/claude-code 2>/dev/null && success "Claude Code installed" || warn "Claude Code installation failed"
+                hash -r 2>/dev/null || true
+            fi
+        else
+            warn "npm not found, skipping Claude Code"
+        fi
+    else
+        success "Claude Code already installed"
+    fi
+
+    # OpenAI Codex (already in npm_tools but ensure it's present)
+    if ! command -v codex >/dev/null 2>&1; then
+        if is_installed npm; then
+            info "Installing OpenAI Codex..."
+            if is_dry_run; then
+                echo -e "${BLUE}[DRY-RUN]${NC} Would install @openai/codex"
+            else
+                npm install -g @openai/codex 2>/dev/null && success "Codex installed" || warn "Codex installation failed"
+            fi
+        fi
+    else
+        success "Codex already installed"
+    fi
+}
+install_ai_tools
+
+# Ensure claude CLI is in PATH for MCP setup
+export PATH="$HOME/.local/bin:$HOME/.npm-global/bin:${DOTFILES_NPM_DIR:-$HOME/.npm-global}/bin:$PATH"
+hash -r 2>/dev/null || true
+
+# --- Phase 6: Configuration ---
 setup_configs
 setup_mcp_config
 setup_shell_integration
@@ -1230,18 +1405,108 @@ if ! is_dry_run && needs_auth; then
 fi
 
 # ============================================================================
+# NON-ROOT USER CREATION
+# ============================================================================
+setup_non_root_user() {
+    # Only when running as root and in interactive mode
+    if [ "$(id -u)" -ne 0 ] || ! [ -t 0 ] || is_dry_run; then
+        return 0
+    fi
+
+    echo ""
+    info "Creation d'un utilisateur non-root..."
+
+    local username=""
+    if use_gum; then
+        username=$(gum input --placeholder "dev" --header "Nom de l'utilisateur a creer (Enter pour 'dev'):" 2>/dev/null || echo "")
+    else
+        read -r -p "Nom de l'utilisateur a creer (defaut: dev): " username
+    fi
+    username="${username:-dev}"
+
+    # Validate username
+    if ! [[ "$username" =~ ^[a-z_][a-z0-9_-]*$ ]]; then
+        warn "Nom d'utilisateur invalide: $username"
+        return 0
+    fi
+
+    # Create user if doesn't exist
+    if id "$username" &>/dev/null; then
+        success "Utilisateur '$username' existe deja"
+    else
+        useradd -m -s /bin/bash "$username" 2>/dev/null || { warn "Impossible de creer l'utilisateur '$username'"; return 0; }
+        success "Utilisateur '$username' cree"
+    fi
+
+    local user_home="/home/$username"
+
+    # Copy SSH keys
+    if [ -d /root/.ssh ]; then
+        mkdir -p "$user_home/.ssh"
+        [ -f /root/.ssh/authorized_keys ] && cp /root/.ssh/authorized_keys "$user_home/.ssh/" 2>/dev/null || true
+        [ -f /root/.ssh/id_ed25519 ] && cp /root/.ssh/id_ed25519 "$user_home/.ssh/" 2>/dev/null || true
+        [ -f /root/.ssh/id_ed25519.pub ] && cp /root/.ssh/id_ed25519.pub "$user_home/.ssh/" 2>/dev/null || true
+        [ -f /root/.ssh/known_hosts ] && cp /root/.ssh/known_hosts "$user_home/.ssh/" 2>/dev/null || true
+        chown -R "$username:$username" "$user_home/.ssh"
+        chmod 700 "$user_home/.ssh"
+        chmod 600 "$user_home/.ssh/id_ed25519" 2>/dev/null || true
+        chmod 600 "$user_home/.ssh/authorized_keys" 2>/dev/null || true
+        success "Cles SSH copiees"
+    fi
+
+    # Add to sudo group
+    usermod -aG sudo "$username" 2>/dev/null || true
+
+    # Configure PATH in user's bashrc
+    if ! grep -q ".local/bin" "$user_home/.bashrc" 2>/dev/null; then
+        cat >> "$user_home/.bashrc" << 'USERPATH'
+
+# Tool paths
+export PATH="$HOME/.local/bin:$HOME/.npm-global/bin:$HOME/.cargo/bin:$PATH"
+export NVM_DIR="$HOME/.nvm"
+[ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
+USERPATH
+    fi
+    chown "$username:$username" "$user_home/.bashrc"
+
+    # Run dotfiles install for this user (user-local mode)
+    info "Installation des dotfiles pour '$username'..."
+    sudo -u "$username" bash -c "cd $SCRIPT_DIR && ./install.sh --only=configs,shell-integration,mcp" 2>&1 || warn "User dotfiles setup had issues"
+
+    success "Utilisateur '$username' configure avec SSH + sudo"
+    echo ""
+    echo -e "  Connexion: ${CYAN}ssh $username@$(hostname)${NC}"
+}
+
+if [ -t 0 ] && [ "$(id -u)" -eq 0 ] && ! is_dry_run; then
+    setup_non_root_user
+fi
+
+# ============================================================================
 # COMPLETION
 # ============================================================================
 echo ""
 echo "════════════════════════════════════════════════════════════════"
 if is_dry_run; then
-    echo "✨ Dry-run complete! No changes were made."
-    echo "   Run without --dry-run to apply changes."
+    echo "  Dry-run complete! No changes were made."
+    echo "  Run without --dry-run to apply changes."
 else
-    echo "✨ Dotfiles installation complete!"
-    echo "🎉 Your environment is ready to use!"
+    echo "  Installation complete!"
     echo ""
-    echo "📄 Log: $DOTFILES_LOG_FILE"
-    echo "🔄 Run 'source ~/.bashrc' to apply shell changes"
+    echo "  Log: $DOTFILES_LOG_FILE"
+    echo "  Reload: source ~/.bashrc"
+    echo ""
+    # Quick status summary
+    echo "  Tools:"
+    command -v nvim >/dev/null 2>&1 && echo "    Neovim ........... OK" || echo "    Neovim ........... MISSING"
+    command -v node >/dev/null 2>&1 && echo "    Node.js .......... OK ($(node --version 2>/dev/null))" || echo "    Node.js .......... MISSING"
+    command -v claude >/dev/null 2>&1 && echo "    Claude Code ...... OK" || echo "    Claude Code ...... MISSING"
+    command -v codex >/dev/null 2>&1 && echo "    Codex ............ OK" || echo "    Codex ............ MISSING"
+    command -v pm2 >/dev/null 2>&1 && echo "    PM2 .............. OK" || echo "    PM2 .............. MISSING"
+    command -v starship >/dev/null 2>&1 && echo "    Starship ......... OK" || echo "    Starship ......... MISSING"
+    command -v flox >/dev/null 2>&1 && echo "    Flox ............. OK" || echo "    Flox ............. MISSING"
+    command -v caddy >/dev/null 2>&1 && echo "    Caddy ............ OK" || echo "    Caddy ............ MISSING"
+    echo ""
+    echo "  Launch: sf (or shipflow)"
 fi
 echo "════════════════════════════════════════════════════════════════"

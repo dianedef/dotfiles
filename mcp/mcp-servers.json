@@ -14,7 +14,7 @@
     },
     "playwright": {
       "command": "npx",
-      "args": ["-y", "mcp-chromium-arm64"]
+      "args": ["-y", "@playwright/mcp@latest"]
     },
     "exa": {
       "type": "http",
@@ -28,20 +28,9 @@
       "command": "npx",
       "args": ["-y", "@webrenew/unicon-mcp-server"]
     },
-    "posthog": {
-      "type": "http",
-      "url": "https://mcp.posthog.com/mcp"
-    },
-    "firecrawl": {
-      "type": "http",
-      "url": "https://mcp.firecrawl.dev/FIRECRAWL_API_KEY/v2/mcp"
-    },
-    "deepl": {
+    "gsc": {
       "command": "npx",
-      "args": ["-y", "deepl-mcp-server"],
-      "env": {
-        "DEEPL_API_KEY": "YOUR_DEEPL_API_KEY"
-      }
+      "args": ["-y", "@anthropic-community/mcp-gsc"]
     }
   }
 }

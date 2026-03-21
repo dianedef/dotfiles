@@ -191,7 +191,7 @@ get_latest_release() {
 
     # Check cache (use file-based cache for compatibility)
     if [ "${DOTFILES_CACHE_ENABLED:-true}" = "true" ]; then
-        local cache_file="/tmp/dotfiles_cache_$cache_key"
+        local cache_file="${TMPDIR:-/tmp}/dotfiles_cache_${UID}_$cache_key"
         if [ -f "$cache_file" ]; then
             local cached_time cached_value
             cached_time=$(head -1 "$cache_file" 2>/dev/null || echo 0)
@@ -221,7 +221,7 @@ get_latest_release() {
 
     # Update cache
     if [ "${DOTFILES_CACHE_ENABLED:-true}" = "true" ]; then
-        local cache_file="/tmp/dotfiles_cache_$cache_key"
+        local cache_file="${TMPDIR:-/tmp}/dotfiles_cache_${UID}_$cache_key"
         echo "$current_time" > "$cache_file"
         echo "$version" >> "$cache_file"
     fi
@@ -232,7 +232,7 @@ get_latest_release() {
 invalidate_cache() {
     local repo=$1
     local cache_key="github_${repo//\//_}"
-    rm -f "/tmp/dotfiles_cache_$cache_key" 2>/dev/null
+    rm -f "${TMPDIR:-/tmp}/dotfiles_cache_${UID}_$cache_key" 2>/dev/null
 }
 
 # ============================================================================
@@ -281,7 +281,7 @@ append_to_bashrc() {
         return 0
     fi
     log DEBUG "Already in .bashrc: $search_string"
-    return 1
+    return 0
 }
 
 # ============================================================================
@@ -1207,7 +1207,7 @@ run_update_check() {
         printf "%-20s %-15s %-15s %s\n" "Package" "Installed" "Latest" "Status"
         printf "%-20s %-15s %-15s %s\n" "───────" "─────────" "──────" "──────"
 
-        local npm_packages=("@anthropic-ai/claude-code" "@apify/mcpc" "@google/gemini-cli" "@kilocode/cli" "opencode-ai" "tldr")
+        local npm_packages=("@apify/mcpc" "@google/gemini-cli" "@kilocode/cli" "opencode-ai" "tldr")
         for pkg in "${npm_packages[@]}"; do
             local pkg_installed pkg_latest pkg_status
             pkg_installed=$(npm list -g "$pkg" 2>/dev/null | grep -oE '[0-9]+\.[0-9]+\.[0-9]+' | head -1)
