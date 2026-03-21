@@ -2057,10 +2057,9 @@ run_interactive_menu() {
         case "$action" in
             *"Install"*)
                 # Select components submenu
-                if select_components; then
-                    echo ""
-                    read -rp "Press Enter to return to menu..."
-                fi
+                select_components || true
+                echo ""
+                read -rp "Press Enter to return to menu..."
                 ;;
             *"Update"*)
                 run_interactive_update
@@ -2143,12 +2142,24 @@ select_components() {
     echo ""
 
     # Install each selected component directly
+    local installed=0 skipped=0 failed=0
     for comp in "${selected[@]}"; do
-        install_component "$comp"
+        local result
+        result=$(install_component "$comp" 2>&1) || true
+        echo "$result"
+        if echo "$result" | grep -q "already installed\|already configured\|deja"; then
+            ((skipped++))
+        elif echo "$result" | grep -q "installed\|configured\|linked"; then
+            ((installed++))
+        else
+            ((failed++))
+        fi
     done
 
     echo ""
-    success "Installation completed!"
+    echo "════════════════════════════════════════"
+    echo "  Installed: $installed  |  Already there: $skipped  |  Failed: $failed"
+    echo "════════════════════════════════════════"
     echo ""
     info "Run 're' or 'source ~/.bashrc' to reload your shell"
 }
