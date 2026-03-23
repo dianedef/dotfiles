@@ -351,7 +351,6 @@ if ! command -v tldr &> /dev/null; then
 else
     log "INFO" "✅ TLDR pages already installed"
 fi
-fi
 
 # Configure API keys from Doppler (if available)
 if command -v doppler &>/dev/null && doppler me &>/dev/null; then
