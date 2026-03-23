@@ -1,0 +1,12 @@
+model = "gpt-5.4"
+approval_policy = "never"
+sandbox_mode = "workspace-write"
+
+[mcp_servers.posthog]
+url = "https://mcp.posthog.com/mcp"
+
+[projects."/home/claude/tubeflow"]
+trust_level = "trusted"
+
+[notice.model_migrations]
+"gpt-5.3-codex" = "gpt-5.4"

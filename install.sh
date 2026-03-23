@@ -1110,11 +1110,21 @@ setup_configs() {
 
     # Tmux
     [ -f "$SCRIPT_DIR/.tmux.conf" ] && create_symlink "$SCRIPT_DIR/.tmux.conf" "$HOME/.tmux.conf" false
+    if [ ! -d "$HOME/.tmux/plugins/tpm" ]; then
+        log "Installing TPM (Tmux Plugin Manager)..."
+        git clone https://github.com/tmux-plugins/tpm "$HOME/.tmux/plugins/tpm" 2>/dev/null || true
+    fi
 
     # Ghostty
     if [ -d "$SCRIPT_DIR/ghostty" ]; then
         mkdir -p "$HOME/.config/ghostty"
         create_symlink "$SCRIPT_DIR/ghostty/config" "$HOME/.config/ghostty/config" false
+    fi
+
+    # Codex
+    if [ -f "$SCRIPT_DIR/codex/config.toml" ]; then
+        mkdir -p "$HOME/.codex"
+        create_symlink "$SCRIPT_DIR/codex/config.toml" "$HOME/.codex/config.toml" false
     fi
 
     # Claude Code skills (flat symlinks — one per skill)

@@ -8,14 +8,6 @@
       "type": "http",
       "url": "https://mcp.vercel.com"
     },
-    "composio": {
-      "command": "npx",
-      "args": ["-y", "composio-mcp@latest", "start"]
-    },
-    "playwright": {
-      "command": "npx",
-      "args": ["-y", "@playwright/mcp@latest"]
-    },
     "exa": {
       "type": "http",
       "url": "https://mcp.exa.ai/mcp"
@@ -25,12 +17,69 @@
       "url": "https://mcp.clerk.com/mcp"
     },
     "unicon": {
+      "type": "http",
+      "url": "https://unicon.webrenew.com/api/mcp"
+    },
+    "firecrawl": {
+      "type": "http",
+      "url": "https://mcp.firecrawl.dev/${FIRECRAWL_MCP_ID}/v2/mcp"
+    },
+    "dfs-mcp": {
+      "type": "http",
+      "url": "https://mcp.dataforseo.com/http",
+      "headers": {
+        "Authorization": "Basic ${DFS_AUTH_TOKEN}"
+      }
+    },
+    "posthog": {
+      "type": "stdio",
       "command": "npx",
-      "args": ["-y", "@webrenew/unicon-mcp-server"]
+      "args": [
+        "-y",
+        "mcp-remote@latest",
+        "https://mcp.posthog.com/mcp",
+        "--header",
+        "Authorization:${POSTHOG_AUTH_HEADER}"
+      ],
+      "env": {
+        "POSTHOG_AUTH_HEADER": "Bearer ${POSTHOG_API_KEY}"
+      }
+    },
+    "composio": {
+      "type": "stdio",
+      "command": "npx",
+      "args": ["-y", "composio-mcp@latest", "start"],
+      "env": {}
+    },
+    "deepl": {
+      "type": "stdio",
+      "command": "npx",
+      "args": ["-y", "deepl-mcp-server"],
+      "env": {}
+    },
+    "playwright": {
+      "type": "stdio",
+      "command": "npx",
+      "args": ["-y", "@playwright/mcp@latest"],
+      "env": {}
     },
     "gsc": {
+      "type": "stdio",
       "command": "npx",
-      "args": ["-y", "@anthropic-community/mcp-gsc"]
+      "args": ["-y", "@anthropic-community/mcp-gsc"],
+      "env": {}
+    },
+    "mcp-server-chart": {
+      "type": "stdio",
+      "command": "npx",
+      "args": ["-y", "@antv/mcp-server-chart"],
+      "env": {}
+    },
+    "mcp-kroki": {
+      "type": "stdio",
+      "command": "npx",
+      "args": ["-y", "@tkoba1974/mcp-kroki"],
+      "env": {}
     }
   }
 }

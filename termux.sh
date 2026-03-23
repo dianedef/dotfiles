@@ -203,6 +203,9 @@ elif [ -d "$SOURCE_DIR/nvim/MyNeovim" ]; then
     create_symlink "$SOURCE_DIR/nvim/MyNeovim" "$NVIM_CONFIG_DIR"
 fi
 
+# Termux properties
+[ -f "$SOURCE_DIR/termux/termux.properties" ] && create_symlink "$SOURCE_DIR/termux/termux.properties" "$HOME/.termux/termux.properties"
+
 # Ranger (primary file manager for Termux)
 [ -d "$SOURCE_DIR/ranger" ] && create_symlink "$SOURCE_DIR/ranger" "$HOME/.config/ranger"
 
