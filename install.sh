@@ -1048,19 +1048,6 @@ setup_mcp_config() {
             success "DataForSEO MCP configured"
         fi
 
-        # PostHog
-        local posthog_key="${POSTHOG_API_KEY:-}"
-        if [ -z "$posthog_key" ]; then
-            if use_gum; then
-                posthog_key=$(gum input --placeholder "phx_..." --header "PostHog API key (posthog.com):" 2>/dev/null || echo "")
-            elif [ -t 0 ]; then
-                read -r -p "  PostHog API key (Enter to skip): " posthog_key
-            fi
-        fi
-        if [ -n "$posthog_key" ]; then
-            claude mcp add posthog --scope user -- npx -y @anthropic-ai/mcp-remote@latest "https://mcp.posthog.com/sse" --header "Authorization: Bearer $posthog_key" 2>/dev/null || true
-            success "PostHog MCP configured"
-        fi
     fi
 
     success "MCP configuration complete"

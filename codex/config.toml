@@ -1,12 +1,44 @@
 model = "gpt-5.4"
-approval_policy = "never"
-sandbox_mode = "workspace-write"
-
-[mcp_servers.posthog]
-url = "https://mcp.posthog.com/mcp"
+approval_policy = "on-request"
+sandbox_mode = "danger-full-access"
+model_reasoning_effort = "high"
 
 [projects."/home/claude/tubeflow"]
 trust_level = "trusted"
 
+[projects."/home/claude/tubeflow-site"]
+trust_level = "trusted"
+
+[projects."/home/claude"]
+trust_level = "trusted"
+
+[projects."/home/claude/ContentFlowz_app"]
+trust_level = "trusted"
+
+[projects."/home/claude/tubeflow-app"]
+trust_level = "trusted"
+
+[projects."/home/claude/socialflow"]
+trust_level = "trusted"
+
+[projects."/home/claude/contentflow_lab"]
+trust_level = "trusted"
+
+[projects."/home/claude/contentflow_app"]
+trust_level = "trusted"
+
+[projects."/home/claude/NoCocaïne"]
+trust_level = "trusted"
+
+[projects."/home/claude/gocharbon_quiz"]
+trust_level = "trusted"
+
+[projects."/home/claude/jarretelacoke"]
+trust_level = "trusted"
+
+[projects."/home/claude/promptflow"]
+trust_level = "trusted"
+
 [notice.model_migrations]
 "gpt-5.3-codex" = "gpt-5.4"
+"gpt-5.2" = "gpt-5.4"

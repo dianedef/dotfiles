@@ -92,6 +92,13 @@ source ~/.bashrc
   - Neovim integration with `opencode.nvim` plugin
   - Automated setup via Doppler secrets
 
+### MCP Servers
+- Shared MCP configuration lives in `mcp/mcp-servers.json`
+- Includes `consensus` at `https://mcp.consensus.app/mcp`
+- Consensus does not require an API key to get started; OAuth can trigger automatically on first use in supported clients
+- Claude Code manual add command: `claude mcp add consensus --transport http https://mcp.consensus.app/mcp`
+- Re-apply dotfiles MCP config with: `./install.sh --only=mcp`
+
 ### Secrets Management
 - **Doppler** - Secure API key management across devices
   - Auto-configures GitHub CLI authentication
