@@ -19,6 +19,11 @@ claude doctor
 - `<leader>ac` : ouvrir / basculer le terminal Claude Code
 - `<leader>as` : envoyer du contexte a Claude Code
 
+Raccourci a retenir :
+
+- `Claude Code` utilise les touches en minuscules
+- `Codex` utilise les touches en majuscules : `<leader>aC`, `<leader>aF`, `<leader>aN`, `<leader>aR`
+
 Si votre `<leader>` est celui par défaut de LazyVim, cela correspond généralement a `Espace a c` et `Espace a s`.
 
 ## Utilisation la plus rapide

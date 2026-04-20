@@ -1,6 +1,6 @@
 return {
   "kevinhwang91/nvim-ufo",
-  enabled = false,
+  enabled = true,
   event = "VeryLazy",
   dependencies = {
     "kevinhwang91/promise-async",
@@ -53,5 +53,12 @@ return {
       table.insert(newVirtText, { suffix, "MoreMsg" })
       return newVirtText
     end,
+  },
+  keys = {
+    { "zR", function() require("ufo").openAllFolds() end, desc = "Open all folds" },
+    { "zM", function() require("ufo").closeAllFolds() end, desc = "Close all folds" },
+    { "zr", function() require("ufo").openFoldsExceptKinds() end, desc = "Open more folds" },
+    { "zm", function() vim.cmd("normal! zm") end, desc = "Close more folds" },
+    { "K", function() local ok, ufo = pcall(require, "ufo"); if ok and ufo.peekFoldedLinesUnderCursor() then return end; vim.lsp.buf.hover() end, desc = "Peek fold or hover" },
   },
 }

@@ -20,14 +20,14 @@ return {
   keys = {
     -- Chat interface
     {
-      "<leader>ac",
+      "<leader>au",
       "<cmd>AugmentChat<cr>",
       desc = "Augment: Open Chat",
       mode = { "n", "v" },
     },
     -- Sync project context
     {
-      "<leader>as",
+      "<leader>aU",
       "<cmd>AugmentSync<cr>",
       desc = "Augment: Sync Project Context",
       mode = "n",

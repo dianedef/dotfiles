@@ -1,7 +1,14 @@
-model = "gpt-5.4"
+model = "gpt-5.3-codex-spark"
 approval_policy = "on-request"
 sandbox_mode = "danger-full-access"
-model_reasoning_effort = "high"
+model_reasoning_effort = "low"
+
+[features]
+# `codex_apps` currently fails to initialize from this environment because
+# `https://chatgpt.com` is returning a Cloudflare challenge (HTTP 403).
+# Disabling `apps` avoids MCP startup failure spam; re-enable once the
+# network can reach ChatGPT without the challenge.
+apps = false
 
 [projects."/home/claude/tubeflow"]
 trust_level = "trusted"
@@ -38,6 +45,30 @@ trust_level = "trusted"
 
 [projects."/home/claude/promptflow"]
 trust_level = "trusted"
+
+[projects."/home/claude/gocharbon"]
+trust_level = "trusted"
+
+[projects."/home/claude/dotfiles"]
+trust_level = "trusted"
+
+[projects."/home/claude/winflowz"]
+trust_level = "trusted"
+
+[projects."/home/claude/contentflow_lab_deploy"]
+trust_level = "trusted"
+
+[projects."/home/claude/ShipFlow"]
+trust_level = "trusted"
+
+[projects."/home"]
+trust_level = "trusted"
+
+[projects."/home/claude/ContentFlow"]
+trust_level = "trusted"
+
+[notice]
+hide_rate_limit_model_nudge = true
 
 [notice.model_migrations]
 "gpt-5.3-codex" = "gpt-5.4"

@@ -1,5 +1,5 @@
 return {
-  "ggandor/leap.nvim",
+  "https://codeberg.org/andyg/leap.nvim.git",
   enabled = false,
   event = "VeryLazy",
   dependencies = { "tpope/vim-repeat" },
