@@ -7,6 +7,14 @@ return {
     "MunifTanjim/nui.nvim",
   },
   cmd = "Neotree",
+  event = "VimEnter",
+  init = function()
+    vim.api.nvim_create_autocmd("VimEnter", function()
+      vim.schedule(function()
+        require("neo-tree.command").execute({ toggle = true, dir = require("lazyvim.util").root() })
+      end)
+    end)
+  end,
   keys = {
     {
       "<leader>e",
