@@ -1128,7 +1128,7 @@ setup_configs() {
 
     # ShipFlow
     if [ "${SKIP_SHIPFLOW:-false}" != "true" ]; then
-        local shipflow_dir="$HOME/ShipFlow"
+        local shipflow_dir="$HOME/shipflow"
         if [ ! -d "$shipflow_dir" ]; then
             info "Cloning ShipFlow..."
             # Try SSH first, fallback to HTTPS
@@ -1214,6 +1214,7 @@ alias r='ranger'
 alias y='yazi'
 
 # AI coding tools
+alias co='codex'
 alias k='kilocode'
 alias o='opencode'
 alias mcp='mcpc'
@@ -1232,6 +1233,16 @@ ALIASES
         if grep -q "alias gp='git push'" "$HOME/.bashrc" 2>/dev/null; then
             sed -i "s|alias gp='git push'|function gp { if [ -n \"\$(git status --porcelain)\" ]; then git add -A \&\& git commit -m \"\${1:-up}\"; fi; git push; }|" "$HOME/.bashrc"
             success "Migrated gp alias to smart function"
+        fi
+
+        # Ensure AI coding aliases exist even if section was added previously
+        if ! grep -q "alias co=" "$HOME/.bashrc" 2>/dev/null; then
+            cat >> "$HOME/.bashrc" << 'AIALIASES'
+
+# AI coding tools
+alias co='codex'
+AIALIASES
+            success "Added Codex alias"
         fi
 
         # Ensure dotfiles aliases exist even if section was added previously
