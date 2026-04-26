@@ -1,3 +1,10 @@
+local user_root_dir = vim.fs.normalize((vim.uv.os_homedir() or vim.env.HOME or vim.fn.expand("~")))
+local launch_dir = vim.fn.getcwd()
+
+local function resolve_root_dir()
+  return user_root_dir
+end
+
 return {
   "nvim-neo-tree/neo-tree.nvim",
   branch = "v3.x",
@@ -9,24 +16,53 @@ return {
   cmd = "Neotree",
   event = "VimEnter",
   init = function()
-    vim.api.nvim_create_autocmd("VimEnter", function()
-      vim.schedule(function()
-        require("neo-tree.command").execute({ toggle = true, dir = require("lazyvim.util").root() })
-      end)
-    end)
+    local function open_root_tree()
+      local root_dir = resolve_root_dir()
+      local neo_tree_ok, neo_tree_cmd = pcall(require, "neo-tree.command")
+      if neo_tree_ok and neo_tree_cmd and neo_tree_cmd.execute then
+        neo_tree_cmd.execute({
+          source = "filesystem",
+          toggle = true,
+          dir = root_dir,
+          position = "left",
+        })
+      else
+        vim.cmd("Neotree")
+      end
+    end
+
+    vim.api.nvim_create_autocmd("VimEnter", {
+      callback = function()
+        vim.schedule(open_root_tree)
+      end,
+    })
   end,
   keys = {
     {
       "<leader>e",
       function()
-        require("neo-tree.command").execute({ toggle = true, dir = require("lazyvim.util").root() })
+        local neo_tree_ok, neo_tree_cmd = pcall(require, "neo-tree.command")
+        if neo_tree_ok and neo_tree_cmd and neo_tree_cmd.execute then
+          neo_tree_cmd.execute({
+            toggle = true,
+            source = "filesystem",
+            dir = resolve_root_dir(),
+          })
+          return
+        end
+        vim.cmd("Neotree")
       end,
       desc = "NeoTree (root)",
     },
     {
       "<leader>E",
       function()
-        require("neo-tree.command").execute({ toggle = true, dir = vim.uv.cwd() })
+        local neo_tree_ok, neo_tree_cmd = pcall(require, "neo-tree.command")
+        if neo_tree_ok and neo_tree_cmd and neo_tree_cmd.execute then
+          neo_tree_cmd.execute({ toggle = true, source = "filesystem", dir = launch_dir })
+          return
+        end
+        vim.cmd("Neotree")
       end,
       desc = "NeoTree (cwd)",
     },
@@ -119,6 +155,11 @@ return {
         follow_current_file = { enabled = true },
         use_libuv_file_watcher = true,
         hijack_netrw_behavior = "open_default",
+        window = {
+          mappings = {
+            ["l"] = "open",
+          },
+        },
         components = {
           contained_git_status = contained_git_status,
         },

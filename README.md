@@ -158,6 +158,7 @@ Each audit:
 /shipflow-backlog     # Capture ideas
 /shipflow-priorities  # Re-rank by impact/effort
 /shipflow-review      # Session review + planning
+/sf-resume            # Fast thread summary + close/keep-open verdict
 /shipflow-ship        # Commit, push, sync ShipFlow
 ```
 

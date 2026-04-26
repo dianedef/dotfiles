@@ -3,6 +3,12 @@ return {
   enabled = true,
   priority = 1000,
   lazy = false,
+  init = function()
+    -- LazyVim references the global `Snacks` while resolving other plugin opts.
+    if not _G.Snacks then
+      _G.Snacks = require("snacks")
+    end
+  end,
   opts = {
     bigfile = { enabled = true },
     dashboard = { enabled = false },

@@ -182,25 +182,24 @@ Si tu cherches "Agentic", c'est cette section.
 
 ### Panneau Codex
 
-- `<leader>aC` : ouvre / ferme Codex
-- `<leader>aF` : ajoute le fichier courant ou la sélection au contexte
-- `<leader>aN` : nouvelle session
-- `<leader>aR` : restaurer une session
-- `<leader>aL` : ajouter le diagnostic de la ligne
-- `<leader>aB` : ajouter tous les diagnostics du buffer
+- `<leader>akt` : ouvre / ferme Codex
+- `<leader>akf` : ajoute le fichier courant ou la sélection au contexte
+- `<leader>akn` : nouvelle session
+- `<leader>akr` : restaurer une session
+- `<leader>akl` : ajouter le diagnostic de la ligne
+- `<leader>akb` : ajouter tous les diagnostics du buffer
 
 Ce qu'il faut retenir :
 
 - le panneau Codex est horizontal, en bas, pratique sur mobile
-- Codex utilise les raccourcis en majuscules pour ne pas entrer en collision avec Claude Code et Copilot Chat
 - tu peux travailler en regardant tes vrais fichiers dans NeoVim
 - tu vois les modifications proposées avec un diff visuel avant validation
 
 Workflow utile :
 
 1. Ouvrir un fichier ou un article
-2. `<leader>aC`
-3. `<leader>aF`
+2. `<leader>akt`
+3. `<leader>akf`
 4. demander une réécriture, une amélioration ou une correction
 5. relire le diff avant d'accepter
 
@@ -210,7 +209,7 @@ Workflow utile :
 
 Si tu vois `Prompt | <C-s>: submit`, tu es dans le panneau Codex, pas dans Claude Code.
 
-- `<leader>aC` : masquer / réafficher le panneau Codex
+- `<leader>akt` : masquer / réafficher le panneau Codex
 - `q` : fermer le panneau Codex quand tu es en mode normal
 - `<C-s>` : envoyer le prompt
 
@@ -222,10 +221,8 @@ Si tu es dans un vrai terminal Claude :
 
 À retenir :
 
-- `Codex` = majuscules
-- `Claude Code` = minuscules
 - `Esc` peut avoir un effet indésirable dans certains outils agents
-- pour sortir sans casser la session, préfère `<leader>aC` dans le panneau Codex
+- pour sortir sans casser la session, préfère `<leader>akt` dans le panneau Codex
 - pour un terminal, préfère toujours `<C-\><C-n>`
 
 ## Copilot
@@ -273,26 +270,39 @@ Question simple à te poser :
 
 ## Avante
 
-Avante est présent dans ton setup, mais désactivé pour l'instant.
+Avante est activé dans ce setup.
 
-Ce qu'il faut tester plus tard si on l'active :
+Flux de base :
 
-- la sidebar conversationnelle
-- les propositions de modifications avec diff
-- l'application des changements depuis la sidebar
-- le confort général par rapport à Codex et Copilot Chat
+1. `<leader>axt` : basculer la sidebar (vertical par défaut).
+2. `<leader>axv` : ouvrir verticalement (droite).
+3. `<leader>axb` : ouvrir horizontalement (bas).
+2. `:AvanteChat` (ou `<leader>axc`) : lancer une conversation avec le contexte courant.
+3. Envoie ton prompt, puis regarde les propositions dans la sidebar Avante.
+4. `a` applique le changement sous le curseur, `A` applique tous les changements proposés.
 
-Ce qu'il faut surtout comparer :
+Raccourcis actifs :
 
-- est-ce que l'interface est plus agréable que Codex pour travailler longtemps
-- est-ce que les diffs sont plus faciles à relire
-- est-ce que l'application des changements est plus fluide
+- `<leader>axt` : basculer la sidebar (vertical par défaut).
+- `<leader>axv` : ouvrir verticalement (droite).
+- `<leader>axb` : ouvrir horizontalement (bas).
+- `:AvanteChat` / `<leader>axc` : chat.
+- `:AvanteAsk` / `<leader>axq` : question rapide.
+- `:AvanteEdit` / `<leader>axe` : édition basée sélection/contexte.
+- `:AvanteFocus` / `<leader>axf` : focus fenêtre Avante.
+- `:AvanteHistory` / `<leader>axh` : historique des échanges.
+- `:AvanteModels` / `<leader>axm` : choisir un modèle.
+- `:AvanteChatNew` / `<leader>axn` : nouvelle session.
+- `:AvanteSwitchProvider` / `<leader>axp` : changer le provider.
+- `:AvanteRefresh` / `<leader>axu` : rafraîchir la vue.
+- `:AvanteStop` / `<leader>axs` : arrêter une génération.
+- `:AvanteBuild` / `:AvanteClear` / `:AvanteShowRepoMap` : commandes utiles selon le cas.
 
-Raccourcis / idées à retenir si on l'active :
+Ce que tu dois comparer avec le workflow Codex/Copilot Chat :
 
-- `a` : appliquer le changement sous le curseur dans la sidebar
-- `A` : tout appliquer
-- `;x` / `,x` : naviguer entre les changements
+- la lisibilité des diffs,
+- la qualité des suggestions,
+- la fluidité d'application depuis la sidebar.
 
 Question simple à te poser :
 

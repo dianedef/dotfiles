@@ -18,7 +18,7 @@
 #
 # MCP Servers:
 #   Edit mcp/mcp-servers.json to configure MCP servers for Claude Code,
-#   Kilocode, and Claude Desktop. Run ./install.sh --only=mcp to apply.
+#   Codex stdio MCPs, Kilocode, and Claude Desktop. Run ./install.sh --only=mcp to apply.
 #   Manual: claude mcp add --transport http <name> <url> --scope user
 
 set -uo pipefail
@@ -26,7 +26,7 @@ set -uo pipefail
 # ============================================================================
 # INITIALIZATION
 # ============================================================================
-SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd -P)"
 
 # Source configuration and library
 source "$SCRIPT_DIR/config.sh"
@@ -944,6 +944,72 @@ setup_mcp_config() {
         fi
     }
 
+    # Function to render stdio MCP servers into Codex TOML config.
+    # Remote HTTP/OAuth MCPs stay in mcp-servers.json until their auth is explicit.
+    merge_codex_mcp_config() {
+        local source_mcp="$1"
+        local target_file="$2"
+        local target_dir names tmp_file
+        target_dir=$(dirname "$target_file")
+        mkdir -p "$target_dir"
+        touch "$target_file"
+
+        names=$(jq -r '
+            .mcpServers
+            | to_entries[]
+            | select((.value.type // "stdio") == "stdio")
+            | select((.value.command // "") != "")
+            | .key
+        ' "$source_mcp" 2>/dev/null | paste -sd, -)
+
+        tmp_file=$(mktemp)
+        awk -v names="$names" '
+            BEGIN {
+                split(names, list, ",")
+                for (i in list) managed[list[i]] = 1
+                skip = 0
+            }
+            /^# >>> dotfiles codex mcp >>>$/ { skip = 1; next }
+            /^# <<< dotfiles codex mcp <<</ { skip = 0; next }
+            /^\[mcp_servers\.[^]]+\]$/ {
+                section = $0
+                sub(/^\[mcp_servers\./, "", section)
+                sub(/\]$/, "", section)
+                skip = (section in managed)
+                if (skip) next
+            }
+            /^\[/ && $0 !~ /^\[mcp_servers\.[^]]+\]$/ { skip = 0 }
+            !skip { print }
+        ' "$target_file" > "$tmp_file"
+        mv "$tmp_file" "$target_file"
+
+        {
+            echo ""
+            echo "# >>> dotfiles codex mcp >>>"
+            echo "# Generated from dotfiles/mcp/mcp-servers.json by ./install.sh --only=mcp."
+            echo "# Only stdio MCP servers are mirrored here; HTTP/OAuth servers need explicit auth handling."
+            jq -r '
+                .mcpServers
+                | to_entries[]
+                | select((.value.type // "stdio") == "stdio")
+                | select((.value.command // "") != "")
+                | "\n[mcp_servers." + .key + "]\ncommand = " + (.value.command | @json) + "\nargs = " + ((.value.args // []) | @json) + "\nenabled = false"
+            ' "$source_mcp"
+            echo "# <<< dotfiles codex mcp <<<"
+        } >> "$target_file"
+
+        log DEBUG "Merged stdio MCP servers into $target_file"
+    }
+
+    disable_claude_mcp_servers() {
+        if [ -f "$HOME/.claude.json" ] && is_installed jq; then
+            jq '(.disabledMcpServers = ((.mcpServers // {}) | keys))' "$HOME/.claude.json" > "$HOME/.claude.json.tmp" && mv "$HOME/.claude.json.tmp" "$HOME/.claude.json"
+        fi
+        if [ -f "$HOME/.claude/settings.json" ] && is_installed jq; then
+            jq '.enableAllProjectMcpServers = false' "$HOME/.claude/settings.json" > "$HOME/.claude/settings.json.tmp" && mv "$HOME/.claude/settings.json.tmp" "$HOME/.claude/settings.json"
+        fi
+    }
+
     # Claude Code: use `claude mcp add` command (stores in ~/.claude.json)
     if is_installed claude; then
         log DEBUG "Configuring Claude Code MCP servers via CLI..."
@@ -976,6 +1042,8 @@ setup_mcp_config() {
                     log DEBUG "Added stdio MCP server: $server_name"
                 fi
             done
+
+            disable_claude_mcp_servers
         fi
         success "Claude Code MCP config updated"
     else
@@ -999,6 +1067,13 @@ setup_mcp_config() {
     # Create reference symlink in ~/.config for easy access
     mkdir -p "$HOME/.config/mcp"
     ln -sf "$SCRIPT_DIR/mcp/mcp-servers.json" "$HOME/.config/mcp/servers.json"
+
+    # Codex: mirror stdio MCP servers into TOML.
+    merge_codex_mcp_config "$SCRIPT_DIR/mcp/mcp-servers.json" "$HOME/.codex/config.toml"
+    if [ -f "$SCRIPT_DIR/codex/config.toml" ] && [ "$HOME/.codex/config.toml" -ef "$SCRIPT_DIR/codex/config.toml" ]; then
+        log DEBUG "Codex config is symlinked to dotfiles template"
+    fi
+    success "Codex stdio MCP config updated"
 
     # Interactive API key prompts for optional MCP servers
     if [ -t 0 ] && is_installed claude && ! is_dry_run; then
@@ -1048,6 +1123,7 @@ setup_mcp_config() {
             success "DataForSEO MCP configured"
         fi
 
+        disable_claude_mcp_servers
     fi
 
     success "MCP configuration complete"

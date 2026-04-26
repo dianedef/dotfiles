@@ -82,6 +82,7 @@ Global skills live in `claude/skills/` and are symlinked to `~/.claude/skills/`.
 - `/shipflow-backlog` — Capture ideas, defer non-urgent tasks
 - `/shipflow-priorities` — Re-rank tasks by impact/effort
 - `/shipflow-review` — Session review, update docs, plan next
+- `/sf-resume` — Fast thread summary with task statuses and close/keep-open verdict
 - `/shipflow-ship` — Stage, commit, push + auto-sync ShipFlow data
 
 ### Audit Skills (8 domains, 3 modes: `@file` = page, no arg = project, `global` = all projects)

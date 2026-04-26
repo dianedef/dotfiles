@@ -1,14 +1,141 @@
-return {
-  {
-    "folke/which-key.nvim",
-    optional = true,
-    opts = {
-      spec = {
-        { "<leader>aC", group = "Codex" },
-      },
-    },
-  },
+local function normalize_dir(path)
+  if not path or path == "" then
+    return nil
+  end
 
+  local normalized = vim.fs.normalize(vim.fn.expand(path))
+  if vim.fn.isdirectory(normalized) == 0 then
+    return nil
+  end
+
+  return normalized
+end
+
+local function resolve_neotree_path()
+  local ok, manager = pcall(require, "neo-tree.sources.manager")
+  if not ok or not manager.get_state then
+    return nil
+  end
+
+  local state = manager.get_state("filesystem")
+  if not state or not state.tree then
+    return nil
+  end
+
+  local ok_node, node = pcall(function()
+    return state.tree:get_node()
+  end)
+  if not ok_node or not node then
+    return nil
+  end
+
+  local path = node.path or (node.get_id and node:get_id()) or node.id
+  if not path then
+    return nil
+  end
+
+  if vim.fn.isdirectory(path) == 1 then
+    return normalize_dir(path)
+  end
+
+  return normalize_dir(vim.fn.fnamemodify(path, ":h"))
+end
+
+local function resolve_cwd_from_file()
+  local bufnr = vim.api.nvim_get_current_buf()
+  local name = vim.api.nvim_buf_get_name(bufnr)
+  if name == "" then
+    return nil
+  end
+
+  local absolute = vim.fn.expand(name)
+  if vim.fn.filereadable(absolute) == 1 then
+    return normalize_dir(vim.fn.fnamemodify(absolute, ":h"))
+  end
+
+  return nil
+end
+
+local function resolve_codex_cwd()
+  return normalize_dir(resolve_neotree_path())
+    or resolve_cwd_from_file()
+    or normalize_dir(vim.fn.getcwd())
+end
+
+local function get_tab_session_cwd(tab)
+  local cwd = vim.t[tab].agentic_codex_session_cwd
+  if cwd and cwd ~= "" then
+    return normalize_dir(cwd)
+  end
+end
+
+local function set_tab_session_cwd(tab, cwd)
+  if cwd and cwd ~= "" then
+    vim.t[tab].agentic_codex_session_cwd = cwd
+    return
+  end
+  vim.t[tab].agentic_codex_session_cwd = nil
+end
+
+local function sync_codex_session_cwd()
+  local tab = vim.api.nvim_get_current_tabpage()
+  local cwd = resolve_codex_cwd()
+  if cwd then
+    set_tab_session_cwd(tab, cwd)
+  end
+  return get_tab_session_cwd(tab)
+end
+
+local function codex_statusline()
+  local tab = vim.api.nvim_win_get_tabpage(0)
+  local cwd = get_tab_session_cwd(tab) or normalize_dir(vim.fn.getcwd())
+  if not cwd then
+    return "Codex"
+  end
+
+  return "󰻞 Codex: " .. vim.fn.fnamemodify(cwd, ":~")
+end
+
+_G.__agentic_codex_statusline = codex_statusline
+
+local AGENTIC_FILETYPES = {
+  "AgenticChat",
+  "AgenticInput",
+  "AgenticCode",
+  "AgenticFiles",
+  "AgenticDiagnostics",
+  "AgenticTodos",
+}
+
+vim.api.nvim_create_autocmd("FileType", {
+  pattern = AGENTIC_FILETYPES,
+  callback = function()
+    vim.wo.statusline = "%{%v:lua.__agentic_codex_statusline()%}"
+  end,
+})
+
+local function run_codex_new_session_in_dir()
+  local target_cwd = resolve_codex_cwd()
+  if not target_cwd then
+    sync_codex_session_cwd()
+    require("agentic").new_session()
+    return
+  end
+
+  local tab = vim.api.nvim_get_current_tabpage()
+  set_tab_session_cwd(tab, target_cwd)
+
+  local previous_cwd = vim.fn.getcwd()
+  vim.fn.chdir(target_cwd)
+  require("agentic").new_session()
+  vim.schedule(function()
+    if vim.fn.getcwd() ~= previous_cwd then
+      vim.fn.chdir(previous_cwd)
+    end
+  end)
+end
+
+return {
   {
     "carlos-algms/agentic.nvim",
     enabled = true,
@@ -40,18 +167,36 @@ return {
       settings = {
         move_cursor_to_chat_on_submit = true,
       },
+      headers = {
+        chat = function(parts)
+          local tab = vim.api.nvim_get_current_tabpage()
+          local cwd = vim.t[tab].agentic_codex_session_cwd
+          if cwd and cwd ~= "" then
+            parts.context = "cwd: " .. vim.fn.fnamemodify(cwd, ":~")
+          end
+          local text = parts.title
+          if parts.context then
+            text = text .. " | " .. parts.context
+          end
+          if parts.suffix then
+            text = text .. " | " .. parts.suffix
+          end
+          return text
+        end,
+      },
     },
-    keys = {
+  keys = {
       {
-        "<leader>aC",
+        "<leader>akt",
         function()
+          sync_codex_session_cwd()
           require("agentic").toggle()
         end,
         mode = { "n", "v", "i" },
         desc = "Codex Toggle",
       },
       {
-        "<leader>aF",
+        "<leader>akf",
         function()
           require("agentic").add_selection_or_file_to_context()
         end,
@@ -59,15 +204,15 @@ return {
         desc = "Codex Add File/Selection",
       },
       {
-        "<leader>aN",
+        "<leader>akn",
         function()
-          require("agentic").new_session()
+          run_codex_new_session_in_dir()
         end,
         mode = { "n", "v", "i" },
-        desc = "Codex New Session",
+        desc = "Codex New Session (context cwd)",
       },
       {
-        "<leader>aR",
+        "<leader>akr",
         function()
           require("agentic").restore_session()
         end,
@@ -75,7 +220,7 @@ return {
         desc = "Codex Restore Session",
       },
       {
-        "<leader>aL",
+        "<leader>akl",
         function()
           require("agentic").add_current_line_diagnostics()
         end,
@@ -83,7 +228,7 @@ return {
         desc = "Codex Add Line Diagnostics",
       },
       {
-        "<leader>aB",
+        "<leader>akb",
         function()
           require("agentic").add_buffer_diagnostics()
         end,

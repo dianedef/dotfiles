@@ -8,6 +8,8 @@ return {
     },
     spec = {
       { "<leader>a", group = "AI", icon = "🤖" },
+      { "<leader>ak", group = "Codex" },
+      { "<leader>ax", group = "Avante" },
     },
   },
 }

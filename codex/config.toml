@@ -1,4 +1,4 @@
-model = "gpt-5.3-codex-spark"
+model = "gpt-5.5"
 approval_policy = "on-request"
 sandbox_mode = "danger-full-access"
 model_reasoning_effort = "low"
@@ -19,22 +19,19 @@ trust_level = "trusted"
 [projects."/home/claude"]
 trust_level = "trusted"
 
-[projects."/home/claude/ContentFlowz_app"]
-trust_level = "trusted"
-
 [projects."/home/claude/tubeflow-app"]
 trust_level = "trusted"
 
 [projects."/home/claude/socialflow"]
 trust_level = "trusted"
 
-[projects."/home/claude/contentflow_lab"]
+[projects."/home/claude/contentflow/contentflow_lab"]
 trust_level = "trusted"
 
-[projects."/home/claude/contentflow_app"]
+[projects."/home/claude/contentflow/contentflow_app"]
 trust_level = "trusted"
 
-[projects."/home/claude/NoCocaïne"]
+[projects."/home/claude/nococaïne"]
 trust_level = "trusted"
 
 [projects."/home/claude/gocharbon_quiz"]
@@ -55,16 +52,19 @@ trust_level = "trusted"
 [projects."/home/claude/winflowz"]
 trust_level = "trusted"
 
-[projects."/home/claude/contentflow_lab_deploy"]
-trust_level = "trusted"
-
-[projects."/home/claude/ShipFlow"]
+[projects."/home/claude/contentflow/contentflow_lab_deploy"]
 trust_level = "trusted"
 
 [projects."/home"]
 trust_level = "trusted"
 
-[projects."/home/claude/ContentFlow"]
+[projects."/home/claude/contentflow"]
+trust_level = "trusted"
+
+[projects."/home/claude/shipflow"]
+trust_level = "trusted"
+
+[projects."/home/claude/tubeflow_lab"]
 trust_level = "trusted"
 
 [notice]
@@ -73,3 +73,6 @@ hide_rate_limit_model_nudge = true
 [notice.model_migrations]
 "gpt-5.3-codex" = "gpt-5.4"
 "gpt-5.2" = "gpt-5.4"
+
+[tui.model_availability_nux]
+"gpt-5.5" = 4
