@@ -1,3 +1,35 @@
+---
+artifact: technical_guidelines
+metadata_schema_version: "1.0"
+artifact_version: "0.1.0"
+project: "dotfiles"
+created: "2026-04-26"
+updated: "2026-04-26"
+status: draft
+source_skill: sf-docs
+scope: technical
+owner: "dianedef"
+confidence: medium
+risk_level: low
+security_impact: medium
+docs_impact: yes
+evidence:
+  - "/home/claude/dotfiles/install.sh"
+  - "/home/claude/dotfiles/termux.sh"
+  - "/home/claude/dotfiles/config.sh"
+  - "/home/claude/dotfiles/lib.sh"
+depends_on:
+  - "/home/claude/dotfiles/install.sh"
+  - "/home/claude/dotfiles/CONTEXT.md"
+linked_systems:
+  - Bash
+  - Git
+  - CLI
+supersedes: []
+next_review: "2026-07-26"
+next_step: /sf-docs audit CLAUDE.md
+---
+
 # CLAUDE.md
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
