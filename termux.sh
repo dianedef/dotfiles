@@ -17,6 +17,24 @@ log() {
 
 log "INFO" "🤖 Starting TERMUX dotfiles installation (lightweight)"
 
+write_sgpt_config() {
+    local key="$1"
+    local sgpt_dir="$HOME/.config/shell_gpt"
+    local sgpt_file="$sgpt_dir/.sgptrc"
+    local previous_umask
+    previous_umask="$(umask)"
+
+    mkdir -p "$sgpt_dir" || return 1
+    umask 077
+    # Keep .sgptrc shell-safe and private even with special chars/newlines in keys.
+    if ! printf 'OPENAI_API_KEY=%q\n' "$key" > "$sgpt_file"; then
+        umask "$previous_umask"
+        return 1
+    fi
+    umask "$previous_umask"
+    chmod 600 "$sgpt_file" 2>/dev/null || return 1
+}
+
 # --- 1. Packages Termux essentiels ---
 log "INFO" "📦 Installing Termux packages..."
 pkg update -y >/dev/null 2>&1
@@ -370,9 +388,11 @@ if command -v doppler &>/dev/null && doppler me &>/dev/null; then
     
     # Configure Shell-GPT (uses OPENAI_API_KEY env var)
     if [ ! -z "$OPENAI_KEY" ]; then
-        mkdir -p "$HOME/.config/shell_gpt"
-        echo "OPENAI_API_KEY=$OPENAI_KEY" > "$HOME/.config/shell_gpt/.sgptrc"
-        log "INFO" "   ✅ Shell-GPT configured"
+        if write_sgpt_config "$OPENAI_KEY"; then
+            log "INFO" "   ✅ Shell-GPT configured"
+        else
+            log "WARN" "   ⚠️  Shell-GPT config write failed"
+        fi
     fi
 elif [ -f "$HOME/.dotfiles-secrets.env" ]; then
     log "INFO" "📝 Using local secrets from ~/.dotfiles-secrets.env"
@@ -385,8 +405,11 @@ elif [ -f "$HOME/.dotfiles-secrets.env" ]; then
     fi
     
     if [ ! -z "$OPENAI_API_KEY" ]; then
-        mkdir -p "$HOME/.config/shell_gpt"
-        echo "OPENAI_API_KEY=$OPENAI_API_KEY" > "$HOME/.config/shell_gpt/.sgptrc"
+        if write_sgpt_config "$OPENAI_API_KEY"; then
+            log "INFO" "   ✅ Shell-GPT configured from local secrets"
+        else
+            log "WARN" "   ⚠️  Shell-GPT config write failed from local secrets"
+        fi
     fi
 else
     log "INFO" "💡 Configure API keys later with: llm keys set <provider>"

@@ -18,34 +18,47 @@ echo ""
 touch "$ENV_FILE"
 chmod 600 "$ENV_FILE"
 
+# Prompt helper for secret inputs (hidden, no echo)
+read_secret() {
+    local prompt="$1"
+    local value=""
+    read -r -s -p "$prompt" value
+    echo ""
+    printf '%s' "$value"
+}
+
 # Fonction pour ajouter/mettre à jour une variable
 update_env() {
     local key=$1
     local value=$2
+    local tmp_file="${ENV_FILE}.tmp"
     
     if grep -q "^export $key=" "$ENV_FILE" 2>/dev/null; then
         # Mettre à jour la ligne existante (portable pour Termux)
-        grep -v "^export $key=" "$ENV_FILE" > "$ENV_FILE.tmp" || true
-        echo "export $key=\"$value\"" >> "$ENV_FILE.tmp"
-        mv "$ENV_FILE.tmp" "$ENV_FILE"
+        grep -v "^export $key=" "$ENV_FILE" > "$tmp_file" || true
     else
-        # Ajouter la nouvelle ligne
-        echo "export $key=\"$value\"" >> "$ENV_FILE"
+        cp "$ENV_FILE" "$tmp_file"
     fi
+
+    # Bash-safe serialization prevents quote/injection breakage in sourced env files.
+    printf 'export %s=%q\n' "$key" "$value" >> "$tmp_file"
+    chmod 600 "$tmp_file"
+    mv "$tmp_file" "$ENV_FILE"
+    chmod 600 "$ENV_FILE"
 }
 
 echo "🔑 Ajout des API keys..."
 echo ""
 
 # OpenAI
-read -p "OpenAI API Key (laissez vide pour skip): " OPENAI_KEY
+OPENAI_KEY="$(read_secret "OpenAI API Key (laissez vide pour skip): ")"
 if [ ! -z "$OPENAI_KEY" ]; then
     update_env "OPENAI_API_KEY" "$OPENAI_KEY"
     echo "✓ OPENAI_API_KEY configuré"
 fi
 
 # Anthropic (Claude)
-read -p "Anthropic API Key (laissez vide pour skip): " ANTHROPIC_KEY
+ANTHROPIC_KEY="$(read_secret "Anthropic API Key (laissez vide pour skip): ")"
 if [ ! -z "$ANTHROPIC_KEY" ]; then
     update_env "ANTHROPIC_API_KEY" "$ANTHROPIC_KEY"
     echo "✓ ANTHROPIC_API_KEY configuré"
@@ -97,21 +110,21 @@ else
 fi
 
 # Google AI (Gemini)
-read -p "Google AI API Key (laissez vide pour skip): " GOOGLE_AI_KEY
+GOOGLE_AI_KEY="$(read_secret "Google AI API Key (laissez vide pour skip): ")"
 if [ ! -z "$GOOGLE_AI_KEY" ]; then
     update_env "GOOGLE_AI_API_KEY" "$GOOGLE_AI_KEY"
     echo "✓ GOOGLE_AI_API_KEY configuré"
 fi
 
 # Groq
-read -p "Groq API Key (laissez vide pour skip): " GROQ_KEY
+GROQ_KEY="$(read_secret "Groq API Key (laissez vide pour skip): ")"
 if [ ! -z "$GROQ_KEY" ]; then
     update_env "GROQ_API_KEY" "$GROQ_KEY"
     echo "✓ GROQ_API_KEY configuré"
 fi
 
 # Deepseek
-read -p "Deepseek API Key (laissez vide pour skip): " DEEPSEEK_KEY
+DEEPSEEK_KEY="$(read_secret "Deepseek API Key (laissez vide pour skip): ")"
 if [ ! -z "$DEEPSEEK_KEY" ]; then
     update_env "DEEPSEEK_API_KEY" "$DEEPSEEK_KEY"
     echo "✓ DEEPSEEK_API_KEY configuré"
