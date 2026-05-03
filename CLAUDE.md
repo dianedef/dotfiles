@@ -128,7 +128,7 @@ Global skills live in `claude/skills/` and are symlinked to `~/.claude/skills/`.
 - `/shipflow-deps` — Dependencies: vulnerabilities, outdated, unused, licenses
 - `/shipflow-perf` — Performance: bundle, rendering, CWV, data fetching
 
-Project registry for global mode: `~/ShipFlow/PROJECTS.md` (private) — lists all projects with domain applicability matrix (8 domains).
+Project registry for global mode: `~/shipflow/PROJECTS.md` (private) — lists all projects with domain applicability matrix (8 domains).
 
 ### DevOps & Shipping Skills
 - `/shipflow-check` — Typecheck + lint + build, auto-fix errors
@@ -161,11 +161,11 @@ When arguments are provided explicitly, prompts are skipped — the skill runs d
 
 ### ShipFlow Data
 
-The `ShipFlow` private repo (`~/ShipFlow/`) stores personal tracking data:
+The `ShipFlow` private repo (`~/shipflow/`) stores personal tracking data:
 - `TASKS.md` — master task tracker (symlinked to `~/TASKS.md`)
 - `AUDIT_LOG.md` — cross-project audit history (symlinked to `~/AUDIT_LOG.md`)
 
-`install.sh` clones it automatically via `git@github.com:${GITHUB_USERNAME}/ShipFlow.git`.
+`install.sh` clones it automatically via `git@github.com:${GITHUB_USERNAME}/shipflow.git`.
 
 ## Key Conventions
 

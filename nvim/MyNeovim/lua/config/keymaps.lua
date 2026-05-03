@@ -1,8 +1,21 @@
 -- Keymaps are automatically loaded on the VeryLazy event
 -- Default keymaps that are always set: https://github.com/LazyVim/LazyVim/blob/main/lua/lazyvim/config/keymaps.lua
 -- Add any additional keymaps here
-vim.keymap.set("t", "<Esc>", "<C-\\><C-n>", { desc = "Exit terminal mode" })
+vim.keymap.set("t", "<C-Space>", "<C-\\><C-n>", { desc = "Exit terminal mode" })
 vim.keymap.set("n", "<leader>uw", ":set wrap!<CR>", { desc = "Toggle wrap" })
+
+local function switch_to_other_buffer()
+  local alt = vim.fn.bufnr("#")
+  if alt <= 0 or not vim.api.nvim_buf_is_valid(alt) then
+    vim.notify("Aucun buffer alternatif", vim.log.levels.WARN)
+    return
+  end
+
+  vim.cmd("buffer " .. alt)
+end
+
+vim.keymap.set("n", "<leader>bb", switch_to_other_buffer, { desc = "Switch to Other Buffer" })
+vim.keymap.set("n", "<leader>`", switch_to_other_buffer, { desc = "Switch to Other Buffer" })
 
 -- Explicit mouse wheel scroll (fixes scroll down through mosh/tmux)
 vim.keymap.set({ "n", "v", "x" }, "<ScrollWheelUp>", "3<C-y>", { desc = "Scroll up" })

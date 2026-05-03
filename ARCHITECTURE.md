@@ -91,6 +91,13 @@ Entrée `install.sh`:
   8) intégration shell,
   9) plugins et auth.
 
+Le point de contrôle final est le calcul d'état d'installation de composants (`capture_final_component_state`) puis la synchronisation des artefacts utilisateurs (`sync_component_artifacts`) pour garantir la cohérence:
+
+- seuls les aliases/commandes cibles installées à la fin du run sont conservés,
+- les aliases obsolètes sont supprimés,
+- les symlinks de config (`~/.config/yazi`, `~/.config/ranger`) ne sont gardés que quand l’outil correspondant est effectivement disponible.
+- ce mécanisme s’applique aussi en mode `--only=<component>`, évitant les artefacts fantômes.
+
 Contrainte: la même orchestration est réutilisable en mode non-interactif (CI) ou interactif (menu `gum`).
 
 ## Couche 2 — Bibliothèque partagée `lib.sh`
@@ -139,7 +146,7 @@ Contrainte: la même orchestration est réutilisable en mode non-interactif (CI)
   - `codex/config.toml` -> `~/.codex/config.toml`
   - `claude/skills/*` -> `~/.claude/skills/*`
   - `.config/mcp/servers.json` -> `mcp/mcp-servers.json`
-  - liaisons de `TASKS.md` et `AUDIT_LOG.md` depuis `~/ShipFlow` quand disponible.
+  - liaisons de `TASKS.md` et `AUDIT_LOG.md` depuis `~/shipflow` quand disponible.
 
 ## Données et flux de secrets
 

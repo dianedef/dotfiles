@@ -2,6 +2,50 @@
 
 Cheat sheet courte pour les fonctions que tu utilises vraiment.
 
+## Comment trouver un raccourci que tu ne connais pas
+
+### L'aide intégrée
+
+Quand tu cherches un raccourci, la première option c'est l'aide native :
+
+```
+:help <sujet>
+```
+
+Par exemple `:help moving` ou `:help usr_04` pour les bases de l'édition.
+
+Pour voir tous tes mappings actifs selon le mode :
+
+```
+:nmap          " tous les mappings en mode Normal
+:imap          " mode Insert
+:vmap          " mode Visual
+:nmap <leader> " tous ceux avec ton leader key
+```
+
+### which-key : la vraie solution
+
+`which-key.nvim` répond exactement à ce besoin. Quand tu commences une séquence de touches, une popup apparaît automatiquement avec toutes les options disponibles.
+
+- Tu tapes `<leader>` et tu vois toutes les possibilités s'afficher
+- Tu peux aussi appeler `:WhichKey` pour ouvrir la cheatsheet complète
+
+Pour vérifier si c'est actif dans ton setup :
+
+```
+:checkhealth which-key
+```
+
+### Déplacer une ligne vers le haut
+
+Un exemple concret — faire remonter la ligne courante :
+
+- **En mode normal** : `ddkP` (`dd` = couper la ligne, `k` = monter d'une ligne, `P` = coller au-dessus)
+- **Avec une commande** : `:m .-2`
+- **En mode visuel** (pour un bloc) : `:m '<-2`
+
+---
+
 ## Édition de texte
 
 ### Mouvements indispensables

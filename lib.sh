@@ -263,6 +263,10 @@ run_privileged() {
     fi
 }
 
+run_with_sudo() {
+    run_privileged "$@"
+}
+
 # ============================================================================
 # BASHRC MODIFICATION
 # ============================================================================
@@ -282,6 +286,35 @@ append_to_bashrc() {
     fi
     log DEBUG "Already in .bashrc: $search_string"
     return 0
+}
+
+sync_bashrc_alias() {
+    local alias_name=$1
+    local alias_value=$2
+    local enabled=${3:-false}
+    local alias_pattern="alias ${alias_name}="
+    local alias_line="alias ${alias_name}=${alias_value}"
+
+    if is_dry_run; then
+        if [ "$enabled" = "true" ]; then
+            echo -e "${BLUE}[DRY-RUN]${NC} Would set alias: ${alias_name}"
+        else
+            echo -e "${BLUE}[DRY-RUN]${NC} Would remove alias: ${alias_name}"
+        fi
+        return 0
+    fi
+
+    if [ "$enabled" = "true" ]; then
+        if grep -qE "$alias_pattern" "$HOME/.bashrc" 2>/dev/null; then
+            sed -i -E "s|^${alias_pattern}.*|${alias_line}|" "$HOME/.bashrc"
+        else
+            {
+                echo "$alias_line"
+            } >> "$HOME/.bashrc"
+        fi
+    else
+        remove_from_bashrc "$alias_pattern" "Alias ${alias_name}"
+    fi
 }
 
 # ============================================================================
@@ -388,6 +421,42 @@ create_symlink() {
     else
         error "Failed to create symlink: $target -> $source"
         return 1
+    fi
+}
+
+sync_managed_symlink() {
+    local source=$1
+    local target=$2
+    local enabled=${3:-false}
+    local source_real
+
+    source_real="$(readlink -f "$source" 2>/dev/null || echo "$source")"
+
+    if is_dry_run; then
+        if [ "$enabled" = "true" ]; then
+            echo -e "${BLUE}[DRY-RUN]${NC} Would sync symlink: $target -> $source"
+        else
+            echo -e "${BLUE}[DRY-RUN]${NC} Would remove managed symlink: $target"
+        fi
+        return 0
+    fi
+
+    if [ "$enabled" = "true" ]; then
+        if [ ! -d "$source" ] && [ ! -f "$source" ]; then
+            warn "Managed config source missing: $source"
+            return 1
+        fi
+        create_symlink "$source" "$target" false
+        return 0
+    fi
+
+    if [ -L "$target" ]; then
+        local target_real
+        target_real="$(readlink -f "$target" 2>/dev/null || true)"
+        if [ "$target_real" = "$source_real" ]; then
+            rm -f "$target"
+            success "Removed managed symlink: $target"
+        fi
     fi
 }
 
@@ -949,6 +1018,8 @@ run_health_check() {
     health_check_tool "fd" "fd" || failed=$((failed + 1))
     health_check_tool "bat" "bat" || failed=$((failed + 1))
     health_check_tool "lsd" "lsd" || failed=$((failed + 1))
+    health_check_tool "tmux" "tmux" "-V" || failed=$((failed + 1))
+    health_check_tool "mosh" "mosh" "--version" || failed=$((failed + 1))
     health_check_tool "Git" "git" || failed=$((failed + 1))
     health_check_tool "GitHub CLI" "gh" || failed=$((failed + 1))
     health_check_tool "mcpc (MCP CLI)" "mcpc" || failed=$((failed + 1))
@@ -1651,15 +1722,18 @@ declare -a PARALLEL_NAMES=()
 parallel_run() {
     local name="$1"
     shift
-    local cmd="$*"
+    if [ "$#" -eq 0 ]; then
+        warn "No command provided for parallel job: $name"
+        return 1
+    fi
 
     if [ "${DOTFILES_PARALLEL:-false}" = "true" ]; then
         log DEBUG "Starting parallel: $name"
-        eval "$cmd" &
+        "$@" &
         PARALLEL_JOBS+=($!)
         PARALLEL_NAMES+=("$name")
     else
-        eval "$cmd"
+        "$@"
     fi
 }
 

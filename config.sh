@@ -42,7 +42,7 @@ export DOTFILES_BACKUP_DIR="${DOTFILES_BACKUP_DIR:-$HOME/.dotfiles-backup}"
 # ============================================================================
 # LOGGING CONFIGURATION
 # ============================================================================
-export DOTFILES_LOG_FILE="${DOTFILES_LOG_FILE:-$DOTFILES_DIR/install.log}"
+export DOTFILES_LOG_FILE="${DOTFILES_LOG_FILE:-$HOME/install-logs/dotfiles-$(date -u +%Y%m%dT%H%M%SZ).log}"
 export DOTFILES_LOG_LEVEL="${DOTFILES_LOG_LEVEL:-INFO}"
 export DOTFILES_LOG_ROTATION_SIZE="${DOTFILES_LOG_ROTATION_SIZE:-10485760}"  # 10MB
 export DOTFILES_LOG_RETENTION_DAYS="${DOTFILES_LOG_RETENTION_DAYS:-30}"
@@ -73,6 +73,7 @@ export SKIP_NEOVIM_INSTALL="${SKIP_NEOVIM_INSTALL:-false}"
 export SKIP_NERD_FONTS="${SKIP_NERD_FONTS:-false}"
 export SKIP_NPM_TOOLS="${SKIP_NPM_TOOLS:-false}"
 export SKIP_YAZI_INSTALL="${SKIP_YAZI_INSTALL:-false}"
+export INSTALL_YAZI_BY_DEFAULT="${INSTALL_YAZI_BY_DEFAULT:-false}"
 export SKIP_DOPPLER_INSTALL="${SKIP_DOPPLER_INSTALL:-false}"
 export SKIP_MCP_INSTALL="${SKIP_MCP_INSTALL:-false}"
 export AUTO_INSTALL_NVIM_PLUGINS="${AUTO_INSTALL_NVIM_PLUGINS:-false}"
@@ -81,7 +82,7 @@ export USER_LOCAL_MODE="${USER_LOCAL_MODE:-false}"
 # ============================================================================
 # PACKAGE LISTS
 # ============================================================================
-export DOTFILES_APT_PACKAGES="git curl wget unzip tar build-essential jq libsecret-1-0"
+export DOTFILES_APT_PACKAGES="git curl wget unzip tar build-essential jq libsecret-1-0 tmux mosh"
 export DOTFILES_NPM_PACKAGES="@apify/mcpc tldr"
 
 # ============================================================================

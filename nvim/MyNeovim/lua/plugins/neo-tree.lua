@@ -43,6 +43,18 @@ return {
       function()
         local neo_tree_ok, neo_tree_cmd = pcall(require, "neo-tree.command")
         if neo_tree_ok and neo_tree_cmd and neo_tree_cmd.execute then
+          neo_tree_cmd.execute({ toggle = true, source = "filesystem", dir = launch_dir })
+          return
+        end
+        vim.cmd("Neotree")
+      end,
+      desc = "NeoTree (cwd)",
+    },
+    {
+      "<leader>E",
+      function()
+        local neo_tree_ok, neo_tree_cmd = pcall(require, "neo-tree.command")
+        if neo_tree_ok and neo_tree_cmd and neo_tree_cmd.execute then
           neo_tree_cmd.execute({
             toggle = true,
             source = "filesystem",
@@ -53,18 +65,6 @@ return {
         vim.cmd("Neotree")
       end,
       desc = "NeoTree (root)",
-    },
-    {
-      "<leader>E",
-      function()
-        local neo_tree_ok, neo_tree_cmd = pcall(require, "neo-tree.command")
-        if neo_tree_ok and neo_tree_cmd and neo_tree_cmd.execute then
-          neo_tree_cmd.execute({ toggle = true, source = "filesystem", dir = launch_dir })
-          return
-        end
-        vim.cmd("Neotree")
-      end,
-      desc = "NeoTree (cwd)",
     },
     {
       "<leader>ge",

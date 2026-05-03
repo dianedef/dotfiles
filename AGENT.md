@@ -4,7 +4,7 @@ metadata_schema_version: "1.0"
 artifact_version: "0.1.0"
 project: "dotfiles"
 created: "2026-04-26"
-updated: "2026-04-26"
+updated: "2026-05-01"
 status: draft
 source_skill: sf-docs
 scope: technical

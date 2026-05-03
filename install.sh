@@ -11,15 +11,14 @@
 #   ./install.sh --check              # Check installation health
 #   ./install.sh --update             # Update all tools
 #   ./install.sh --only=neovim,yazi   # Install only specific components
-#   ./install.sh --only=mcp           # Setup MCP servers only
+#   ./install.sh --only=mcp           # Setup shared MCP registry only
 #   ./install.sh --uninstall          # Remove everything
 #   ./install.sh --parallel           # Parallel installation (faster)
 #   ./install.sh --help               # Show help
 #
 # MCP Servers:
-#   Edit mcp/mcp-servers.json to configure MCP servers for Claude Code,
-#   Codex stdio MCPs, Kilocode, and Claude Desktop. Run ./install.sh --only=mcp to apply.
-#   Manual: claude mcp add --transport http <name> <url> --scope user
+#   Edit mcp/mcp-servers.json for shared registry entries.
+#   ShipFlow owns Claude/Codex client MCP configuration and AI aliases.
 
 set -uo pipefail
 
@@ -52,6 +51,167 @@ fi
 init_logging
 setup_error_traps
 detect_system
+
+DOTFILES_REPORT_DIR="${DOTFILES_REPORT_DIR:-$HOME/install-reports}"
+DOTFILES_REPORT_FILE="${DOTFILES_REPORT_FILE:-$DOTFILES_REPORT_DIR/dotfiles-report-$(date -u +%Y%m%dT%H%M%SZ).md}"
+mkdir -p "$DOTFILES_REPORT_DIR"
+
+dotfiles_capture_status() {
+    command -v node >/dev/null 2>&1 && DOTFILES_PRE_STATUS_NODE="present" || true
+    command -v npm >/dev/null 2>&1 && DOTFILES_PRE_STATUS_NPM="present" || true
+    command -v claude >/dev/null 2>&1 && DOTFILES_PRE_STATUS_CLAUDE="present" || true
+    command -v codex >/dev/null 2>&1 && DOTFILES_PRE_STATUS_CODEX="present" || true
+    command -v mcpc >/dev/null 2>&1 && DOTFILES_PRE_STATUS_MCPC="present" || true
+    command -v nvim >/dev/null 2>&1 && DOTFILES_PRE_STATUS_NVIM="present" || true
+    command -v fzf >/dev/null 2>&1 && DOTFILES_PRE_STATUS_FZF="present" || true
+    command -v bat >/dev/null 2>&1 && DOTFILES_PRE_STATUS_BAT="present" || true
+    command -v starship >/dev/null 2>&1 && DOTFILES_PRE_STATUS_STARSHIP="present" || true
+    command -v zoxide >/dev/null 2>&1 && DOTFILES_PRE_STATUS_ZOXIDE="present" || true
+    command -v yazi >/dev/null 2>&1 && DOTFILES_PRE_STATUS_YAZI="present" || true
+    command -v ranger >/dev/null 2>&1 && DOTFILES_PRE_STATUS_RANGER="present" || true
+    command -v tmux >/dev/null 2>&1 && DOTFILES_PRE_STATUS_TMUX="present" || true
+    command -v mosh >/dev/null 2>&1 && DOTFILES_PRE_STATUS_MOSH="present" || true
+    command -v gh >/dev/null 2>&1 && DOTFILES_PRE_STATUS_GH="present" || true
+    command -v doppler >/dev/null 2>&1 && DOTFILES_PRE_STATUS_DOPPLER="present" || true
+    command -v pm2 >/dev/null 2>&1 && DOTFILES_PRE_STATUS_PM2="present" || true
+    command -v flox >/dev/null 2>&1 && DOTFILES_PRE_STATUS_FLOX="present" || true
+    command -v caddy >/dev/null 2>&1 && DOTFILES_PRE_STATUS_CADDY="present" || true
+}
+
+dotfiles_status() {
+    local pre="$1"
+    local post="$2"
+    if [ "$pre" = "present" ] && [ "$post" = "present" ]; then
+        echo "DÉJÀ_PRÉSENT"
+    elif [ "$pre" != "present" ] && [ "$post" = "present" ]; then
+        echo "INSTALLÉ"
+    else
+        echo "ÉCHEC"
+    fi
+}
+
+capture_final_component_state() {
+    if is_installed yazi; then DOTFILES_INSTALLED_YAZI="true"; else DOTFILES_INSTALLED_YAZI="false"; fi
+    if is_installed ranger; then DOTFILES_INSTALLED_RANGER="true"; else DOTFILES_INSTALLED_RANGER="false"; fi
+    if is_installed codex; then DOTFILES_INSTALLED_CODEX="true"; else DOTFILES_INSTALLED_CODEX="false"; fi
+    if is_installed kilocode; then DOTFILES_INSTALLED_KILOCODE="true"; else DOTFILES_INSTALLED_KILOCODE="false"; fi
+    if is_installed opencode; then DOTFILES_INSTALLED_OPENCODE="true"; else DOTFILES_INSTALLED_OPENCODE="false"; fi
+    if is_installed mcpc; then DOTFILES_INSTALLED_MCPC="true"; else DOTFILES_INSTALLED_MCPC="false"; fi
+}
+
+sync_component_artifacts() {
+    # Always align user-facing shortcuts and managed config symlinks with final state.
+    sync_managed_symlink "$SCRIPT_DIR/yazi" "$HOME/.config/yazi" "${DOTFILES_INSTALLED_YAZI:-false}"
+    sync_managed_symlink "$SCRIPT_DIR/ranger" "$HOME/.config/ranger" "${DOTFILES_INSTALLED_RANGER:-false}"
+
+    sync_bashrc_alias "r" "'ranger'" "${DOTFILES_INSTALLED_RANGER:-false}"
+    sync_bashrc_alias "y" "'yazi'" "${DOTFILES_INSTALLED_YAZI:-false}"
+        sync_bashrc_alias "k" "'kilocode'" "${DOTFILES_INSTALLED_KILOCODE:-false}"
+    sync_bashrc_alias "o" "'opencode'" "${DOTFILES_INSTALLED_OPENCODE:-false}"
+    sync_bashrc_alias "mcp" "'mcpc'" "${DOTFILES_INSTALLED_MCPC:-false}"
+    success "Component artifact synchronization applied"
+}
+
+generate_dotfiles_report() {
+    local now
+    local status_node status_npm status_claude status_codex status_mcpc status_nvim status_fzf status_bat
+    local status_starship status_zoxide status_yazi status_ranger status_tmux status_mosh status_gh status_doppler
+    local status_pm2 status_flox status_caddy
+    local status_alias_yazi status_alias_ranger status_alias_codex status_alias_kilocode status_alias_opencode status_alias_mcpc
+    now="$(date -u +%Y-%m-%dT%H:%M:%SZ)"
+
+    if command -v node >/dev/null 2>&1; then status_node="present"; else status_node=""; fi
+    if command -v npm >/dev/null 2>&1; then status_npm="present"; else status_npm=""; fi
+    if command -v claude >/dev/null 2>&1; then status_claude="present"; else status_claude=""; fi
+    if command -v codex >/dev/null 2>&1; then status_codex="present"; else status_codex=""; fi
+    if command -v mcpc >/dev/null 2>&1; then status_mcpc="present"; else status_mcpc=""; fi
+    if command -v nvim >/dev/null 2>&1; then status_nvim="present"; else status_nvim=""; fi
+    if command -v fzf >/dev/null 2>&1; then status_fzf="present"; else status_fzf=""; fi
+    if command -v bat >/dev/null 2>&1; then status_bat="present"; else status_bat=""; fi
+    if command -v starship >/dev/null 2>&1; then status_starship="present"; else status_starship=""; fi
+    if command -v zoxide >/dev/null 2>&1; then status_zoxide="present"; else status_zoxide=""; fi
+    if command -v yazi >/dev/null 2>&1; then status_yazi="present"; else status_yazi=""; fi
+    if command -v ranger >/dev/null 2>&1; then status_ranger="present"; else status_ranger=""; fi
+    if command -v tmux >/dev/null 2>&1; then status_tmux="present"; else status_tmux=""; fi
+    if command -v mosh >/dev/null 2>&1; then status_mosh="present"; else status_mosh=""; fi
+    if command -v gh >/dev/null 2>&1; then status_gh="present"; else status_gh=""; fi
+    if command -v doppler >/dev/null 2>&1; then status_doppler="present"; else status_doppler=""; fi
+    if command -v pm2 >/dev/null 2>&1; then status_pm2="present"; else status_pm2=""; fi
+    if command -v flox >/dev/null 2>&1; then status_flox="present"; else status_flox=""; fi
+    if command -v caddy >/dev/null 2>&1; then status_caddy="present"; else status_caddy=""; fi
+    if [ "${DOTFILES_INSTALLED_YAZI:-false}" = "true" ]; then status_alias_yazi="present"; else status_alias_yazi=""; fi
+    if [ "${DOTFILES_INSTALLED_RANGER:-false}" = "true" ]; then status_alias_ranger="present"; else status_alias_ranger=""; fi
+    if [ "${DOTFILES_INSTALLED_CODEX:-false}" = "true" ]; then status_alias_codex="present"; else status_alias_codex=""; fi
+    if [ "${DOTFILES_INSTALLED_KILOCODE:-false}" = "true" ]; then status_alias_kilocode="present"; else status_alias_kilocode=""; fi
+    if [ "${DOTFILES_INSTALLED_OPENCODE:-false}" = "true" ]; then status_alias_opencode="present"; else status_alias_opencode=""; fi
+    if [ "${DOTFILES_INSTALLED_MCPC:-false}" = "true" ]; then status_alias_mcpc="present"; else status_alias_mcpc=""; fi
+
+    cat > "$DOTFILES_REPORT_FILE" << REPORT
+# Rapport d'installation dotfiles
+
+## Run summary
+
+- Date UTC: $now
+- Repo: dotfiles
+- Utilisateur: $(id -un)
+- Commande: ./install.sh
+- Mode: installation utilisateur
+- Version script: local
+- Machine: $(hostname)
+- Log brut: $DOTFILES_LOG_FILE
+- Statut global: $(if [ "$status_node" = present ] && [ "$status_npm" = present ]; then echo "SUCCÈS"; else echo "PARTIEL"; fi)
+
+## Packages / outils
+
+| Élément | Résultat | Détails |
+|---|---|---|
+| Node.js | $(dotfiles_status "$DOTFILES_PRE_STATUS_NODE" "$status_node") | Détection binaire |
+| npm | $(dotfiles_status "$DOTFILES_PRE_STATUS_NPM" "$status_npm") | Détection binaire |
+| claude | $(dotfiles_status "$DOTFILES_PRE_STATUS_CLAUDE" "$status_claude") | Détection binaire |
+| codex | $(dotfiles_status "$DOTFILES_PRE_STATUS_CODEX" "$status_codex") | Détection binaire |
+| mcpc | $(dotfiles_status "$DOTFILES_PRE_STATUS_MCPC" "$status_mcpc") | Détection binaire |
+| nvim | $(dotfiles_status "$DOTFILES_PRE_STATUS_NVIM" "$status_nvim") | Détection binaire |
+| fzf | $(dotfiles_status "$DOTFILES_PRE_STATUS_FZF" "$status_fzf") | Détection binaire |
+| bat | $(dotfiles_status "$DOTFILES_PRE_STATUS_BAT" "$status_bat") | Détection binaire |
+| starship | $(dotfiles_status "$DOTFILES_PRE_STATUS_STARSHIP" "$status_starship") | Détection binaire |
+| zoxide | $(dotfiles_status "$DOTFILES_PRE_STATUS_ZOXIDE" "$status_zoxide") | Détection binaire |
+| yazi | $(dotfiles_status "$DOTFILES_PRE_STATUS_YAZI" "$status_yazi") | Détection binaire |
+| ranger | $(dotfiles_status "$DOTFILES_PRE_STATUS_RANGER" "$status_ranger") | Détection binaire |
+| alias y (yazi) | $(dotfiles_status "" "$status_alias_yazi") | Disponible si `yazi` installé |
+| alias r (ranger) | $(dotfiles_status "" "$status_alias_ranger") | Disponible si `ranger` installé |
+| alias co (codex) | NON_APPLICABLE | gere par ShipFlow |
+| alias k (kilocode) | $(dotfiles_status "" "$status_alias_kilocode") | Disponible si `kilocode` installé |
+| alias o (opencode) | $(dotfiles_status "" "$status_alias_opencode") | Disponible si `opencode` installé |
+| alias mcp (mcpc) | $(dotfiles_status "" "$status_alias_mcpc") | Disponible si `mcpc` installé |
+| tmux | $(dotfiles_status "$DOTFILES_PRE_STATUS_TMUX" "$status_tmux") | Détection binaire |
+| mosh | $(dotfiles_status "$DOTFILES_PRE_STATUS_MOSH" "$status_mosh") | Détection binaire |
+| GitHub CLI | $(dotfiles_status "$DOTFILES_PRE_STATUS_GH" "$status_gh") | Détection binaire |
+| doppler | $(dotfiles_status "$DOTFILES_PRE_STATUS_DOPPLER" "$status_doppler") | Détection binaire |
+| PM2 | $(dotfiles_status "$DOTFILES_PRE_STATUS_PM2" "$status_pm2") | Détection binaire |
+| Flox | $(dotfiles_status "$DOTFILES_PRE_STATUS_FLOX" "$status_flox") | Détection binaire |
+| Caddy | $(dotfiles_status "$DOTFILES_PRE_STATUS_CADDY" "$status_caddy") | Détection binaire |
+
+## Outils utilisateur
+
+- PATH shell: $HOME/.local/bin, $HOME/.npm-global/bin
+
+## Configuration
+
+- Utilisateurs ciblés: $(id -un)
+- Compte d'invocation: $(id -un)
+- Cibles de config (root / non-root): non-root privilégié (utilisateur courant)
+- Résumé santé/diagnostic:
+- Actions correctives suggérées:
+
+## Observations
+
+- Avertissements:
+- Erreurs bloquantes:
+- Recommandations:
+REPORT
+}
+
+dotfiles_capture_status
 
 # ============================================================================
 # SPECIAL MODES (exit early)
@@ -144,6 +304,35 @@ setup_user_local_mode() {
 }
 
 setup_user_local_mode
+
+log_privilege_scope() {
+    if [ "$(id -u)" = "0" ]; then
+        info "Privilege scope: root run; system paths and optional user provisioning are available"
+        echo "   Root-only extras enabled: apt/dpkg, /opt, /usr/local/bin, and interactive non-root user provisioning"
+        log INFO "Privilege scope: root run. Available: /opt, /usr/local/bin, apt/dpkg, sudo user provisioning, root-owned system services."
+    elif [ "$USER_LOCAL_MODE" = "true" ]; then
+        info "Privilege scope: non-root user-local run"
+        echo "   Installing user-local tools only: ~/.local/bin, ~/.npm-global, ~/.config"
+        echo "   Not applied here: apt/dpkg, /opt, /usr/local/bin, system services, ShipFlow system install"
+        log WARN "Privilege scope: non-root user-local run. Installs target ~/.local/bin, ~/.npm-global, and user config only."
+        log WARN "Root-only extras unavailable in this mode: apt/dpkg packages, /opt installs, /usr/local/bin symlinks, system service setup, new sudo user creation, and ShipFlow system installer."
+        log WARN "To add root-only extras later: run ShipFlow with sudo, or rerun dotfiles without USER_LOCAL_MODE when passwordless sudo is available."
+    elif [ "$HAS_SUDO" = "true" ]; then
+        info "Privilege scope: non-root run with sudo available"
+        echo "   System packages can use sudo; user config still targets: $HOME"
+        echo "   Root-only interactive user creation is not active unless dotfiles itself starts as root"
+        log INFO "Privilege scope: non-root with sudo. System package operations are available through sudo; user config remains scoped to $(id -un)."
+        log INFO "Root-only interactive extra not active: non-root user creation runs only when dotfiles itself is started as root in an interactive terminal."
+    else
+        info "Privilege scope: non-root run without sudo"
+        echo "   Installing user-local tools only where possible"
+        echo "   Missing root-only extras: apt/dpkg, /opt, /usr/local/bin, system services, ShipFlow system install"
+        log WARN "Privilege scope: non-root without sudo. System package operations are unavailable."
+        log WARN "Missing root-only extras: apt/dpkg packages, /opt installs, /usr/local/bin symlinks, tmux/mosh system packages, Doppler apt install, system GitHub CLI install, ShipFlow system installer, and new sudo user creation."
+    fi
+}
+
+log_privilege_scope
 
 # Detect execution mode
 if [ ! -t 0 ]; then
@@ -289,16 +478,16 @@ install_neovim() {
     tmp_dir=$(mktemp -d)
 
     if download_and_extract "$url" "$tmp_dir"; then
-        rm -rf "$install_dir" 2>/dev/null
-        mkdir -p "$(dirname "$install_dir")"
+        run_privileged rm -rf "$install_dir" 2>/dev/null
+        run_privileged mkdir -p "$(dirname "$install_dir")"
         local extracted_dir
         extracted_dir=$(find "$tmp_dir" -maxdepth 1 -type d -name "nvim*" | head -1)
         if [ -n "$extracted_dir" ]; then
-            mv "$extracted_dir" "$install_dir"
+            run_privileged mv "$extracted_dir" "$install_dir"
         else
-            mv "$tmp_dir"/* "$install_dir" 2>/dev/null || true
+            run_privileged mv "$tmp_dir"/* "$install_dir" 2>/dev/null || true
         fi
-        ln -sf "$install_dir/bin/nvim" "$bin_link"
+        run_privileged ln -sf "$install_dir/bin/nvim" "$bin_link"
         success "Neovim $version installed"
     else
         error "Neovim installation failed"
@@ -372,7 +561,7 @@ install_system_packages() {
     if [ "$OS" = "macos" ]; then
         if is_installed brew; then
             info "Installing via Homebrew..."
-            brew install git curl wget unzip ripgrep fd bat lsd trash-cli 2>/dev/null || true
+            brew install git curl wget unzip ripgrep fd bat lsd trash-cli tmux mosh 2>/dev/null || true
         fi
     elif [ "$OS" = "linux" ]; then
         if [ "$USER_LOCAL_MODE" = "true" ]; then
@@ -389,11 +578,14 @@ install_system_packages() {
                 install_github_binary "sharkdp/bat" "bat" "aarch64-unknown-linux-gnu.tar.gz"
                 install_github_binary "lsd-rs/lsd" "lsd" "aarch64-unknown-linux-gnu.tar.gz"
             fi
+            if ! is_installed tmux || ! is_installed mosh; then
+                warn "tmux/mosh require system packages; install them with apt/brew or rerun without USER_LOCAL_MODE when sudo is available"
+            fi
         else
             if [[ "$DISTRO_FAMILY" == *"debian"* ]] || [ "$DISTRO" = "ubuntu" ] || [ "$DISTRO" = "debian" ]; then
                 info "Installing via apt-get..."
                 sudo apt-get update >/dev/null 2>&1 || true
-                sudo apt-get install -y git curl wget unzip build-essential python3-pip ripgrep fd-find xclip bat lsd trash-cli >/dev/null 2>&1 || true
+                sudo apt-get install -y git curl wget unzip build-essential python3-pip ripgrep fd-find xclip bat lsd trash-cli tmux mosh >/dev/null 2>&1 || true
                 if [ -f /usr/bin/fdfind ] && [ ! -f /usr/bin/fd ]; then
                     sudo ln -s /usr/bin/fdfind /usr/bin/fd 2>/dev/null || true
                 fi
@@ -532,7 +724,7 @@ install_npm_tools() {
     fi
 
     if is_dry_run; then
-        echo -e "${BLUE}[DRY-RUN]${NC} Would install npm tools: tldr, @apify/mcpc, @openai/codex"
+        echo -e "${BLUE}[DRY-RUN]${NC} Would install npm tools: tldr, @apify/mcpc"
         return 0
     fi
 
@@ -542,7 +734,7 @@ install_npm_tools() {
     export PATH="$DOTFILES_NPM_DIR/bin:$PATH"
 
     info "Installing CLI tools via npm..."
-    for pkg in "tldr" "@apify/mcpc" "@openai/codex"; do
+    for pkg in "tldr" "@apify/mcpc"; do
         npm install -g "$pkg" 2>/dev/null && success "$pkg installed" || warn "$pkg failed"
     done
 
@@ -902,231 +1094,17 @@ setup_mcp_config() {
         return 0
     fi
 
-    # Guard: jq required for parsing MCP config
-    if ! is_installed jq; then
-        warn "jq not installed, skipping MCP setup (install jq and re-run with --only=mcp)"
-        return 0
-    fi
-
-    # Ensure claude CLI is discoverable
-    export PATH="$HOME/.local/bin:$HOME/.npm-global/bin:$PATH"
-    hash -r 2>/dev/null || true
-
-    info "Setting up MCP server configurations..."
-
+    info "Setting up shared MCP registry (ShipFlow owns Claude/Codex client config)..."
     if is_dry_run; then
-        echo -e "${BLUE}[DRY-RUN]${NC} Would setup MCP configs for Claude Code, Kilocode, etc."
+        echo -e "${BLUE}[DRY-RUN]${NC} Would link shared MCP registry files only"
         return 0
     fi
-
-    # Function to merge MCP servers into existing JSON config
-    merge_mcp_config() {
-        local source_mcp="$1"
-        local target_file="$2"
-        local target_dir
-        target_dir=$(dirname "$target_file")
-
-        mkdir -p "$target_dir"
-
-        if is_installed jq; then
-            if [ -f "$target_file" ]; then
-                local mcp_servers
-                mcp_servers=$(jq '.mcpServers // {}' "$source_mcp" 2>/dev/null)
-                jq --argjson mcp "$mcp_servers" '.mcpServers = ($mcp + (.mcpServers // {}))' "$target_file" > "${target_file}.tmp" && mv "${target_file}.tmp" "$target_file"
-                log DEBUG "Merged MCP servers into $target_file"
-            else
-                jq '{mcpServers: .mcpServers}' "$source_mcp" > "$target_file"
-                log DEBUG "Created $target_file with MCP servers"
-            fi
-        else
-            ln -sf "$source_mcp" "${target_dir}/mcp-servers.json"
-            log DEBUG "Created symlink (jq not available)"
-        fi
-    }
-
-    # Function to render stdio MCP servers into Codex TOML config.
-    # Remote HTTP/OAuth MCPs stay in mcp-servers.json until their auth is explicit.
-    merge_codex_mcp_config() {
-        local source_mcp="$1"
-        local target_file="$2"
-        local target_dir names tmp_file
-        target_dir=$(dirname "$target_file")
-        mkdir -p "$target_dir"
-        touch "$target_file"
-
-        names=$(jq -r '
-            .mcpServers
-            | to_entries[]
-            | select((.value.type // "stdio") == "stdio")
-            | select((.value.command // "") != "")
-            | .key
-        ' "$source_mcp" 2>/dev/null | paste -sd, -)
-
-        tmp_file=$(mktemp)
-        awk -v names="$names" '
-            BEGIN {
-                split(names, list, ",")
-                for (i in list) managed[list[i]] = 1
-                skip = 0
-            }
-            /^# >>> dotfiles codex mcp >>>$/ { skip = 1; next }
-            /^# <<< dotfiles codex mcp <<</ { skip = 0; next }
-            /^\[mcp_servers\.[^]]+\]$/ {
-                section = $0
-                sub(/^\[mcp_servers\./, "", section)
-                sub(/\]$/, "", section)
-                skip = (section in managed)
-                if (skip) next
-            }
-            /^\[/ && $0 !~ /^\[mcp_servers\.[^]]+\]$/ { skip = 0 }
-            !skip { print }
-        ' "$target_file" > "$tmp_file"
-        mv "$tmp_file" "$target_file"
-
-        {
-            echo ""
-            echo "# >>> dotfiles codex mcp >>>"
-            echo "# Generated from dotfiles/mcp/mcp-servers.json by ./install.sh --only=mcp."
-            echo "# Only stdio MCP servers are mirrored here; HTTP/OAuth servers need explicit auth handling."
-            jq -r '
-                .mcpServers
-                | to_entries[]
-                | select((.value.type // "stdio") == "stdio")
-                | select((.value.command // "") != "")
-                | "\n[mcp_servers." + .key + "]\ncommand = " + (.value.command | @json) + "\nargs = " + ((.value.args // []) | @json) + "\nenabled = false"
-            ' "$source_mcp"
-            echo "# <<< dotfiles codex mcp <<<"
-        } >> "$target_file"
-
-        log DEBUG "Merged stdio MCP servers into $target_file"
-    }
-
-    disable_claude_mcp_servers() {
-        if [ -f "$HOME/.claude.json" ] && is_installed jq; then
-            jq '(.disabledMcpServers = ((.mcpServers // {}) | keys))' "$HOME/.claude.json" > "$HOME/.claude.json.tmp" && mv "$HOME/.claude.json.tmp" "$HOME/.claude.json"
-        fi
-        if [ -f "$HOME/.claude/settings.json" ] && is_installed jq; then
-            jq '.enableAllProjectMcpServers = false' "$HOME/.claude/settings.json" > "$HOME/.claude/settings.json.tmp" && mv "$HOME/.claude/settings.json.tmp" "$HOME/.claude/settings.json"
-        fi
-    }
-
-    # Claude Code: use `claude mcp add` command (stores in ~/.claude.json)
-    if is_installed claude; then
-        log DEBUG "Configuring Claude Code MCP servers via CLI..."
-
-        # Read servers from mcp-servers.json and add them via CLI
-        if is_installed jq; then
-            local servers
-            servers=$(jq -r '.mcpServers | to_entries[] | .key' "$SCRIPT_DIR/mcp/mcp-servers.json" 2>/dev/null)
-
-            for server_name in $servers; do
-                local server_type server_url server_command server_args
-                server_type=$(jq -r ".mcpServers[\"$server_name\"].type // \"stdio\"" "$SCRIPT_DIR/mcp/mcp-servers.json")
-                server_url=$(jq -r ".mcpServers[\"$server_name\"].url // empty" "$SCRIPT_DIR/mcp/mcp-servers.json")
-                server_command=$(jq -r ".mcpServers[\"$server_name\"].command // empty" "$SCRIPT_DIR/mcp/mcp-servers.json")
-
-                # Skip if server already exists
-                if claude mcp get "$server_name" &>/dev/null; then
-                    log DEBUG "MCP server '$server_name' already configured, skipping"
-                    continue
-                fi
-
-                if [ -n "$server_url" ]; then
-                    # HTTP/SSE remote server
-                    claude mcp add --transport "$server_type" "$server_name" "$server_url" --scope user 2>/dev/null || true
-                    log DEBUG "Added remote MCP server: $server_name"
-                elif [ -n "$server_command" ]; then
-                    # Stdio local server
-                    server_args=$(jq -r ".mcpServers[\"$server_name\"].args | @sh" "$SCRIPT_DIR/mcp/mcp-servers.json" 2>/dev/null | tr -d "'")
-                    eval "claude mcp add --transport stdio \"$server_name\" --scope user -- $server_command $server_args" 2>/dev/null || true
-                    log DEBUG "Added stdio MCP server: $server_name"
-                fi
-            done
-
-            disable_claude_mcp_servers
-        fi
-        success "Claude Code MCP config updated"
-    else
-        log DEBUG "Claude Code CLI not installed, skipping MCP setup for Claude Code"
-    fi
-
-    # Kilocode: symlink to settings directory
-    if [ -d "$HOME/.kilocode" ]; then
-        local kilocode_dir="$HOME/.kilocode/cli/global/settings"
-        mkdir -p "$kilocode_dir"
-        merge_mcp_config "$SCRIPT_DIR/mcp/mcp-servers.json" "$kilocode_dir/mcp_settings.json"
-        success "Kilocode MCP config updated"
-    fi
-
-    # Claude Desktop (if exists)
-    if [ -d "$HOME/.config/claude" ]; then
-        merge_mcp_config "$SCRIPT_DIR/mcp/mcp-servers.json" "$HOME/.config/claude/claude_desktop_config.json"
-        success "Claude Desktop MCP config updated"
-    fi
-
-    # Create reference symlink in ~/.config for easy access
     mkdir -p "$HOME/.config/mcp"
     ln -sf "$SCRIPT_DIR/mcp/mcp-servers.json" "$HOME/.config/mcp/servers.json"
-
-    # Codex: mirror stdio MCP servers into TOML.
-    merge_codex_mcp_config "$SCRIPT_DIR/mcp/mcp-servers.json" "$HOME/.codex/config.toml"
-    if [ -f "$SCRIPT_DIR/codex/config.toml" ] && [ "$HOME/.codex/config.toml" -ef "$SCRIPT_DIR/codex/config.toml" ]; then
-        log DEBUG "Codex config is symlinked to dotfiles template"
+    if [ -d "$HOME/.kilocode/cli/global/settings" ] && is_installed jq; then
+        jq '{mcpServers: .mcpServers}' "$SCRIPT_DIR/mcp/mcp-servers.json" > "$HOME/.kilocode/cli/global/settings/mcp_settings.json"
     fi
-    success "Codex stdio MCP config updated"
-
-    # Interactive API key prompts for optional MCP servers
-    if [ -t 0 ] && is_installed claude && ! is_dry_run; then
-        echo ""
-        info "Optional MCP servers requiring API keys (Enter to skip):"
-        echo ""
-
-        # Firecrawl
-        local firecrawl_key="${FIRECRAWL_API_KEY:-}"
-        if [ -z "$firecrawl_key" ]; then
-            if use_gum; then
-                firecrawl_key=$(gum input --placeholder "fc-..." --header "Firecrawl API key (firecrawl.dev):" 2>/dev/null || echo "")
-            elif [ -t 0 ]; then
-                read -r -p "  Firecrawl API key (Enter to skip): " firecrawl_key
-            fi
-        fi
-        if [ -n "$firecrawl_key" ]; then
-            claude mcp add --transport http firecrawl "https://mcp.firecrawl.dev/${firecrawl_key}/v2/mcp" --scope user 2>/dev/null || true
-            success "Firecrawl MCP configured"
-        fi
-
-        # DeepL
-        local deepl_key="${DEEPL_API_KEY:-}"
-        if [ -z "$deepl_key" ]; then
-            if use_gum; then
-                deepl_key=$(gum input --placeholder "..." --header "DeepL API key (deepl.com/pro-api):" 2>/dev/null || echo "")
-            elif [ -t 0 ]; then
-                read -r -p "  DeepL API key (Enter to skip): " deepl_key
-            fi
-        fi
-        if [ -n "$deepl_key" ]; then
-            DEEPL_API_KEY="$deepl_key" claude mcp add --transport stdio deepl --scope user -- npx -y deepl-mcp-server 2>/dev/null || true
-            success "DeepL MCP configured"
-        fi
-
-        # DataForSEO
-        local dfs_key="${DFS_API_KEY:-}"
-        if [ -z "$dfs_key" ]; then
-            if use_gum; then
-                dfs_key=$(gum input --placeholder "user:pass en Base64" --header "DataForSEO Authorization Basic token:" 2>/dev/null || echo "")
-            elif [ -t 0 ]; then
-                read -r -p "  DataForSEO Basic auth token (Enter to skip): " dfs_key
-            fi
-        fi
-        if [ -n "$dfs_key" ]; then
-            claude mcp add --transport http dfs-mcp "https://mcp.dataforseo.com/http" --header "Authorization: Basic $dfs_key" --scope user 2>/dev/null || true
-            success "DataForSEO MCP configured"
-        fi
-
-        disable_claude_mcp_servers
-    fi
-
-    success "MCP configuration complete"
+    success "Shared MCP registry configured"
 }
 
 # ============================================================================
@@ -1154,11 +1132,11 @@ setup_configs() {
         create_symlink "$SCRIPT_DIR/nvim/MyNeovim" "$NVIM_CONFIG_DIR" false
     fi
 
-    # Yazi
-    [ -d "$SCRIPT_DIR/yazi" ] && create_symlink "$SCRIPT_DIR/yazi" "$HOME/.config/yazi" false
+    # Yazi (legacy: keep previous behavior in full config install flow)
+    sync_managed_symlink "$SCRIPT_DIR/yazi" "$HOME/.config/yazi" "${DOTFILES_INSTALLED_YAZI:-false}"
 
-    # Ranger
-    [ -d "$SCRIPT_DIR/ranger" ] && create_symlink "$SCRIPT_DIR/ranger" "$HOME/.config/ranger" false
+    # Ranger (legacy: keep previous behavior in full config install flow)
+    sync_managed_symlink "$SCRIPT_DIR/ranger" "$HOME/.config/ranger" "${DOTFILES_INSTALLED_RANGER:-false}"
 
     # Starship
     if [ -d "$SCRIPT_DIR/starship" ]; then
@@ -1184,20 +1162,7 @@ setup_configs() {
         create_symlink "$SCRIPT_DIR/ghostty/config" "$HOME/.config/ghostty/config" false
     fi
 
-    # Codex
-    if [ -f "$SCRIPT_DIR/codex/config.toml" ]; then
-        mkdir -p "$HOME/.codex"
-        create_symlink "$SCRIPT_DIR/codex/config.toml" "$HOME/.codex/config.toml" false
-    fi
-
-    # Claude Code skills (flat symlinks — one per skill)
-    if [ -d "$SCRIPT_DIR/claude/skills" ]; then
-        mkdir -p "$HOME/.claude/skills"
-        for skill_dir in "$SCRIPT_DIR/claude/skills"/*/; do
-            skill_name=$(basename "$skill_dir")
-            [ -d "$skill_dir" ] && create_symlink "$skill_dir" "$HOME/.claude/skills/$skill_name" false
-        done
-    fi
+    # ShipFlow owns Codex and Claude skills/config.
 
     # Claude Code statusLine — now managed by ShipFlow/install.sh
     log DEBUG "Claude Code statusLine is configured by ShipFlow install"
@@ -1205,11 +1170,20 @@ setup_configs() {
     # ShipFlow
     if [ "${SKIP_SHIPFLOW:-false}" != "true" ]; then
         local shipflow_dir="$HOME/shipflow"
+        local legacy_shipflow_dir="$HOME/ShipFlow"
+
+        if [ ! -d "$shipflow_dir" ] && [ -d "$legacy_shipflow_dir" ]; then
+            info "Migrating legacy path $legacy_shipflow_dir to lowercase $shipflow_dir"
+            if ! mv "$legacy_shipflow_dir" "$shipflow_dir" 2>/dev/null; then
+                ln -sfn "$legacy_shipflow_dir" "$shipflow_dir"
+            fi
+        fi
+
         if [ ! -d "$shipflow_dir" ]; then
             info "Cloning ShipFlow..."
             # Try SSH first, fallback to HTTPS
-            git clone "git@github.com:${GITHUB_USERNAME:-dianedef}/ShipFlow.git" "$shipflow_dir" 2>/dev/null || \
-                git clone "https://github.com/${GITHUB_USERNAME:-dianedef}/ShipFlow.git" "$shipflow_dir" 2>/dev/null || \
+            git clone "git@github.com:${GITHUB_USERNAME:-dianedef}/shipflow.git" "$shipflow_dir" 2>/dev/null || \
+                git clone "https://github.com/${GITHUB_USERNAME:-dianedef}/shipflow.git" "$shipflow_dir" 2>/dev/null || \
                 warn "Could not clone ShipFlow repo"
         fi
         if [ -d "$shipflow_dir" ]; then
@@ -1218,10 +1192,17 @@ setup_configs() {
             [ -f "$shipflow_dir/CLAUDE.md" ] && create_symlink "$shipflow_dir/CLAUDE.md" "$HOME/CLAUDE.md" false
             success "ShipFlow linked"
 
-            # Run ShipFlow installer automatically
+            # ShipFlow owns system-level AI/code workflow setup. It requires root.
             if [ -f "$shipflow_dir/install.sh" ] && ! is_dry_run; then
-                info "Running ShipFlow installer (PM2, Flox, Caddy)..."
-                bash "$shipflow_dir/install.sh" 2>&1 || warn "ShipFlow installation had issues"
+                if [ "$(id -u)" = "0" ]; then
+                    info "Running ShipFlow system installer (PM2, Flox, Caddy, Claude/Codex config)..."
+                    bash "$shipflow_dir/install.sh" 2>&1 || warn "ShipFlow installation had issues"
+                else
+                    warn "ShipFlow system installer requires root and was not run from dotfiles"
+                    echo "   To apply ShipFlow root-only setup later:"
+                    echo "   cd \"$shipflow_dir\" && sudo ./install.sh"
+                    log WARN "Skipped ShipFlow system installer from non-root dotfiles run. Required root-only scope: PM2/Flox/Caddy, global CLIs, /etc/dokploy, and all-user ShipFlow configuration."
+                fi
             fi
         fi
     fi
@@ -1267,7 +1248,6 @@ setup_shell_integration() {
 # Productivity aliases
 alias re='source ~/.bashrc && echo "✓ Shell reloaded"'
 alias reload='source ~/.bashrc && echo "✓ Shell reloaded"'
-alias c='claude'
 
 # Navigation
 alias ..='cd ..'
@@ -1287,10 +1267,10 @@ command -v lsd >/dev/null && alias ls='lsd' && alias ll='lsd -lh' && alias la='l
 
 # File managers
 alias r='ranger'
-alias y='yazi'
+if command -v yazi >/dev/null 2>&1; then
+    alias y='yazi'
+fi
 
-# AI coding tools
-alias co='codex'
 alias k='kilocode'
 alias o='opencode'
 alias mcp='mcpc'
@@ -1311,16 +1291,6 @@ ALIASES
             success "Migrated gp alias to smart function"
         fi
 
-        # Ensure AI coding aliases exist even if section was added previously
-        if ! grep -q "alias co=" "$HOME/.bashrc" 2>/dev/null; then
-            cat >> "$HOME/.bashrc" << 'AIALIASES'
-
-# AI coding tools
-alias co='codex'
-AIALIASES
-            success "Added Codex alias"
-        fi
-
         # Ensure dotfiles aliases exist even if section was added previously
         if ! grep -q "alias dot=" "$HOME/.bashrc" 2>/dev/null; then
             cat >> "$HOME/.bashrc" << 'DOTALIASES'
@@ -1337,6 +1307,7 @@ DOTALIASES
     # shellcheck disable=SC1091
     source "$SCRIPT_DIR/nvim/shell-integration.sh" 2>/dev/null || true
     hash -r 2>/dev/null
+
 }
 
 # ============================================================================
@@ -1347,6 +1318,7 @@ needs_system_packages() {
     [ -z "${DOTFILES_ONLY:-}" ] || \
     [[ ",$DOTFILES_ONLY," == *",neovim,"* ]] || \
     [[ ",$DOTFILES_ONLY," == *",yazi,"* ]] || \
+    [[ ",$DOTFILES_ONLY," == *",ranger,"* ]] || \
     [[ ",$DOTFILES_ONLY," == *",fzf,"* ]]
 }
 
@@ -1364,6 +1336,7 @@ if [ "${DOTFILES_PARALLEL:-false}" = "true" ]; then
     parallel_run "GitHub CLI" install_gh
     parallel_run "lsd" install_lsd
     parallel_run "bat" install_bat
+    parallel_run "Ranger" install_component ranger
     parallel_wait
 else
     install_neovim
@@ -1372,6 +1345,7 @@ else
     install_gh
     install_lsd
     install_bat
+    install_component ranger
 fi
 
 # --- Phase 3: Node.js ecosystem (order matters) ---
@@ -1389,50 +1363,24 @@ install_npm_tools
 if [ "${DOTFILES_PARALLEL:-false}" = "true" ]; then
     parallel_run "Starship" install_starship
     parallel_run "Zoxide" install_zoxide
-    parallel_run "Yazi" install_yazi
+    if [ "$INSTALL_YAZI_BY_DEFAULT" = "true" ]; then
+        parallel_run "Yazi" install_yazi
+    fi
     parallel_run "Doppler" install_doppler
     parallel_wait
 else
     install_starship
     install_zoxide
-    install_yazi
+    if [ "$INSTALL_YAZI_BY_DEFAULT" = "true" ]; then
+        install_yazi
+    fi
     install_doppler
 fi
 
 # --- Phase 5: AI Coding Tools ---
 install_ai_tools() {
     if ! should_install "ai-tools"; then return 0; fi
-
-    # Claude Code
-    if ! is_installed claude; then
-        if is_installed npm; then
-            info "Installing Claude Code..."
-            if is_dry_run; then
-                echo -e "${BLUE}[DRY-RUN]${NC} Would install @anthropic-ai/claude-code"
-            else
-                npm install -g @anthropic-ai/claude-code 2>/dev/null && success "Claude Code installed" || warn "Claude Code installation failed"
-                hash -r 2>/dev/null || true
-            fi
-        else
-            warn "npm not found, skipping Claude Code"
-        fi
-    else
-        success "Claude Code already installed"
-    fi
-
-    # OpenAI Codex (already in npm_tools but ensure it's present)
-    if ! command -v codex >/dev/null 2>&1; then
-        if is_installed npm; then
-            info "Installing OpenAI Codex..."
-            if is_dry_run; then
-                echo -e "${BLUE}[DRY-RUN]${NC} Would install @openai/codex"
-            else
-                npm install -g @openai/codex 2>/dev/null && success "Codex installed" || warn "Codex installation failed"
-            fi
-        fi
-    else
-        success "Codex already installed"
-    fi
+    info "Skipping Claude/Codex install in dotfiles (owned by ShipFlow installer)."
 }
 install_ai_tools
 
@@ -1441,9 +1389,11 @@ export PATH="$HOME/.local/bin:$HOME/.npm-global/bin:${DOTFILES_NPM_DIR:-$HOME/.n
 hash -r 2>/dev/null || true
 
 # --- Phase 6: Configuration ---
+capture_final_component_state
 setup_configs
 setup_mcp_config
 setup_shell_integration
+sync_component_artifacts
 
 # ============================================================================
 # NEOVIM PLUGINS
@@ -1528,12 +1478,10 @@ setup_non_root_user() {
     if [ -d /root/.ssh ]; then
         mkdir -p "$user_home/.ssh"
         [ -f /root/.ssh/authorized_keys ] && cp /root/.ssh/authorized_keys "$user_home/.ssh/" 2>/dev/null || true
-        [ -f /root/.ssh/id_ed25519 ] && cp /root/.ssh/id_ed25519 "$user_home/.ssh/" 2>/dev/null || true
         [ -f /root/.ssh/id_ed25519.pub ] && cp /root/.ssh/id_ed25519.pub "$user_home/.ssh/" 2>/dev/null || true
         [ -f /root/.ssh/known_hosts ] && cp /root/.ssh/known_hosts "$user_home/.ssh/" 2>/dev/null || true
         chown -R "$username:$username" "$user_home/.ssh"
         chmod 700 "$user_home/.ssh"
-        chmod 600 "$user_home/.ssh/id_ed25519" 2>/dev/null || true
         chmod 600 "$user_home/.ssh/authorized_keys" 2>/dev/null || true
         success "Cles SSH copiees"
     fi
@@ -1587,10 +1535,14 @@ else
     command -v claude >/dev/null 2>&1 && echo "    Claude Code ...... OK" || echo "    Claude Code ...... MISSING"
     command -v codex >/dev/null 2>&1 && echo "    Codex ............ OK" || echo "    Codex ............ MISSING"
     command -v pm2 >/dev/null 2>&1 && echo "    PM2 .............. OK" || echo "    PM2 .............. MISSING"
+    command -v tmux >/dev/null 2>&1 && echo "    Tmux ............. OK" || echo "    Tmux ............. MISSING"
+    command -v mosh >/dev/null 2>&1 && echo "    Mosh ............. OK" || echo "    Mosh ............. MISSING"
     command -v starship >/dev/null 2>&1 && echo "    Starship ......... OK" || echo "    Starship ......... MISSING"
     command -v flox >/dev/null 2>&1 && echo "    Flox ............. OK" || echo "    Flox ............. MISSING"
     command -v caddy >/dev/null 2>&1 && echo "    Caddy ............ OK" || echo "    Caddy ............ MISSING"
     echo ""
     echo "  Launch: sf (or shipflow)"
 fi
+generate_dotfiles_report
+echo "  Report: $DOTFILES_REPORT_FILE"
 echo "════════════════════════════════════════════════════════════════"

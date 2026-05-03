@@ -18,7 +18,12 @@
       "Bash(git checkout:*)",
       "Bash(git fetch:*)",
       "Bash(git pull:*)",
-      "Bash(git push:*)"
+      "Bash(git push:*)",
+      "Bash(curl -s https://api.github.com/repos/yetone/avante.nvim/releases/latest)",
+      "Bash(git -C /home/ubuntu/.local/share/nvim/lazy/avante.nvim tag --sort=-version:refname)",
+      "Bash(sudo apt *)",
+      "Bash(cmake --version)",
+      "Bash(make)"
     ]
   }
 }

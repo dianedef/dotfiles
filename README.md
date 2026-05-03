@@ -1,3 +1,24 @@
+---
+artifact: documentation
+metadata_schema_version: "1.0"
+artifact_version: "0.1.0"
+project: "dotfiles"
+created: "2026-04-26"
+updated: "2026-04-28"
+status: draft
+source_skill: sf-docs
+scope: readme
+owner: "dianedef"
+confidence: medium
+security_impact: low
+risk_level: low
+docs_impact: yes
+depends_on: []
+supersedes: []
+evidence: []
+next_step: "/sf-docs audit README.md"
+---
+
 # My Dotfiles
 
 Multi-platform development environment with modern terminal tools and AI-assisted workflows.
@@ -58,6 +79,31 @@ source ~/.bashrc
 
 **[→ Detailed Linux Guide](docs/installation/LINUX.md)** | **[→ .env Configuration](docs/ENV_CONFIGURATION.md)**
 
+### Installation scope and root usage
+
+`dotfiles` is primarily a user-level installer. Its normal target is the current user's home directory:
+
+- `~/.local/bin` for user-local binaries
+- `~/.npm-global` for npm global tools without writing to `/usr/local`
+- `~/.config` and `~/.bashrc` for editor, shell, and terminal configuration
+
+When sudo is available, the script may install generic system packages such as `git`, `curl`, `ripgrep`, `fd`, `bat`, `lsd`, `tmux`, or `mosh`. User configuration still remains scoped to the current `$HOME`.
+
+When launched without sudo or with `USER_LOCAL_MODE=true`, root-only extras are not applied: apt/dpkg packages, `/opt`, `/usr/local/bin`, system services, and new sudo user creation. The install log now reports this explicitly so the operator can see what was installed user-local and what still requires root.
+
+ShipFlow is separate: its system installer must be run as `sudo ~/shipflow/install.sh`. dotfiles links or clones ShipFlow, but does not silently elevate into the ShipFlow system installer from a non-root run.
+
+### Component-aware shell integration
+
+`dotfiles` applies shell aliases and config symlinks only for components that are actually installed when the run finishes.
+
+- `alias y='yazi'` is added only when `yazi` is available.
+- `alias r='ranger'` is added only when `ranger` is available.
+- `alias k`, `alias o`, `alias mcp` are added when available. `alias co` is owned by ShipFlow.
+- `~/.config/yazi` and `~/.config/ranger` are created only when the corresponding tool is installed.
+- In `--dry-run`, no `.bashrc` or config symlink is actually modified.
+- Synchronization runs on the final component state, including `--only` modes, so stale aliases/symlinks are removed and only installed-component artifacts are kept.
+
 ### Termux/Android
 
 ```bash
@@ -96,8 +142,7 @@ source ~/.bashrc
 - Shared MCP configuration lives in `mcp/mcp-servers.json`
 - Includes `consensus` at `https://mcp.consensus.app/mcp`
 - Consensus does not require an API key to get started; OAuth can trigger automatically on first use in supported clients
-- Claude Code manual add command: `claude mcp add consensus --transport http https://mcp.consensus.app/mcp`
-- Re-apply dotfiles MCP config with: `./install.sh --only=mcp`
+- ShipFlow owns Claude/Codex MCP client configuration. Dotfiles only links shared MCP registry files via `./install.sh --only=mcp`.
 
 ### Secrets Management
 - **Doppler** - Secure API key management across devices
@@ -121,11 +166,11 @@ source ~/.bashrc
 | OpenCode AI | ✅ | ✅ | ✅ (Alpine) |
 | Doppler | ✅ | ✅ | ✅ |
 
-## Claude Code Skills
+## ShipFlow Ownership
 
-This repo includes a full suite of Claude Code skills (global slash commands) in `claude/skills/`. They're symlinked to `~/.claude/skills/` on install.
+Claude Code skills, Codex config, Claude settings, and ShipFlow AI aliases are owned by the ShipFlow installer. Dotfiles no longer writes `~/.claude` or `~/.codex` for that workflow.
 
-### Audit System (8 domains)
+## Audit System (8 domains)
 
 Run `/shipflow-audit` in any project to launch a full 8-domain audit (code, design, copy, SEO, GTM, translation, dependencies, performance) with parallel agents. Three modes:
 
@@ -143,7 +188,7 @@ Run `/shipflow-audit` in any project to launch a full 8-domain audit (code, desi
 /shipflow-deps global                # Dependencies across all projects
 ```
 
-Global mode reads `~/ShipFlow/PROJECTS.md` (private, 8-domain applicability matrix) and launches parallel agents per project.
+Global mode reads `~/shipflow/PROJECTS.md` (private, 8-domain applicability matrix) and launches parallel agents per project.
 
 Each audit:
 - Scores every category A/B/C/D
@@ -205,12 +250,12 @@ When arguments are provided explicitly, prompts are skipped.
 
 ### ShipFlow Data (Private)
 
-Personal tracking data lives in a separate private repo (`~/ShipFlow/`):
+Personal tracking data lives in a separate private repo (`~/shipflow/`):
 - `TASKS.md` — master tracker across all projects
 - `AUDIT_LOG.md` — audit history with scores over time
 - `PROJECTS.md` — project registry with domain applicability matrix
 
-`install.sh` clones it automatically. Create yours with `gh repo create ShipFlow --private`.
+`install.sh` clones it automatically. Create yours with `gh repo create shipflow --private`.
 
 ## BMAD Method Integration
 
