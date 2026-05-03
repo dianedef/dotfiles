@@ -8,6 +8,17 @@ vim.opt.linebreak = true
 vim.opt.mouse = "a"
 vim.opt.mousescroll = "ver:3,hor:6"
 
+-- Prevent E35 "No previous regular expression" errors from snacks picker
+-- when @/ register is empty and something internally calls n/N or histdel("search")
+vim.api.nvim_create_autocmd("VimEnter", {
+  once = true,
+  callback = function()
+    if vim.fn.getreg("/") == "" then
+      vim.fn.setreg("/", "\\%^")
+    end
+  end,
+})
+
 vim.opt.sessionoptions = {
   "blank",
   "buffers",

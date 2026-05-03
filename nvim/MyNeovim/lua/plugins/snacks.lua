@@ -18,6 +18,20 @@ return {
     notifier = { enabled = false }, -- using nvim-notify
     picker = {
       sources = {
+        git_diff = {
+          layout = {
+            fullscreen = true,
+            layout = {
+              box = "vertical",
+              border = true,
+              title = "{title} {live} {flags}",
+              title_pos = "center",
+              { win = "input", height = 1, border = "bottom" },
+              { win = "list", height = 0.2, border = "none" },
+              { win = "preview", title = "{preview}", border = "top" },
+            },
+          },
+        },
         explorer = {
           git_status = true,
           git_status_open = true,

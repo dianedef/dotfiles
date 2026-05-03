@@ -2446,7 +2446,7 @@ install_component() {
         npm-tools)
             info "Installing npm tools..."
             if is_installed npm; then
-                for pkg in "@apify/mcpc" "tldr"; do
+                for pkg in $DOTFILES_NPM_PACKAGES; do
                     if npm list -g "$pkg" >/dev/null 2>&1; then
                         success "$pkg already installed"
                     else

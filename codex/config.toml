@@ -1,7 +1,20 @@
-model = "gpt-5.5"
-approval_policy = "on-request"
+# >>> shipflow codex autonomous >>>
+approval_policy = "never"
 sandbox_mode = "danger-full-access"
-model_reasoning_effort = "low"
+# <<< shipflow codex autonomous <<<
+
+# >>> shipflow codex tui >>>
+tui.status_line = ["model-with-reasoning", "current-dir", "context-remaining", "five-hour-limit", "weekly-limit"]
+tui.terminal_title = ["spinner", "thread", "project"]
+# <<< shipflow codex tui <<<
+
+
+model = "gpt-5.5"
+model_reasoning_effort = "high"
+# >>> shipflow codex rmcp >>>
+[beta]
+rmcp = true
+# <<< shipflow codex rmcp <<<
 
 [features]
 # `codex_apps` currently fails to initialize from this environment because
@@ -67,12 +80,121 @@ trust_level = "trusted"
 [projects."/home/claude/tubeflow_lab"]
 trust_level = "trusted"
 
+[projects."/home/ubuntu/ShipFlow"]
+trust_level = "trusted"
+
+[projects."/home/ubuntu"]
+trust_level = "trusted"
+
+[projects."/home/ubuntu/shipflow"]
+trust_level = "trusted"
+
+[projects."/home/ubuntu/dotfiles"]
+trust_level = "trusted"
+
+[projects."/home/ubuntu/contentflow"]
+trust_level = "trusted"
+
+[projects."/home/ubuntu/tubeflow_flutter"]
+trust_level = "trusted"
+
+[projects."/home/ubuntu/shipflow_app"]
+trust_level = "trusted"
+
+[projects."/home/ubuntu/voiceflowz"]
+trust_level = "trusted"
+
+[projects."/home/ubuntu/socialflow"]
+trust_level = "trusted"
+
+[projects."/home/ubuntu/zikflow"]
+trust_level = "trusted"
+
+[projects."/home/ubuntu/winflowz"]
+trust_level = "trusted"
+
+[projects."/home/ubuntu/plaisirsurprise"]
+trust_level = "trusted"
+
 [notice]
 hide_rate_limit_model_nudge = true
+fast_default_opt_out = true
 
 [notice.model_migrations]
 "gpt-5.3-codex" = "gpt-5.4"
 "gpt-5.2" = "gpt-5.4"
+
+[mcp_servers.clerk]
+url = "https://mcp.clerk.com/mcp"
+
+[mcp_servers.composio]
+command = "npx"
+args = ["-y", "composio-mcp@latest", "start"]
+enabled = false
+
+[mcp_servers.context7]
+command = "npx"
+args = ["-y", "@upstash/context7-mcp@latest"]
+
+[mcp_servers.convex]
+command = "npx"
+args = ["-y", "convex@latest", "mcp", "start"]
+
+[mcp_servers.dataforseo]
+command = "doppler"
+args = ["run", "--project", "contentflow_app", "--config", "prd", "--", "bash", "-lc", 'export DATAFORSEO_USERNAME="${DATAFORSEO_USERNAME:-${DATAFORSEO_LOGIN:-}}"; exec npx -y dataforseo-mcp-server']
+enabled = false
+
+[mcp_servers.deepl]
+command = "npx"
+args = ["-y", "deepl-mcp-server"]
+enabled = false
+
+[mcp_servers.gsc]
+command = "npx"
+args = ["-y", "@anthropic-community/mcp-gsc"]
+enabled = false
+
+[mcp_servers.mcp-kroki]
+command = "npx"
+args = ["-y", "@tkoba1974/mcp-kroki"]
+enabled = false
+
+[mcp_servers.mcp-server-chart]
+command = "npx"
+args = ["-y", "@antv/mcp-server-chart"]
+enabled = false
+
+[mcp_servers.openaiDeveloperDocs]
+url = "https://developers.openai.com/mcp"
+
+# >>> shipflow codex playwright mcp >>>
+[mcp_servers.playwright]
+command = "npx"
+args = ["-y", "@playwright/mcp@latest", "--executable-path", "/home/ubuntu/.cache/ms-playwright/chromium-1222/chrome-linux/chrome", "--headless", "--no-sandbox"]
+enabled = true
+
+[mcp_servers.playwright.tools]
+browser_snapshot = {}
+browser_click = {}
+browser_type = {}
+browser_take_screenshot = {}
+browser_console_messages = {}
+browser_network_requests = {}
+browser_run_code = {}
+
+[mcp_servers.playwright.tools.browser_navigate]
+approval_mode = "approve"
+
+[mcp_servers.playwright.tools.browser_resize]
+approval_mode = "approve"
+# <<< shipflow codex playwright mcp <<<
+
+[mcp_servers.supabase]
+url = "https://mcp.supabase.com/mcp"
+
+[mcp_servers.vercel]
+url = "https://mcp.vercel.com"
 
 [tui.model_availability_nux]
 "gpt-5.5" = 4

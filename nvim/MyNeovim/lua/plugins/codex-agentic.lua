@@ -11,6 +11,15 @@ local function normalize_dir(path)
   return normalized
 end
 
+local function resolve_codex_acp_command()
+  local local_bin = vim.fn.expand("~/.npm-global/bin/codex-acp")
+  if vim.fn.executable(local_bin) == 1 then
+    return local_bin
+  end
+
+  return "codex-acp"
+end
+
 local function resolve_neotree_path()
   local ok, manager = pcall(require, "neo-tree.sources.manager")
   if not ok or not manager.get_state then
@@ -144,7 +153,7 @@ return {
       acp_providers = {
         ["codex-acp"] = {
           name = "Codex ACP",
-          command = "/home/claude/.npm-global/bin/codex-acp",
+          command = resolve_codex_acp_command(),
           env = {},
         },
       },

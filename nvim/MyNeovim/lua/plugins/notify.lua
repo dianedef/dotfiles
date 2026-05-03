@@ -4,6 +4,7 @@ return {
   config = function()
     require("notify").setup({
       timeout = 10000,
+      background_colour = "#000000",
     })
     local banned_patterns = { "removed %d+ missing entries." }
     vim.notify = function(msg, ...)

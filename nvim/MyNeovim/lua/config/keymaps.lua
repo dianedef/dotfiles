@@ -2,6 +2,23 @@
 -- Default keymaps that are always set: https://github.com/LazyVim/LazyVim/blob/main/lua/lazyvim/config/keymaps.lua
 -- Add any additional keymaps here
 vim.keymap.set("t", "<C-Space>", "<C-\\><C-n>", { desc = "Exit terminal mode" })
+
+-- Snacks explorer under the Explorer group (leader e)
+-- Override the default <leader>e and <leader>E remaps from snacks_explorer extra
+pcall(vim.keymap.del, "n", "<leader>e")
+pcall(vim.keymap.del, "n", "<leader>E")
+vim.keymap.set("n", "<leader>es", function() Snacks.explorer({ cwd = LazyVim.root() }) end, { desc = "Snacks Explorer (root)" })
+vim.keymap.set("n", "<leader>eS", function() Snacks.explorer() end, { desc = "Snacks Explorer (cwd)" })
+
+-- Move Buffers picker under Buffer group
+vim.keymap.del("n", "<leader>,")
+vim.keymap.set("n", "<leader>bf", function() Snacks.picker.buffers() end, { desc = "Find Buffers" })
+
+-- Move split commands under Windows group
+vim.keymap.del("n", "<leader>-")
+vim.keymap.del("n", "<leader>|")
+vim.keymap.set("n", "<leader>w-", "<C-W>s", { desc = "Split Window Below", remap = true })
+vim.keymap.set("n", "<leader>w|", "<C-W>v", { desc = "Split Window Right", remap = true })
 vim.keymap.set("n", "<leader>uw", ":set wrap!<CR>", { desc = "Toggle wrap" })
 
 local function switch_to_other_buffer()
@@ -15,7 +32,7 @@ local function switch_to_other_buffer()
 end
 
 vim.keymap.set("n", "<leader>bb", switch_to_other_buffer, { desc = "Switch to Other Buffer" })
-vim.keymap.set("n", "<leader>`", switch_to_other_buffer, { desc = "Switch to Other Buffer" })
+vim.keymap.del("n", "<leader>`")
 
 -- Explicit mouse wheel scroll (fixes scroll down through mosh/tmux)
 vim.keymap.set({ "n", "v", "x" }, "<ScrollWheelUp>", "3<C-y>", { desc = "Scroll up" })

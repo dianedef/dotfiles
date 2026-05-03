@@ -3,6 +3,7 @@ return {
   enabled = true,
   dependencies = { "nvim-lua/plenary.nvim" },
   opts = {
+    terminal_cmd = "claude --permission-mode bypassPermissions",
     terminal = {
       split_side = "right",
       split_width_percentage = 0.5,
@@ -13,7 +14,7 @@ return {
     },
   },
   keys = {
-    { "<leader>ac", "<cmd>ClaudeCode<cr>", desc = "Claude Code (IDE)" },
-    { "<leader>as", "<cmd>ClaudeCodeSend<cr>", mode = { "n", "v" }, desc = "Claude Code Send (IDE)" },
+    { "<leader>acc", "<cmd>ClaudeCode<cr>", desc = "Claude Code (IDE)" },
+    { "<leader>acs", "<cmd>ClaudeCodeSend<cr>", mode = { "n", "v" }, desc = "Claude Code Send" },
   },
 }

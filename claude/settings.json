@@ -1,0 +1,59 @@
+{
+  "enableAllProjectMcpServers": false,
+  "statusLine": {
+    "type": "command",
+    "command": "bash /home/ubuntu/shipflow/.claude/statusline-starship.sh"
+  },
+  "theme": "dark",
+  "mcpServers": {
+    "context7": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "@upstash/context7-mcp@latest"
+      ]
+    },
+    "vercel": {
+      "url": "https://mcp.vercel.com"
+    },
+    "convex": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "convex@latest",
+        "mcp",
+        "start"
+      ]
+    },
+    "clerk": {
+      "url": "https://mcp.clerk.com/mcp"
+    },
+    "supabase": {
+      "url": "https://mcp.supabase.com/mcp"
+    },
+    "dataforseo": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "dataforseo-mcp-server"
+      ]
+    },
+    "playwright": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "@playwright/mcp@latest",
+        "--executable-path",
+        "/home/ubuntu/.cache/ms-playwright/chromium-1222/chrome-linux/chrome",
+        "--headless",
+        "--no-sandbox"
+      ]
+    }
+  },
+  "disabledMcpServers": [
+    "dataforseo"
+  ],
+  "enabledPlugins": {
+    "lua-lsp@claude-plugins-official": true
+  }
+}

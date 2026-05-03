@@ -30,7 +30,7 @@ return {
   end,
   keys = {
     {
-      "<leader>ap",
+      "<leader>apt",
       function()
         require("CopilotChat").toggle()
       end,
@@ -38,7 +38,7 @@ return {
       desc = "CopilotChat Toggle",
     },
     {
-      "<leader>ae",
+      "<leader>ape",
       function()
         ask_with_context("Explain this code and its role in the current project.")
       end,
@@ -46,7 +46,7 @@ return {
       desc = "CopilotChat Explain",
     },
     {
-      "<leader>ar",
+      "<leader>apr",
       function()
         ask_with_context("Review this code. Focus on bugs, regressions, and maintainability.")
       end,
@@ -54,7 +54,7 @@ return {
       desc = "CopilotChat Review",
     },
     {
-      "<leader>af",
+      "<leader>apf",
       function()
         ask_with_context("Help me fix this code. Explain the issue briefly and propose the smallest safe patch.")
       end,

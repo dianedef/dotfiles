@@ -174,13 +174,11 @@ return {
         "<leader>at",
         "<leader>ad",
         "<leader>aC",
-        "<leader>as",
         "<leader>aR",
         "<leader>a?",
         "<leader>ah",
         "<leader>aM",
         "<leader>am",
-        "<leader>ac",
         "<leader>aB",
       }
 

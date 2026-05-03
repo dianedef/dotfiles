@@ -11,28 +11,28 @@ return {
   end,
   keys = {
     {
-      "<leader>ag",
+      "<leader>agt",
       function()
         require("gemini_cli.api").toggle_terminal()
       end,
       desc = "Gemini Toggle",
     },
     {
-      "<leader>aa",
+      "<leader>aga",
       function()
         require("gemini_cli.api").add_current_file()
       end,
       desc = "Gemini Add File",
     },
     {
-      "<leader>ad",
+      "<leader>agd",
       function()
         require("gemini_cli.api").send_diagnostics_with_prompt()
       end,
       desc = "Gemini Fix Diagnostic",
     },
     {
-      "<leader>a/",
+      "<leader>ag/",
       function()
         require("gemini_cli.api").open_command_picker()
       end,

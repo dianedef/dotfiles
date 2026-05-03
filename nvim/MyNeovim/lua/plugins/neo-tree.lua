@@ -39,7 +39,7 @@ return {
   end,
   keys = {
     {
-      "<leader>e",
+      "<leader>ec",
       function()
         local neo_tree_ok, neo_tree_cmd = pcall(require, "neo-tree.command")
         if neo_tree_ok and neo_tree_cmd and neo_tree_cmd.execute then
@@ -51,7 +51,7 @@ return {
       desc = "NeoTree (cwd)",
     },
     {
-      "<leader>E",
+      "<leader>er",
       function()
         local neo_tree_ok, neo_tree_cmd = pcall(require, "neo-tree.command")
         if neo_tree_ok and neo_tree_cmd and neo_tree_cmd.execute then
@@ -67,11 +67,11 @@ return {
       desc = "NeoTree (root)",
     },
     {
-      "<leader>ge",
+      "<leader>eg",
       function()
         require("neo-tree.command").execute({ source = "git_status", toggle = true })
       end,
-      desc = "NeoTree Git",
+      desc = "NeoTree (git)",
     },
   },
   opts = function()

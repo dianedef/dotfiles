@@ -165,6 +165,8 @@ Important :
 
 ### Plugins qui montrent un vrai diff visuel
 
+- `Snacks picker` : `<leader>gd` ouvre la liste des fichiers/hunks modifiés avec preview
+- `Diffview` : `<leader>gv` ouvre la revue Git en plein écran avec fichiers en haut et diff en bas
 - `gitsigns` : actif par défaut, montre les changements dans la gouttière du buffer courant
 - `[h` / `]h` : hunk précédent / suivant
 - `<leader>ghp` : aperçu inline du hunk courant

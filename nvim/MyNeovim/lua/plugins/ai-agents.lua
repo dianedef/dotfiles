@@ -1,67 +1,67 @@
 -- AI Coding Agents (Claude Code)
-return {
-  -- Which-key labels
-  {
-    "folke/which-key.nvim",
-    optional = true,
-    opts = {
-      spec = {
-        { "<leader>a", group = "ai-agents" },
-      },
-    },
-  },
+local CLAUDE_AUTONOMOUS_CMD = "claude --permission-mode bypassPermissions"
 
-  -- Claude Code plain terminal (uses snacks.terminal from LazyVim)
-  -- Note: <leader>ac is handled by claudecode.nvim (IDE integration)
+local function half_height()
+  return math.floor(vim.o.lines / 2)
+end
+
+local function sync_terminal_height()
+  for _, win in ipairs(vim.api.nvim_list_wins()) do
+    if vim.api.nvim_win_is_valid(win) then
+      local cfg = vim.api.nvim_win_get_config(win)
+      if not cfg.relative or cfg.relative == "" then
+        local buf = vim.api.nvim_win_get_buf(win)
+        if vim.bo[buf].filetype == "snacks_terminal" then
+          pcall(vim.api.nvim_win_set_height, win, half_height())
+        end
+      end
+    end
+  end
+end
+
+vim.api.nvim_create_autocmd("VimResized", {
+  group = vim.api.nvim_create_augroup("claude_terminal_resize", { clear = true }),
+  callback = vim.schedule_wrap(sync_terminal_height),
+})
+
+return {
   {
     "folke/snacks.nvim",
     keys = {
       {
-        "<leader>ah",
+        "<leader>ach",
         function()
-          Snacks.terminal.open("claude", {
-            win = {
-              position = "bottom",
-              height = 0.5,
-            },
+          Snacks.terminal.open(CLAUDE_AUTONOMOUS_CMD, {
+            win = { position = "bottom", height = half_height() },
           })
         end,
         desc = "Claude CLI ─",
       },
       {
-        "<leader>av",
+        "<leader>acv",
         function()
-          Snacks.terminal.open("claude", {
-            win = {
-              position = "right",
-              width = 0.5,
-            },
+          Snacks.terminal.open(CLAUDE_AUTONOMOUS_CMD, {
+            win = { position = "right", width = 0.5 },
           })
         end,
         desc = "Claude CLI │",
       },
       {
-        "<leader>aH",
+        "<leader>acH",
         function()
-          local dir = vim.fn.expand("%:p:h")
-          Snacks.terminal.open("claude " .. vim.fn.shellescape(dir), {
-            win = {
-              position = "bottom",
-              height = 0.5,
-            },
+          Snacks.terminal.open(CLAUDE_AUTONOMOUS_CMD, {
+            cwd = vim.fn.expand("%:p:h"),
+            win = { position = "bottom", height = half_height() },
           })
         end,
         desc = "Claude CLI here ─",
       },
       {
-        "<leader>aV",
+        "<leader>acV",
         function()
-          local dir = vim.fn.expand("%:p:h")
-          Snacks.terminal.open("claude " .. vim.fn.shellescape(dir), {
-            win = {
-              position = "right",
-              width = 0.5,
-            },
+          Snacks.terminal.open(CLAUDE_AUTONOMOUS_CMD, {
+            cwd = vim.fn.expand("%:p:h"),
+            win = { position = "right", width = 0.5 },
           })
         end,
         desc = "Claude CLI here │",
