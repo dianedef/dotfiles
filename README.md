@@ -132,7 +132,6 @@ source ~/.bashrc
 
 ### AI-Powered CLI Tools
 - **GitHub Copilot CLI** (`copilot`) - AI assistant in your terminal
-- **Kilocode** (`kilocode` or `kilo`) - AI-powered code generation
 - **OpenCode AI** (`opencode`) - Open-source AI coding assistant
   - Supports: OpenAI (GPT), Anthropic (Claude), Google (Gemini), Groq
   - Neovim integration with `opencode.nvim` plugin

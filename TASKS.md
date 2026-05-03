@@ -10,7 +10,7 @@
 | Pri | Task | Status |
 |-----|------|--------|
 | 🟠 | Harden Termux local secret handling: silent input, shell-safe env serialization, and `0600` permissions for generated Shell-GPT config | ✅ done |
-| 🟠 | Stop destructive replacement of existing user config targets when dotfiles manages first-party config symlinks; unknown files should be backed up, not deleted | 🔄 in progress |
+| 🟠 | Stop destructive replacement of existing user config targets when dotfiles manages first-party config symlinks; unknown files should be backed up, not deleted | ✅ done |
 | 🟠 | MCP shared secrets/OAuth broker for Claude + Codex via a single `mcp/run-mcp <server>` wrapper and per-server env injection | 📋 todo |
 | 🟡 | Add a non-network installer smoke test that exercises `--dry-run`, `--only=mcp`, and symlink sync behavior under a temporary `HOME` | 📋 todo |
 | 🟡 | Replace remote install-script pipes with downloaded, pinned, checksum-verified artifacts where upstream releases make that practical | 📋 todo |
@@ -47,6 +47,6 @@
 
 **Remaining:**
 - [x] 🟠 Harden Termux local secret handling: silent input, shell-safe env serialization, and `0600` permissions for generated Shell-GPT config. `Done`
-- [ ] 🟠 Stop destructive replacement of existing user config targets when dotfiles manages first-party config symlinks; unknown files should be backed up, not deleted. `In progress`
+- [x] 🟠 Stop destructive replacement of existing user config targets when dotfiles manages first-party config symlinks; unknown files should be backed up, not deleted. `Done`
 - [ ] 🟡 Add a non-network installer smoke test that exercises `--dry-run`, `--only=mcp`, and symlink sync behavior under a temporary `HOME`.
 - [ ] 🟡 Replace remote install-script pipes with downloaded, pinned, checksum-verified artifacts where upstream releases make that practical.

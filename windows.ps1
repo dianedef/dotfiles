@@ -55,9 +55,6 @@ if (Get-Command npm -ErrorAction SilentlyContinue) {
     Write-Host "Installing GitHub Copilot CLI..." -ForegroundColor Yellow
     npm install -g @github/copilot
     
-    Write-Host "Installing Kilocode CLI..." -ForegroundColor Yellow
-    npm install -g @kilocode/cli
-    
     Write-Host "Installing OpenCode AI..." -ForegroundColor Yellow
     npm install -g opencode-ai
     
@@ -308,4 +305,4 @@ if (-not $ghAuthenticated) {
     }
 }
 
-Write-Host "`n🎊 Installation complete!" -ForegroundColor Green 
+Write-Host "`n🎊 Installation complete!" -ForegroundColor Green

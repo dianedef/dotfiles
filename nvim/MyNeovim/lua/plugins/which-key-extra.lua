@@ -39,8 +39,14 @@ return {
     })
   end,
   opts = {
+    icons = {
+      rules = {
+        { pattern = "ai", icon = "🤖", color = "purple" },
+        { pattern = "neotree", icon = "", color = "blue" },
+      },
+    },
     spec = {
-      { "<leader>a",    group = "AI", icon = "🤖" },
+      { "<leader>a",    group = "AI" },
       { "<leader>ac",   group = "Claude" },
       { "<leader>ag",   group = "Gemini" },
       { "<leader>ak",   group = "Codex" },

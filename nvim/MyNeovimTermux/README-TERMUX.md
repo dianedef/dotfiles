@@ -1,217 +1,126 @@
 # MyNeovim for Termux
 
-Configuration Neovim optimisée pour Android/Termux avec intégration d'agents IA.
+Configuration Neovim légère pour Android/Termux, alignée avec le script racine `termux.sh`.
 
-## 🚀 AI Coding Agents Installés
+## Installation
 
-### 1. **Aider** (Recommandé - Léger)
-Agent de code IA le plus simple pour Termux.
+Depuis Termux:
 
-**Installation:**
 ```bash
-pip install aider-chat
-```
-
-**Utilisation:**
-```bash
-# Avec OpenAI
-export OPENAI_API_KEY="your-key"
-aider
-
-# Avec Anthropic Claude
-export ANTHROPIC_API_KEY="your-key"
-aider --model claude-3-5-sonnet-20241022
-
-# Mode local avec Ollama
-aider --model ollama/codellama
-```
-
-**Configuration Neovim:**
-- Commande `:Aider` pour ouvrir dans terminal
-- `<leader>ai` pour démarrer Aider
-
----
-
-### 2. **Codex-Termux** (Léger ARM64)
-Agent de code optimisé pour Termux.
-
-**Installation:**
-```bash
-cd ~
-git clone https://github.com/nasarman/codex-termux.git
-cd codex-termux
-pip install -r requirements.txt
-```
-
-**Utilisation:**
-```bash
-cd codex-termux
-python codex.py
-```
-
----
-
-### 3. **OpenCode Termux (Alpine proot)** - Auto-installé ✨
-Version complète d'OpenCode pour mobile avec support multi-modèles.
-
-**Installation automatique:**
-Le script `termux.sh` installe et configure OpenCode automatiquement avec Doppler.
-
-**Configuration manuelle (si besoin):**
-```bash
-# Si pas encore installé
 cd ~/dotfiles
-./termux.sh  # Choisir 'y' pour OpenCode
-
-# Configuration API keys avec Doppler
-doppler secrets set OPENCODE_API_KEY="your_key"
-doppler secrets set OPENAI_API_KEY="sk-..."
-doppler secrets set ANTHROPIC_API_KEY="sk-ant-..."
-doppler secrets set GEMINI_AI="your_gemini_key"
-doppler secrets set GROQ="your_groq_key"
-```
-
-**Utilisation:**
-```bash
-# Depuis le terminal
-ao  # Alias configuré automatiquement
-
-# Depuis Neovim
-<leader>ao  # Ouvre OpenCode dans terminal flottant
-<leader>oa  # Ask OpenCode (inline)
-<leader>ox  # Execute action
-<leader>ot  # Toggle panel
-```
-
-**Modèles supportés:**
-- OpenAI (GPT-4, GPT-3.5)
-- Anthropic (Claude 3)
-- Google (Gemini)
-- Groq (Mixtral, Llama)
-
----
-
-### 4. **Sheikh CLI Assistant** (100% Local)
-Agent IA offline pour Termux.
-
-**Installation:**
-```bash
-pip install sheikh-cli-assistant
-```
-
-**Utilisation:**
-```bash
-sheikh init  # Configuration initiale
-sheikh       # Mode interactif
-sheikh "explain this code" file.py
-```
-
-**Features:**
-- ✅ Fonctionne 100% offline
-- ✅ Intégration llama.cpp possible
-- ✅ Analyse de code naturelle
-- ✅ File operations
-
----
-
-## 🔧 Configuration Neovim
-
-### Plugins ajoutés pour Termux:
-
-```lua
--- lua/plugins/ai-agents.lua
-return {
-  -- Aider integration
-  {
-    "vim-test/vim-test",
-    optional = true,
-    config = function()
-      vim.g["test#strategy"] = "neovim"
-    end,
-  },
-}
-```
-
-### Keybindings:
-
-| Key | Action |
-|-----|--------|
-| `<leader>ai` | Ouvrir Aider |
-| `<leader>ax` | Ouvrir Codex |
-| `<leader>as` | Sheikh assistant |
-| `<leader>ao` | OpenCode (Alpine) |
-
----
-
-## 📦 Installation Rapide (Script Automatique)
-
-Le script `termux.sh` installe automatiquement:
-1. ✅ MyNeovimTermux config
-2. ✅ Aider (pip)
-3. ✅ Codex-Termux (git clone)
-4. ⚠️ OpenCode optionnel (nécessite proot Alpine)
-5. ✅ Sheikh CLI Assistant
-
----
-
-## 🎯 Recommandations Termux
-
-### Agents IA par ordre de légèreté:
-1. **Aider** ⭐ (plus simple, API cloud)
-2. **Codex-Termux** (léger, ARM64 natif)
-3. **Sheikh** (100% local, mais consomme RAM)
-4. **OpenCode** (complet mais lourd, Alpine requis)
-
-### Modèles recommandés:
-- Claude 3.5 Sonnet (via API)
-- GPT-4 (via API)
-- Codellama 7B (Ollama local - 4GB+ RAM)
-- Deepseek Coder (Ollama local)
-
----
-
-## ⚠️ Limitations Termux
-
-- **RAM**: 4GB+ recommandé pour modèles locaux
-- **Stockage**: 2GB+ pour OpenCode + modèles
-- **CPU**: Performance mobile limitée
-- **Réseau**: Agents API nécessitent connexion stable
-
----
-
-## 🆘 Troubleshooting
-
-### Aider ne trouve pas l'API key:
-```bash
-echo 'export OPENAI_API_KEY="sk-..."' >> ~/.bashrc
+bash termux.sh
 source ~/.bashrc
 ```
 
-### Erreur pip install:
+Le script doit être lancé dans Termux, car il dépend de `pkg`.
+
+## Ce que `termux.sh` installe
+
+- Paquets Termux: `git`, `curl`, `wget`, `neovim`, `ripgrep`, `fd`, `fzf`, `python`, `nodejs-lts`, `gh`, `ranger`, `tree`, `termux-api`.
+- Prompt et navigation: Starship dans `~/.local/bin`, Zoxide via `pkg`.
+- Secrets optionnels: Doppler si compatible, sinon fichier local `~/.dotfiles-secrets.env`.
+- Configs symlinkées: `nvim/MyNeovimTermux`, `termux/termux.properties`, `ranger`, `starship-simple.toml`.
+- Agents CLI légers: Shell-GPT (`sgpt`) et LLM CLI (`llm`) avec plugins Gemini/Anthropic.
+- Font: JetBrainsMono Nerd Font dans `~/.termux/font.ttf` si absente.
+
+## Agents disponibles
+
+### Shell-GPT
+
+Commande rapide pour les prompts OpenAI:
+
 ```bash
-pkg update
-pkg upgrade
-pkg install python python-pip binutils
-pip install --upgrade pip
+gpt "explique cette erreur bash"
+sgpt "résume ce fichier"
 ```
 
-### OpenCode ne démarre pas:
-```bash
-# Vérifier Alpine
-proot-distro list
-proot-distro login alpine
+La clé OpenAI est écrite dans `~/.config/shell_gpt/.sgptrc` avec permissions `0600`.
 
-# Dans Alpine, vérifier Node.js
-node --version
-npm --version
+### LLM CLI
+
+Interface multi-provider:
+
+```bash
+ai "question"
+llm -m gemini-2.0-flash "question"
+llm -m claude-3-haiku "question"
+chat
 ```
 
----
+Les clés sont récupérées depuis Doppler si disponible, sinon depuis `~/.dotfiles-secrets.env`.
 
-## 📚 Ressources
+## Secrets locaux
 
-- [Aider Docs](https://aider.chat/docs/)
-- [Codex-Termux GitHub](https://github.com/nasarman/codex-termux)
-- [OpenCode Termux Fork](https://github.com/Charlie6F/opencode_termux_alpine_aarch64)
-- [Sheikh CLI](https://pypi.org/project/sheikh-cli-assistant/)
-- [Termux Wiki](https://wiki.termux.com/)
+Pour configurer les clés sans Doppler:
+
+```bash
+bash ~/dotfiles/doppler-setup-termux.sh
+```
+
+Le fichier généré est `~/.dotfiles-secrets.env`, avec permissions `0600`.
+
+## Keybindings Neovim
+
+La config Termux garde LazyVim léger. Les intégrations lourdes ne sont pas installées par défaut.
+
+| Key | Action |
+|-----|--------|
+| `<leader>ai` | Aider si installé manuellement |
+| `<leader>ax` | Codex-Termux si installé manuellement |
+| `<leader>as` | Sheikh si installé manuellement |
+| `<leader>ao` | OpenCode si installé manuellement |
+
+Ces mappings peuvent exister côté config, mais les binaires correspondants ne sont pas installés par `termux.sh`.
+
+## Choix volontairement exclus
+
+- GitHub Copilot CLI.
+- Aider auto-installé.
+- OpenCode auto-installé.
+- Neovim compilé depuis source.
+- Plugins LSP lourds.
+
+Objectif: garder une installation utilisable sur Android, avec peu de RAM et de stockage.
+
+## Icônes
+
+Après installation de `~/.termux/font.ttf`, il faut redémarrer complètement Termux:
+
+1. Forcer l'arrêt de l'app Termux dans Android.
+2. Rouvrir Termux.
+3. Lancer `nvim`.
+
+Si les icônes ne s'affichent pas, utiliser l'app officielle `Termux:Styling` depuis F-Droid.
+
+## Troubleshooting
+
+### `pkg` introuvable
+
+Le script n'est pas lancé dans Termux. Utiliser `install.sh` pour Linux/Codespaces.
+
+### Shell-GPT sans clé API
+
+```bash
+bash ~/dotfiles/doppler-setup-termux.sh
+source ~/.dotfiles-secrets.env
+```
+
+### LLM CLI sans provider
+
+```bash
+llm keys set openai
+llm keys set gemini
+llm keys set anthropic
+```
+
+### GitHub CLI non authentifié
+
+```bash
+gh auth login
+```
+
+ou:
+
+```bash
+bash ~/dotfiles/doppler-setup-termux.sh
+```

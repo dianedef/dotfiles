@@ -75,7 +75,7 @@ cd ~/dotfiles && ./install.sh
 - **yazi/** - Yazi file manager with plugins and flavors
 - **starship/** - Shell prompt themes with `starship-switch.sh` for switching
 - **lazygit/** - Git TUI configuration
-- **mcp/** - MCP server configurations (single source of truth for Claude Code, Kilocode, etc.)
+- **mcp/** - MCP server configurations (single source of truth for Claude Code and related CLI clients)
 - **_bmad/** - BMAD Method v6 (10 AI agents, 34 workflows)
 - **docs/** - Comprehensive documentation organized by category
 

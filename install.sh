@@ -94,7 +94,6 @@ capture_final_component_state() {
     if is_installed yazi; then DOTFILES_INSTALLED_YAZI="true"; else DOTFILES_INSTALLED_YAZI="false"; fi
     if is_installed ranger; then DOTFILES_INSTALLED_RANGER="true"; else DOTFILES_INSTALLED_RANGER="false"; fi
     if is_installed codex; then DOTFILES_INSTALLED_CODEX="true"; else DOTFILES_INSTALLED_CODEX="false"; fi
-    if is_installed kilocode; then DOTFILES_INSTALLED_KILOCODE="true"; else DOTFILES_INSTALLED_KILOCODE="false"; fi
     if is_installed opencode; then DOTFILES_INSTALLED_OPENCODE="true"; else DOTFILES_INSTALLED_OPENCODE="false"; fi
     if is_installed mcpc; then DOTFILES_INSTALLED_MCPC="true"; else DOTFILES_INSTALLED_MCPC="false"; fi
 }
@@ -106,7 +105,7 @@ sync_component_artifacts() {
 
     sync_bashrc_alias "r" "'ranger'" "${DOTFILES_INSTALLED_RANGER:-false}"
     sync_bashrc_alias "y" "'yazi'" "${DOTFILES_INSTALLED_YAZI:-false}"
-        sync_bashrc_alias "k" "'kilocode'" "${DOTFILES_INSTALLED_KILOCODE:-false}"
+    sync_bashrc_alias "k" "''" false
     sync_bashrc_alias "o" "'opencode'" "${DOTFILES_INSTALLED_OPENCODE:-false}"
     sync_bashrc_alias "mcp" "'mcpc'" "${DOTFILES_INSTALLED_MCPC:-false}"
     success "Component artifact synchronization applied"
@@ -117,7 +116,7 @@ generate_dotfiles_report() {
     local status_node status_npm status_claude status_codex status_mcpc status_nvim status_fzf status_bat
     local status_starship status_zoxide status_yazi status_ranger status_tmux status_mosh status_gh status_doppler
     local status_pm2 status_flox status_caddy
-    local status_alias_yazi status_alias_ranger status_alias_codex status_alias_kilocode status_alias_opencode status_alias_mcpc
+    local status_alias_yazi status_alias_ranger status_alias_codex status_alias_opencode status_alias_mcpc
     now="$(date -u +%Y-%m-%dT%H:%M:%SZ)"
 
     if command -v node >/dev/null 2>&1; then status_node="present"; else status_node=""; fi
@@ -142,7 +141,6 @@ generate_dotfiles_report() {
     if [ "${DOTFILES_INSTALLED_YAZI:-false}" = "true" ]; then status_alias_yazi="present"; else status_alias_yazi=""; fi
     if [ "${DOTFILES_INSTALLED_RANGER:-false}" = "true" ]; then status_alias_ranger="present"; else status_alias_ranger=""; fi
     if [ "${DOTFILES_INSTALLED_CODEX:-false}" = "true" ]; then status_alias_codex="present"; else status_alias_codex=""; fi
-    if [ "${DOTFILES_INSTALLED_KILOCODE:-false}" = "true" ]; then status_alias_kilocode="present"; else status_alias_kilocode=""; fi
     if [ "${DOTFILES_INSTALLED_OPENCODE:-false}" = "true" ]; then status_alias_opencode="present"; else status_alias_opencode=""; fi
     if [ "${DOTFILES_INSTALLED_MCPC:-false}" = "true" ]; then status_alias_mcpc="present"; else status_alias_mcpc=""; fi
 
@@ -177,12 +175,11 @@ generate_dotfiles_report() {
 | zoxide | $(dotfiles_status "$DOTFILES_PRE_STATUS_ZOXIDE" "$status_zoxide") | Détection binaire |
 | yazi | $(dotfiles_status "$DOTFILES_PRE_STATUS_YAZI" "$status_yazi") | Détection binaire |
 | ranger | $(dotfiles_status "$DOTFILES_PRE_STATUS_RANGER" "$status_ranger") | Détection binaire |
-| alias y (yazi) | $(dotfiles_status "" "$status_alias_yazi") | Disponible si `yazi` installé |
-| alias r (ranger) | $(dotfiles_status "" "$status_alias_ranger") | Disponible si `ranger` installé |
+| alias y (yazi) | $(dotfiles_status "" "$status_alias_yazi") | Disponible si yazi installé |
+| alias r (ranger) | $(dotfiles_status "" "$status_alias_ranger") | Disponible si ranger installé |
 | alias co (codex) | NON_APPLICABLE | gere par ShipFlow |
-| alias k (kilocode) | $(dotfiles_status "" "$status_alias_kilocode") | Disponible si `kilocode` installé |
-| alias o (opencode) | $(dotfiles_status "" "$status_alias_opencode") | Disponible si `opencode` installé |
-| alias mcp (mcpc) | $(dotfiles_status "" "$status_alias_mcpc") | Disponible si `mcpc` installé |
+| alias o (opencode) | $(dotfiles_status "" "$status_alias_opencode") | Disponible si opencode installé |
+| alias mcp (mcpc) | $(dotfiles_status "" "$status_alias_mcpc") | Disponible si mcpc installé |
 | tmux | $(dotfiles_status "$DOTFILES_PRE_STATUS_TMUX" "$status_tmux") | Détection binaire |
 | mosh | $(dotfiles_status "$DOTFILES_PRE_STATUS_MOSH" "$status_mosh") | Détection binaire |
 | GitHub CLI | $(dotfiles_status "$DOTFILES_PRE_STATUS_GH" "$status_gh") | Détection binaire |
@@ -1101,9 +1098,6 @@ setup_mcp_config() {
     fi
     mkdir -p "$HOME/.config/mcp"
     ln -sf "$SCRIPT_DIR/mcp/mcp-servers.json" "$HOME/.config/mcp/servers.json"
-    if [ -d "$HOME/.kilocode/cli/global/settings" ] && is_installed jq; then
-        jq '{mcpServers: .mcpServers}' "$SCRIPT_DIR/mcp/mcp-servers.json" > "$HOME/.kilocode/cli/global/settings/mcp_settings.json"
-    fi
     success "Shared MCP registry configured"
 }
 
@@ -1124,10 +1118,6 @@ setup_configs() {
 
     # Neovim config
     NVIM_CONFIG_DIR="$HOME/.config/nvim"
-    if [ -d "$NVIM_CONFIG_DIR" ]; then
-        mv "$NVIM_CONFIG_DIR" "${NVIM_CONFIG_DIR}.backup.$(date +%s)" 2>/dev/null || true
-    fi
-
     if [ -d "$SCRIPT_DIR/nvim/MyNeovim" ]; then
         create_symlink "$SCRIPT_DIR/nvim/MyNeovim" "$NVIM_CONFIG_DIR" false
     fi
@@ -1271,7 +1261,6 @@ if command -v yazi >/dev/null 2>&1; then
     alias y='yazi'
 fi
 
-alias k='kilocode'
 alias o='opencode'
 alias mcp='mcpc'
 

@@ -67,7 +67,7 @@ return {
       desc = "NeoTree (root)",
     },
     {
-      "<leader>eg",
+      "<leader>ee",
       function()
         require("neo-tree.command").execute({ source = "git_status", toggle = true })
       end,

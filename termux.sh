@@ -4,7 +4,8 @@
 # Version minimaliste - pas de copilot, neovim léger, outils essentiels seulement
 
 ## Configuration logging
-LOG_FILE="$PWD/termux-install.log"
+LOG_FILE="${TERMUX_DOTFILES_LOG_FILE:-$HOME/termux-install.log}"
+mkdir -p "$(dirname "$LOG_FILE")"
 touch "$LOG_FILE"
 
 log() {
@@ -12,10 +13,19 @@ log() {
     local message=$2
     local timestamp=$(date +"%Y-%m-%d %H:%M:%S")
     echo "[$timestamp] [$level] $message" >> "$LOG_FILE"
-    [ "$level" = "INFO" ] || [ "$level" = "ERROR" ] && echo "$message"
+    case "$level" in
+        INFO|ERROR|WARN) echo "$message" ;;
+    esac
 }
 
 log "INFO" "🤖 Starting TERMUX dotfiles installation (lightweight)"
+
+if ! command -v pkg >/dev/null 2>&1; then
+    log "ERROR" "❌ This installer must run inside Termux (pkg command not found)"
+    exit 1
+fi
+
+mkdir -p "$HOME/.local/bin" "$HOME/.cargo/bin" "$HOME/tmp"
 
 write_sgpt_config() {
     local key="$1"
@@ -48,6 +58,7 @@ pkg install -y \
   fzf \
   python \
   nodejs-lts \
+  gh \
   ranger \
   tree \
   termux-api >/dev/null 2>&1
@@ -79,17 +90,17 @@ FONT_INSTALLED=false
 
 if [ ! -f "$FONT_DIR/font.ttf" ]; then
     log "INFO" "Downloading JetBrainsMono Nerd Font..."
-    cd "$HOME/tmp" || cd /tmp
-    
+    FONT_TMP_DIR="$(mktemp -d "$HOME/tmp/nerd-font.XXXXXX")"
+
     # Télécharger JetBrainsMono Nerd Font (version complète avec icônes)
     FONT_URL="https://github.com/ryanoasis/nerd-fonts/releases/download/v3.2.1/JetBrainsMono.zip"
-    
-    if curl -fsSL "$FONT_URL" -o JetBrainsMono.zip; then
+
+    if curl -fsSL "$FONT_URL" -o "$FONT_TMP_DIR/JetBrainsMono.zip"; then
         log "INFO" "Download complete, extracting..."
-        
-        if unzip -q JetBrainsMono.zip "JetBrainsMonoNerdFont-Regular.ttf" 2>/dev/null; then
-            if [ -f "JetBrainsMonoNerdFont-Regular.ttf" ]; then
-                cp "JetBrainsMonoNerdFont-Regular.ttf" "$FONT_DIR/font.ttf"
+
+        if unzip -q "$FONT_TMP_DIR/JetBrainsMono.zip" "JetBrainsMonoNerdFont-Regular.ttf" -d "$FONT_TMP_DIR" 2>/dev/null; then
+            if [ -f "$FONT_TMP_DIR/JetBrainsMonoNerdFont-Regular.ttf" ]; then
+                cp "$FONT_TMP_DIR/JetBrainsMonoNerdFont-Regular.ttf" "$FONT_DIR/font.ttf"
                 chmod 644 "$FONT_DIR/font.ttf"
                 log "INFO" "✅ Nerd Font installed to ~/.termux/font.ttf"
                 FONT_INSTALLED=true
@@ -99,14 +110,14 @@ if [ ! -f "$FONT_DIR/font.ttf" ]; then
         else
             log "WARN" "⚠️  Failed to extract font from zip"
         fi
-        
+
         rm -rf JetBrainsMono.zip JetBrainsMono* *.ttf *.otf 2>/dev/null
     else
         log "ERROR" "❌ Failed to download Nerd Font from GitHub"
         log "INFO" "💡 Alternative: Install 'Termux:Styling' app from F-Droid"
     fi
-    
-    cd - > /dev/null
+
+    rm -rf "$FONT_TMP_DIR"
 else
     log "INFO" "✅ Nerd Font already configured in ~/.termux/font.ttf"
     FONT_INSTALLED=true
@@ -114,9 +125,6 @@ fi
 
 # --- 3. Outils légers uniquement ---
 log "INFO" "📦 Installing lightweight tools..."
-
-# Create bin directories first
-mkdir -p "$HOME/.local/bin" "$HOME/.cargo/bin" "$HOME/tmp"
 
 # Starship (prompt)
 if ! command -v starship &> /dev/null; then
@@ -161,12 +169,12 @@ if ! command -v doppler &> /dev/null; then
             DOPPLER_ARCH=""
             ;;
     esac
-    
-    if [ ! -z "$DOPPLER_ARCH" ]; then
+
+    if [ -n "$DOPPLER_ARCH" ]; then
         # Download Doppler CLI for Linux ARM64/AMD64
         DOPPLER_URL="https://cli.doppler.com/install.sh"
         curl -sL "$DOPPLER_URL" | sh -s -- --no-install --no-package-manager >/dev/null 2>&1
-        
+
         if [ -f "./doppler" ]; then
             mv ./doppler "$HOME/.local/bin/doppler"
             chmod +x "$HOME/.local/bin/doppler"
@@ -193,24 +201,59 @@ log "INFO" "⚙️ Setting up Neovim (MyNeovimTermux config)..."
 SOURCE_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 NVIM_CONFIG_DIR="$HOME/.config/nvim"
 
-# Backup existing config
-if [ -d "$NVIM_CONFIG_DIR" ]; then
-    log "INFO" "Backing up existing config..."
-    mv "$NVIM_CONFIG_DIR" "${NVIM_CONFIG_DIR}.backup.$(date +%s)"
-fi
-
 # --- 5. Symlinks ---
 log "INFO" "🔗 Creating symlinks..."
+
+next_backup_path() {
+    local TARGET=$1
+    local BACKUP_PATH="${TARGET}.backup.$(date +%s)"
+    local SUFFIX=1
+
+    while [ -e "$BACKUP_PATH" ] || [ -L "$BACKUP_PATH" ]; do
+        BACKUP_PATH="${TARGET}.backup.$(date +%s).$SUFFIX"
+        SUFFIX=$((SUFFIX + 1))
+    done
+
+    echo "$BACKUP_PATH"
+}
 
 create_symlink() {
     local SOURCE=$1
     local TARGET=$2
-    
+    local SOURCE_REAL
+
     [ ! -e "$SOURCE" ] && { log "WARN" "⚠️  $SOURCE not found"; return; }
-    [ -e "$TARGET" ] || [ -L "$TARGET" ] && rm -rf "$TARGET"
-    
+    SOURCE_REAL="$(readlink -f "$SOURCE" 2>/dev/null || echo "$SOURCE")"
+
+    if [ -e "$TARGET" ] || [ -L "$TARGET" ]; then
+        if [ -L "$TARGET" ]; then
+            local TARGET_REAL
+            TARGET_REAL="$(readlink -f "$TARGET" 2>/dev/null || true)"
+            if [ "$TARGET_REAL" = "$SOURCE_REAL" ]; then
+                log "INFO" "Already linked: $TARGET -> $SOURCE"
+                return
+            fi
+            if ! rm -f "$TARGET"; then
+                log "ERROR" "Failed to remove stale symlink: $TARGET"
+                return 1
+            fi
+            log "INFO" "Removed stale symlink: $TARGET"
+        else
+            local BACKUP_PATH
+            BACKUP_PATH="$(next_backup_path "$TARGET")"
+            if ! mv "$TARGET" "$BACKUP_PATH"; then
+                log "ERROR" "Failed to back up existing target: $TARGET -> $BACKUP_PATH"
+                return 1
+            fi
+            log "WARN" "Existing target backed up: $TARGET -> $BACKUP_PATH"
+        fi
+    fi
+
     mkdir -p "$(dirname "$TARGET")"
-    ln -s "$SOURCE" "$TARGET"
+    if ! ln -s "$SOURCE" "$TARGET"; then
+        log "ERROR" "Failed to link: $TARGET -> $SOURCE"
+        return 1
+    fi
     log "INFO" "Linked: $TARGET -> $SOURCE"
 }
 
@@ -345,7 +388,7 @@ if ! command -v llm &> /dev/null; then
     pip install llm >/dev/null 2>&1
     if command -v llm &> /dev/null; then
         log "INFO" "✅ LLM CLI installed"
-        
+
         # Install Gemini plugin (lightweight, free tier available)
         log "INFO" "Installing LLM plugins (Gemini, Claude)..."
         llm install llm-gemini >/dev/null 2>&1 && log "INFO" "   ✅ Gemini plugin"
@@ -373,21 +416,21 @@ fi
 # Configure API keys from Doppler (if available)
 if command -v doppler &>/dev/null && doppler me &>/dev/null; then
     log "INFO" "🔐 Configuring AI API keys from Doppler..."
-    
+
     # Get keys from Doppler
     OPENAI_KEY=$(doppler secrets get OPENAI_API_KEY --plain 2>/dev/null)
     GEMINI_KEY=$(doppler secrets get GEMINI_AI --plain 2>/dev/null)
     ANTHROPIC_KEY=$(doppler secrets get ANTHROPIC_API_KEY --plain 2>/dev/null)
-    
+
     # Configure LLM CLI keys
     if command -v llm &>/dev/null; then
-        [ ! -z "$OPENAI_KEY" ] && llm keys set openai "$OPENAI_KEY" 2>/dev/null && log "INFO" "   ✅ OpenAI key configured"
-        [ ! -z "$GEMINI_KEY" ] && llm keys set gemini "$GEMINI_KEY" 2>/dev/null && log "INFO" "   ✅ Gemini key configured"
-        [ ! -z "$ANTHROPIC_KEY" ] && llm keys set anthropic "$ANTHROPIC_KEY" 2>/dev/null && log "INFO" "   ✅ Anthropic key configured"
+        [ -n "$OPENAI_KEY" ] && llm keys set openai "$OPENAI_KEY" 2>/dev/null && log "INFO" "   ✅ OpenAI key configured"
+        [ -n "$GEMINI_KEY" ] && llm keys set gemini "$GEMINI_KEY" 2>/dev/null && log "INFO" "   ✅ Gemini key configured"
+        [ -n "$ANTHROPIC_KEY" ] && llm keys set anthropic "$ANTHROPIC_KEY" 2>/dev/null && log "INFO" "   ✅ Anthropic key configured"
     fi
-    
+
     # Configure Shell-GPT (uses OPENAI_API_KEY env var)
-    if [ ! -z "$OPENAI_KEY" ]; then
+    if [ -n "$OPENAI_KEY" ]; then
         if write_sgpt_config "$OPENAI_KEY"; then
             log "INFO" "   ✅ Shell-GPT configured"
         else
@@ -396,15 +439,16 @@ if command -v doppler &>/dev/null && doppler me &>/dev/null; then
     fi
 elif [ -f "$HOME/.dotfiles-secrets.env" ]; then
     log "INFO" "📝 Using local secrets from ~/.dotfiles-secrets.env"
+    # shellcheck disable=SC1091
     source "$HOME/.dotfiles-secrets.env"
-    
+
     if command -v llm &>/dev/null; then
-        [ ! -z "$OPENAI_API_KEY" ] && llm keys set openai "$OPENAI_API_KEY" 2>/dev/null
-        [ ! -z "$GOOGLE_AI_API_KEY" ] && llm keys set gemini "$GOOGLE_AI_API_KEY" 2>/dev/null
-        [ ! -z "$ANTHROPIC_API_KEY" ] && llm keys set anthropic "$ANTHROPIC_API_KEY" 2>/dev/null
+        [ -n "${OPENAI_API_KEY:-}" ] && llm keys set openai "$OPENAI_API_KEY" 2>/dev/null
+        [ -n "${GOOGLE_AI_API_KEY:-}" ] && llm keys set gemini "$GOOGLE_AI_API_KEY" 2>/dev/null
+        [ -n "${ANTHROPIC_API_KEY:-}" ] && llm keys set anthropic "$ANTHROPIC_API_KEY" 2>/dev/null
     fi
-    
-    if [ ! -z "$OPENAI_API_KEY" ]; then
+
+    if [ -n "${OPENAI_API_KEY:-}" ]; then
         if write_sgpt_config "$OPENAI_API_KEY"; then
             log "INFO" "   ✅ Shell-GPT configured from local secrets"
         else
@@ -417,6 +461,66 @@ else
 fi
 
 log "INFO" "✅ AI coding agents setup complete"
+
+# --- GitHub CLI Authentication (with Doppler fallback) ---
+log "INFO" "🔐 Setting up GitHub CLI..."
+GH_TOKEN="${GH_TOKEN:-}"
+
+# Try 1: Doppler token (automated)
+if command -v doppler &>/dev/null && doppler me &>/dev/null; then
+    GH_TOKEN=$(doppler secrets get GH_TOKEN --plain 2>/dev/null || doppler secrets get GITHUB_TOKEN --plain 2>/dev/null)
+
+    if [ -n "$GH_TOKEN" ] && command -v gh &>/dev/null; then
+        log "INFO" "Authenticating with Doppler token..."
+        echo "$GH_TOKEN" | gh auth login --with-token >/dev/null 2>&1
+
+        if gh auth status &>/dev/null; then
+            log "INFO" "✅ GitHub authenticated via Doppler"
+        else
+            log "WARN" "⚠️ Doppler token failed, manual login needed"
+            GH_TOKEN=""
+        fi
+    fi
+# Try 1b: Local .env file
+elif [ -f "$HOME/.dotfiles-secrets.env" ]; then
+    # shellcheck disable=SC1091
+    source "$HOME/.dotfiles-secrets.env"
+
+    if [ -n "${GITHUB_TOKEN:-}" ] && command -v gh &>/dev/null; then
+        log "INFO" "Authenticating with local .env token..."
+        echo "$GITHUB_TOKEN" | gh auth login --with-token >/dev/null 2>&1
+
+        if gh auth status &>/dev/null; then
+            log "INFO" "✅ GitHub authenticated via local .env"
+        else
+            log "WARN" "⚠️ Local token failed, manual login needed"
+            GH_TOKEN=""
+        fi
+    fi
+fi
+
+# Try 2: Already authenticated
+if ! command -v gh &>/dev/null; then
+    log "WARN" "⚠️ GitHub CLI not installed (pkg install gh)"
+elif [ -z "$GH_TOKEN" ] && gh auth status &>/dev/null; then
+    log "INFO" "✅ GitHub already authenticated"
+
+# Try 3: Manual login (interactive fallback)
+elif [ -z "$GH_TOKEN" ]; then
+    log "INFO" "⚠️ GitHub not authenticated"
+    log "INFO" "📝 Run: gh auth login  (or bash ~/dotfiles/doppler-setup-termux.sh)"
+
+    read -r -p "Authenticate now? (y/N): " AUTH_NOW
+    if [ "$AUTH_NOW" = "y" ] || [ "$AUTH_NOW" = "Y" ]; then
+        gh auth login
+    fi
+fi
+
+# --- Git Identity Configuration ---
+log "INFO" "👤 Configuring Git identity..."
+git config --global user.name "Diane"
+git config --global user.email "deforesd@gmail.com"
+log "INFO" "✅ Git identity configured"
 
 # --- 8. Finalisation ---
 echo ""
@@ -431,6 +535,7 @@ echo ""
 echo "📦 Packages installés:"
 echo "   • Neovim (MyNeovimTermux config)"
 echo "   • Ripgrep, fd, fzf"
+echo "   • GitHub CLI"
 echo "   • Starship prompt"
 echo "   • Zoxide (smart cd)"
 echo "   • Node.js LTS"
@@ -520,59 +625,3 @@ echo "   chat          → Mode conversation interactif"
 echo ""
 echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
 echo ""
-
-# --- GitHub CLI Authentication (with Doppler fallback) ---
-log "INFO" "🔐 Setting up GitHub CLI..."
-
-# Try 1: Doppler token (automated)
-if command -v doppler &>/dev/null && doppler me &>/dev/null; then
-    GH_TOKEN=$(doppler secrets get GH_TOKEN --plain 2>/dev/null || doppler secrets get GITHUB_TOKEN --plain 2>/dev/null)
-    
-    if [ ! -z "$GH_TOKEN" ]; then
-        log "INFO" "Authenticating with Doppler token..."
-        echo "$GH_TOKEN" | gh auth login --with-token >/dev/null 2>&1
-        
-        if gh auth status &>/dev/null; then
-            log "INFO" "✅ GitHub authenticated via Doppler"
-        else
-            log "WARN" "⚠️ Doppler token failed, manual login needed"
-            GH_TOKEN=""
-        fi
-    fi
-# Try 1b: Local .env file
-elif [ -f "$HOME/.dotfiles-secrets.env" ]; then
-    source "$HOME/.dotfiles-secrets.env"
-    
-    if [ ! -z "$GITHUB_TOKEN" ]; then
-        log "INFO" "Authenticating with local .env token..."
-        echo "$GITHUB_TOKEN" | gh auth login --with-token >/dev/null 2>&1
-        
-        if gh auth status &>/dev/null; then
-            log "INFO" "✅ GitHub authenticated via local .env"
-        else
-            log "WARN" "⚠️ Local token failed, manual login needed"
-            GH_TOKEN=""
-        fi
-    fi
-fi
-
-# Try 2: Already authenticated
-if [ -z "$GH_TOKEN" ] && gh auth status &>/dev/null; then
-    log "INFO" "✅ GitHub already authenticated"
-
-# Try 3: Manual login (interactive fallback)
-elif [ -z "$GH_TOKEN" ]; then
-    log "INFO" "⚠️ GitHub not authenticated"
-    log "INFO" "📝 Run: gh auth login  (or bash ~/dotfiles/doppler-setup-termux.sh)"
-    
-    read -p "Authenticate now? (y/N): " AUTH_NOW
-    if [ "$AUTH_NOW" = "y" ] || [ "$AUTH_NOW" = "Y" ]; then
-        gh auth login
-    fi
-fi
-
-# --- Git Identity Configuration ---
-log "INFO" "👤 Configuring Git identity..."
-git config --global user.name "Diane"
-git config --global user.email "deforesd@gmail.com"
-log "INFO" "✅ Git identity configured"

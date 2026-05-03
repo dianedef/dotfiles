@@ -43,7 +43,8 @@ log() {
 
     # Write to log file
     if [ -n "${DOTFILES_LOG_FILE:-}" ]; then
-        echo "[$timestamp] [$level] $message" >> "$DOTFILES_LOG_FILE" 2>/dev/null
+        mkdir -p "$(dirname "$DOTFILES_LOG_FILE")" 2>/dev/null || true
+        { echo "[$timestamp] [$level] $message"; } >> "$DOTFILES_LOG_FILE" 2>/dev/null || true
     fi
 
     # Console output with colors
@@ -389,10 +390,24 @@ download_and_extract() {
 # ============================================================================
 # SYMLINK MANAGEMENT
 # ============================================================================
+next_backup_path() {
+    local target=$1
+    local backup_path="${target}.backup.$(date +%s)"
+    local suffix=1
+
+    while [ -e "$backup_path" ] || [ -L "$backup_path" ]; do
+        backup_path="${target}.backup.$(date +%s).$suffix"
+        suffix=$((suffix + 1))
+    done
+
+    echo "$backup_path"
+}
+
 create_symlink() {
     local source=$1
     local target=$2
     local backup=${3:-true}
+    local source_real
 
     # Validation
     if [ ! -e "$source" ]; then
@@ -400,14 +415,42 @@ create_symlink() {
         return 1
     fi
 
-    # Backup existing
+    source_real="$(readlink -f "$source" 2>/dev/null || echo "$source")"
+
+    # Replace safely. Real files/directories are always backed up, even when
+    # backup=false is used for managed dotfiles links.
     if [ -e "$target" ] || [ -L "$target" ]; then
-        if [ "$backup" = "true" ]; then
-            local backup_path="${target}.backup.$(date +%s)"
-            mv "$target" "$backup_path"
-            log DEBUG "Backed up: $target -> $backup_path"
+        if [ -L "$target" ]; then
+            local target_real
+            target_real="$(readlink -f "$target" 2>/dev/null || true)"
+            if [ "$target_real" = "$source_real" ]; then
+                success "Already linked: $target -> $source"
+                return 0
+            fi
+
+            if [ "$backup" = "true" ]; then
+                local backup_path
+                backup_path="$(next_backup_path "$target")"
+                if ! mv "$target" "$backup_path"; then
+                    error "Failed to back up symlink: $target -> $backup_path"
+                    return 1
+                fi
+                log DEBUG "Backed up symlink: $target -> $backup_path"
+            else
+                if ! rm -f "$target"; then
+                    error "Failed to remove stale symlink: $target"
+                    return 1
+                fi
+                log DEBUG "Removed stale symlink: $target"
+            fi
         else
-            rm -rf "$target"
+            local backup_path
+            backup_path="$(next_backup_path "$target")"
+            if ! mv "$target" "$backup_path"; then
+                error "Failed to back up existing target: $target -> $backup_path"
+                return 1
+            fi
+            warn "Existing target backed up: $target -> $backup_path"
         fi
     fi
 
@@ -1278,7 +1321,7 @@ run_update_check() {
         printf "%-20s %-15s %-15s %s\n" "Package" "Installed" "Latest" "Status"
         printf "%-20s %-15s %-15s %s\n" "───────" "─────────" "──────" "──────"
 
-        local npm_packages=("@apify/mcpc" "@google/gemini-cli" "@kilocode/cli" "opencode-ai" "tldr")
+        local npm_packages=("@apify/mcpc" "@google/gemini-cli" "opencode-ai" "tldr")
         for pkg in "${npm_packages[@]}"; do
             local pkg_installed pkg_latest pkg_status
             pkg_installed=$(npm list -g "$pkg" 2>/dev/null | grep -oE '[0-9]+\.[0-9]+\.[0-9]+' | head -1)
@@ -1893,7 +1936,7 @@ Options:
                      Available: neovim,fzf,nerd-fonts,node,npm-tools,
                                 starship,zoxide,yazi,ranger,doppler,gh,
                                 lsd,bat,claude-code,claude-chill,copilot,
-                                kilocode,opencode,gemini,crush,vercel,mcp,
+                                opencode,gemini,crush,vercel,mcp,
                                 configs,shell-integration
   -p, --parallel     Run independent installations in parallel
   --no-gum           Disable gum UI (use plain text)
@@ -2188,7 +2231,6 @@ select_components() {
         "claude-code │ Claude Code (native binary)" \
         "claude-chill│ PTY proxy for Claude (mosh)" \
         "copilot     │ GitHub Copilot CLI" \
-        "kilocode    │ Kilocode CLI" \
         "opencode    │ OpenCode AI" \
         "gemini      │ Google Gemini CLI" \
         "crush       │ Crush (Charmbracelet)" \
@@ -2523,19 +2565,6 @@ install_component() {
             info "Installing Copilot..."
             npm install -g @github/copilot </dev/null >/dev/null 2>&1
             is_installed github-copilot-cli && success "Copilot installed" || warn "Copilot installation failed"
-            ;;
-        kilocode)
-            if is_installed kilocode; then
-                success "Kilocode already installed"
-                return 0
-            fi
-            if ! is_installed npm; then
-                warn "npm required (install Node.js first)"
-                return 1
-            fi
-            info "Installing Kilocode..."
-            npm install -g @kilocode/cli </dev/null >/dev/null 2>&1
-            is_installed kilocode && success "Kilocode installed" || warn "Kilocode installation failed"
             ;;
         opencode)
             if is_installed opencode; then
