@@ -137,9 +137,13 @@ Si on active un bon plugin de fold Markdown, le plus utile sera surtout :
 
 ### NeoTree
 
-- `<leader>e` : ouvre l'arborescence du projet courant
-- `<leader>E` : ouvre l'arborescence du `cwd`
-- `<leader>ge` : ouvre la vue Git de `neo-tree`
+Trois portes d'entrée — attention, « root » ici n'est ni le root système (`/`) ni le project root LazyVim, c'est juste `$HOME`.
+
+| Mapping | Ancré sur | Résolution chez toi |
+|---|---|---|
+| `<leader>er` (root) | `$HOME` (figé dans la config) | `/home/ubuntu` |
+| `<leader>ec` (cwd) | dossier où `nvim` a été lancé | figé au démarrage |
+| `<leader>ee` (git) | dossier git courant, vue git_status | ouvert auto au lancement |
 
 Ce qu'il faut retenir :
 
@@ -148,6 +152,43 @@ Ce qu'il faut retenir :
 - tu n'as plus besoin d'ouvrir chaque dossier pour savoir où il y a du travail
 - `l` ouvre un dossier ou un fichier
 - `h` referme un dossier
+
+### Changer la racine de l'explorateur
+
+Tu peux choisir n'importe quel dossier dans l'arborescence et le définir comme nouvelle racine, pour ne plus voir que son contenu.
+
+**NeoTree** (curseur sur le dossier) :
+
+- `.` : définir le dossier sous le curseur comme nouvelle racine (`set_root`)
+- `<BS>` : remonter d'un niveau (`navigate_up`)
+- `<` / `>` : naviguer entre les sources (filesystem / buffers / git)
+- `H` : toggle fichiers cachés
+
+**Snacks Explorer** (curseur sur le dossier) :
+
+- `.` : focus sur le dossier courant et le définir comme cwd (`explorer_focus`)
+- `<BS>` : remonter d'un niveau (`explorer_up`)
+- `<C-c>` : changer le cwd du tab vers le dossier courant (`tcd`)
+- `Z` : refermer tous les dossiers ouverts
+- `H` / `I` : toggle fichiers cachés / ignorés (gitignore)
+
+À retenir : `.` est le même raccourci dans les deux. Pour revenir en arrière, `<BS>` partout.
+
+### Chercher dans un dossier précis
+
+Quand tu es positionné sur un dossier dans l'explorateur, tu peux limiter une recherche à ce dossier.
+
+**Snacks Explorer** (curseur sur le dossier) :
+
+- `<C-f>` : grep (live grep) limité à ce dossier
+- `<C-t>` : find files limité à ce dossier
+- `<C-w>` : words / symbols limité à ce dossier
+- `?` dans l'explorateur : liste complète des mappings actifs (la source de vérité)
+
+**NeoTree** : pas de mapping intégré pour ça. Deux solutions :
+
+1. Yank + picker : positionner sur le dossier, `Y` pour copier le chemin, puis `<leader>sg` ou `<leader>ff` et coller le chemin dans le champ « cwd ».
+2. Ajouter un mapping custom dans `window.mappings` de `lua/plugins/neo-tree.lua` qui appelle Snacks/Telescope sur `state.tree:get_node().path`.
 
 ## Git
 
@@ -176,31 +217,83 @@ Important :
 - `Codex` (`agentic.nvim`) : montre un diff visuel pour les changements proposés par l'agent avant validation
 - `Claude Code` : ouvre aussi des diffs visuels quand Claude propose des modifications
 
-### Plugins présents mais désactivés
+### Neogit — agir sur Git sans taper de commandes
 
-- `Neogit` : interface Git complète
-- `Diffview` : très bon pour relire des diffs complets
-- `CodeDiff` : utile pour comparer deux blocs ou deux versions de code
+Interface type magit pour stage/commit/push au clavier.
 
-Donc, dans ton setup actuel :
+Raccourcis globaux :
 
-- pour savoir *où* ça a changé : `neo-tree` ou Git status
-- pour voir *ce qui* a changé dans un fichier : `gitsigns`
-- pour relire un diff proposé par une IA : `Codex` ou `Claude Code`
+- `<leader>gn` : ouvrir Neogit
+- `<leader>gc` : commit
+- `<leader>gp` : push
+- `<leader>gl` : pull
 
-### Plus tard : Neogit
+Dans le buffer Neogit (mode normal) :
 
-`Neogit` sert à agir sur Git depuis NeoVim :
+- `s` : stage le fichier ou le hunk sous le curseur
+- `S` : stage tout
+- `u` : unstage
+- `U` : unstage tout
+- `x` : discard (annule les changements)
+- `<Tab>` : déplier / replier un fichier pour voir le diff
+- `<Enter>` : ouvrir le fichier
+- `d` : ouvrir le diff dans Diffview
 
-- stage / unstage
-- commit
-- push / pull
-- review des changements
+Commits :
 
-Idée simple :
+- `cc` : commit (ouvre le buffer message, `:wq` pour valider)
+- `ca` : commit --amend (réécrit le dernier commit)
+- `ce` : extend (ajoute au dernier commit sans changer le message)
+- `cf` : fixup
+- `cw` : reword (changer juste le message)
 
-- `neo-tree` = voir
-- `neogit` = agir
+Push / pull / fetch :
+
+- `Pp` : push vers l'upstream
+- `Pf` : push --force-with-lease
+- `Pu` : push et set upstream
+- `Fa` : fetch all
+- `pp` : pull
+
+Branches / log :
+
+- `bb` : checkout branche
+- `bc` : créer une branche
+- `ll` : log de la branche
+- `q` : fermer Neogit
+
+### Diffview — relire les diffs en plein écran
+
+Raccourcis globaux :
+
+- `<leader>gv` : ouvrir Diffview (changements locaux)
+- `<leader>gV` : diff vs `origin/main` (ce que la PR contiendra)
+- `<leader>gq` : fermer Diffview
+- `<leader>gF` : historique du fichier courant
+
+Dans le panneau de fichiers (en haut) :
+
+- `j` / `k` : fichier suivant / précédent (le diff s'ouvre en bas)
+- `<Enter>` : ouvrir le fichier sélectionné
+- `-` : toggle stage / unstage du fichier
+- `s` : stage
+- `u` : unstage
+- `X` : discard
+- `R` : refresh
+- `<Tab>` / `<S-Tab>` : sauter au fichier suivant / précédent
+
+Dans la vue diff :
+
+- `]c` / `[c` : hunk suivant / précédent (natif Vim diff)
+- `do` : appliquer le hunk depuis l'autre côté (obtain)
+- `dp` : pousser le hunk vers l'autre côté (put)
+- `g?` : afficher l'aide complète des keymaps de Diffview
+
+Workflow type :
+
+- `neo-tree` = voir où ça a bougé
+- `Diffview` (`<leader>gv`) = lire ce qui a changé
+- `Neogit` (`<leader>gn`) = stage + commit + push
 
 ## Recherche et navigation
 

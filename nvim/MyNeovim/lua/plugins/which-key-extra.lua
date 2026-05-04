@@ -42,7 +42,8 @@ return {
     icons = {
       rules = {
         { pattern = "ai", icon = "🤖", color = "purple" },
-        { pattern = "neotree", icon = "", color = "blue" },
+        { pattern = "cheat", icon = "📖", color = "yellow" },
+        { pattern = "neotree", icon = "", color = "blue" },
       },
     },
     spec = {

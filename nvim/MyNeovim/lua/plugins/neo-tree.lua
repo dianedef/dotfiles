@@ -1,5 +1,6 @@
 local user_root_dir = vim.fs.normalize((vim.uv.os_homedir() or vim.env.HOME or vim.fn.expand("~")))
 local launch_dir = vim.fn.getcwd()
+local explorer_panel = require("config.explorer-panel")
 
 local function resolve_root_dir()
   return user_root_dir
@@ -16,24 +17,11 @@ return {
   cmd = "Neotree",
   event = "VimEnter",
   init = function()
-    local function open_root_tree()
-      local root_dir = resolve_root_dir()
-      local neo_tree_ok, neo_tree_cmd = pcall(require, "neo-tree.command")
-      if neo_tree_ok and neo_tree_cmd and neo_tree_cmd.execute then
-        neo_tree_cmd.execute({
-          source = "filesystem",
-          toggle = true,
-          dir = root_dir,
-          position = "left",
-        })
-      else
-        vim.cmd("Neotree")
-      end
-    end
-
     vim.api.nvim_create_autocmd("VimEnter", {
       callback = function()
-        vim.schedule(open_root_tree)
+        vim.schedule(function()
+          require("config.neotree-smart").open("git_status")
+        end)
       end,
     })
   end,
@@ -41,35 +29,21 @@ return {
     {
       "<leader>ec",
       function()
-        local neo_tree_ok, neo_tree_cmd = pcall(require, "neo-tree.command")
-        if neo_tree_ok and neo_tree_cmd and neo_tree_cmd.execute then
-          neo_tree_cmd.execute({ toggle = true, source = "filesystem", dir = launch_dir })
-          return
-        end
-        vim.cmd("Neotree")
+        require("config.neotree-smart").open("filesystem", launch_dir)
       end,
       desc = "NeoTree (cwd)",
     },
     {
       "<leader>er",
       function()
-        local neo_tree_ok, neo_tree_cmd = pcall(require, "neo-tree.command")
-        if neo_tree_ok and neo_tree_cmd and neo_tree_cmd.execute then
-          neo_tree_cmd.execute({
-            toggle = true,
-            source = "filesystem",
-            dir = resolve_root_dir(),
-          })
-          return
-        end
-        vim.cmd("Neotree")
+        require("config.neotree-smart").open("filesystem", resolve_root_dir())
       end,
       desc = "NeoTree (root)",
     },
     {
       "<leader>ee",
       function()
-        require("neo-tree.command").execute({ source = "git_status", toggle = true })
+        require("config.neotree-smart").open("git_status")
       end,
       desc = "NeoTree (git)",
     },
@@ -182,11 +156,23 @@ return {
       },
       window = {
         position = "left",
-        width = 36,
+        width = explorer_panel.width,
         mappings = {
           ["<space>"] = "none",
           ["l"] = "open",
           ["h"] = "close_node",
+          ["<c-f>"] = function(state)
+            local node = state.tree:get_node()
+            local path = node and (node.type == "directory" and node.path or vim.fs.dirname(node.path))
+              or vim.fn.getcwd()
+            require("snacks").picker.files({ cwd = path })
+          end,
+          ["<c-g>"] = function(state)
+            local node = state.tree:get_node()
+            local path = node and (node.type == "directory" and node.path or vim.fs.dirname(node.path))
+              or vim.fn.getcwd()
+            require("snacks").picker.grep({ cwd = path })
+          end,
         },
       },
       default_component_configs = {

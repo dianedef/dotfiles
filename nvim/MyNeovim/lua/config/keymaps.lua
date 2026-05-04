@@ -34,6 +34,38 @@ end
 vim.keymap.set("n", "<leader>bb", switch_to_other_buffer, { desc = "Switch to Other Buffer" })
 vim.keymap.del("n", "<leader>`")
 
+vim.keymap.set("n", "<leader>h", function()
+  local path = vim.fn.expand("~/dotfiles/nvim/MyNeovim/Cheat Sheet.md")
+  local target = vim.uv.fs_realpath(path) or vim.fn.fnamemodify(path, ":p")
+  local current_name = vim.api.nvim_buf_get_name(0)
+  local current = current_name ~= "" and (vim.uv.fs_realpath(current_name) or vim.fn.fnamemodify(current_name, ":p")) or ""
+
+  local function close_and_return()
+    local buf = vim.api.nvim_get_current_buf()
+    local alt = vim.fn.bufnr("#")
+    if alt > 0 and alt ~= buf and vim.api.nvim_buf_is_valid(alt) then
+      vim.cmd("buffer " .. alt)
+    else
+      vim.cmd("enew")
+    end
+    pcall(vim.api.nvim_buf_delete, buf, { force = false })
+  end
+
+  if current == target then
+    close_and_return()
+    return
+  end
+
+  vim.cmd("edit " .. vim.fn.fnameescape(path))
+  vim.bo.buflisted = false
+
+  vim.keymap.set("n", "q", close_and_return, { buffer = true, desc = "Fermer cheatsheet" })
+  vim.keymap.set("n", "<leader>bd", close_and_return, { buffer = true, desc = "Fermer cheatsheet" })
+  vim.keymap.set("n", "<leader>wd", close_and_return, { buffer = true, desc = "Fermer cheatsheet" })
+end, { desc = "Cheat Sheet" })
+
+require("shipflow").setup()
+
 -- Explicit mouse wheel scroll (fixes scroll down through mosh/tmux)
 vim.keymap.set({ "n", "v", "x" }, "<ScrollWheelUp>", "3<C-y>", { desc = "Scroll up" })
 vim.keymap.set({ "n", "v", "x" }, "<ScrollWheelDown>", "3<C-e>", { desc = "Scroll down" })

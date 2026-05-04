@@ -1,3 +1,5 @@
+local explorer_panel = require("config.explorer-panel")
+
 return {
   "folke/snacks.nvim",
   enabled = true,
@@ -38,7 +40,15 @@ return {
           git_untracked = true,
           diagnostics = true,
           follow_file = true,
-          layout = { preset = "sidebar", preview = false },
+          layout = explorer_panel.snacks_layout(),
+          win = {
+            list = {
+              keys = {
+                ["<c-f>"] = "picker_files",
+                ["<c-g>"] = "picker_grep",
+              },
+            },
+          },
           format = function(item, picker)
             local fmt = require("snacks.picker.format")
             local git = require("snacks.picker.source.git")

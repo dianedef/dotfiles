@@ -58,11 +58,11 @@ return {
       },
       sections = {
         -- remove defaults
-        lualine_a = {},
         lualine_b = {},
         lualine_y = {},
         lualine_z = {},
         -- filled later
+        lualine_a = { { "mode", color = { fg = colors.bg, bg = colors.violet, gui = "bold" } } },
         lualine_c = {},
         lualine_x = {},
       },
@@ -88,10 +88,104 @@ return {
     --  ╭──────────────────────────────────────────────────────────╮
     --  │ left section                                             │
     --  ╰──────────────────────────────────────────────────────────╯
+
+    -- Macro recording indicator
+    ins_left({
+      function()
+        local reg = vim.fn.reg_recording()
+        if reg == "" then return "" end
+        return "recording @" .. reg
+      end,
+      cond = function() return vim.fn.reg_recording() ~= "" end,
+      icon = "\u{f111}",
+      color = { fg = colors.red, gui = "bold" },
+    })
+
+    -- Search count
+    ins_left({
+      function()
+        if vim.v.hlsearch == 0 then return "" end
+        local ok, c = pcall(vim.fn.searchcount, { maxcount = 999, timeout = 100 })
+        if not ok or not c or (c.total or 0) == 0 then return "" end
+        return string.format("%d/%d", c.current or 0, c.total)
+      end,
+      cond = function()
+        if vim.v.hlsearch == 0 then return false end
+        local ok, c = pcall(vim.fn.searchcount, { maxcount = 999, timeout = 100 })
+        return ok and c and (c.total or 0) > 0
+      end,
+      icon = "\u{f002}",
+      color = { fg = colors.yellow },
+    })
+
     ins_left({
       "b:gitsigns_head",
-      icon = "",
+      icon = "",
       color = { fg = colors.violet },
+    })
+
+    ins_left({
+      function()
+        return vim.fn.fnamemodify(vim.fn.getcwd(), ":~")
+      end,
+      icon = "\u{f07b}",
+      color = { fg = colors.cyan },
+    })
+
+    local git_repo_cache = { cwd = "", modified = 0, untracked = 0, ahead = 0, behind = 0, in_repo = false, ts = 0 }
+
+    local function refresh_git_repo_stats()
+      local cwd = vim.fn.getcwd()
+      local lines = vim.fn.systemlist({ "git", "-C", cwd, "status", "--porcelain=v1", "--branch" })
+      if vim.v.shell_error ~= 0 then
+        git_repo_cache = { cwd = cwd, modified = 0, untracked = 0, ahead = 0, behind = 0, in_repo = false, ts = vim.uv.now() }
+        return
+      end
+      local modified, untracked, ahead, behind = 0, 0, 0, 0
+      for _, line in ipairs(lines) do
+        if line:sub(1, 2) == "##" then
+          local a = line:match("ahead (%d+)")
+          local b = line:match("behind (%d+)")
+          if a then ahead = tonumber(a) end
+          if b then behind = tonumber(b) end
+        elseif line:sub(1, 2) == "??" then
+          untracked = untracked + 1
+        elseif line ~= "" then
+          modified = modified + 1
+        end
+      end
+      git_repo_cache = { cwd = cwd, modified = modified, untracked = untracked, ahead = ahead, behind = behind, in_repo = true, ts = vim.uv.now() }
+    end
+
+    local function git_repo_stats()
+      local cwd = vim.fn.getcwd()
+      local now = vim.uv.now()
+      if git_repo_cache.cwd ~= cwd or (now - git_repo_cache.ts) > 3000 then
+        refresh_git_repo_stats()
+      end
+      return git_repo_cache
+    end
+
+    vim.api.nvim_create_autocmd({ "BufWritePost", "FocusGained", "DirChanged", "ShellCmdPost" }, {
+      group = vim.api.nvim_create_augroup("LualineGitRepoStats", { clear = true }),
+      callback = function()
+        git_repo_cache.ts = 0
+      end,
+    })
+
+    ins_left({
+      function()
+        local s = git_repo_stats()
+        if not s.in_repo then return "" end
+        local parts = {}
+        if s.modified > 0 then table.insert(parts, "\u{f459}" .. s.modified) end
+        if s.untracked > 0 then table.insert(parts, "\u{f128}" .. s.untracked) end
+        if s.ahead > 0 then table.insert(parts, "\u{f55c}" .. s.ahead) end
+        if s.behind > 0 then table.insert(parts, "\u{f544}" .. s.behind) end
+        return table.concat(parts, " ")
+      end,
+      color = { fg = colors.yellow },
+      cond = function() return git_repo_stats().in_repo end,
     })
 
     local function diff_source()
@@ -126,6 +220,20 @@ return {
         color_warn = { fg = colors.yellow },
         color_info = { fg = colors.cyan },
       },
+    })
+
+    -- Word count (markdown only)
+    ins_left({
+      function()
+        local wc = vim.fn.wordcount()
+        local n = wc.visual_words or wc.words or 0
+        return n .. " mots"
+      end,
+      cond = function()
+        return vim.bo.filetype == "markdown" or vim.bo.filetype == "text"
+      end,
+      icon = "\u{f02d}",
+      color = { fg = colors.green },
     })
 
     --  ╭──────────────────────────────────────────────────────────╮
@@ -176,6 +284,53 @@ return {
       ) .. data
       return data
     end
+
+    -- LSP attached
+    ins_right({
+      function()
+        local clients = vim.lsp.get_clients({ bufnr = 0 })
+        if #clients == 0 then return "" end
+        local names = {}
+        for _, c in ipairs(clients) do
+          table.insert(names, c.name)
+        end
+        return table.concat(names, ",")
+      end,
+      icon = "\u{f085}",
+      color = { fg = colors.cyan },
+      cond = function()
+        return #vim.lsp.get_clients({ bufnr = 0 }) > 0
+      end,
+    })
+
+    -- Lazy updates pending
+    ins_right({
+      function()
+        local ok, lazy = pcall(require, "lazy.status")
+        if not ok then return "" end
+        return lazy.has_updates() and lazy.updates() or ""
+      end,
+      cond = function()
+        local ok, lazy = pcall(require, "lazy.status")
+        return ok and lazy.has_updates()
+      end,
+      color = { fg = colors.orange },
+    })
+
+    -- Session loaded indicator (persistence.nvim)
+    local session_loaded = false
+    vim.api.nvim_create_autocmd("User", {
+      pattern = { "PersistenceLoadPost", "PersistenceSavePost" },
+      callback = function() session_loaded = true end,
+    })
+    ins_right({
+      function()
+        return vim.fn.fnamemodify(vim.fn.getcwd(), ":t")
+      end,
+      icon = "\u{f0c7}",
+      color = { fg = colors.magenta },
+      cond = function() return session_loaded end,
+    })
 
     ins_right({ custom_filetype })
     ins_right({ "location", color = { fg = colors.violet } })
