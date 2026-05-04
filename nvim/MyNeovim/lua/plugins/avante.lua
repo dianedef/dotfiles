@@ -1,3 +1,31 @@
+local function resolve_codex_acp_command()
+  local local_bin = vim.fn.expand("~/.npm-global/bin/codex-acp")
+  if vim.fn.executable(local_bin) == 1 then
+    return local_bin
+  end
+
+  local path_bin = vim.fn.exepath("codex-acp")
+  if path_bin ~= "" then
+    return path_bin
+  end
+
+  return "codex-acp"
+end
+
+local function codex_acp_env()
+  local env = {
+    NODE_NO_WARNINGS = "1",
+    HOME = os.getenv("HOME"),
+  }
+
+  local codex_home = os.getenv("CODEX_HOME")
+  if codex_home and codex_home ~= "" then
+    env.CODEX_HOME = codex_home
+  end
+
+  return env
+end
+
 return {
   "yetone/avante.nvim",
   enabled = true,
@@ -18,7 +46,7 @@ return {
     },
   },
   opts = {
-    provider = "copilot",
+    provider = "codex",
     selector = {
       provider = "snacks",
       provider_opts = {},
@@ -34,6 +62,14 @@ return {
         endpoint = "https://api.anthropic.com",
         model = "claude-3-5-sonnet-latest",
         proxy = "http://127.0.0.1:8888",
+      },
+    },
+    acp_providers = {
+      codex = {
+        command = resolve_codex_acp_command(),
+        args = {},
+        env = codex_acp_env(),
+        auth_method = "chatgpt",
       },
     },
     behaviour = {
