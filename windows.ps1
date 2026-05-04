@@ -31,9 +31,6 @@ winget install GitHub.cli
 Write-Host "Installing fzf..." -ForegroundColor Yellow
 winget install junegunn.fzf
 
-Write-Host "Installing Yazi..." -ForegroundColor Yellow
-winget install sxyazi.yazi
-
 Write-Host "Installing Python..." -ForegroundColor Yellow
 winget install Python.Python.3.11
 
@@ -163,10 +160,6 @@ $CONFIG_PATHS = @{
         "source" = "$HOME\dotfiles\nvim"
         "target" = "$env:LOCALAPPDATA\nvim"
     }
-    "yazi" = @{
-        "source" = "$HOME\dotfiles\yazi"
-        "target" = "$env:APPDATA\yazi"
-    }
     "starship" = @{
         "source" = "$HOME\dotfiles\starship\starship.toml"
         "target" = "$HOME\.config\starship.toml"
@@ -239,7 +232,6 @@ function ds { & "$HOME\dotfiles\doppler-setup.sh" }
 
 # File manager aliases
 Set-Alias -Name r -Value ranger
-Set-Alias -Name y -Value yazi
 "@
 
 if (-not (Get-Content $ProfilePath -ErrorAction SilentlyContinue | Select-String "File manager aliases")) {

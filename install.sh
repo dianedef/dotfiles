@@ -10,7 +10,7 @@
 #   ./install.sh --dry-run            # Preview what would be installed
 #   ./install.sh --check              # Check installation health
 #   ./install.sh --update             # Update all tools
-#   ./install.sh --only=neovim,yazi   # Install only specific components
+#   ./install.sh --only=neovim,ranger # Install only specific components
 #   ./install.sh --only=mcp           # Setup shared MCP registry only
 #   ./install.sh --uninstall          # Remove everything
 #   ./install.sh --parallel           # Parallel installation (faster)
@@ -67,7 +67,6 @@ dotfiles_capture_status() {
     command -v bat >/dev/null 2>&1 && DOTFILES_PRE_STATUS_BAT="present" || true
     command -v starship >/dev/null 2>&1 && DOTFILES_PRE_STATUS_STARSHIP="present" || true
     command -v zoxide >/dev/null 2>&1 && DOTFILES_PRE_STATUS_ZOXIDE="present" || true
-    command -v yazi >/dev/null 2>&1 && DOTFILES_PRE_STATUS_YAZI="present" || true
     command -v ranger >/dev/null 2>&1 && DOTFILES_PRE_STATUS_RANGER="present" || true
     command -v tmux >/dev/null 2>&1 && DOTFILES_PRE_STATUS_TMUX="present" || true
     command -v mosh >/dev/null 2>&1 && DOTFILES_PRE_STATUS_MOSH="present" || true
@@ -91,7 +90,6 @@ dotfiles_status() {
 }
 
 capture_final_component_state() {
-    if is_installed yazi; then DOTFILES_INSTALLED_YAZI="true"; else DOTFILES_INSTALLED_YAZI="false"; fi
     if is_installed ranger; then DOTFILES_INSTALLED_RANGER="true"; else DOTFILES_INSTALLED_RANGER="false"; fi
     if is_installed codex; then DOTFILES_INSTALLED_CODEX="true"; else DOTFILES_INSTALLED_CODEX="false"; fi
     if is_installed opencode; then DOTFILES_INSTALLED_OPENCODE="true"; else DOTFILES_INSTALLED_OPENCODE="false"; fi
@@ -100,11 +98,16 @@ capture_final_component_state() {
 
 sync_component_artifacts() {
     # Always align user-facing shortcuts and managed config symlinks with final state.
-    sync_managed_symlink "$SCRIPT_DIR/yazi" "$HOME/.config/yazi" "${DOTFILES_INSTALLED_YAZI:-false}"
     sync_managed_symlink "$SCRIPT_DIR/ranger" "$HOME/.config/ranger" "${DOTFILES_INSTALLED_RANGER:-false}"
 
     sync_bashrc_alias "r" "'ranger'" "${DOTFILES_INSTALLED_RANGER:-false}"
-    sync_bashrc_alias "y" "'yazi'" "${DOTFILES_INSTALLED_YAZI:-false}"
+    sync_bashrc_alias "y" "'yazi'" false
+    if is_dry_run; then
+        echo -e "${BLUE}[DRY-RUN]${NC} Would remove managed symlink: $HOME/.config/yazi"
+    elif [ -L "$HOME/.config/yazi" ] && [ "$(readlink "$HOME/.config/yazi" 2>/dev/null)" = "$SCRIPT_DIR/yazi" ]; then
+        rm -f "$HOME/.config/yazi"
+        success "Removed managed symlink: $HOME/.config/yazi"
+    fi
     sync_bashrc_alias "k" "''" false
     sync_bashrc_alias "o" "'opencode'" "${DOTFILES_INSTALLED_OPENCODE:-false}"
     sync_bashrc_alias "mcp" "'mcpc'" "${DOTFILES_INSTALLED_MCPC:-false}"
@@ -114,9 +117,9 @@ sync_component_artifacts() {
 generate_dotfiles_report() {
     local now
     local status_node status_npm status_claude status_codex status_mcpc status_nvim status_fzf status_bat
-    local status_starship status_zoxide status_yazi status_ranger status_tmux status_mosh status_gh status_doppler
+    local status_starship status_zoxide status_ranger status_tmux status_mosh status_gh status_doppler
     local status_pm2 status_flox status_caddy
-    local status_alias_yazi status_alias_ranger status_alias_codex status_alias_opencode status_alias_mcpc
+    local status_alias_ranger status_alias_codex status_alias_opencode status_alias_mcpc
     now="$(date -u +%Y-%m-%dT%H:%M:%SZ)"
 
     if command -v node >/dev/null 2>&1; then status_node="present"; else status_node=""; fi
@@ -129,7 +132,6 @@ generate_dotfiles_report() {
     if command -v bat >/dev/null 2>&1; then status_bat="present"; else status_bat=""; fi
     if command -v starship >/dev/null 2>&1; then status_starship="present"; else status_starship=""; fi
     if command -v zoxide >/dev/null 2>&1; then status_zoxide="present"; else status_zoxide=""; fi
-    if command -v yazi >/dev/null 2>&1; then status_yazi="present"; else status_yazi=""; fi
     if command -v ranger >/dev/null 2>&1; then status_ranger="present"; else status_ranger=""; fi
     if command -v tmux >/dev/null 2>&1; then status_tmux="present"; else status_tmux=""; fi
     if command -v mosh >/dev/null 2>&1; then status_mosh="present"; else status_mosh=""; fi
@@ -138,7 +140,6 @@ generate_dotfiles_report() {
     if command -v pm2 >/dev/null 2>&1; then status_pm2="present"; else status_pm2=""; fi
     if command -v flox >/dev/null 2>&1; then status_flox="present"; else status_flox=""; fi
     if command -v caddy >/dev/null 2>&1; then status_caddy="present"; else status_caddy=""; fi
-    if [ "${DOTFILES_INSTALLED_YAZI:-false}" = "true" ]; then status_alias_yazi="present"; else status_alias_yazi=""; fi
     if [ "${DOTFILES_INSTALLED_RANGER:-false}" = "true" ]; then status_alias_ranger="present"; else status_alias_ranger=""; fi
     if [ "${DOTFILES_INSTALLED_CODEX:-false}" = "true" ]; then status_alias_codex="present"; else status_alias_codex=""; fi
     if [ "${DOTFILES_INSTALLED_OPENCODE:-false}" = "true" ]; then status_alias_opencode="present"; else status_alias_opencode=""; fi
@@ -173,9 +174,7 @@ generate_dotfiles_report() {
 | bat | $(dotfiles_status "$DOTFILES_PRE_STATUS_BAT" "$status_bat") | Détection binaire |
 | starship | $(dotfiles_status "$DOTFILES_PRE_STATUS_STARSHIP" "$status_starship") | Détection binaire |
 | zoxide | $(dotfiles_status "$DOTFILES_PRE_STATUS_ZOXIDE" "$status_zoxide") | Détection binaire |
-| yazi | $(dotfiles_status "$DOTFILES_PRE_STATUS_YAZI" "$status_yazi") | Détection binaire |
 | ranger | $(dotfiles_status "$DOTFILES_PRE_STATUS_RANGER" "$status_ranger") | Détection binaire |
-| alias y (yazi) | $(dotfiles_status "" "$status_alias_yazi") | Disponible si yazi installé |
 | alias r (ranger) | $(dotfiles_status "" "$status_alias_ranger") | Disponible si ranger installé |
 | alias co (codex) | NON_APPLICABLE | gere par ShipFlow |
 | alias o (opencode) | $(dotfiles_status "" "$status_alias_opencode") | Disponible si opencode installé |
@@ -979,54 +978,6 @@ install_zoxide() {
 }
 
 # ============================================================================
-# YAZI INSTALLATION
-# ============================================================================
-install_yazi() {
-    if ! should_install "yazi"; then return 0; fi
-    if [ "$SKIP_YAZI_INSTALL" = "true" ]; then
-        info "Skipping Yazi (SKIP_YAZI_INSTALL=true)"
-        return 0
-    fi
-
-    if is_installed yazi && [ "${DOTFILES_UPDATE_MODE:-false}" != "true" ]; then
-        success "Yazi already installed"
-        return 0
-    fi
-
-    local yazi_version
-    yazi_version=$(get_latest_release "$DOTFILES_REPO_YAZI" "$DOTFILES_YAZI_VERSION")
-
-    local yazi_file
-    if [ "$OS" = "macos" ]; then
-        yazi_file="yazi-${ARCH}-apple-darwin.zip"
-    else
-        yazi_file="yazi-${ARCH}-unknown-linux-gnu.zip"
-    fi
-    # Fix arch naming
-    yazi_file="${yazi_file/arm64/aarch64}"
-
-    if is_dry_run; then
-        echo -e "${BLUE}[DRY-RUN]${NC} Would install Yazi $yazi_version"
-        return 0
-    fi
-
-    info "Installing Yazi $yazi_version..."
-    local url="https://github.com/$DOTFILES_REPO_YAZI/releases/download/$yazi_version/$yazi_file"
-    local tmp_dir
-    tmp_dir=$(mktemp -d)
-
-    if download_and_extract "$url" "$tmp_dir" "zip"; then
-        find "$tmp_dir" -name "yazi" -type f -exec mv {} "$DOTFILES_BIN_DIR/yazi" \;
-        chmod +x "$DOTFILES_BIN_DIR/yazi"
-        success "Yazi $yazi_version installed"
-    else
-        warn "Yazi installation failed"
-    fi
-
-    rm -rf "$tmp_dir"
-}
-
-# ============================================================================
 # DOPPLER INSTALLATION
 # ============================================================================
 install_doppler() {
@@ -1111,7 +1062,6 @@ setup_configs() {
 
     if is_dry_run; then
         echo -e "${BLUE}[DRY-RUN]${NC} Would setup Neovim config"
-        echo -e "${BLUE}[DRY-RUN]${NC} Would setup Yazi config"
         echo -e "${BLUE}[DRY-RUN]${NC} Would setup Starship config"
         return 0
     fi
@@ -1121,9 +1071,6 @@ setup_configs() {
     if [ -d "$SCRIPT_DIR/nvim/MyNeovim" ]; then
         create_symlink "$SCRIPT_DIR/nvim/MyNeovim" "$NVIM_CONFIG_DIR" false
     fi
-
-    # Yazi (legacy: keep previous behavior in full config install flow)
-    sync_managed_symlink "$SCRIPT_DIR/yazi" "$HOME/.config/yazi" "${DOTFILES_INSTALLED_YAZI:-false}"
 
     # Ranger (legacy: keep previous behavior in full config install flow)
     sync_managed_symlink "$SCRIPT_DIR/ranger" "$HOME/.config/ranger" "${DOTFILES_INSTALLED_RANGER:-false}"
@@ -1257,9 +1204,6 @@ command -v lsd >/dev/null && alias ls='lsd' && alias ll='lsd -lh' && alias la='l
 
 # File managers
 alias r='ranger'
-if command -v yazi >/dev/null 2>&1; then
-    alias y='yazi'
-fi
 
 alias o='opencode'
 alias mcp='mcpc'
@@ -1306,7 +1250,6 @@ DOTALIASES
 needs_system_packages() {
     [ -z "${DOTFILES_ONLY:-}" ] || \
     [[ ",$DOTFILES_ONLY," == *",neovim,"* ]] || \
-    [[ ",$DOTFILES_ONLY," == *",yazi,"* ]] || \
     [[ ",$DOTFILES_ONLY," == *",ranger,"* ]] || \
     [[ ",$DOTFILES_ONLY," == *",fzf,"* ]]
 }
@@ -1352,17 +1295,11 @@ install_npm_tools
 if [ "${DOTFILES_PARALLEL:-false}" = "true" ]; then
     parallel_run "Starship" install_starship
     parallel_run "Zoxide" install_zoxide
-    if [ "$INSTALL_YAZI_BY_DEFAULT" = "true" ]; then
-        parallel_run "Yazi" install_yazi
-    fi
     parallel_run "Doppler" install_doppler
     parallel_wait
 else
     install_starship
     install_zoxide
-    if [ "$INSTALL_YAZI_BY_DEFAULT" = "true" ]; then
-        install_yazi
-    fi
     install_doppler
 fi
 

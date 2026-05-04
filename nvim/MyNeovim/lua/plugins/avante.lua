@@ -171,6 +171,39 @@ return {
     },
   },
   config = function(_, opts)
+    local function patch_avante_invalid_buffer_root()
+      local ok, root = pcall(require, "avante.utils.root")
+      if not ok or type(root) ~= "table" or type(root.get) ~= "function" then return end
+      if root.__myneovim_invalid_buffer_root_patch then return end
+
+      local base_get = root.get
+
+      local function fallback_project_root(bufnr)
+        local cached = type(bufnr) == "number" and root.cache and root.cache[bufnr] or nil
+        if type(cached) == "string" and cached ~= "" then return cached end
+
+        local cwd = vim.uv.cwd()
+        if cwd and cwd ~= "" then return cwd end
+        return vim.fn.getcwd()
+      end
+
+      root.get = function(root_opts)
+        local bufnr = root_opts and root_opts.buf
+        if type(bufnr) == "number" and bufnr ~= 0 and not vim.api.nvim_buf_is_valid(bufnr) then
+          return fallback_project_root(bufnr)
+        end
+
+        local ok_get, project_root = pcall(base_get, root_opts)
+        if ok_get and type(project_root) == "string" and project_root ~= "" then
+          return project_root
+        end
+
+        return fallback_project_root(bufnr)
+      end
+
+      root.__myneovim_invalid_buffer_root_patch = true
+    end
+
     local function patch_avante_horizontal_input_layout()
       local ok, sidebar = pcall(require, "avante.sidebar")
       if not ok or type(sidebar) ~= "table" then return end
@@ -226,6 +259,7 @@ return {
     end
 
     clear_legacy_avante_keymaps()
+    patch_avante_invalid_buffer_root()
     patch_avante_horizontal_input_layout()
     require("avante").setup(opts)
     vim.api.nvim_set_hl(0, "AvanteTitle", { fg = "#ABB2BF", bg = "#353B45" })

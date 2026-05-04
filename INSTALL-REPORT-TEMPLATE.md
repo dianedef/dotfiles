@@ -43,7 +43,6 @@
 | bat | [INSTALLÉ \| DÉJÀ_PRÉSENT \| ÉCHEC \| NON_APPLICABLE] | |
 | starship | [INSTALLÉ \| DÉJÀ_PRÉSENT \| ÉCHEC \| NON_APPLICABLE] | |
 | zoxide | [INSTALLÉ \| DÉJÀ_PRÉSENT \| ÉCHEC \| NON_APPLICABLE] | |
-| yazi (optionnel par défaut) | [INSTALLÉ \| DÉJÀ_PRÉSENT \| NON_APPLICABLE] | défaut: non installé |
 | ranger | [INSTALLÉ \| DÉJÀ_PRÉSENT \| ÉCHEC \| NON_APPLICABLE] | |
 | tmux | [INSTALLÉ \| DÉJÀ_PRÉSENT \| ÉCHEC \| NON_APPLICABLE] | |
 | mosh | [INSTALLÉ \| DÉJÀ_PRÉSENT \| ÉCHEC \| NON_APPLICABLE] | |

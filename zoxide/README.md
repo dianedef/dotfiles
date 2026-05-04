@@ -13,7 +13,6 @@ Zoxide se souvient automatiquement des dossiers que vous visitez et vous permet 
 ### 1. Visitez des dossiers normalement
 ```bash
 cd ~/dotfiles/nvim/lua/plugins/
-cd ~/dotfiles/yazi/
 cd /tmp/test/
 cd ~/projects/myapp/src/
 ```
@@ -24,7 +23,6 @@ Aucune action requise ! Zoxide enregistre en arrière-plan.
 ### 3. Utilisez `z` pour sauter rapidement
 ```bash
 z plugins    # → ~/dotfiles/nvim/lua/plugins/
-z yazi       # → ~/dotfiles/yazi/
 z dot        # → ~/dotfiles/
 z myapp      # → ~/projects/myapp/src/
 ```
@@ -66,7 +64,7 @@ z ui         # Zoxide trouve le bon chemin !
 # Si plusieurs dossiers contiennent "config" :
 z config         # → Celui le plus fréquemment visité
 z config nvim    # → Spécifiquement nvim/config
-z config yazi    # → Spécifiquement yazi/config
+z config starship    # → Spécifiquement starship/config
 ```
 
 ### Naviguer entre projets
@@ -74,7 +72,7 @@ z config yazi    # → Spécifiquement yazi/config
 z dot       # → ~/dotfiles/
 z nvim      # → ~/dotfiles/nvim/
 z plugins   # → ~/dotfiles/nvim/lua/plugins/
-z yazi      # → ~/dotfiles/yazi/
+z ranger    # → ~/dotfiles/ranger/
 ```
 
 ## 🔍 Comprendre la Sélection

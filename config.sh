@@ -12,7 +12,7 @@ export DOTFILES_DRY_RUN="${DOTFILES_DRY_RUN:-false}"
 export DOTFILES_UPDATE_MODE="${DOTFILES_UPDATE_MODE:-false}"
 export DOTFILES_UNINSTALL_MODE="${DOTFILES_UNINSTALL_MODE:-false}"
 export DOTFILES_CHECK_MODE="${DOTFILES_CHECK_MODE:-false}"
-export DOTFILES_ONLY="${DOTFILES_ONLY:-}"  # Comma-separated list: neovim,starship,yazi
+export DOTFILES_ONLY="${DOTFILES_ONLY:-}"  # Comma-separated list: neovim,starship,ranger
 export DOTFILES_PARALLEL="${DOTFILES_PARALLEL:-false}"
 export DOTFILES_INTERACTIVE="${DOTFILES_INTERACTIVE:-auto}"  # auto, true, false
 export DOTFILES_NO_GUM="${DOTFILES_NO_GUM:-false}"
@@ -53,7 +53,6 @@ export DOTFILES_DEBUG_MODE="${DOTFILES_DEBUG_MODE:-false}"
 # ============================================================================
 export DOTFILES_NVIM_VERSION="${DOTFILES_NVIM_VERSION:-v0.10.2}"
 export DOTFILES_NVM_VERSION="${DOTFILES_NVM_VERSION:-v0.39.7}"
-export DOTFILES_YAZI_VERSION="${DOTFILES_YAZI_VERSION:-v0.4.2}"
 export DOTFILES_NERD_FONTS_VERSION="${DOTFILES_NERD_FONTS_VERSION:-v3.2.1}"
 export DOTFILES_DOPPLER_VERSION="${DOTFILES_DOPPLER_VERSION:-3.69.0}"
 
@@ -61,7 +60,6 @@ export DOTFILES_DOPPLER_VERSION="${DOTFILES_DOPPLER_VERSION:-3.69.0}"
 # GITHUB REPOSITORIES
 # ============================================================================
 export DOTFILES_REPO_NEOVIM="neovim/neovim"
-export DOTFILES_REPO_YAZI="sxyazi/yazi"
 export DOTFILES_REPO_DOPPLER="DopplerHQ/cli"
 export DOTFILES_REPO_FZF="junegunn/fzf"
 export DOTFILES_REPO_LAZYVIM="LazyVim/starter"
@@ -72,8 +70,6 @@ export DOTFILES_REPO_LAZYVIM="LazyVim/starter"
 export SKIP_NEOVIM_INSTALL="${SKIP_NEOVIM_INSTALL:-false}"
 export SKIP_NERD_FONTS="${SKIP_NERD_FONTS:-false}"
 export SKIP_NPM_TOOLS="${SKIP_NPM_TOOLS:-false}"
-export SKIP_YAZI_INSTALL="${SKIP_YAZI_INSTALL:-false}"
-export INSTALL_YAZI_BY_DEFAULT="${INSTALL_YAZI_BY_DEFAULT:-false}"
 export SKIP_DOPPLER_INSTALL="${SKIP_DOPPLER_INSTALL:-false}"
 export SKIP_MCP_INSTALL="${SKIP_MCP_INSTALL:-false}"
 export AUTO_INSTALL_NVIM_PLUGINS="${AUTO_INSTALL_NVIM_PLUGINS:-false}"
@@ -100,7 +96,7 @@ export DOTFILES_DANGEROUS_CHARS_REGEX='[;&|$`]'
 # ============================================================================
 # AVAILABLE COMPONENTS (for --only flag)
 # ============================================================================
-export DOTFILES_ALL_COMPONENTS="neovim,fzf,gum,nerd-fonts,node,npm-tools,starship,zoxide,yazi,ranger,doppler,gh,lsd,bat,claude-code,claude-chill,copilot,opencode,gemini,crush,vercel,mcp,configs,shell-integration"
+export DOTFILES_ALL_COMPONENTS="neovim,fzf,gum,nerd-fonts,node,npm-tools,starship,zoxide,ranger,doppler,gh,lsd,bat,claude-code,claude-chill,copilot,opencode,gemini,crush,vercel,mcp,configs,shell-integration"
 
 # ============================================================================
 # CHECKSUMS (SHA256 for critical downloads - updated periodically)

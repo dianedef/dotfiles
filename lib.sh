@@ -719,8 +719,7 @@ show_help_aliases() {
 │ dot     │ ~/dotfiles/install.sh   │ Run installer           │
 │ ds      │ doppler-setup.sh        │ Setup API keys          │
 ├─────────┼─────────────────────────┼─────────────────────────┤
-│ y       │ yazi                    │ File manager            │
-│ r       │ ranger                  │ File manager (Termux)   │
+│ r       │ ranger                  │ File manager            │
 │ z <dir> │ zoxide                  │ Smart cd                │
 ├─────────┼─────────────────────────┼─────────────────────────┤
 │ gs      │ git status              │ Git status              │
@@ -844,7 +843,7 @@ show_help_troubleshooting() {
 → If in /usr/bin, update via apt:
   sudo apt update && sudo apt upgrade
 
-## Yazi/Neovim not found after install
+## Neovim not found after install
 
 → Ensure ~/.local/bin is in PATH:
   echo 'export PATH="$HOME/.local/bin:$PATH"' >> ~/.bashrc
@@ -881,7 +880,6 @@ Multi-platform dotfiles for developers who work across:
    - Neovim (with LazyVim)
    - Starship prompt
    - Zoxide (smart cd)
-   - Yazi (file manager)
    - fzf (fuzzy finder)
    - bat, lsd, ripgrep, fd
 
@@ -1055,7 +1053,6 @@ run_health_check() {
     health_check_tool "fzf" "fzf" || failed=$((failed + 1))
     health_check_tool "Starship" "starship" || failed=$((failed + 1))
     health_check_tool "Zoxide" "zoxide" || failed=$((failed + 1))
-    health_check_tool "Yazi" "yazi" || failed=$((failed + 1))
     health_check_tool "Doppler" "doppler" || failed=$((failed + 1))
     health_check_tool "ripgrep" "rg" || failed=$((failed + 1))
     health_check_tool "fd" "fd" || failed=$((failed + 1))
@@ -1070,7 +1067,6 @@ run_health_check() {
     echo ""
     echo "🔗 Symlinks:"
     health_check_symlink "Neovim config" "$HOME/.config/nvim" || failed=$((failed + 1))
-    health_check_symlink "Yazi config" "$HOME/.config/yazi" || failed=$((failed + 1))
     health_check_symlink "Starship config" "$HOME/.config/starship.toml" || failed=$((failed + 1))
     health_check_symlink "Tmux config" "$HOME/.tmux.conf" || failed=$((failed + 1))
     health_check_symlink "MCP config" "$HOME/.config/mcp/servers.json" || failed=$((failed + 1))
@@ -1142,9 +1138,6 @@ get_installed_version() {
         neovim)
             nvim --version 2>/dev/null | head -1 | grep -oE 'v[0-9]+\.[0-9]+\.[0-9]+' || echo "unknown"
             ;;
-        yazi)
-            yazi --version 2>/dev/null | grep -oE 'v?[0-9]+\.[0-9]+\.[0-9]+' | head -1 || echo "unknown"
-            ;;
         starship)
             starship --version 2>/dev/null | grep -oE '[0-9]+\.[0-9]+\.[0-9]+' || echo "unknown"
             ;;
@@ -1212,9 +1205,6 @@ get_latest_version() {
         neovim)
             get_latest_release "$DOTFILES_REPO_NEOVIM" "$DOTFILES_NVIM_VERSION"
             ;;
-        yazi)
-            get_latest_release "$DOTFILES_REPO_YAZI" "$DOTFILES_YAZI_VERSION"
-            ;;
         starship)
             get_latest_release "starship/starship" "v1.18.0"
             ;;
@@ -1275,7 +1265,7 @@ run_update_check() {
     echo "════════════════════════════════════════════════════════════════"
     echo ""
 
-    local tools=("neovim" "yazi" "starship" "zoxide" "fzf" "doppler" "gum" "gh" "node" "bat" "lsd" "lazygit")
+    local tools=("neovim" "starship" "zoxide" "fzf" "doppler" "gum" "gh" "node" "bat" "lsd" "lazygit")
     DOTFILES_UPDATES_AVAILABLE=()
 
     info "Checking for updates..."
@@ -1353,7 +1343,7 @@ run_update_check() {
         local auto_update=() manual_update=()
         for item in "${DOTFILES_UPDATES_AVAILABLE[@]}"; do
             case "$item" in
-                neovim|yazi|starship|zoxide|fzf|doppler|gum|gh|bat|lsd|npm:*)
+                neovim|starship|zoxide|fzf|doppler|gum|gh|bat|lsd|npm:*)
                     auto_update+=("$item")
                     ;;
                 node|lazygit)
@@ -1539,21 +1529,6 @@ update_tool() {
                 rm -f /tmp/bat.deb
             fi
             ;;
-        yazi)
-            info "Updating Yazi..."
-            local latest arch
-            latest=$(get_latest_release "sxyazi/yazi" "v0.4.0")
-            arch="x86_64"
-            [ "$(uname -m)" = "aarch64" ] && arch="aarch64"
-            curl -fsSL "https://github.com/sxyazi/yazi/releases/download/${latest}/yazi-${arch}-unknown-linux-gnu.zip" -o /tmp/yazi.zip 2>/dev/null
-            if [ -f /tmp/yazi.zip ]; then
-                unzip -o /tmp/yazi.zip -d /tmp >/dev/null 2>&1
-                mkdir -p ~/.local/bin
-                mv /tmp/yazi-${arch}-unknown-linux-gnu/yazi ~/.local/bin/
-                rm -rf /tmp/yazi.zip /tmp/yazi-*
-                success "Yazi updated to $latest"
-            fi
-            ;;
         *)
             warn "Unknown tool: $tool"
             ;;
@@ -1592,7 +1567,7 @@ run_interactive_update() {
         # Separate npm packages from tools (only auto-updatable)
         local all_auto=()
         for item in "${DOTFILES_UPDATES_AVAILABLE[@]}"; do
-            if [[ "$item" == npm:* ]] || [[ "$item" =~ ^(neovim|yazi|starship|zoxide|fzf|doppler|gum|gh|bat|lsd)$ ]]; then
+            if [[ "$item" == npm:* ]] || [[ "$item" =~ ^(neovim|starship|zoxide|fzf|doppler|gum|gh|bat|lsd)$ ]]; then
                 all_auto+=("$item")
             fi
         done
@@ -1737,7 +1712,6 @@ run_uninstall() {
     uninstall_tool "Neovim" "$bin_dir/nvim" "$opt_dir/nvim,$HOME/.config/nvim,$HOME/.local/share/nvim,$HOME/.local/state/nvim"
     uninstall_tool "Starship" "$bin_dir/starship" "$HOME/.config/starship.toml"
     uninstall_tool "Zoxide" "$bin_dir/zoxide" ""
-    uninstall_tool "Yazi" "$bin_dir/yazi" "$HOME/.config/yazi"
     uninstall_tool "fzf" "$bin_dir/fzf" "$HOME/.fzf"
     uninstall_tool "Doppler" "$bin_dir/doppler" ""
 
@@ -1934,7 +1908,7 @@ Options:
   --uninstall        Remove installed tools and configurations
   --only=COMPONENTS  Install only specified components (comma-separated)
                      Available: neovim,fzf,nerd-fonts,node,npm-tools,
-                                starship,zoxide,yazi,ranger,doppler,gh,
+                                starship,zoxide,ranger,doppler,gh,
                                 lsd,bat,claude-code,claude-chill,copilot,
                                 opencode,gemini,crush,vercel,mcp,
                                 configs,shell-integration
@@ -1949,7 +1923,7 @@ Examples:
   ./install.sh --dry-run            # Preview what would be installed
   ./install.sh --check              # Check installation health
   ./install.sh --update             # Update all tools
-  ./install.sh --only=neovim,yazi   # Install only Neovim and Yazi
+  ./install.sh --only=neovim,ranger # Install only Neovim and Ranger
   ./install.sh --uninstall          # Remove everything
   ./install.sh --parallel           # Parallel installation (faster)
 
@@ -1957,7 +1931,6 @@ Environment Variables:
   SKIP_NEOVIM_INSTALL=true    Skip Neovim
   SKIP_NERD_FONTS=true        Skip Nerd Fonts
   SKIP_NPM_TOOLS=true         Skip npm tools
-  SKIP_YAZI_INSTALL=true      Skip Yazi
   SKIP_DOPPLER_INSTALL=true   Skip Doppler
   SKIP_MCP_INSTALL=true       Skip MCP config setup
   USER_LOCAL_MODE=true        Install to ~/.local (no sudo)
@@ -2222,7 +2195,6 @@ select_components() {
         "gum         │ Terminal UI (menus)" \
         "starship    │ Shell prompt" \
         "zoxide      │ Smart cd" \
-        "yazi        │ File manager" \
         "ranger      │ File manager (classic)" \
         "doppler     │ Secrets manager" \
         "gh          │ GitHub CLI" \
@@ -2337,27 +2309,6 @@ install_component() {
                 is_installed zoxide && success "Zoxide installed" || warn "Zoxide installation failed"
             else
                 warn "Zoxide installation failed"
-            fi
-            ;;
-        yazi)
-            if is_installed yazi; then
-                success "Yazi already installed"
-                return 0
-            fi
-            info "Installing Yazi..."
-            local version arch
-            version=$(get_latest_release "sxyazi/yazi" "v0.4.0")
-            arch="x86_64"
-            [ "$(uname -m)" = "aarch64" ] && arch="aarch64"
-            curl -fsSL "https://github.com/sxyazi/yazi/releases/download/${version}/yazi-${arch}-unknown-linux-gnu.zip" -o /tmp/yazi.zip 2>/dev/null
-            if [ -f /tmp/yazi.zip ]; then
-                unzip -o /tmp/yazi.zip -d /tmp >/dev/null 2>&1
-                mkdir -p ~/.local/bin
-                mv /tmp/yazi-${arch}-unknown-linux-gnu/yazi ~/.local/bin/ 2>/dev/null
-                rm -rf /tmp/yazi.zip /tmp/yazi-*
-                success "Yazi installed ($version)"
-            else
-                warn "Yazi installation failed"
             fi
             ;;
         fzf)
@@ -2520,7 +2471,6 @@ install_component() {
             info "Linking configs..."
             mkdir -p ~/.config
             ln -sf "$script_dir/nvim" ~/.config/nvim 2>/dev/null && success "nvim config linked" || warn "nvim config failed"
-            ln -sf "$script_dir/yazi" ~/.config/yazi 2>/dev/null && success "yazi config linked" || warn "yazi config failed"
             ln -sf "$script_dir/starship/starship.toml" ~/.config/starship.toml 2>/dev/null && success "starship config linked" || warn "starship config failed"
             ln -sf "$script_dir/.tmux.conf" ~/.tmux.conf 2>/dev/null && success "tmux config linked" || warn "tmux config failed"
             ;;

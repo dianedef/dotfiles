@@ -24,7 +24,6 @@ next_step: "/sf-docs audit README.md"
 Multi-platform development environment with modern terminal tools and AI-assisted workflows.
 
 - 🎨 Neovim for code editing
-- 📁 Yazi as terminal file manager  
 - ✨ Starship prompt with git integration
 - 🔍 FZF, Ripgrep, and Zoxide for navigation
 - 🤖 BMAD Method for AI-driven development
@@ -97,10 +96,9 @@ ShipFlow is separate: its system installer must be run as `sudo ~/shipflow/insta
 
 `dotfiles` applies shell aliases and config symlinks only for components that are actually installed when the run finishes.
 
-- `alias y='yazi'` is added only when `yazi` is available.
 - `alias r='ranger'` is added only when `ranger` is available.
 - `alias k`, `alias o`, `alias mcp` are added when available. `alias co` is owned by ShipFlow.
-- `~/.config/yazi` and `~/.config/ranger` are created only when the corresponding tool is installed.
+- `~/.config/ranger` is created only when Ranger is installed.
 - In `--dry-run`, no `.bashrc` or config symlink is actually modified.
 - Synchronization runs on the final component state, including `--only` modes, so stale aliases/symlinks are removed and only installed-component artifacts are kept.
 
@@ -119,7 +117,6 @@ source ~/.bashrc
 
 ### Core Tools
 - **Neovim** - LazyVim-based configuration with LSP support
-- **Yazi** - Fast terminal file manager with previews
 - **Starship** - Beautiful customizable shell prompt
 - **FZF** - Fuzzy finder for files and command history
 - **Ripgrep** - Lightning-fast text search
@@ -150,7 +147,7 @@ source ~/.bashrc
   - Syncs secrets between Termux, Codespaces, and local machines
 
 ### Fonts & Icons
-- **Nerd Fonts** - Automatically installed for icons in Neovim, Starship, and Yazi
+- **Nerd Fonts** - Automatically installed for icons in Neovim and Starship
 - **JetBrainsMono Nerd Font** - Professional monospace with complete icon coverage
 - **Note for Termux**: Requires full restart after installation to apply font
 
@@ -158,7 +155,6 @@ source ~/.bashrc
 | Tool | Windows | Linux | Termux |
 |------|---------|-------|--------|
 | Neovim | ✅ Full | ✅ Full | ✅ Basic |
-| Yazi | ✅ | ✅ | ❌ (Ranger) |
 | Starship | ✅ | ✅ | ✅ |
 | Nerd Fonts | ✅ | ✅ | ✅ |
 | GitHub Copilot | ✅ | ✅ | ❌ |

@@ -188,7 +188,6 @@ else
 fi
 
 # File manager - Use Ranger (already installed via pkg)
-# Yazi has compatibility issues on Termux/Android
 if command -v ranger &> /dev/null; then
     log "INFO" "✅ Ranger file manager installed (use 'ranger' command)"
 else

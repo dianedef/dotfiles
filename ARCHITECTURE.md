@@ -95,7 +95,7 @@ Le point de contrôle final est le calcul d'état d'installation de composants (
 
 - seuls les aliases/commandes cibles installées à la fin du run sont conservés,
 - les aliases obsolètes sont supprimés,
-- les symlinks de config (`~/.config/yazi`, `~/.config/ranger`) ne sont gardés que quand l’outil correspondant est effectivement disponible.
+- les symlinks de config (`~/.config/ranger`) ne sont gardés que quand l’outil correspondant est effectivement disponible.
 - ce mécanisme s’applique aussi en mode `--only=<component>`, évitant les artefacts fantômes.
 
 Contrainte: la même orchestration est réutilisable en mode non-interactif (CI) ou interactif (menu `gum`).
@@ -119,8 +119,6 @@ Contrainte: la même orchestration est réutilisable en mode non-interactif (CI)
   - install binaire/URL release, lien binaire, symlink config vers `nvim/MyNeovim`.
 - `Starship`
   - installation via script officiel ou cargo fallback, initialisation shell dans `.bashrc`.
-- `Yazi`
-  - binaires release GitHub, config dans `~/.config/yazi`, intégration de règles/plugins.
 - `Zoxide`, `Doppler`, `FZF`, `GH CLI`, `lsd`, `bat`.
 - Outils AI via `install_ai_tools` + `npm`:
   - `@anthropic-ai/claude-code`, `@openai/codex`, `@apify/mcpc`, `tldr`, plus outils listés dans `DOTFILES_ALL_COMPONENTS`.
@@ -138,7 +136,6 @@ Contrainte: la même orchestration est réutilisable en mode non-interactif (CI)
 
 - Gestion de configuration utilisateur via symlink:
   - `nvim` -> `~/.config/nvim`
-  - `yazi` -> `~/.config/yazi`
   - `ranger` -> `~/.config/ranger`
   - `starship` -> `~/.config/starship.toml`
   - `tmux` -> `~/.tmux.conf`
@@ -176,7 +173,6 @@ Contrainte: la même orchestration est réutilisable en mode non-interactif (CI)
 
 - Starship docs (installation + prompt init).
 - Neovim / LazyVim docs.
-- Yazi docs.
 - Ranger docs.
 - MCP protocol docs.
 - Doppler docs.
@@ -194,7 +190,7 @@ Contrainte: la même orchestration est réutilisable en mode non-interactif (CI)
 ## Répartition des responsabilités
 
 - Script owner (contrat): bootstrap, installation, santé, uninstall.
-- Config owner: répertoires module (`nvim`, `yazi`, `ranger`, `starship`, `ghostty`, `lazygit`, `mpv`).
+- Config owner: répertoires module (`nvim`, `ranger`, `starship`, `ghostty`, `lazygit`, `mpv`).
 - Secret owner: `.env` templates + scripts Doppler.
 - MCP owner: `mcp/mcp-servers.json` + logique d'injection multi-client.
 

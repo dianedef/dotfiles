@@ -70,7 +70,6 @@ next_step: /sf-docs audit CONTEXT-FUNCTION-TREE.md
 - Groupe Shell:
   - `install_starship`
   - `install_zoxide`
-  - `install_yazi`
   - `install_doppler`
 - Groupe IA:
   - `install_ai_tools` (inclut Claude CLI, Codex, NPM tools)
@@ -92,7 +91,7 @@ next_step: /sf-docs audit CONTEXT-FUNCTION-TREE.md
 ### Sorties et vérification
 
 - `run_health_check` :
-  - vérifie `Neovim`, `Starship`, `Yazi`, `Doppler`, `mcpc`, alias/symlinks, `.bashrc`.
+  - vérifie `Neovim`, `Starship`, `Doppler`, `mcpc`, alias/symlinks, `.bashrc`.
 
 ## Arbre fonctionnel (`lib.sh`)
 
@@ -126,8 +125,6 @@ next_step: /sf-docs audit CONTEXT-FUNCTION-TREE.md
 
 - `nvim/`:
   - `MyNeovim` (configs principales), `MyNeovimTermux` (variant Android), `shell-integration.sh`.
-- `yazi/`:
-  - `yazi.toml`, `keymap.toml`, `rules/`, scripts d'aide.
 - `starship/`:
   - `starship.toml`, `starship-simple.toml`, `starship-switch.sh`.
 - `ranger/`:
@@ -141,6 +138,6 @@ next_step: /sf-docs audit CONTEXT-FUNCTION-TREE.md
 ## Preuves liées
 
 - `install.sh` contient explicitement l'ordre: dépendances -> outils -> node -> shell tools -> shell integration -> MCP -> auth.
-- `setup_configs` enchaîne les symlinks `nvim`, `yazi`, `ranger`, `starship`, `tmux`, `ghostty`, `codex`, skills Claude.
+- `setup_configs` enchaîne les symlinks `nvim`, `ranger`, `starship`, `tmux`, `ghostty`, `codex`, skills Claude.
 - `setup_mcp_config` lit `mcp/mcp-servers.json`, merge/écrit `~/.claude.json`, `~/.config/mcp/servers.json`, `~/.config/claude/claude_desktop_config.json`.
 - `termux.sh` et `doppler-setup-termux.sh` montrent clairement la voie Android.

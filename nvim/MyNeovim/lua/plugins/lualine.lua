@@ -19,6 +19,34 @@ return {
       red      = '#E46876',
     }
 
+    local function section_color(fg, bg, gui)
+      local color = { fg = fg, bg = bg }
+      if gui then color.gui = gui end
+      return color
+    end
+
+    local function active_theme()
+      return {
+        a = section_color(colors.bg, colors.violet, "bold"),
+        b = section_color(colors.fg, colors.bg),
+        c = section_color(colors.fg, colors.bg),
+        x = section_color(colors.fg, colors.bg),
+        y = section_color(colors.fg, colors.bg),
+        z = section_color(colors.bg, colors.violet, "bold"),
+      }
+    end
+
+    local function inactive_theme()
+      return {
+        a = section_color(colors.fg, colors.bg),
+        b = section_color(colors.fg, colors.bg),
+        c = section_color(colors.fg, colors.bg),
+        x = section_color(colors.fg, colors.bg),
+        y = section_color(colors.fg, colors.bg),
+        z = section_color(colors.fg, colors.bg),
+      }
+    end
+
     local conditions = {
       buffer_not_empty = function()
         return vim.fn.empty(vim.fn.expand("%:t")) ~= 1
@@ -47,8 +75,12 @@ return {
           "AgenticTodos",
         },
         theme = {
-          normal = { c = { fg = colors.fg, bg = colors.bg } },
-          inactive = { c = { fg = colors.fg, bg = colors.bg } },
+          normal = active_theme(),
+          insert = active_theme(),
+          visual = active_theme(),
+          replace = active_theme(),
+          command = active_theme(),
+          inactive = inactive_theme(),
         },
         refresh = {
           statusline = 500,
@@ -273,9 +305,6 @@ return {
           self.options
         ),
       }
-      if self.options.color == nil then
-        self.options.color = ""
-      end
     end
     function custom_filetype:update_status()
       local data = custom_filetype.super.update_status(self)

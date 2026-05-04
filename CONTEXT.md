@@ -42,7 +42,7 @@ Ce dépôt regroupe un ensemble de configurations locales (terminal, éditeur, f
   - `lib.sh` contient le socle utilitaire: parsing d'options, installation, santé, symlinks, auth, menu, logs.
   - `config.sh` concentre les constantes runtime: versions, chemins, flags, listes de composants.
 - Couche configuration:
-  - Répertoires de configs versionnés: `nvim/`, `yazi/`, `ranger/`, `starship/`, `ghostty/`.
+  - Répertoires de configs versionnés: `nvim/`, `ranger/`, `starship/`, `ghostty/`.
   - Fichiers dédiés: `.tmux.conf`, `.env.example`, `cheat/conf.yml`, `mcp/mcp-servers.json`, `codex/config.toml`, `lazygit/config.yml`, `cursor/settings.json`, `ranger/...`.
 - Couche secrets/AI:
   - `doppler-setup.sh` et `doppler-setup-termux.sh` gèrent la configuration d'accès.
@@ -86,11 +86,11 @@ Ce dépôt regroupe un ensemble de configurations locales (terminal, éditeur, f
   - `README.md` (installation, objectifs, liste d'inclus).
   - `CLAUDE.md` (invariants d'agent + commandes clé).
   - `.env.example` / `env.example` (variables observables de comportement).
-  - `starship/README.md`, `nvim/README.md`, `ranger/rc.conf`, `yazi/yazi.toml`, `mcp/mcp-servers.json`.
+  - `starship/README.md`, `nvim/README.md`, `ranger/rc.conf`, `mcp/mcp-servers.json`.
 - Sources d'exécution:
   - `install.sh`, `lib.sh`, `config.sh`.
 - Sources externes recommandées (non incluses en snapshot):
-  - docs officielles de Starship, Yazi, Neovim, Ranger, MCP, Doppler, GitHub CLI.
+  - docs officielles de Starship, Neovim, Ranger, MCP, Doppler, GitHub CLI.
 
 ## Gaps et points d'attention
 

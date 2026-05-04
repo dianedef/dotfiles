@@ -72,7 +72,7 @@ Avant toute modification de logique, lire en priorité:
 ### Preuves d'architecture à respecter
 - `install.sh` source `config.sh` puis `lib.sh` avant le parsing d'options.
 - `lib.sh` expose `parse_arguments`, `run_health_check`, `create_symlink`, `parallel_run`, `should_install`.
-- `setup_configs` lie les répertoires réels `nvim`, `yazi`, `ranger`, `starship`, `tmux`, `ghostty`, `codex`, `claude`.
+- `setup_configs` lie les répertoires réels `nvim`, `ranger`, `starship`, `tmux`, `ghostty`, `codex`, `claude`.
 - `setup_mcp_config` lit `mcp/mcp-servers.json` et configure plusieurs clients.
 - `setup_shell_integration` modifie `.bashrc` avec `starship init`, `zoxide init`, alias et exports.
 - `termux.sh` utilise des chemins différents (MyNeovimTermux, `starship-simple.toml`, `~/.local/bin`), et un flux de secrets local `.dotfiles-secrets.env`.

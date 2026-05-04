@@ -63,8 +63,7 @@ cd ~/dotfiles && ./install.sh
 |-------|---------|-------------|
 | `ds` | `doppler-setup.sh` | Configure all API keys |
 | `i` | `install.sh` / `windows.ps1` | Re-run installation |
-| `y` | `yazi` | File manager (Linux/Windows) |
-| `r` | `ranger` | File manager (Termux) |
+| `r` | `ranger` | File manager |
 | `z <dir>` | `zoxide` | Smart directory jump |
 | `mcp` | `mcpc` | MCP CLI client for testing servers |
 
@@ -72,7 +71,6 @@ cd ~/dotfiles && ./install.sh
 
 ### Directory Structure
 - **nvim/** - Neovim configs (LazyVim-based). Multiple variants: `nvim11/`, `nvim22/`, `MyNeovim/`, `MyNeovimTermux/`
-- **yazi/** - Yazi file manager with plugins and flavors
 - **starship/** - Shell prompt themes with `starship-switch.sh` for switching
 - **lazygit/** - Git TUI configuration
 - **mcp/** - MCP server configurations (single source of truth for Claude Code and related CLI clients)
@@ -98,12 +96,9 @@ cd ~/dotfiles && ./install.sh
 - Functions: `snake_case()`, constants: `UPPER_SNAKE_CASE`, locals: `lower_snake_case`
 - Format with `shfmt` (2-space indent), always quote variables: `"$VAR"`
 
-### Lua (Neovim/Yazi)
+### Lua (Neovim)
 - Format with StyLua: 2-space indent, 120 column width
 - Use return table pattern for modules; lazy.nvim spec format for plugins
-
-### JavaScript/TypeScript (yazi/rules)
-- Format with Prettier: tabs, no semicolons, double quotes, 120 print width
 
 ## Claude Code Skills
 
