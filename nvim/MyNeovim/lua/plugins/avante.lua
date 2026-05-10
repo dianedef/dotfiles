@@ -90,6 +90,10 @@ return {
         next = ";x",
         prev = ",x",
       },
+      submit = {
+        normal = "<CR>",
+        insert = "<CR>",
+      },
       sidebar = {
         apply_all = "A",
         apply_cursor = "a",
@@ -118,8 +122,26 @@ return {
     "AvanteStop",
     "AvanteSwitchProvider",
     "AvanteToggle",
+    "AvanteToggleToolMessages",
+    "ShipFlowAvantePanel1",
+    "ShipFlowAvantePanel2",
+    "ShipFlowAvantePanel3",
+    "ShipFlowAvantePanel20",
+    "ShipFlowAvantePanel30",
+    "ShipFlowAvantePanelFull",
   },
   keys = {
+    { "<leader>aa", false },
+    { "<leader>ac", false },
+    { "<leader>ae", false },
+    { "<leader>af", false },
+    { "<leader>ah", false },
+    { "<leader>am", false },
+    { "<leader>an", false },
+    { "<leader>ap", false },
+    { "<leader>ar", false },
+    { "<leader>as", false },
+    { "<leader>at", false },
     { "<leader>axq", "<cmd>AvanteAsk<CR>", desc = "Avante Ask" },
     {
       "<leader>axc",
@@ -132,7 +154,12 @@ return {
     { "<leader>axh", "<cmd>AvanteHistory<CR>", desc = "Avante History" },
     { "<leader>axm", "<cmd>AvanteModels<CR>", desc = "Avante Select Model" },
     { "<leader>axn", "<cmd>AvanteChatNew<CR>", desc = "Avante New Chat" },
+    { "<leader>ax1", "<cmd>ShipFlowAvantePanel1<CR>", desc = "Avante panel 1" },
+    { "<leader>ax2", "<cmd>ShipFlowAvantePanel2<CR>", desc = "Avante panel 2" },
+    { "<leader>ax3", "<cmd>ShipFlowAvantePanel3<CR>", desc = "Avante panel 3" },
+    { "<leader>axF", "<cmd>ShipFlowAvantePanelFull<CR>", desc = "Avante panel full" },
     { "<leader>axp", "<cmd>AvanteSwitchProvider<CR>", desc = "Avante Switch Provider" },
+    { "<leader>axT", "<cmd>AvanteToggleToolMessages<CR>", desc = "Avante Toggle Tool Messages" },
     { "<leader>axu", "<cmd>AvanteRefresh<CR>", desc = "Avante Refresh" },
     { "<leader>axs", "<cmd>AvanteStop<CR>", desc = "Avante Stop" },
     {
@@ -171,6 +198,64 @@ return {
     },
   },
   config = function(_, opts)
+    local avante_panel_presets = {
+      [1] = { vertical = 30, horizontal = 15 },
+      [2] = { vertical = 45, horizontal = 20 },
+      [3] = { vertical = 60, horizontal = 30 },
+    }
+
+    local function set_avante_panel_size(size)
+      local avante = require("avante")
+      local Config = require("avante.config")
+      local sidebar = avante.get()
+      local layout = vim.tbl_contains({ "top", "bottom" }, Config.windows.position) and "horizontal" or "vertical"
+      if sidebar and type(sidebar.get_layout) == "function" then
+        layout = sidebar:get_layout()
+      end
+
+      local width = size == "full" and 100 or tonumber(size)
+      local height = width
+      if type(size) == "table" then
+        width = tonumber(size.vertical)
+        height = tonumber(size.horizontal)
+      end
+
+      if not width or not height then return end
+      width = math.max(1, math.min(100, math.floor(width)))
+      height = math.max(1, math.min(100, math.floor(height)))
+      Config.override({ windows = { width = width, height = height } })
+
+      local percent = layout == "horizontal" and height or width
+
+      local resized = false
+      if sidebar and type(sidebar.is_open) == "function" and sidebar:is_open() then
+        if size == "full" then
+          if not sidebar.is_in_full_view and type(sidebar.toggle_code_window) == "function" then
+            sidebar:toggle_code_window()
+          end
+        else
+          if sidebar.is_in_full_view and type(sidebar.toggle_code_window) == "function" then
+            sidebar:toggle_code_window()
+          end
+          if type(sidebar.adjust_result_container_layout) == "function" then
+            sidebar:adjust_result_container_layout()
+          end
+          if type(sidebar.render_input) == "function" then
+            pcall(function() sidebar:render_input() end)
+          end
+          if type(sidebar.render_selected_code) == "function" then
+            pcall(function() sidebar:render_selected_code() end)
+          end
+        end
+        resized = true
+      end
+
+      local axis = layout == "horizontal" and "hauteur" or "largeur"
+      local label = size == "full" and "full" or (percent .. "%")
+      local suffix = resized and "" or " (applique au prochain panneau Avante ouvert)"
+      vim.notify(("Avante %s: %s%s"):format(axis, label, suffix), vim.log.levels.INFO)
+    end
+
     local function patch_avante_invalid_buffer_root()
       local ok, root = pcall(require, "avante.utils.root")
       if not ok or type(root) ~= "table" or type(root.get) ~= "function" then return end
@@ -231,6 +316,62 @@ return {
       sidebar.__avante_input_layout_patched = true
     end
 
+    local function patch_avante_hide_tool_messages()
+      local ok_render, render = pcall(require, "avante.history.render")
+      local ok_helpers, helpers = pcall(require, "avante.history.helpers")
+      if not ok_render or not ok_helpers then return end
+      if render.__myneovim_hide_tool_messages_patch then return end
+
+      vim.g.avante_hide_tool_messages = vim.g.avante_hide_tool_messages ~= false
+
+      local base_message_to_lines = render.message_to_lines
+      local base_message_to_text = render.message_to_text
+
+      render.message_to_lines = function(message, messages, expanded)
+        if vim.g.avante_hide_tool_messages ~= false and helpers.is_tool_use_message(message) then
+          return {}
+        end
+        return base_message_to_lines(message, messages, expanded)
+      end
+
+      render.message_to_text = function(message, messages)
+        if vim.g.avante_hide_tool_messages ~= false and helpers.is_tool_use_message(message) then
+          return ""
+        end
+        return base_message_to_text(message, messages)
+      end
+
+      render.__myneovim_hide_tool_messages_patch = true
+    end
+
+    local function patch_avante_openai_nil_tool_result_content()
+      local ok, openai = pcall(require, "avante.providers.openai")
+      if not ok or type(openai) ~= "table" or type(openai.parse_messages) ~= "function" then return end
+      if openai.__myneovim_nil_tool_result_content_patch then return end
+
+      local base_parse_messages = openai.parse_messages
+
+      openai.parse_messages = function(self, parse_opts)
+        if type(parse_opts) == "table" and type(parse_opts.messages) == "table" then
+          for _, msg in ipairs(parse_opts.messages) do
+            if type(msg.content) == "table" then
+              for _, item in ipairs(msg.content) do
+                if type(item) == "table" and item.type == "tool_result" and item.content == nil then
+                  item.content = ""
+                end
+              end
+            elseif msg.content == nil then
+              msg.content = ""
+            end
+          end
+        end
+
+        return base_parse_messages(self, parse_opts)
+      end
+
+      openai.__myneovim_nil_tool_result_content_patch = true
+    end
+
     local function clear_legacy_avante_keymaps()
       local mappings = {
         "<leader>aa",
@@ -261,7 +402,35 @@ return {
     clear_legacy_avante_keymaps()
     patch_avante_invalid_buffer_root()
     patch_avante_horizontal_input_layout()
+    patch_avante_hide_tool_messages()
+    patch_avante_openai_nil_tool_result_content()
     require("avante").setup(opts)
+    vim.api.nvim_create_user_command("ShipFlowAvantePanel1", function()
+      set_avante_panel_size(avante_panel_presets[1])
+    end, { desc = "Set Avante panel preset 1", force = true })
+    vim.api.nvim_create_user_command("ShipFlowAvantePanel2", function()
+      set_avante_panel_size(avante_panel_presets[2])
+    end, { desc = "Set Avante panel preset 2", force = true })
+    vim.api.nvim_create_user_command("ShipFlowAvantePanel3", function()
+      set_avante_panel_size(avante_panel_presets[3])
+    end, { desc = "Set Avante panel preset 3", force = true })
+    vim.api.nvim_create_user_command("ShipFlowAvantePanel20", function()
+      set_avante_panel_size(avante_panel_presets[1])
+    end, { desc = "Set Avante panel width/height to 20%", force = true })
+    vim.api.nvim_create_user_command("ShipFlowAvantePanel30", function()
+      set_avante_panel_size(avante_panel_presets[2])
+    end, { desc = "Set Avante panel width/height to 30%", force = true })
+    vim.api.nvim_create_user_command("ShipFlowAvantePanelFull", function()
+      set_avante_panel_size("full")
+    end, { desc = "Set Avante panel width/height to full", force = true })
+    vim.api.nvim_create_user_command("AvanteToggleToolMessages", function()
+      local currently_hidden = vim.g.avante_hide_tool_messages ~= false
+      vim.g.avante_hide_tool_messages = not currently_hidden
+      vim.notify(
+        "Avante tool messages " .. (vim.g.avante_hide_tool_messages and "hidden" or "visible"),
+        vim.log.levels.INFO
+      )
+    end, {})
     vim.api.nvim_set_hl(0, "AvanteTitle", { fg = "#ABB2BF", bg = "#353B45" })
     vim.api.nvim_set_hl(0, "AvanteReversedTitle", { fg = "#353B45" })
     vim.api.nvim_set_hl(0, "AvanteSubtitle", { fg = "#ABB2BF", bg = "#353B45" })

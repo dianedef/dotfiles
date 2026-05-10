@@ -11,7 +11,7 @@ local function search_header(level)
 end
 
 local function set_explorer_width(width)
-  require("config.explorer-panel").set_width(width)
+  require("config.explorer-panel").set_width(width, { notify = false })
 end
 
 -- Mappings for navigating between headers

@@ -3,7 +3,7 @@ return {
   enabled = true,
   config = function()
     require("notify").setup({
-      timeout = 10000,
+      timeout = 1200,
       background_colour = "#000000",
     })
     local banned_patterns = { "removed %d+ missing entries." }
