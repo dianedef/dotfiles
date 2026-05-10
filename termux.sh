@@ -354,6 +354,7 @@ alias storage='cd ~/storage/shared'
 alias dl='cd ~/storage/downloads'
 
 # File managers
+alias n='nvim'
 alias r='ranger'
 
 # AI Agents (verified working on Termux)

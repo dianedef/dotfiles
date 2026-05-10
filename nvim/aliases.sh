@@ -10,6 +10,7 @@ alias nvim-switch="$SCRIPT_DIR/switch-config.sh"
 alias nv-switch="$SCRIPT_DIR/switch-config.sh"
 
 # Quick access to different configs using NVIM_APPNAME
+alias n="nvim"
 alias nv="nvim"
 alias nv3="NVIM_APPNAME=nvim3 nvim"
 alias nv6="NVIM_APPNAME=nvim6 nvim"

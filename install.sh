@@ -101,6 +101,7 @@ sync_component_artifacts() {
     sync_managed_symlink "$SCRIPT_DIR/ranger" "$HOME/.config/ranger" "${DOTFILES_INSTALLED_RANGER:-false}"
 
     sync_bashrc_alias "r" "'ranger'" "${DOTFILES_INSTALLED_RANGER:-false}"
+    sync_bashrc_alias "n" "'nvim'" "$(is_installed nvim && echo true || echo false)"
     sync_bashrc_alias "y" "'yazi'" false
     if is_dry_run; then
         echo -e "${BLUE}[DRY-RUN]${NC} Would remove managed symlink: $HOME/.config/yazi"
@@ -1203,6 +1204,7 @@ command -v bat >/dev/null && alias cat='bat --paging=never'
 command -v lsd >/dev/null && alias ls='lsd' && alias ll='lsd -lh' && alias la='lsd -lAh'
 
 # File managers
+alias n='nvim'
 alias r='ranger'
 
 alias o='opencode'
@@ -1233,6 +1235,16 @@ alias dot='~/dotfiles/install.sh'
 alias dotfiles='~/dotfiles/install.sh -i'
 DOTALIASES
             success "Added dotfiles aliases"
+        fi
+
+        # Ensure Neovim shortcut exists for existing aliases block
+        if ! grep -qE '^alias n=' "$HOME/.bashrc" 2>/dev/null; then
+            cat >> "$HOME/.bashrc" << 'NVALIAS'
+
+# Neovim shortcut
+alias n='nvim'
+NVALIAS
+            success "Added Neovim alias"
         fi
     fi
 

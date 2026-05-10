@@ -5,6 +5,9 @@ return {
   version = "*",
   dependencies = { "rafamadriz/friendly-snippets" },
   opts = {
+    enabled = function()
+      return vim.bo.filetype ~= "AvanteInput" and vim.bo.filetype ~= "Avante"
+    end,
     keymap = { preset = "default" },
     appearance = {
       use_nvim_cmp_as_default = true,

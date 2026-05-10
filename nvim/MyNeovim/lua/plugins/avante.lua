@@ -192,7 +192,7 @@ return {
       "<leader>axt",
       function() require("avante").toggle_sidebar({ ask = false }) end,
       desc = "Toggle Avante",
-      mode = { "n", "v", "i" },
+      mode = { "n", "v" },
     },
     {
       "<leader>axv",
@@ -204,7 +204,7 @@ return {
         avante.toggle_sidebar({ ask = false })
       end,
       desc = "Toggle Avante (vertical)",
-      mode = { "n", "v", "i" },
+      mode = { "n", "v" },
     },
     {
       "<leader>axb",
@@ -220,7 +220,7 @@ return {
         avante.open_sidebar({ ask = false })
       end,
       desc = "Toggle Avante (horizontal)",
-      mode = { "n", "v", "i" },
+      mode = { "n", "v" },
     },
   },
   config = function(_, opts)
@@ -539,13 +539,22 @@ return {
 
     clear_legacy_avante_keymaps()
     patch_avante_invalid_buffer_root()
-    patch_avante_horizontal_input_layout()
+    -- Disabled: this custom input-layout patch alters Avante input autocmds and can
+    -- cause cursor/text jitter while typing in the prompt buffer.
+    -- patch_avante_horizontal_input_layout()
     patch_avante_skip_explorer_panel_auto_file()
     patch_avante_compact_input_hint()
     patch_avante_escape_stop()
     patch_avante_hide_tool_messages()
     patch_avante_openai_nil_tool_result_content()
     require("avante").setup(opts)
+    vim.api.nvim_create_autocmd("FileType", {
+      group = vim.api.nvim_create_augroup("MyNeovimAvanteInputKeyfix", { clear = true }),
+      pattern = { "AvanteInput", "Avante" },
+      callback = function(ev)
+        vim.keymap.set("i", "<Space>", " ", { buffer = ev.buf, noremap = true, silent = true })
+      end,
+    })
     vim.api.nvim_create_user_command("AvanteAddFile", function()
       local ok, avante = pcall(require, "avante")
       if not ok or type(avante.get) ~= "function" then

@@ -51,6 +51,7 @@ return {
       { "<leader>a",    group = "AI" },
       { "<leader>ac",   group = "Claude" },
       { "<leader>ag",   group = "Gemini" },
+      { "<leader>aj",   group = "Agentic" },
       { "<leader>ak",   group = "Codex" },
       { "<leader>ap",   group = "Copilot" },
       { "<leader>au",   group = "Augment" },

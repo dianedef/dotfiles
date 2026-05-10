@@ -196,12 +196,61 @@ return {
     },
   keys = {
       {
+        "<leader>ajt",
+        function()
+          sync_codex_session_cwd()
+          require("agentic").toggle()
+        end,
+        mode = { "n", "v" },
+        desc = "Agentic Toggle",
+      },
+      {
+        "<leader>ajf",
+        function()
+          require("agentic").add_selection_or_file_to_context()
+        end,
+        mode = { "n", "v" },
+        desc = "Agentic Add File/Selection",
+      },
+      {
+        "<leader>ajn",
+        function()
+          run_codex_new_session_in_dir()
+        end,
+        mode = { "n", "v" },
+        desc = "Agentic New Session (context cwd)",
+      },
+      {
+        "<leader>ajr",
+        function()
+          require("agentic").restore_session()
+        end,
+        mode = { "n", "v" },
+        desc = "Agentic Restore Session",
+      },
+      {
+        "<leader>ajl",
+        function()
+          require("agentic").add_current_line_diagnostics()
+        end,
+        mode = { "n" },
+        desc = "Agentic Add Line Diagnostics",
+      },
+      {
+        "<leader>ajb",
+        function()
+          require("agentic").add_buffer_diagnostics()
+        end,
+        mode = { "n" },
+        desc = "Agentic Add Buffer Diagnostics",
+      },
+      {
         "<leader>akt",
         function()
           sync_codex_session_cwd()
           require("agentic").toggle()
         end,
-        mode = { "n", "v", "i" },
+        mode = { "n", "v" },
         desc = "Codex Toggle",
       },
       {
@@ -217,7 +266,7 @@ return {
         function()
           run_codex_new_session_in_dir()
         end,
-        mode = { "n", "v", "i" },
+        mode = { "n", "v" },
         desc = "Codex New Session (context cwd)",
       },
       {
@@ -225,7 +274,7 @@ return {
         function()
           require("agentic").restore_session()
         end,
-        mode = { "n", "v", "i" },
+        mode = { "n", "v" },
         desc = "Codex Restore Session",
       },
       {
