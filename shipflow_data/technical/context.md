@@ -23,7 +23,10 @@ evidence:
   - "/home/claude/dotfiles/termux.sh"
 depends_on:
   - "/home/claude/dotfiles/AGENT.md"
-  - "/home/claude/dotfiles/ARCHITECTURE.md"
+  - "/home/claude/dotfiles/install.sh"
+  - "/home/claude/dotfiles/lib.sh"
+  - "/home/claude/dotfiles/config.sh"
+next_step: /sf-docs audit shipflow_data/technical/context.md
 supersedes: []
 next_review: "2026-07-26"
 next_step: /sf-docs audit CONTEXT.md

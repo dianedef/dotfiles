@@ -24,7 +24,8 @@ evidence:
 depends_on:
   - "/home/claude/dotfiles/README.md"
   - "/home/claude/dotfiles/CLAUDE.md"
-  - "/home/claude/dotfiles/CONTEXT.md"
+  - "/home/claude/dotfiles/shipflow_data/technical/context.md"
+  - "/home/claude/dotfiles/shipflow_data/technical/context-function-tree.md"
 linked_systems:
   - Bash
   - Neovim
@@ -41,7 +42,7 @@ invariants:
   - config.sh and lib.sh must stay in sync for component behavior.
 supersedes: []
 next_review: "2026-07-26"
-next_step: /sf-docs audit ARCHITECTURE.md
+next_step: /sf-docs audit shipflow_data/technical/README.md
 ---
 
 # ARCHITECTURE
@@ -200,3 +201,36 @@ Contrainte: la même orchestration est réutilisable en mode non-interactif (CI)
 - Garder la cohérence entre nom des répertoires cibles et `dotfiles-switch`/scripts externes.
 - Vérifier les chemins absolus attendus sur Windows/macOS avant élargissement de fonctionnalités.
 - Contrôler la rotation/charge des plugins AI et l'impact réseau.
+
+
+## Standards techniques
+
+- Bash :
+  - `set -euo pipefail`
+  - guillemets sur toutes les expansions de variables
+  - fonctions nommées en `snake_case`
+- Lua :
+  - formatage via Stylua, 2 espaces, largeur 120
+  - préférer modules renvoyant des tables (`return { ... }`)
+- JS/TS :
+  - style cohérent, lint localement respecté
+  - priorité lisibilité/simplicité sur cleverness
+
+### Conventions de sécurité
+
+- Aucun secret en clair dans les fichiers versionnés.
+- Variables sensibles dans `.env` ou Doppler seulement.
+- Vérifier les droits d’exécution uniquement quand nécessaire.
+- Journaliser sans afficher de tokens / mots de passe dans les logs.
+
+### Ordre de travail recommandé
+
+1. Modifier le script ciblé en mode minimal.
+2. Ajuster la doc associée dans le bloc correspondant.
+3. Mettre à jour les fichiers d’inventaire/guide s’il y a un comportement utilisateur visible.
+4. Documenter les cas de migration (plateforme, rollback).
+
+### Gouvernance
+
+- Priorité : stabilité de la chaîne d’installation, puis confort d’usage.
+- Décisions importantes validées par essai sur Linux/Codespaces, puis sur Termux/Windows si impact.

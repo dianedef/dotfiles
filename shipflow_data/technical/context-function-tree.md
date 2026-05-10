@@ -21,10 +21,10 @@ evidence:
   - "/home/claude/dotfiles/doppler-setup.sh"
 depends_on:
   - "/home/claude/dotfiles/AGENT.md"
-  - "/home/claude/dotfiles/CONTEXT.md"
+  - "/home/claude/dotfiles/shipflow_data/technical/context.md"
 supersedes: []
 next_review: "2026-07-26"
-next_step: /sf-docs audit CONTEXT-FUNCTION-TREE.md
+next_step: /sf-docs audit shipflow_data/technical/context-function-tree.md
 ---
 
 # CONTEXT-FUNCTION-TREE
