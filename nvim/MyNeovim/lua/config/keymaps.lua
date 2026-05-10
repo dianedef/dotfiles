@@ -3,12 +3,14 @@
 -- Add any additional keymaps here
 vim.keymap.set("t", "<C-Space>", "<C-\\><C-n>", { desc = "Exit terminal mode" })
 
+-- Root/cwd convention under <leader>: lowercase = current working directory, uppercase = project root
+
 -- Snacks explorer under the Explorer group (leader e)
 -- Override the default <leader>e and <leader>E remaps from snacks_explorer extra
 pcall(vim.keymap.del, "n", "<leader>e")
 pcall(vim.keymap.del, "n", "<leader>E")
-vim.keymap.set("n", "<leader>es", function() Snacks.explorer({ cwd = LazyVim.root() }) end, { desc = "Snacks Explorer (root)" })
-vim.keymap.set("n", "<leader>eS", function() Snacks.explorer() end, { desc = "Snacks Explorer (cwd)" })
+vim.keymap.set("n", "<leader>es", function() Snacks.explorer() end, { desc = "Snacks Explorer (cwd)" })
+vim.keymap.set("n", "<leader>eS", function() Snacks.explorer({ cwd = LazyVim.root() }) end, { desc = "Snacks Explorer (root)" })
 
 -- Move Buffers picker under Buffer group
 vim.keymap.del("n", "<leader>,")
@@ -65,6 +67,8 @@ vim.keymap.set("n", "<leader>h", function()
 end, { desc = "Cheat Sheet" })
 
 require("shipflow").setup()
+
+pcall(vim.keymap.del, "n", "<leader>L")
 
 -- Explicit mouse wheel scroll (fixes scroll down through mosh/tmux)
 vim.keymap.set({ "n", "v", "x" }, "<ScrollWheelUp>", "3<C-y>", { desc = "Scroll up" })

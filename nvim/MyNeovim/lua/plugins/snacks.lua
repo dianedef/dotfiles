@@ -1,10 +1,138 @@
 local explorer_panel = require("config.explorer-panel")
 
+local function normalize_dir(path)
+  if not path or path == "" then
+    return nil
+  end
+  return vim.fs.normalize(path)
+end
+
+local function directory_exists(path)
+  local stat = path and vim.uv.fs_stat(path) or nil
+  return stat and stat.type == "directory" or false
+end
+
+local function gather_project_directories(root)
+  root = normalize_dir(root)
+  if not directory_exists(root) then
+    return {}
+  end
+
+  local seen = { [root] = true }
+  local results = {
+    {
+      text = ".",
+      path = root,
+    },
+  }
+  local ignored = {
+    [".git"] = true,
+    ["node_modules"] = true,
+    ["dist"] = true,
+    ["build"] = true,
+    [".next"] = true,
+    ["coverage"] = true,
+    ["__pycache__"] = true,
+  }
+
+  local queue = { { path = root, depth = 0 } }
+  local max_depth = 4
+  local max_dirs = 300
+  local idx = 1
+
+  while idx <= #queue and #results < max_dirs do
+    local current = queue[idx]
+    idx = idx + 1
+
+    if current.depth < max_depth then
+      for name, entry_type in vim.fs.dir(current.path) do
+        if entry_type == "directory" and not ignored[name] then
+          local full = normalize_dir(current.path .. "/" .. name)
+          if full and not seen[full] then
+            seen[full] = true
+            results[#results + 1] = {
+              text = vim.fs.relpath(root, full) or name,
+              path = full,
+            }
+            queue[#queue + 1] = { path = full, depth = current.depth + 1 }
+            if #results >= max_dirs then
+              break
+            end
+          end
+        end
+      end
+    end
+  end
+
+  table.sort(results, function(a, b)
+    return a.text < b.text
+  end)
+
+  return results
+end
+
+local function grep_in_selected_directory()
+  local root = normalize_dir(LazyVim.root()) or normalize_dir(vim.fn.getcwd())
+  local cwd = normalize_dir(vim.fn.getcwd())
+  local file_dir = normalize_dir(vim.fn.expand("%:p:h"))
+  local items = gather_project_directories(root)
+
+  local function add_priority_dir(path, label)
+    path = normalize_dir(path)
+    if not directory_exists(path) then
+      return
+    end
+    for _, item in ipairs(items) do
+      if item.path == path then
+        item.text = label
+        return
+      end
+    end
+    items[#items + 1] = { text = label, path = path }
+  end
+
+  add_priority_dir(cwd, ". (cwd)")
+  add_priority_dir(root, "/ (root)")
+  if file_dir and file_dir ~= cwd and file_dir ~= root then
+    add_priority_dir(file_dir, "%:h (file dir)")
+  end
+
+  table.sort(items, function(a, b)
+    return a.text < b.text
+  end)
+
+  vim.ui.select(items, {
+    prompt = "Grep in directory",
+    format_item = function(item)
+      return item.text
+    end,
+  }, function(choice)
+    if not choice or not choice.path then
+      return
+    end
+    Snacks.picker.grep({ cwd = choice.path })
+  end)
+end
+
 return {
   "folke/snacks.nvim",
   enabled = true,
   priority = 1000,
   lazy = false,
+  keys = {
+    { "<leader>ff", LazyVim.pick("files", { root = false }), desc = "Find Files (cwd)" },
+    { "<leader>fF", LazyVim.pick("files"), desc = "Find Files (root dir)" },
+    { "<leader>fe", function() Snacks.explorer() end, desc = "Explorer Snacks (cwd)" },
+    { "<leader>fE", function() Snacks.explorer({ cwd = LazyVim.root() }) end, desc = "Explorer Snacks (root dir)" },
+    { "<leader>fr", function() Snacks.picker.recent({ filter = { cwd = true } }) end, desc = "Recent (cwd)" },
+    { "<leader>fR", LazyVim.pick("oldfiles"), desc = "Recent (root dir)" },
+    { "<leader>ft", function() Snacks.terminal() end, desc = "Terminal (cwd)" },
+    { "<leader>fT", function() Snacks.terminal(nil, { cwd = LazyVim.root() }) end, desc = "Terminal (root dir)" },
+    { "<leader>sg", LazyVim.pick("live_grep", { root = false }), desc = "Grep (cwd)" },
+    { "<leader>sd", grep_in_selected_directory, desc = "Grep (pick dir)" },
+    { "<leader>sw", LazyVim.pick("grep_word", { root = false }), mode = { "n", "x" }, desc = "Visual selection or word (cwd)" },
+    { "<leader>sW", LazyVim.pick("grep_word"), mode = { "n", "x" }, desc = "Visual selection or word (root dir)" },
+  },
   init = function()
     -- LazyVim references the global `Snacks` while resolving other plugin opts.
     if not _G.Snacks then

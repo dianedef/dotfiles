@@ -43,6 +43,7 @@ return {
       rules = {
         { pattern = "ai", icon = "🤖", color = "purple" },
         { pattern = "cheat", icon = "📖", color = "yellow" },
+        { pattern = "keywordprg", icon = "", color = "azure" },
         { pattern = "neotree", icon = "", color = "blue" },
       },
     },

@@ -28,19 +28,19 @@ M.setup = function()
 
   vim.api.nvim_create_user_command("ShipFlowExplorerWidth20", function()
     set_explorer_width(20)
-  end, { desc = "Set explorer panel width to 20", force = true })
+  end, { desc = "Set width 20", force = true })
 
   vim.api.nvim_create_user_command("ShipFlowExplorerWidth35", function()
     set_explorer_width(35)
-  end, { desc = "Set explorer panel width to 35", force = true })
+  end, { desc = "Set width 35", force = true })
 
   vim.api.nvim_create_user_command("ShipFlowExplorerWidthFull", function()
     set_explorer_width("full")
-  end, { desc = "Set explorer panel width to full screen", force = true })
+  end, { desc = "Set width full", force = true })
 
-  vim.keymap.set("n", "<leader>e2", "<cmd>ShipFlowExplorerWidth20<cr>", { desc = "Explorer width 20" })
-  vim.keymap.set("n", "<leader>e3", "<cmd>ShipFlowExplorerWidth35<cr>", { desc = "Explorer width 35" })
-  vim.keymap.set("n", "<leader>eF", "<cmd>ShipFlowExplorerWidthFull<cr>", { desc = "Explorer full width" })
+  vim.keymap.set("n", "<leader>e2", "<cmd>ShipFlowExplorerWidth20<cr>", { desc = "width 20" })
+  vim.keymap.set("n", "<leader>e3", "<cmd>ShipFlowExplorerWidth35<cr>", { desc = "width 35" })
+  vim.keymap.set("n", "<leader>eF", "<cmd>ShipFlowExplorerWidthFull<cr>", { desc = "width full" })
 end
 
 -- Function to navigate to a header
