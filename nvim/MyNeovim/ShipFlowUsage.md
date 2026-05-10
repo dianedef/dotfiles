@@ -1,6 +1,6 @@
 # ShipFlow Plugin for NeoVim
 
-ShipFlow is a NeoVim helper module that allows users to navigate between different levels of Markdown headers using customizable shortcuts.
+ShipFlow is a NeoVim helper module that allows users to navigate between different levels of Markdown headers and control the shared explorer panel width with customizable shortcuts.
 
 ## Installation
 
@@ -19,6 +19,12 @@ Once loaded, ShipFlow provides the following default shortcuts for navigating be
 - **Navigate to the next H1 header**: `<leader>h1`
 - **Navigate to the next H2 header**: `<leader>h2`
 - **Navigate to the next H3 header**: `<leader>h3`
+
+It also exposes explorer width commands for the shared Snacks/Neo-tree panel:
+
+- **Set explorer width to 20**: `:ShipFlowExplorerWidth20` or `<leader>e2`
+- **Set explorer width to 35**: `:ShipFlowExplorerWidth35` or `<leader>e3`
+- **Set explorer width to full screen**: `:ShipFlowExplorerWidthFull` or `<leader>eF`
 
 ## Configuration
 

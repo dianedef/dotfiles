@@ -54,7 +54,7 @@ return {
       { "<leader>ap",   group = "Copilot" },
       { "<leader>au",   group = "Augment" },
       { "<leader>ax",   group = "Avante" },
-      { "<leader>e",    group = "NeoTree" },
+      { "<leader>e",    group = "Explorer" },
       { "<leader><tab>", group = "Tabs" },
       { "<leader>b",    group = "Buffer" },
       { "<leader>c",    group = "Code" },

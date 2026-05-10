@@ -40,7 +40,9 @@ return {
           git_untracked = true,
           diagnostics = true,
           follow_file = true,
-          layout = explorer_panel.snacks_layout(),
+          layout = function()
+            return explorer_panel.snacks_layout()
+          end,
           win = {
             list = {
               keys = {

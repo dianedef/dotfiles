@@ -100,3 +100,4 @@ Ce dépôt regroupe un ensemble de configurations locales (terminal, éditeur, f
 - Le `README.md` référence un ensemble de guides `docs/...` absents dans ce répertoire racine au moment de la génération.
 - La base de configuration peut évoluer vite (MCP/AI tools), maintenir la cohérence entre `config.sh` et `install.sh` lors de tout ajout.
 - Les dépendances de santé (`run_health_check`) doivent rester alignées avec les composants réellement installés via `DOTFILES_ONLY`.
+- Le panneau explorateur Neovim partage sa largeur via `nvim/MyNeovim/lua/config/explorer-panel.lua`; `shipflow` expose `ShipFlowExplorerWidth20`, `ShipFlowExplorerWidth35` et `ShipFlowExplorerWidthFull` avec les mappings `<leader>e2`, `<leader>e3`, `<leader>eF` pour Snacks et Neo-tree.

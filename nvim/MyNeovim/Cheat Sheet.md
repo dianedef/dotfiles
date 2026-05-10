@@ -144,6 +144,9 @@ Trois portes d'entrée — attention, « root » ici n'est ni le root système (
 | `<leader>er` (root) | `$HOME` (figé dans la config) | `/home/ubuntu` |
 | `<leader>ec` (cwd) | dossier où `nvim` a été lancé | figé au démarrage |
 | `<leader>ee` (git) | dossier git courant, vue git_status | ouvert auto au lancement |
+| `<leader>e2` | largeur panneau | 20 colonnes |
+| `<leader>e3` | largeur panneau | 35 colonnes |
+| `<leader>eF` | largeur panneau | largeur totale écran |
 
 Ce qu'il faut retenir :
 
