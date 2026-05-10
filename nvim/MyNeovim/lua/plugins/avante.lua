@@ -316,6 +316,34 @@ return {
       sidebar.__avante_input_layout_patched = true
     end
 
+    local function patch_avante_escape_stop()
+      local ok_sidebar, sidebar = pcall(require, "avante.sidebar")
+      local ok_utils, utils = pcall(require, "avante.utils")
+      if not ok_sidebar or not ok_utils or type(sidebar) ~= "table" then return end
+      if sidebar.__myneovim_escape_stop_patch then return end
+
+      local base_setup_window_navigation = sidebar.setup_window_navigation
+      sidebar.setup_window_navigation = function(self, container)
+        base_setup_window_navigation(self, container)
+        if not container or not container.winid or not vim.api.nvim_win_is_valid(container.winid) then return end
+
+        local bufnr = vim.api.nvim_win_get_buf(container.winid)
+        utils.safe_keymap_set({ "n", "i" }, "<Esc>", function()
+          if self.is_generating then
+            require("avante.api").stop()
+            return
+          end
+
+          if vim.fn.mode() == "i" then
+            local esc = vim.api.nvim_replace_termcodes("<Esc>", true, false, true)
+            vim.api.nvim_feedkeys(esc, "n", false)
+          end
+        end, { buffer = bufnr, noremap = true, silent = true, nowait = true, desc = "Avante Stop" })
+      end
+
+      sidebar.__myneovim_escape_stop_patch = true
+    end
+
     local function patch_avante_hide_tool_messages()
       local ok_render, render = pcall(require, "avante.history.render")
       local ok_helpers, helpers = pcall(require, "avante.history.helpers")
@@ -402,6 +430,7 @@ return {
     clear_legacy_avante_keymaps()
     patch_avante_invalid_buffer_root()
     patch_avante_horizontal_input_layout()
+    patch_avante_escape_stop()
     patch_avante_hide_tool_messages()
     patch_avante_openai_nil_tool_result_content()
     require("avante").setup(opts)
