@@ -67,6 +67,7 @@ return {
       { "<leader>gh",   group = "Hunks" },
       { "<leader>q",    group = "Quit/Session" },
       { "<leader>s",    group = "Search" },
+      { "<leader>t",    group = "Terminal", icon = "" },
       { "<leader>u",    group = "UI" },
       { "<leader>w",    group = "Windows" },
       { "<leader>n",    group = "Notifications" },

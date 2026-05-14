@@ -14,3 +14,13 @@ vim.api.nvim_create_autocmd("VimEnter", {
       end
     end,
 })
+
+local reload_changed_files_group = vim.api.nvim_create_augroup("reload_changed_files", { clear = true })
+
+vim.api.nvim_create_autocmd({ "WinEnter", "CursorHold" }, {
+    group = reload_changed_files_group,
+    desc = "Reload files changed outside Neovim",
+    callback = function()
+        vim.cmd("checktime")
+    end,
+})

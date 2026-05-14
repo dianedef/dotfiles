@@ -31,3 +31,13 @@ vim.opt.sessionoptions = {
   "terminal",
   "localoptions",
 }
+
+vim.opt.spell = true
+vim.opt.spelllang = "fr,en_us"
+
+vim.api.nvim_create_autocmd({ "BufEnter", "BufNewFile" }, {
+  callback = function()
+    vim.opt_local.spell = true
+    vim.opt_local.spelllang = "fr,en_us"
+  end,
+})

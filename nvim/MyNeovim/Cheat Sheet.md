@@ -125,6 +125,14 @@ Si on active un bon plugin de fold Markdown, le plus utile sera surtout :
 - `p` : coller après
 - `P` : coller avant
 
+### Spell (orthographe)
+
+- `zg` / `Zg` : ajouter le mot sous le curseur au dictionnaire personnel
+- `zug` / `Zug` : supprimer le mot du dictionnaire personnel
+- `zw` / `Zw` : marquer le mot comme incorrect
+- `z=` : proposer des corrections
+- `]s` / `[s` : aller à l'erreur d’orthographe suivante / précédente
+
 ### Raccourcis très rentables sur mobile
 
 - `s` : saut rapide visible avec `flash.nvim`

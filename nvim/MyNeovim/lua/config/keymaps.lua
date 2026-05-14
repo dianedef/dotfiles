@@ -22,6 +22,21 @@ vim.keymap.del("n", "<leader>|")
 vim.keymap.set("n", "<leader>w-", "<C-W>s", { desc = "Split Window Below", remap = true })
 vim.keymap.set("n", "<leader>w|", "<C-W>v", { desc = "Split Window Right", remap = true })
 vim.keymap.set("n", "<leader>uw", ":set wrap!<CR>", { desc = "Toggle wrap" })
+vim.keymap.set("n", "<leader>r", "<cmd>checktime<cr>", { desc = "Reload changed files" })
+
+-- Terminal submenu: open new terminals in horizontal/vertical splits
+vim.keymap.set("n", "<leader>th", function()
+  vim.cmd("botright split")
+  vim.cmd("terminal")
+  vim.cmd("wincmd J")
+  vim.cmd("startinsert")
+end, { desc = " Terminal Horizontal" })
+
+vim.keymap.set("n", "<leader>tv", function()
+  vim.cmd("vsplit")
+  vim.cmd("terminal")
+  vim.cmd("startinsert")
+end, { desc = " Terminal Vertical" })
 
 local function switch_to_other_buffer()
   local alt = vim.fn.bufnr("#")
@@ -124,3 +139,91 @@ vim.keymap.set("n", "<leader>nC", function()
   end
   vim.notify("Aucun message", "warn")
 end, { desc = "Copier tous les messages" })
+
+-- Front matter folding shortcut in same namespace as fold commands (z...)
+local function get_front_matter_end()
+  local lines = vim.api.nvim_buf_get_lines(0, 0, -1, false)
+  if lines[1] ~= "---" then
+    return nil
+  end
+
+  for lnum = 2, #lines do
+    if lines[lnum] == "---" then
+      return lnum
+    end
+  end
+
+  return nil
+end
+
+function _G.__fm_foldexpr(lnum)
+  local end_fm = vim.b.front_matter_end_line
+  local first_line = vim.api.nvim_buf_get_lines(0, 0, 1, false)[1]
+  local prev_expr = vim.b.fm_prev_foldexpr
+
+  local function fallback_fold_expr()
+    if prev_expr and prev_expr ~= "" and prev_expr ~= "v:lua.__fm_foldexpr(v:lnum)" then
+      vim.v.lnum = lnum
+      local ok, res = pcall(vim.api.nvim_eval, prev_expr)
+      if ok and res ~= nil then
+        return res
+      end
+    end
+    if vim.treesitter and vim.treesitter.foldexpr then
+      vim.v.lnum = lnum
+      local ok, res = pcall(vim.treesitter.foldexpr)
+      return ok and res or "="
+    end
+    return "="
+  end
+
+  if first_line ~= "---" or not end_fm then
+    return fallback_fold_expr()
+  end
+
+  if lnum == 1 then
+    return "a1"
+  elseif lnum < end_fm then
+    return "1"
+  elseif lnum == end_fm then
+    return "s1"
+  end
+
+  return fallback_fold_expr()
+end
+
+local function fold_front_matter()
+  local end_fm = get_front_matter_end()
+  vim.b.front_matter_end_line = end_fm
+  vim.b.fm_prev_foldexpr = vim.wo.foldexpr
+
+  if not end_fm then
+    vim.notify("Pas de front matter détectable (--- ... ---) en tête de fichier", vim.log.levels.INFO)
+    return
+  end
+
+  vim.wo.foldmethod = "expr"
+  vim.wo.foldexpr = "v:lua.__fm_foldexpr(v:lnum)"
+
+  local cur = vim.api.nvim_win_get_cursor(0)
+  vim.api.nvim_win_set_cursor(0, { 1, 0 })
+
+  if vim.fn.foldclosed(1) == 1 then
+    vim.cmd("normal! zo")
+  else
+    vim.cmd("normal! zc")
+  end
+
+  vim.api.nvim_win_set_cursor(0, cur)
+end
+
+vim.api.nvim_create_user_command("FoldFrontMatter", fold_front_matter, {
+  desc = "Toggle fold front matter (--- ... ---)",
+})
+
+pcall(vim.keymap.del, "n", "zF")
+vim.keymap.set("n", "zF", "<cmd>FoldFrontMatter<cr>", {
+  desc = "Fold front matter",
+  silent = true,
+  nowait = true,
+})
