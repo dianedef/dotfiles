@@ -149,6 +149,7 @@ return {
     picker = {
       sources = {
         git_diff = {
+          focus = "list",
           layout = {
             fullscreen = true,
             layout = {
@@ -157,8 +158,28 @@ return {
               title = "{title} {live} {flags}",
               title_pos = "center",
               { win = "input", height = 1, border = "bottom" },
-              { win = "list", height = 0.2, border = "none" },
+              { win = "list", height = 3, border = "none" },
               { win = "preview", title = "{preview}", border = "top" },
+            },
+          },
+          win = {
+            input = {
+              keys = {
+                ["<Tab>"] = { "focus_list", mode = { "i", "n" } },
+                ["<S-Tab>"] = { "focus_preview", mode = { "i", "n" } },
+              },
+            },
+            list = {
+              keys = {
+                ["<Tab>"] = "focus_preview",
+                ["<S-Tab>"] = "focus_preview",
+              },
+            },
+            preview = {
+              keys = {
+                ["<Tab>"] = "focus_list",
+                ["<S-Tab>"] = "focus_list",
+              },
             },
           },
         },

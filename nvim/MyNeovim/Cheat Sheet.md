@@ -217,13 +217,40 @@ Important :
 
 ### Plugins qui montrent un vrai diff visuel
 
+- `gitsigns` : diff directement dans le fichier ouvert
 - `Snacks picker` : `<leader>gd` ouvre la liste des fichiers/hunks modifiés avec preview
+- `Snacks picker` : `<leader>gD` ouvre le diff contre `origin`
 - `Diffview` : `<leader>gv` ouvre la revue Git en plein écran avec fichiers en haut et diff en bas
-- `gitsigns` : actif par défaut, montre les changements dans la gouttière du buffer courant
-- `[h` / `]h` : hunk précédent / suivant
+- `Diffview` : `<leader>gV` ouvre le diff contre la branche `origin` principale
+
+Dans le fichier courant avec `gitsigns` :
+
+- la colonne gauche affiche `+`, `~`, `_`, `^`, `!` selon le type de changement
+- les numéros et lignes modifiés sont colorés
+- les changements intra-ligne sont visibles quand `word_diff` est actif
 - `<leader>ghp` : aperçu inline du hunk courant
-- `<leader>ghd` : ouvrir un vrai mode diff sur le fichier courant
-- `<leader>ghD` : diff contre `~`
+- `<leader>ghs` : stage le hunk courant
+- `<leader>ghr` : reset le hunk courant
+- `<leader>ghb` : blame de la ligne courante
+- `<leader>ghd` : diff du fichier courant
+- `<leader>ght` : toggle du diff intra-ligne
+
+Si rien n'apparait avec `gitsigns` :
+
+- vérifier que le fichier est dans un dépôt Git
+- vérifier que le fichier est suivi par Git ou attachable par `gitsigns`
+- vérifier qu'il reste bien des changements non commités
+- lancer `:Gitsigns attach`
+- lancer `:Gitsigns debug_messages`
+
+Diff rapide avec `Snacks` :
+
+- `<leader>gd` : Git Diff (hunks)
+- `<leader>gD` : Git Diff (origin)
+- le panneau de sélection est volontairement limité à 3 lignes pour mobile
+- `Tab` : basculer entre la liste des fichiers/hunks et le preview du diff
+- `<C-f>` / `<C-b>` : scroller le preview
+- `<C-j>` / `<C-k>` : descendre / monter dans la liste
 
 - `Codex` (`agentic.nvim`) : montre un diff visuel pour les changements proposés par l'agent avant validation
 - `Claude Code` : ouvre aussi des diffs visuels quand Claude propose des modifications

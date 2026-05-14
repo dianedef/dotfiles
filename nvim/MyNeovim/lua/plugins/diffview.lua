@@ -65,7 +65,7 @@ return {
           return {
             type = "split",
             position = "top",
-            height = math.max(6, math.floor(vim.o.lines * 0.25)),
+            height = math.max(3, math.floor(vim.o.lines * 0.12)),
             win_opts = {
               wrap = false,
             },
@@ -77,7 +77,7 @@ return {
           return {
             type = "split",
             position = "top",
-            height = math.max(6, math.floor(vim.o.lines * 0.25)),
+            height = math.max(3, math.floor(vim.o.lines * 0.12)),
             win_opts = {
               wrap = false,
             },
