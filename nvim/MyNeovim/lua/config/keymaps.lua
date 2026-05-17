@@ -51,7 +51,7 @@ end
 vim.keymap.set("n", "<leader>bb", switch_to_other_buffer, { desc = "Switch to Other Buffer" })
 vim.keymap.del("n", "<leader>`")
 
-vim.keymap.set("n", "<leader>h", function()
+local function toggle_cheat_sheet()
   local path = vim.fn.expand("~/dotfiles/nvim/MyNeovim/Cheat Sheet.md")
   local target = vim.uv.fs_realpath(path) or vim.fn.fnamemodify(path, ":p")
   local current_name = vim.api.nvim_buf_get_name(0)
@@ -79,7 +79,9 @@ vim.keymap.set("n", "<leader>h", function()
   vim.keymap.set("n", "q", close_and_return, { buffer = true, desc = "Fermer cheatsheet" })
   vim.keymap.set("n", "<leader>bd", close_and_return, { buffer = true, desc = "Fermer cheatsheet" })
   vim.keymap.set("n", "<leader>wd", close_and_return, { buffer = true, desc = "Fermer cheatsheet" })
-end, { desc = "Cheat Sheet" })
+end
+
+vim.keymap.set("n", "<leader>H", toggle_cheat_sheet, { desc = "Cheat Sheet" })
 
 require("shipflow").setup()
 

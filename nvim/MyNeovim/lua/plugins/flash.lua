@@ -2,7 +2,15 @@ return {
   "folke/flash.nvim",
   enabled = true,
   event = "VeryLazy",
-  opts = {},
+  opts = {
+    modes = {
+      -- Termux/custom keyboard paste can replay normal-mode text through Neo-tree.
+      -- Keep explicit Flash jumps, but leave char motions native to avoid nil state crashes.
+      char = {
+        enabled = false,
+      },
+    },
+  },
   keys = {
     { "s", mode = { "n", "x", "o" }, function() require("flash").jump() end, desc = "Flash" },
     { "S", mode = { "n", "x", "o" }, function() require("flash").treesitter() end, desc = "Flash Treesitter" },

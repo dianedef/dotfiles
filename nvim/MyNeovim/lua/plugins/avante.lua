@@ -31,6 +31,20 @@ return {
   enabled = true,
   event = "VeryLazy",
   build = "make",
+  init = function()
+    vim.api.nvim_create_autocmd({ "BufEnter", "WinEnter" }, {
+      group = vim.api.nvim_create_augroup("user_avante_input_insert", { clear = true }),
+      callback = function()
+        if vim.bo.filetype == "AvanteInput" and vim.bo.modifiable then
+          vim.schedule(function()
+            if vim.bo.filetype == "AvanteInput" and vim.bo.modifiable then
+              vim.cmd("startinsert!")
+            end
+          end)
+        end
+      end,
+    })
+  end,
   -- build = "make BUILD_FROM_SOURCE=true luajit",
   dependencies = {
     "nvim-treesitter/nvim-treesitter",
