@@ -1,0 +1,228 @@
+#!/usr/bin/env python3
+import argparse
+import json
+import os
+import shutil
+import subprocess
+import sys
+from pathlib import Path
+
+
+def error(message, code=1):
+    print(f"mail-intel: {message}", file=sys.stderr)
+    return code
+
+
+def require_root(root):
+    if not root:
+        raise ValueError("missing --maildir-root or MAIL_INTEL_ROOT")
+    path = Path(root).expanduser()
+    if not path.exists():
+        raise FileNotFoundError(f"Maildir root not found: {path}")
+    return path
+
+
+def require_notmuch():
+    exe = shutil.which("notmuch")
+    if not exe:
+        raise RuntimeError("notmuch is not installed or not in PATH")
+    return exe
+
+
+def account_path(root, account):
+    path = root / account
+    if not path.exists():
+        raise FileNotFoundError(f"account Maildir not found: {path}")
+    return path
+
+
+def list_accounts(root):
+    return sorted(path.name for path in root.iterdir() if path.is_dir() and not path.name.startswith("."))
+
+
+def list_folders(root, account):
+    base = account_path(root, account)
+    folders = []
+    for path in base.rglob("*"):
+        if path.is_dir() and (path / "cur").is_dir() and (path / "new").is_dir() and (path / "tmp").is_dir():
+            folders.append(path.relative_to(base).as_posix() or "INBOX")
+    return sorted(folders)
+
+
+def run_notmuch(args):
+    exe = require_notmuch()
+    result = subprocess.run([exe, *args], text=True, capture_output=True, check=False)
+    if result.returncode != 0:
+        raise RuntimeError(result.stderr.strip() or result.stdout.strip() or "notmuch command failed")
+    return result.stdout
+
+
+def path_query(account, folder=None):
+    folder = folder.strip("/") if folder else None
+    if folder:
+        return f"path:{account}/{folder}/**"
+    return f"path:{account}/**"
+
+
+def search_messages(account, folder=None, query=None, limit=30):
+    terms = [path_query(account, folder)]
+    if query:
+        terms.append(f"({query})")
+    full_query = " and ".join(terms)
+    stdout = run_notmuch(["search", "--format=json", "--output=summary", "--limit", str(limit), full_query])
+    data = json.loads(stdout or "[]")
+    messages = []
+    for item in data:
+        query = item.get("query")
+        if isinstance(query, list) and query:
+            message_id = query[0]
+        elif isinstance(query, str) and query:
+            message_id = query
+        elif item.get("thread"):
+            message_id = f"thread:{item.get('thread')}"
+        else:
+            message_id = item.get("messageid")
+        messages.append(
+            {
+                "id": message_id,
+                "thread": item.get("thread"),
+                "date": item.get("date_relative") or item.get("timestamp"),
+                "authors": item.get("authors"),
+                "subject": item.get("subject"),
+                "tags": item.get("tags", []),
+            }
+        )
+    return messages
+
+
+def iter_messages(node):
+    if isinstance(node, dict):
+        if "headers" in node and "body" in node:
+            yield node
+        for value in node.values():
+            yield from iter_messages(value)
+    elif isinstance(node, list):
+        for value in node:
+            yield from iter_messages(value)
+
+
+def extract_text_part(part):
+    if not isinstance(part, dict):
+        return None
+    content_type = part.get("content-type", "")
+    content = part.get("content")
+    if content_type.startswith("text/plain") and isinstance(content, str):
+        return content
+    if isinstance(content, list):
+        chunks = [extract_text_part(child) for child in content]
+        chunks = [chunk for chunk in chunks if chunk]
+        if chunks:
+            return "\n\n".join(chunks)
+    return None
+
+
+def show_message(message_id):
+    stdout = run_notmuch(["show", "--format=json", message_id])
+    data = json.loads(stdout or "[]")
+    messages = list(iter_messages(data))
+    if not messages:
+        raise RuntimeError(f"message not found: {message_id}")
+    return messages[0]
+
+
+def markdown_for_message(message):
+    headers = message.get("headers", {})
+    body = message.get("body", [])
+    text = None
+    if isinstance(body, list):
+        for part in body:
+            text = extract_text_part(part)
+            if text:
+                break
+    elif isinstance(body, dict):
+        text = extract_text_part(body)
+
+    if not text:
+        text = "[Aucun contenu text/plain lisible. Email HTML ou multipart non supporté complètement en v1.]"
+
+    lines = [
+        "# Email concurrent",
+        "",
+        f"From: {headers.get('From', '')}",
+        f"To: {headers.get('To', '')}",
+        f"Date: {headers.get('Date', '')}",
+        f"Subject: {headers.get('Subject', '')}",
+        f"Message-ID: {headers.get('Message-ID', message.get('id', ''))}",
+        "",
+        "## Contenu",
+        "",
+        text.strip(),
+        "",
+    ]
+    return "\n".join(lines)
+
+
+def print_json(data):
+    print(json.dumps(data, ensure_ascii=False, indent=2))
+
+
+def main():
+    parser = argparse.ArgumentParser(description="Read-only Maildir/notmuch bridge for Neovim.")
+    parser.add_argument("--maildir-root", default=os.environ.get("MAIL_INTEL_ROOT"))
+    parser.add_argument("--format", choices=["json", "text"], default="text")
+    sub = parser.add_subparsers(dest="command", required=True)
+
+    sub.add_parser("accounts")
+
+    folders = sub.add_parser("folders")
+    folders.add_argument("account")
+
+    list_cmd = sub.add_parser("list")
+    list_cmd.add_argument("account")
+    list_cmd.add_argument("folder", nargs="?", default="INBOX")
+    list_cmd.add_argument("--limit", type=int, default=30)
+
+    search = sub.add_parser("search")
+    search.add_argument("account")
+    search.add_argument("query")
+    search.add_argument("--limit", type=int, default=30)
+
+    show = sub.add_parser("show")
+    show.add_argument("message_id")
+    show.add_argument("--markdown", action="store_true")
+
+    export = sub.add_parser("export")
+    export.add_argument("message_id")
+    export.add_argument("--markdown", action="store_true")
+
+    args = parser.parse_args()
+
+    try:
+        if args.command in {"accounts", "folders", "list", "search"}:
+            root = require_root(args.maildir_root)
+        if args.command == "accounts":
+            data = list_accounts(root)
+            print_json(data) if args.format == "json" else print("\n".join(data))
+        elif args.command == "folders":
+            data = list_folders(root, args.account)
+            print_json(data) if args.format == "json" else print("\n".join(data))
+        elif args.command == "list":
+            data = search_messages(args.account, args.folder, limit=args.limit)
+            print_json(data) if args.format == "json" else print("\n".join(item["id"] for item in data))
+        elif args.command == "search":
+            data = search_messages(args.account, query=args.query, limit=args.limit)
+            print_json(data) if args.format == "json" else print("\n".join(item["id"] for item in data))
+        elif args.command in {"show", "export"}:
+            message = show_message(args.message_id)
+            if args.markdown or args.command == "export":
+                print(markdown_for_message(message))
+            else:
+                print_json(message)
+    except Exception as exc:
+        return error(str(exc))
+
+    return 0
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())

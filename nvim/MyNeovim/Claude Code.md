@@ -16,21 +16,21 @@ claude doctor
 
 ## Vos raccourcis dans cette config
 
-- `<leader>ac` : ouvrir / basculer le terminal Claude Code
-- `<leader>as` : envoyer du contexte a Claude Code
+- `<leader>acc` : ouvrir / basculer le terminal Claude Code
+- `<leader>acs` : envoyer du contexte a Claude Code
 
 Raccourci a retenir :
 
-- `Claude Code` utilise les touches en minuscules
-- `Codex` utilise les touches en majuscules : `<leader>aC`, `<leader>aF`, `<leader>aN`, `<leader>aR`
+- `Claude Code` utilise le prefixe `<leader>ac`
+- `Codex` utilise le prefixe `<leader>ak` : `<leader>akt`, `<leader>akf`, `<leader>akn`, `<leader>akr`
 
-Si votre `<leader>` est celui par défaut de LazyVim, cela correspond généralement a `Espace a c` et `Espace a s`.
+Si votre `<leader>` est celui par défaut de LazyVim, cela correspond généralement a `Espace a c c` et `Espace a c s`.
 
 ## Utilisation la plus rapide
 
 1. Ouvrir le projet et le fichier sur lequel vous travaillez.
-2. Lancer Claude avec `<leader>ac` ou `:ClaudeCode`.
-3. Sélectionner un bloc en mode visuel puis faire `<leader>as` ou `:ClaudeCodeSend`.
+2. Lancer Claude avec `<leader>acc` ou `:ClaudeCode`.
+3. Sélectionner un bloc en mode visuel puis faire `<leader>acs` ou `:ClaudeCodeSend`.
 4. Laisser Claude proposer des changements.
 5. Quand un diff s'ouvre :
    - `:w` pour accepter

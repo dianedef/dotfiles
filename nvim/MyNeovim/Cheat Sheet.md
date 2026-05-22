@@ -76,31 +76,21 @@ Un exemple concret — faire remonter la ligne courante :
 
 Pour les articles, `}` et `{` sont parmi les touches les plus utiles.
 
-### Folds
+### Markdown : titres et folds
 
-- `za` : ouvrir / fermer le fold courant
-- `zo` : ouvrir le fold courant
-- `zc` : fermer le fold courant
-- `zR` : tout ouvrir
-- `zM` : tout fermer
-- `zr` : ouvrir un peu plus les folds
-- `zm` : fermer un peu plus les folds
-- `zj` : fold suivant
-- `zk` : fold précédent
+Règle importante : les titres `H1` (`#`) restent toujours ouverts.
 
-Pour un paragraphe ou un bloc courant :
-
-- `vip` puis `zf` : créer un fold manuel sur le paragraphe courant
-- `zd` : supprimer le fold sous le curseur
-
-Si on active un bon plugin de fold Markdown, le plus utile sera surtout :
-
-- `za`
-- `zR`
-- `zM`
-- `zr`
-- `zm`
-- `K` : aperçu du fold courant si tu es sur une section repliée
+- `]h` / `[h` : titre H2/H3 suivant / précédent
+- `zh` : titre suivant, tous niveaux
+- `n` / `p` : titre H2/H3 suivant / précédent en `Visual` uniquement, avec compte possible (`2n`, `3p`)
+- `z2` : garde H1/H2 visibles, replie en dessous
+- `z3` : garde H1/H2/H3 visibles, replie en dessous
+- `z4` : garde H1/H2/H3/H4 visibles, replie en dessous
+- `z5` : garde H1/H2/H3/H4/H5 visibles, replie en dessous
+- `za` : ouvrir / fermer la section courante
+- `zR` / `zM` : tout ouvrir / tout fermer, sans replier les H1
+- `q` en `Visual` : toggle `fold all sauf H1` / `unfold all`
+- `r` en `Visual` : toggle complet du titre courant et de tout son bloc
 
 ### Suppressions utiles
 
@@ -380,6 +370,58 @@ Workflow utile :
 4. demander une réécriture, une amélioration ou une correction
 5. relire le diff avant d'accepter
 
+## Emails concurrents dans Neovim
+
+Le plugin local `Mail Intel` sert à lire des emails Gmail déjà synchronisés en Maildir, les ouvrir dans Neovim, puis copier leur contenu en Markdown pour Codex, Claude, Gemini, Copilot Chat ou Avante.
+
+Il est volontairement en lecture seule :
+
+- pas d'envoi d'email
+- pas de suppression
+- pas d'archive
+- pas de modification Gmail
+
+### Commandes utiles
+
+- `<leader>mi` : ouvrir le dossier par défaut (`_to_transcribe`)
+- `<leader>mf` : ouvrir un dossier Gmail précis
+- `<leader>ms` : chercher dans les emails
+- `<leader>ma` : lister les comptes locaux
+- `<leader>mO` : ouvrir un email par identifiant `notmuch`
+- `<leader>my` : copier l'email ouvert en Markdown
+- `<leader>mb` : copier un prompt `$sf-content` pour placer l'email dans tes sites
+- `<leader>mA` : envoyer l'email ouvert à Avante avec `$sf-content`
+- `:CompetitorMailAccounts` : lister les comptes locaux disponibles
+- `:CompetitorMailInbox` : ouvrir le dossier par défaut (`_to_transcribe`)
+- `:CompetitorMailFolder _to_transcribe` : ouvrir un dossier Gmail précis
+- `:CompetitorMailInbox business-a` : ouvrir l'inbox d'un compte précis
+- `:CompetitorMailSearch pricing` : chercher dans les emails du compte par défaut
+- `:CompetitorMailOpen <id>` : ouvrir un email par identifiant `notmuch`
+- `:CompetitorMailCopyMarkdown` : copier l'email ouvert en Markdown
+- `:CompetitorMailCopySfContent` : copier un prompt `$sf-content`
+- `:CompetitorMailAvanteSfContent` : envoyer à Avante avec `$sf-content`
+
+### Workflow simple
+
+1. Synchroniser Gmail vers le Maildir local avec `mbsync`.
+2. Indexer avec `notmuch new`.
+3. Dans Neovim, lancer `<leader>mi`.
+4. Choisir un email dans la liste.
+5. Lancer `<leader>mA` pour envoyer l'email à Avante avec `$sf-content`.
+6. Ou lancer `<leader>mb` pour copier le prompt et le coller ailleurs.
+
+### Configuration à connaître
+
+Les variables importantes sont :
+
+```bash
+export MAIL_INTEL_ROOT="$HOME/Mail/competitors"
+export MAIL_INTEL_ACCOUNT="business-a"
+export MAIL_INTEL_FOLDER="_to_transcribe"
+```
+
+La doc complète est dans `Mail Intel.md`.
+
 ## Codex / Claude
 
 ### Sortir proprement d'une interface agent
@@ -495,65 +537,13 @@ Ceux que tu devrais connaître d'abord :
 - `Copilot` : autocomplétion rapide
 - `Copilot Chat` : explication / review / fix rapide d'un buffer
 - `vim-pencil` : confort d'écriture en Markdown et texte
+- `ShipFlow` : navigation dans les titres Markdown (ce que tu appelles parfois *Wispr Flow*)
 
 Ceux qui valent le coup plus tard pour la rédaction :
 
 - `nvim-ufo` : folds sur les headings Markdown
 - `nvim-spider` : mouvements plus intelligents par mots
-- `md-outline` : vue d'ensemble de la structure d'un article
 - `follow-md-links` : suivre les liens Markdown facilement
-
-### Ce que je te conseille pour les folds
-
-- `nvim-ufo` est activé dans ton setup
-- pour du Markdown, il peut plier les sections par headings
-- pour toi, c'est probablement l'activation la plus rentable après `neo-tree` et Codex
-- `zR` ouvre tout
-- `zM` ferme tout
-- `zr` ouvre un peu plus
-- `zm` ferme un peu plus
-- `K` permet de prévisualiser le contenu d'un fold
-
-Autres pistes si un jour tu veux comparer :
-
-- `preservim/vim-markdown` : option classique, très orientée Markdown, avec folding par headings
-- `md-outline` : pas un plugin de fold, mais très utile en complément pour voir la structure
-
-### À quoi sert MD Outline
-
-`md-outline` ne replie pas directement le texte.
-
-Il sert à afficher la structure d'un document Markdown à partir des headings :
-
-- H1
-- H2
-- H3
-- etc.
-
-Donc son rôle, c'est :
-
-- voir le plan d'un article
-- repérer rapidement la section que tu veux relire
-- naviguer dans un long texte sans scroller partout
-
-Différence simple :
-
-- `ufo` = plier / déplier les sections
-- `md-outline` = voir le sommaire / plan du document
-
-Dans ton setup :
-
-- `md-outline` est activé
-- `<leader>mo` : ouvrir l'outline Markdown
-- `<leader>mc` : fermer l'outline Markdown
-- `:MdoOpen` : ouvrir l'outline
-- `:MdoClose` : fermer l'outline
-
-Quand l'utiliser :
-
-- quand tu veux voir le squelette d'un article
-- quand tu veux passer vite d'un heading à un autre
-- quand tu veux relire la structure avant de réécrire le contenu
 
 ## Raccourcis à apprendre d'abord
 
@@ -566,10 +556,11 @@ Si tu ne dois retenir que quelques touches :
 - `{` / `}` : sauter de paragraphe en paragraphe
 - `diw` : supprimer un mot
 - `dd` : supprimer une ligne
+- `]h` / `[h` : aller au titre H2/H3 suivant / précédent
 - `za` : ouvrir / fermer la section courante
 - `zM` / `zR` : tout fermer / tout ouvrir
-- `<leader>aC` : ouvrir Codex
-- `<leader>aF` : envoyer un fichier ou une sélection à Codex
+- `<leader>akt` : ouvrir Codex
+- `<leader>akf` : envoyer le fichier ou la sélection à Codex
 - `h` / `l` dans l'arborescence : fermer / ouvrir
 
 ## Lecture des indicateurs
@@ -577,16 +568,3 @@ Si tu ne dois retenir que quelques touches :
 - `*` sur un dossier : il y a des fichiers modifiés quelque part dedans
 - `?` sur un dossier : il y a au moins un fichier non tracké dedans
 - Git visible sur un fichier : ce fichier a changé
-
-## Philosophie simple
-
-Pour toi, l'usage important maintenant est :
-
-- regarder l'arborescence
-- repérer les zones sales du repo
-- naviguer vite dans un article
-- supprimer / corriger du texte sans lenteur
-- envoyer un fichier ou une sélection à Codex
-- juger les changements dans le diff
-
-Le reste peut attendre.
