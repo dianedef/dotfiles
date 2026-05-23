@@ -40,7 +40,6 @@ Le bootstrap distant clone ou met à jour `~/dotfiles`, puis lance `termux.sh`. 
 - Thèmes Termux: `termux-theme` depuis `dianedef/termux-theme`, avec alias `thermux`.
 - Configs symlinkées: `nvim/MyNeovimTermux`, `termux/termux.properties`, `ranger`, `starship-simple.toml`.
 - Font: JetBrainsMono Nerd Font dans `~/.termux/font.ttf` si absente.
-- Helpers Markdown "ShipFlow/Wispr Flow": module Lua local dans Neovim, sans dépendance `gum`.
 
 ## Keybindings Neovim
 

@@ -259,9 +259,13 @@ done
 BASHRC="$HOME/.bashrc"
 touch "$BASHRC"
 
-# Remove generic desktop/Linux Neovim integration from older Termux installs.
-# Termux uses the explicit alias block below to avoid web/dev-only helpers.
-sed -i '/# Neovim config switcher/{N; /shell-integration.sh/d; }' "$BASHRC" 2>/dev/null || true
+# Shell integration
+if ! grep -q "shell-integration.sh" "$BASHRC" 2>/dev/null; then
+    echo "" >> "$BASHRC"
+    echo "# Neovim config switcher" >> "$BASHRC"
+    echo '[ -f "$HOME/dotfiles/nvim/shell-integration.sh" ] && source "$HOME/dotfiles/nvim/shell-integration.sh"' >> "$BASHRC"
+    log "INFO" "✅ Added shell integration"
+fi
 
 # Add cargo/local bin to PATH for Starship/Zoxide
 if ! grep -q "\.cargo/bin" "$BASHRC"; then
