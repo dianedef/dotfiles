@@ -138,9 +138,20 @@ return {
           contained_git_status = contained_git_status,
         },
         renderers = {
+          file = {
+            { "indent" },
+            {
+              "container",
+              content = {
+                { "name", zindex = 10 },
+                { "clipboard", zindex = 10 },
+                { "diagnostics", errors_only = true, zindex = 20, align = "right" },
+                { "git_status", zindex = 10, align = "right" },
+              },
+            },
+          },
           directory = {
             { "indent" },
-            { "icon" },
             {
               "container",
               content = {
@@ -178,9 +189,15 @@ return {
       default_component_configs = {
         indent = {
           with_expanders = true,
-          expander_collapsed = "",
-          expander_expanded = "",
+          expander_collapsed = "+",
+          expander_expanded = "-",
           expander_highlight = "NeoTreeExpander",
+        },
+        icon = {
+          folder_closed = "+",
+          folder_open = "-",
+          folder_empty = ".",
+          default = " ",
         },
         git_status = {
           symbols = {

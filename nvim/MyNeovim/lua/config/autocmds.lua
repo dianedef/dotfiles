@@ -55,11 +55,11 @@ local function markdown_toggle_global_fold_except_h1()
   if folded then
     vim.cmd("normal! zR")
     vim.wo.foldlevel = 99
-    vim.wo.foldlevelstart = 99
+    vim.opt_global.foldlevelstart = 99
   else
     vim.cmd("normal! zM")
     vim.wo.foldlevel = 1
-    vim.wo.foldlevelstart = 1
+    vim.opt_global.foldlevelstart = 1
   end
   vim.b.shipflow_fold_except_h1_only = not folded
 end
@@ -97,7 +97,7 @@ end
 
 local function markdown_set_h1_fold_policy()
   vim.wo.foldlevel = 1
-  vim.wo.foldlevelstart = 1
+  vim.opt_global.foldlevelstart = 1
   vim.wo.foldmethod = vim.wo.foldmethod ~= "manual" and vim.wo.foldmethod or "indent"
 
   local heading_fold_modes = { "n", "x" }
@@ -126,37 +126,37 @@ local function markdown_set_h1_fold_policy()
 
   vim.keymap.set(heading_fold_modes, "z2", function()
     vim.wo.foldlevel = 2
-    vim.wo.foldlevelstart = 2
+    vim.opt_global.foldlevelstart = 2
   end, { buffer = true, desc = "Fold below H2 (keep H1/H2 visible)" })
 
   vim.keymap.set(heading_fold_modes, "z3", function()
     vim.wo.foldlevel = 3
-    vim.wo.foldlevelstart = 3
+    vim.opt_global.foldlevelstart = 3
   end, { buffer = true, desc = "Fold below H3 (keep H1/H2/H3 visible)" })
 
   vim.keymap.set(heading_fold_modes, "Z3", function()
     vim.wo.foldlevel = 3
-    vim.wo.foldlevelstart = 3
+    vim.opt_global.foldlevelstart = 3
   end, { buffer = true, desc = "Fold below H3 (keep H1/H2/H3 visible)" })
 
   vim.keymap.set(heading_fold_modes, "z4", function()
     vim.wo.foldlevel = 4
-    vim.wo.foldlevelstart = 4
+    vim.opt_global.foldlevelstart = 4
   end, { buffer = true, desc = "Fold below H4 (keep H1/H2/H3/H4 visible)" })
 
   vim.keymap.set(heading_fold_modes, "Z4", function()
     vim.wo.foldlevel = 4
-    vim.wo.foldlevelstart = 4
+    vim.opt_global.foldlevelstart = 4
   end, { buffer = true, desc = "Fold below H4 (keep H1/H2/H3/H4 visible)" })
 
   vim.keymap.set(heading_fold_modes, "z5", function()
     vim.wo.foldlevel = 5
-    vim.wo.foldlevelstart = 5
+    vim.opt_global.foldlevelstart = 5
   end, { buffer = true, desc = "Fold below H5 (keep H1/H2/H3/H4/H5 visible)" })
 
   vim.keymap.set(heading_fold_modes, "Z5", function()
     vim.wo.foldlevel = 5
-    vim.wo.foldlevelstart = 5
+    vim.opt_global.foldlevelstart = 5
   end, { buffer = true, desc = "Fold below H5 (keep H1/H2/H3/H4/H5 visible)" })
 
   vim.keymap.set(heading_fold_modes, "zh", function()

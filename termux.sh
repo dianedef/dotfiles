@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 # Script d'installation ALLÉGÉ pour Termux (Android)
-# Version minimaliste - pas de copilot, neovim léger, outils essentiels seulement
+# Version minimaliste pour édition Markdown: pas d'agents IA, pas de stack web.
 
 ## Configuration logging
 LOG_FILE="${TERMUX_DOTFILES_LOG_FILE:-$HOME/termux-install.log}"
@@ -27,24 +27,6 @@ fi
 
 mkdir -p "$HOME/.local/bin" "$HOME/.cargo/bin" "$HOME/tmp"
 
-write_sgpt_config() {
-    local key="$1"
-    local sgpt_dir="$HOME/.config/shell_gpt"
-    local sgpt_file="$sgpt_dir/.sgptrc"
-    local previous_umask
-    previous_umask="$(umask)"
-
-    mkdir -p "$sgpt_dir" || return 1
-    umask 077
-    # Keep .sgptrc shell-safe and private even with special chars/newlines in keys.
-    if ! printf 'OPENAI_API_KEY=%q\n' "$key" > "$sgpt_file"; then
-        umask "$previous_umask"
-        return 1
-    fi
-    umask "$previous_umask"
-    chmod 600 "$sgpt_file" 2>/dev/null || return 1
-}
-
 # --- 1. Packages Termux essentiels ---
 log "INFO" "📦 Installing Termux packages..."
 pkg update -y >/dev/null 2>&1
@@ -57,8 +39,8 @@ pkg install -y \
   fd \
   fzf \
   python \
-  nodejs-lts \
-  gh \
+  tar \
+  unzip \
   ranger \
   tree \
   termux-api >/dev/null 2>&1
@@ -88,6 +70,11 @@ fi
 
 FONT_INSTALLED=false
 
+if [ -f "$FONT_DIR/font.ttf" ] && [ ! -s "$FONT_DIR/font.ttf" ]; then
+    log "WARN" "⚠️  Existing ~/.termux/font.ttf is empty, reinstalling Nerd Font"
+    rm -f "$FONT_DIR/font.ttf"
+fi
+
 if [ ! -f "$FONT_DIR/font.ttf" ]; then
     log "INFO" "Downloading JetBrainsMono Nerd Font..."
     FONT_TMP_DIR="$(mktemp -d "$HOME/tmp/nerd-font.XXXXXX")"
@@ -100,18 +87,20 @@ if [ ! -f "$FONT_DIR/font.ttf" ]; then
 
         if unzip -q "$FONT_TMP_DIR/JetBrainsMono.zip" "JetBrainsMonoNerdFont-Regular.ttf" -d "$FONT_TMP_DIR" 2>/dev/null; then
             if [ -f "$FONT_TMP_DIR/JetBrainsMonoNerdFont-Regular.ttf" ]; then
-                cp "$FONT_TMP_DIR/JetBrainsMonoNerdFont-Regular.ttf" "$FONT_DIR/font.ttf"
-                chmod 644 "$FONT_DIR/font.ttf"
-                log "INFO" "✅ Nerd Font installed to ~/.termux/font.ttf"
-                FONT_INSTALLED=true
+                if cp "$FONT_TMP_DIR/JetBrainsMonoNerdFont-Regular.ttf" "$FONT_DIR/font.ttf" && [ -s "$FONT_DIR/font.ttf" ]; then
+                    chmod 644 "$FONT_DIR/font.ttf"
+                    log "INFO" "✅ Nerd Font installed to ~/.termux/font.ttf"
+                    FONT_INSTALLED=true
+                else
+                    rm -f "$FONT_DIR/font.ttf"
+                    log "ERROR" "❌ Failed to install Nerd Font to ~/.termux/font.ttf"
+                fi
             else
                 log "WARN" "⚠️  Font file not found after extraction"
             fi
         else
             log "WARN" "⚠️  Failed to extract font from zip"
         fi
-
-        rm -rf JetBrainsMono.zip JetBrainsMono* *.ttf *.otf 2>/dev/null
     else
         log "ERROR" "❌ Failed to download Nerd Font from GitHub"
         log "INFO" "💡 Alternative: Install 'Termux:Styling' app from F-Droid"
@@ -152,39 +141,17 @@ else
     log "INFO" "✅ Zoxide already installed"
 fi
 
-# Doppler (secret management)
-if ! command -v doppler &> /dev/null; then
-    log "INFO" "Installing Doppler..."
-    # Doppler requires architecture detection
-    ARCH=$(uname -m)
-    case $ARCH in
-        aarch64|arm64)
-            DOPPLER_ARCH="arm64"
-            ;;
-        x86_64|amd64)
-            DOPPLER_ARCH="amd64"
-            ;;
-        *)
-            log "WARN" "⚠️ Unsupported architecture: $ARCH (skipping Doppler)"
-            DOPPLER_ARCH=""
-            ;;
-    esac
-
-    if [ -n "$DOPPLER_ARCH" ]; then
-        # Download Doppler CLI for Linux ARM64/AMD64
-        DOPPLER_URL="https://cli.doppler.com/install.sh"
-        curl -sL "$DOPPLER_URL" | sh -s -- --no-install --no-package-manager >/dev/null 2>&1
-
-        if [ -f "./doppler" ]; then
-            mv ./doppler "$HOME/.local/bin/doppler"
-            chmod +x "$HOME/.local/bin/doppler"
-            log "INFO" "✅ Doppler installed to ~/.local/bin"
-        else
-            log "ERROR" "❌ Doppler installation failed"
-        fi
+# Termux theme picker
+log "INFO" "🎨 Installing termux-theme..."
+if curl -fsSL https://raw.githubusercontent.com/dianedef/termux-theme/main/install.sh -o "$HOME/tmp/termux-theme-install.sh"; then
+    if sh "$HOME/tmp/termux-theme-install.sh" >/dev/null 2>&1 && command -v termux-theme &> /dev/null; then
+        log "INFO" "✅ termux-theme installed"
+    else
+        log "WARN" "⚠️  termux-theme installation failed"
     fi
+    rm -f "$HOME/tmp/termux-theme-install.sh"
 else
-    log "INFO" "✅ Doppler already installed"
+    log "WARN" "⚠️  Could not download termux-theme installer"
 fi
 
 # File manager - Use Ranger (already installed via pkg)
@@ -327,11 +294,11 @@ sed -i '/# Termux aliases/,/# END Termux aliases/d' "$BASHRC" 2>/dev/null
 cat >> "$BASHRC" << 'EOF'
 
 # Termux aliases
+alias re='source "$HOME/.bashrc" && echo "✓ Shell rechargé!"'
 alias reload='source "$HOME/.bashrc" && echo "✓ Shell rechargé!"'
 alias i='bash ~/dotfiles/termux.sh'
 alias dot='~/dotfiles/termux.sh'
 alias dotfiles='~/dotfiles/termux.sh'
-alias ds='bash ~/dotfiles/doppler-setup-termux.sh'
 alias cls='clear'
 alias ..='cd ..'
 alias ...='cd ../..'
@@ -344,9 +311,6 @@ function gp { if [ -n "$(git status --porcelain)" ]; then git add -A && git comm
 alias gl='git pull'
 alias gd='git diff'
 
-# Codespace
-alias cs='gh cs ssh'                 # SSH into any codespace (interactive)
-
 # Termux specific
 alias termux-wake='termux-wake-lock'
 alias termux-sleep='termux-wake-unlock'
@@ -356,165 +320,15 @@ alias dl='cd ~/storage/downloads'
 # File managers
 alias n='nvim'
 alias r='ranger'
-
-# AI Agents (verified working on Termux)
-alias ai='llm'                       # LLM CLI - multi-provider (Gemini, Claude, GPT)
-alias gpt='sgpt'                     # Shell-GPT - quick OpenAI queries
-alias chat='llm chat'                # Interactive chat mode
+alias thermux='termux-theme'
 
 # END Termux aliases
 EOF
 log "INFO" "✅ Added/Updated Termux aliases"
 
-# --- 7. AI Coding Agents Installation ---
-log "INFO" "🤖 Installing AI coding agents..."
-
-# Shell-GPT (sgpt) - Lightweight, works great on Termux
-if ! command -v sgpt &> /dev/null; then
-    log "INFO" "Installing Shell-GPT (sgpt)..."
-    pip install shell-gpt >/dev/null 2>&1
-    if command -v sgpt &> /dev/null; then
-        log "INFO" "✅ Shell-GPT installed"
-    else
-        log "WARN" "⚠️  Shell-GPT installation failed"
-    fi
-else
-    log "INFO" "✅ Shell-GPT already installed"
-fi
-
-# LLM by Simon Willison - Multi-provider support with plugins
-if ! command -v llm &> /dev/null; then
-    log "INFO" "Installing LLM CLI..."
-    pip install llm >/dev/null 2>&1
-    if command -v llm &> /dev/null; then
-        log "INFO" "✅ LLM CLI installed"
-
-        # Install Gemini plugin (lightweight, free tier available)
-        log "INFO" "Installing LLM plugins (Gemini, Claude)..."
-        llm install llm-gemini >/dev/null 2>&1 && log "INFO" "   ✅ Gemini plugin"
-        llm install llm-anthropic >/dev/null 2>&1 && log "INFO" "   ✅ Anthropic plugin"
-    else
-        log "WARN" "⚠️  LLM CLI installation failed"
-    fi
-else
-    log "INFO" "✅ LLM CLI already installed"
-fi
-
-# TLDR pages
-if ! command -v tldr &> /dev/null; then
-    log "INFO" "Installing TLDR pages..."
-    npm install -g tldr >/dev/null 2>&1
-    if command -v tldr &> /dev/null; then
-        log "INFO" "✅ TLDR pages installed"
-    else
-        log "WARN" "⚠️  TLDR pages installation failed"
-    fi
-else
-    log "INFO" "✅ TLDR pages already installed"
-fi
-
-# Configure API keys from Doppler (if available)
-if command -v doppler &>/dev/null && doppler me &>/dev/null; then
-    log "INFO" "🔐 Configuring AI API keys from Doppler..."
-
-    # Get keys from Doppler
-    OPENAI_KEY=$(doppler secrets get OPENAI_API_KEY --plain 2>/dev/null)
-    GEMINI_KEY=$(doppler secrets get GEMINI_AI --plain 2>/dev/null)
-    ANTHROPIC_KEY=$(doppler secrets get ANTHROPIC_API_KEY --plain 2>/dev/null)
-
-    # Configure LLM CLI keys
-    if command -v llm &>/dev/null; then
-        [ -n "$OPENAI_KEY" ] && llm keys set openai "$OPENAI_KEY" 2>/dev/null && log "INFO" "   ✅ OpenAI key configured"
-        [ -n "$GEMINI_KEY" ] && llm keys set gemini "$GEMINI_KEY" 2>/dev/null && log "INFO" "   ✅ Gemini key configured"
-        [ -n "$ANTHROPIC_KEY" ] && llm keys set anthropic "$ANTHROPIC_KEY" 2>/dev/null && log "INFO" "   ✅ Anthropic key configured"
-    fi
-
-    # Configure Shell-GPT (uses OPENAI_API_KEY env var)
-    if [ -n "$OPENAI_KEY" ]; then
-        if write_sgpt_config "$OPENAI_KEY"; then
-            log "INFO" "   ✅ Shell-GPT configured"
-        else
-            log "WARN" "   ⚠️  Shell-GPT config write failed"
-        fi
-    fi
-elif [ -f "$HOME/.dotfiles-secrets.env" ]; then
-    log "INFO" "📝 Using local secrets from ~/.dotfiles-secrets.env"
-    # shellcheck disable=SC1091
-    source "$HOME/.dotfiles-secrets.env"
-
-    if command -v llm &>/dev/null; then
-        [ -n "${OPENAI_API_KEY:-}" ] && llm keys set openai "$OPENAI_API_KEY" 2>/dev/null
-        [ -n "${GOOGLE_AI_API_KEY:-}" ] && llm keys set gemini "$GOOGLE_AI_API_KEY" 2>/dev/null
-        [ -n "${ANTHROPIC_API_KEY:-}" ] && llm keys set anthropic "$ANTHROPIC_API_KEY" 2>/dev/null
-    fi
-
-    if [ -n "${OPENAI_API_KEY:-}" ]; then
-        if write_sgpt_config "$OPENAI_API_KEY"; then
-            log "INFO" "   ✅ Shell-GPT configured from local secrets"
-        else
-            log "WARN" "   ⚠️  Shell-GPT config write failed from local secrets"
-        fi
-    fi
-else
-    log "INFO" "💡 Configure API keys later with: llm keys set <provider>"
-    log "INFO" "   Providers: openai, gemini, anthropic"
-fi
-
-log "INFO" "✅ AI coding agents setup complete"
-
-# --- GitHub CLI Authentication (with Doppler fallback) ---
-log "INFO" "🔐 Setting up GitHub CLI..."
-GH_TOKEN="${GH_TOKEN:-}"
-
-# Try 1: Doppler token (automated)
-if command -v doppler &>/dev/null && doppler me &>/dev/null; then
-    GH_TOKEN=$(doppler secrets get GH_TOKEN --plain 2>/dev/null || doppler secrets get GITHUB_TOKEN --plain 2>/dev/null)
-
-    if [ -n "$GH_TOKEN" ] && command -v gh &>/dev/null; then
-        log "INFO" "Authenticating with Doppler token..."
-        echo "$GH_TOKEN" | gh auth login --with-token >/dev/null 2>&1
-
-        if gh auth status &>/dev/null; then
-            log "INFO" "✅ GitHub authenticated via Doppler"
-        else
-            log "WARN" "⚠️ Doppler token failed, manual login needed"
-            GH_TOKEN=""
-        fi
-    fi
-# Try 1b: Local .env file
-elif [ -f "$HOME/.dotfiles-secrets.env" ]; then
-    # shellcheck disable=SC1091
-    source "$HOME/.dotfiles-secrets.env"
-
-    if [ -n "${GITHUB_TOKEN:-}" ] && command -v gh &>/dev/null; then
-        log "INFO" "Authenticating with local .env token..."
-        echo "$GITHUB_TOKEN" | gh auth login --with-token >/dev/null 2>&1
-
-        if gh auth status &>/dev/null; then
-            log "INFO" "✅ GitHub authenticated via local .env"
-        else
-            log "WARN" "⚠️ Local token failed, manual login needed"
-            GH_TOKEN=""
-        fi
-    fi
-fi
-
-# Try 2: Already authenticated
-if ! command -v gh &>/dev/null; then
-    log "WARN" "⚠️ GitHub CLI not installed (pkg install gh)"
-elif [ -z "$GH_TOKEN" ] && gh auth status &>/dev/null; then
-    log "INFO" "✅ GitHub already authenticated"
-
-# Try 3: Manual login (interactive fallback)
-elif [ -z "$GH_TOKEN" ]; then
-    log "INFO" "⚠️ GitHub not authenticated"
-    log "INFO" "📝 Run: gh auth login  (or bash ~/dotfiles/doppler-setup-termux.sh)"
-
-    read -r -p "Authenticate now? (y/N): " AUTH_NOW
-    if [ "$AUTH_NOW" = "y" ] || [ "$AUTH_NOW" = "Y" ]; then
-        gh auth login
-    fi
-fi
+# --- 7. Agents / web tooling intentionally skipped ---
+log "INFO" "🤖 Skipping AI agents, MCP, and web tooling on Termux"
+log "INFO" "✅ Termux profile kept focused on Markdown editing"
 
 # --- Git Identity Configuration ---
 log "INFO" "👤 Configuring Git identity..."
@@ -530,25 +344,22 @@ echo "✅ Installation Termux terminée!"
 echo "📝 Log: $LOG_FILE"
 echo ""
 echo "🚀 Pour activer: source ~/.bashrc"
+echo "   Ensuite, utilisez: re"
 echo "💡 Ou redémarrez Termux"
 echo ""
 echo "📦 Packages installés:"
 echo "   • Neovim (MyNeovimTermux config)"
 echo "   • Ripgrep, fd, fzf"
-echo "   • GitHub CLI"
 echo "   • Starship prompt"
 echo "   • Zoxide (smart cd)"
-echo "   • Node.js LTS"
-echo "   • JetBrainsMono Nerd Font (icônes)"
+echo "   • termux-theme (thermux alias)"
+if [ "$FONT_INSTALLED" = true ]; then
+    echo "   • JetBrainsMono Nerd Font (icônes)"
+fi
 echo "   • Ranger file manager (use 'ranger' command)"
 echo ""
-echo "🤖 AI Coding Agents:"
-[ -x "$(command -v sgpt)" ] && echo "   • Shell-GPT (sgpt/gpt command)"
-[ -x "$(command -v llm)" ] && echo "   • LLM CLI (ai/llm command) - Gemini, Claude, GPT"
-echo ""
-echo ""
 echo "🎨 CONFIGURATION DES ICÔNES (Nerd Font):"
-if [ -f "$HOME/.termux/font.ttf" ]; then
+if [ "$FONT_INSTALLED" = true ] && [ -s "$HOME/.termux/font.ttf" ]; then
     echo "✅ Font installée dans ~/.termux/font.ttf"
     echo ""
     echo "📱 Pour activer les icônes dans Neovim:"
@@ -561,6 +372,10 @@ if [ -f "$HOME/.termux/font.ttf" ]; then
     echo "🧪 Testez si les icônes fonctionnent:"
     echo "   echo '    '"
     echo ""
+else
+    echo "⚠️  Font non installée automatiquement dans ~/.termux/font.ttf"
+    echo "   Vérifiez la connexion GitHub ou utilisez Termux:Styling."
+    echo ""
 fi
 echo "❌ Si les icônes ne s'affichent TOUJOURS PAS après redémarrage:"
 echo "   Solution recommandée: Installez 'Termux:Styling' (officiel)"
@@ -572,21 +387,14 @@ echo ""
 echo "   Alternative: Supprimez ~/.termux/font.ttf pour désactiver"
 echo ""
 echo "⚠️  EXCLUS de cette installation (trop lourds):"
+echo "   ✗ Stack web / Node.js"
+echo "   ✗ MCP"
+echo "   ✗ Agents IA dans Neovim"
 echo "   ✗ GitHub Copilot"
 echo "   ✗ Aider (dépendances lourdes)"
+echo "   ✗ Claude/Codex/OpenCode"
 echo "   ✗ Neovim compilé from source"
 echo "   ✗ Plugins LSP lourds"
-echo ""
-echo "🎯 Utilisation des AI Agents:"
-echo "   ai 'question'      → LLM CLI (multi-provider)"
-echo "   gpt 'question'     → Shell-GPT (OpenAI)"
-echo "   chat               → Mode conversation interactif"
-echo "   llm -m gemini-2.0-flash 'question'  → Gemini"
-echo "   llm -m claude-3-haiku 'question'    → Claude"
-echo ""
-echo "📚 Configuration API keys:"
-echo "   Via Doppler (recommandé): déjà configuré automatiquement"
-echo "   Manuel: llm keys set openai / gemini / anthropic"
 echo ""
 echo "💡 Pour Codespaces, utilisez: bash install.sh"
 echo ""
@@ -595,6 +403,7 @@ echo "📖 ALIASES DISPONIBLES (ajoutés à ~/.bashrc):"
 echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
 echo ""
 echo "🔄 Système:"
+echo "   re           → Recharger .bashrc"
 echo "   reload       → Recharger .bashrc"
 echo "   i            → Relancer le script d'installation"
 echo "   cls          → Effacer l'écran (clear)"
@@ -617,11 +426,6 @@ echo "   dl           → cd ~/storage/downloads"
 echo ""
 echo "📂 File Managers:"
 echo "   r            → ranger"
-echo ""
-echo "🤖 AI Agents (terminal):"
-echo "   ai            → LLM CLI (multi-provider: Gemini, Claude, GPT)"
-echo "   gpt           → Shell-GPT (OpenAI quick queries)"
-echo "   chat          → Mode conversation interactif"
 echo ""
 echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
 echo ""

@@ -4,7 +4,7 @@ metadata_schema_version: "1.0"
 artifact_version: "0.1.0"
 project: "dotfiles"
 created: "2026-04-26"
-updated: "2026-04-26"
+updated: "2026-05-22"
 status: draft
 source_skill: sf-docs
 scope: architecture
@@ -54,14 +54,14 @@ Le dépôt fonctionne comme une plateforme de bootstrap de workstation:
 - une couche d'installation scriptée,
 - une couche de bibliothèques partagées,
 - une couche de configurations déclaratives par application,
-- une couche de secrets et d'intégrations d'outils IA.
+- une couche de secrets et d'intégrations d'outils IA pour Linux/Codespaces.
 
 ## Diagramme logique
 
 ```text
 Entrée d'installation
 ├─ bootstrap.sh (one-click ubuntu) -> install.sh
-├─ termux.sh (workflow Android allégé)
+├─ termux.sh (workflow Android allégé Markdown-only)
 └─ windows.ps1 (workflow Windows référencé)
 
 install.sh (orchestrateur)
@@ -127,11 +127,12 @@ Contrainte: la même orchestration est réutilisable en mode non-interactif (CI)
 ### Modules spécifiques Termux
 
 - `termux.sh` active une variante légère:
-  - outils de base via `pkg`,
+  - outils de base via `pkg` pour Markdown et petits fichiers,
   - `Neovim`,
   - `Starship` binaire local,
   - gestion `ranger` prioritaire,
   - configs simplifiées (`starship-simple.toml`) et config Nvim Termux.
+  - exclusions explicites: Node.js, GitHub CLI, Doppler, MCP, Copilot, Claude/Codex/OpenCode, Aider et agents Neovim.
 
 ## Couche 4 — Config-as-code
 
@@ -148,9 +149,8 @@ Contrainte: la même orchestration est réutilisable en mode non-interactif (CI)
 
 ## Données et flux de secrets
 
-- Le dépôt prévoit deux approches:
-  - flux secret manager `Doppler` (installation/usage standard),
-  - stockage local `.dotfiles-secrets.env` pour Termux en l'absence de CLI.
+- Le dépôt prévoit le flux secret manager `Doppler` pour l'installation/usage standard Linux/Codespaces.
+- Termux ne configure plus de secrets locaux; les anciens flux de secrets Android sont retirés du profil.
 - Les variables d'environnement sont lues depuis `.env` (template `.env.example`), avec valeurs par défaut définies dans `config.sh`.
 - Certains flux MCP utilisent des clés optionnelles (`FIRECRAWL`, `DEEPL`, `DFS`) injectées dynamiquement.
 
@@ -186,13 +186,13 @@ Contrainte: la même orchestration est réutilisable en mode non-interactif (CI)
 - `lib.sh` contient la matrice complète des composants et le parseur d'options.
 - `config.sh` contient versioning, chemins, flags et liste `DOTFILES_ALL_COMPONENTS`.
 - `mcp/mcp-servers.json` regroupe la vérité des serveurs MCP.
-- `termux.sh` exprime un flux différent mais convergent sur les mêmes cibles de config.
+- `termux.sh` exprime un flux différent et volontairement réduit: config Markdown Android, pas station de développement web/agentique.
 
 ## Répartition des responsabilités
 
 - Script owner (contrat): bootstrap, installation, santé, uninstall.
 - Config owner: répertoires module (`nvim`, `ranger`, `starship`, `ghostty`, `lazygit`, `mpv`).
-- Secret owner: `.env` templates + scripts Doppler.
+- Secret owner: `.env` templates + scripts Doppler pour Linux/Codespaces.
 - MCP owner: `mcp/mcp-servers.json` + logique d'injection multi-client.
 
 ## Points de vigilance

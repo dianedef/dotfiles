@@ -4,7 +4,7 @@ metadata_schema_version: "1.0"
 artifact_version: "0.1.0"
 project: "dotfiles"
 created: "2026-04-26"
-updated: "2026-04-26"
+updated: "2026-05-22"
 status: draft
 source_skill: sf-docs
 scope: technique
@@ -35,12 +35,13 @@ next_step: /sf-docs audit CONTEXT.md
 # CONTEXT
 
 ## Contexte métier
-Ce dépôt regroupe un ensemble de configurations locales (terminal, éditeur, file managers, prompts, MCP, assistants IA) avec un pipeline d'installation automatisé. L'objectif est de reconstituer un poste de travail homogène sur Linux/Codespaces, Termux et Windows.
+Ce dépôt regroupe un ensemble de configurations locales (terminal, éditeur, file managers, prompts, MCP, assistants IA) avec un pipeline d'installation automatisé. L'objectif est de reconstituer un poste de travail homogène sur Linux/Codespaces et Windows, avec un profil Termux volontairement réduit à l'édition Markdown et aux petits fichiers texte.
 
 ## Architecture réelle observée
 
 - Couche installation:
   - `bootstrap.sh` installe prérequis, clone/actualise le dépôt puis délègue à `install.sh`.
+  - `install-termux.sh` fournit l'entrée réseau Termux en une commande, clone ou met à jour `~/dotfiles`, puis délègue à `termux.sh`.
   - `install.sh` est le point d'entrée principal et pilote toutes les phases.
   - `lib.sh` contient le socle utilitaire: parsing d'options, installation, santé, symlinks, auth, menu, logs.
   - `config.sh` concentre les constantes runtime: versions, chemins, flags, listes de composants.
@@ -48,7 +49,8 @@ Ce dépôt regroupe un ensemble de configurations locales (terminal, éditeur, f
   - Répertoires de configs versionnés: `nvim/`, `ranger/`, `starship/`, `ghostty/`.
   - Fichiers dédiés: `.tmux.conf`, `.env.example`, `cheat/conf.yml`, `mcp/mcp-servers.json`, `codex/config.toml`, `lazygit/config.yml`, `cursor/settings.json`, `ranger/...`.
 - Couche secrets/AI:
-  - `doppler-setup.sh` et `doppler-setup-termux.sh` gèrent la configuration d'accès.
+  - `doppler-setup.sh` gère la configuration d'accès pour Linux/Codespaces.
+  - Termux ne configure plus de secrets, agents IA, MCP, GitHub CLI ou stack web.
   - `.env.example` et `env.example` décrivent les variables supportées.
   - `mcp/mcp-servers.json` est la source principale des serveurs MCP.
 - Couche intégration shell:
@@ -64,7 +66,7 @@ Ce dépôt regroupe un ensemble de configurations locales (terminal, éditeur, f
   - mode local sans sudo (`USER_LOCAL_MODE`) vers `~/.local/bin` et `~/.npm-global` quand nécessaire.
 - Gestion des configurations:
   - la logique privilégie les symlinks vers le dépôt pour garder un source of truth unique.
-- Dépendances externes: GitHub releases, Starship install script, curl, npm/node, Doppler, gh, npx, outils système selon composants.
+- Dépendances externes: GitHub releases, Starship install script, curl, npm/node, Doppler, gh, npx, outils système selon composants. Sur Termux, le périmètre est limité à `pkg`, Neovim, outils de recherche/navigation, Starship/Zoxide/Ranger et font Nerd Font.
 
 ## État documenté et preuves
 
@@ -76,6 +78,7 @@ Ce dépôt regroupe un ensemble de configurations locales (terminal, éditeur, f
   - `/home/claude/dotfiles/config.sh`
 - Démarrage multi-plateforme:
   - `/home/claude/dotfiles/bootstrap.sh`
+  - `/home/claude/dotfiles/install-termux.sh`
   - `/home/claude/dotfiles/termux.sh`
   - `/home/claude/dotfiles/windows.ps1`
 - Documentation de produit:
@@ -99,5 +102,6 @@ Ce dépôt regroupe un ensemble de configurations locales (terminal, éditeur, f
 
 - Le `README.md` référence un ensemble de guides `docs/...` absents dans ce répertoire racine au moment de la génération.
 - La base de configuration peut évoluer vite (MCP/AI tools), maintenir la cohérence entre `config.sh` et `install.sh` lors de tout ajout.
+- Le profil Termux ne doit pas réintroduire Node.js, GitHub CLI, Doppler, MCP, Copilot, Claude/Codex/OpenCode, Aider ou agents Neovim; il cible Markdown seulement.
 - Les dépendances de santé (`run_health_check`) doivent rester alignées avec les composants réellement installés via `DOTFILES_ONLY`.
 - Le panneau explorateur Neovim partage sa largeur via `nvim/MyNeovim/lua/config/explorer-panel.lua`; `shipflow` expose `ShipFlowExplorerWidth20`, `ShipFlowExplorerWidth35` et `ShipFlowExplorerWidthFull` avec les mappings `<leader>e2`, `<leader>e3`, `<leader>eF` pour Snacks et Neo-tree.

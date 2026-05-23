@@ -4,7 +4,7 @@ metadata_schema_version: "1.0"
 artifact_version: "0.1.0"
 project: "dotfiles"
 created: "2026-04-26"
-updated: "2026-05-01"
+updated: "2026-05-22"
 status: draft
 source_skill: sf-docs
 scope: technical
@@ -20,7 +20,6 @@ evidence:
   - "/home/claude/dotfiles/bootstrap.sh"
   - "/home/claude/dotfiles/termux.sh"
   - "/home/claude/dotfiles/doppler-setup.sh"
-  - "/home/claude/dotfiles/doppler-setup-termux.sh"
 depends_on:
   - "/home/claude/dotfiles/README.md"
   - "/home/claude/dotfiles/CLAUDE.md"
@@ -75,11 +74,12 @@ Avant toute modification de logique, lire en priorité:
 - `setup_configs` lie les répertoires réels `nvim`, `ranger`, `starship`, `tmux`, `ghostty`, `codex`, `claude`.
 - `setup_mcp_config` lit `mcp/mcp-servers.json` et configure plusieurs clients.
 - `setup_shell_integration` modifie `.bashrc` avec `starship init`, `zoxide init`, alias et exports.
-- `termux.sh` utilise des chemins différents (MyNeovimTermux, `starship-simple.toml`, `~/.local/bin`), et un flux de secrets local `.dotfiles-secrets.env`.
+- `termux.sh` utilise des chemins différents (MyNeovimTermux, `starship-simple.toml`, `~/.local/bin`) et reste limité à l'édition Markdown sur Android.
 
 ## Risques connus à surveiller
 
 - Les dépendances de packages changent vite (NPM, GitHub release URLs, API keys). Toujours vérifier la compatibilité OS/arch.
+- Le profil Termux ne doit pas réintroduire Node.js, GitHub CLI, Doppler, MCP, Copilot, Claude/Codex/OpenCode, Aider ou agents Neovim.
 - Les chemins `.dotfiles-backup/*` peuvent croître si les scripts de symlink sont rejoués souvent.
 - La référence à des guides `docs/` dans `README.md` ne correspond pas à un répertoire `docs` présent dans ce snapshot.
 

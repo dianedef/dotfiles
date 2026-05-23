@@ -6,3 +6,146 @@
 --
 -- Or remove existing autocmds by their group name (which is prefixed with `lazyvim_` for the defaults)
 -- e.g. vim.api.nvim_del_augroup_by_name("lazyvim_wrap_spell")
+pcall(vim.api.nvim_del_augroup_by_name, "lazyvim_wrap_spell")
+
+local reload_changed_files_group = vim.api.nvim_create_augroup("reload_changed_files", { clear = true })
+
+vim.api.nvim_create_autocmd({ "WinEnter", "CursorHold" }, {
+  group = reload_changed_files_group,
+  desc = "Reload files changed outside Neovim",
+  callback = function()
+    vim.cmd("checktime")
+  end,
+})
+
+local function markdown_heading_level(line)
+  local hashes = line:match("^(#+)%s")
+  if not hashes then
+    return 0
+  end
+  return #hashes
+end
+
+local function markdown_is_h1(line_num)
+  local line = vim.api.nvim_buf_get_lines(0, line_num - 1, line_num, false)[1] or ""
+  return markdown_heading_level(line) == 1
+end
+
+local function markdown_heading_line_at_or_before_cursor(line_num)
+  for ln = line_num, 1, -1 do
+    local line = vim.api.nvim_buf_get_lines(0, ln - 1, ln, false)[1] or ""
+    if markdown_heading_level(line) > 0 then
+      return ln
+    end
+  end
+  return 0
+end
+
+local function markdown_toggle_global_fold_except_h1()
+  local folded = vim.b.shipflow_fold_except_h1_only or false
+  if folded then
+    vim.cmd("normal! zR")
+    vim.wo.foldlevel = 99
+    vim.wo.foldlevelstart = 99
+  else
+    vim.cmd("normal! zM")
+    vim.wo.foldlevel = 1
+    vim.wo.foldlevelstart = 1
+  end
+  vim.b.shipflow_fold_except_h1_only = not folded
+end
+
+local function markdown_toggle_current_heading_fold()
+  local cursor = vim.api.nvim_win_get_cursor(0)
+  local heading_line = markdown_heading_line_at_or_before_cursor(cursor[1])
+  if heading_line == 0 then
+    local next_heading = vim.fn.search("^#+\\s", "nW")
+    if next_heading ~= 0 then
+      heading_line = next_heading
+    else
+      vim.notify("Aucun titre dans ce document")
+      return
+    end
+  end
+
+  local saved_col = cursor[2]
+  vim.api.nvim_win_set_cursor(0, { heading_line, 0 })
+
+  if vim.fn.foldclosed(".") ~= -1 then
+    vim.cmd("normal! zO")
+  else
+    vim.cmd("normal! zC")
+  end
+
+  vim.api.nvim_win_set_cursor(0, { cursor[1], saved_col })
+end
+
+local function markdown_set_h1_fold_policy()
+  vim.wo.foldlevel = 1
+  vim.wo.foldlevelstart = 1
+  vim.wo.foldmethod = vim.wo.foldmethod ~= "manual" and vim.wo.foldmethod or "indent"
+
+  local heading_fold_modes = { "n", "x" }
+
+  vim.keymap.set("n", "zM", function()
+    vim.cmd("normal! zM")
+    vim.wo.foldlevel = 1
+  end, { buffer = true, desc = "Close all folds (keep H1 open)" })
+
+  vim.keymap.set(heading_fold_modes, "zm", function()
+    if vim.wo.foldlevel <= 1 then
+      vim.wo.foldlevel = 1
+    else
+      vim.cmd("normal! zm")
+    end
+  end, { buffer = true, desc = "Fold one more level (keep H1 open)" })
+
+  vim.keymap.set(heading_fold_modes, "zc", function()
+    local line = vim.api.nvim_win_get_cursor(0)[1]
+    if markdown_is_h1(line) then
+      vim.wo.foldlevel = 1
+      return
+    end
+    vim.cmd("normal! zc")
+  end, { buffer = true, desc = "Close fold under cursor (skip H1)" })
+
+  for _, level in ipairs({ 2, 3, 4, 5 }) do
+    vim.keymap.set(heading_fold_modes, "z" .. level, function()
+      vim.wo.foldlevel = level
+      vim.wo.foldlevelstart = level
+    end, { buffer = true, desc = "Fold below H" .. level })
+
+    vim.keymap.set(heading_fold_modes, "Z" .. level, function()
+      vim.wo.foldlevel = level
+      vim.wo.foldlevelstart = level
+    end, { buffer = true, desc = "Fold below H" .. level })
+  end
+
+  vim.keymap.set(heading_fold_modes, "zh", function()
+    require("shipflow").search_headings({ 1, 2, 3, 4, 5, 6 })
+  end, { buffer = true, desc = "Next heading (any level)" })
+
+  vim.keymap.set(heading_fold_modes, "za", function()
+    local line = vim.api.nvim_win_get_cursor(0)[1]
+    if markdown_is_h1(line) then
+      vim.wo.foldlevel = 1
+      return
+    end
+    vim.cmd("normal! za")
+  end, { buffer = true, desc = "Toggle fold under cursor (skip H1)" })
+
+  vim.keymap.set("x", "q", markdown_toggle_global_fold_except_h1, {
+    buffer = true,
+    desc = "Toggle fold all except H1 / unfold all",
+  })
+
+  vim.keymap.set("x", "r", markdown_toggle_current_heading_fold, {
+    buffer = true,
+    desc = "Toggle current section fold",
+  })
+end
+
+vim.api.nvim_create_autocmd("FileType", {
+  pattern = "markdown",
+  callback = markdown_set_h1_fold_policy,
+})

@@ -4,7 +4,7 @@ metadata_schema_version: "1.0"
 artifact_version: "0.1.0"
 project: "dotfiles"
 created: "2026-04-26"
-updated: "2026-04-26"
+updated: "2026-05-22"
 status: draft
 source_skill: sf-docs
 scope: function_tree
@@ -33,7 +33,8 @@ next_step: /sf-docs audit shipflow_data/technical/context-function-tree.md
 
 - `bootstrap.sh` (entrée réseau one-click) appelle `install.sh`.
 - `install.sh` est l'orchestrateur machine-agnostique.
-- `termux.sh` est une alternative légère pour Android sans dépendances Copilot/Doppler complète.
+- `install-termux.sh` est le bootstrap réseau Termux: il installe `git`, `curl`, `bash`, clone ou met à jour `~/dotfiles`, puis délègue à `termux.sh`.
+- `termux.sh` est une alternative légère pour Android, centrée Markdown, sans Node.js, GitHub CLI, Doppler, MCP, Copilot, Claude/Codex/OpenCode, Aider ou agents Neovim.
 
 ## Arbre fonctionnel (`install.sh`)
 
@@ -114,12 +115,13 @@ next_step: /sf-docs audit shipflow_data/technical/context-function-tree.md
   - liste composants `DOTFILES_ALL_COMPONENTS`,
   - configuration d'outils.
 - `termux.sh`:
-  - installation allégée, installation `starship`, `ranger`, `doppler`,
-  - symlink config vers `nvim/MyNeovimTermux`, `ranger`, `starship-simple.toml`.
+  - installation allégée pour Markdown et petits fichiers,
+  - cible appelée par `install-termux.sh` pour l'installation en une commande,
+  - installation `starship`, `zoxide`, `ranger`,
+  - symlink config vers `nvim/MyNeovimTermux`, `ranger`, `starship-simple.toml`,
+  - exclusion explicite agents IA, MCP et tooling web.
 - `doppler-setup.sh`:
   - setup projet Doppler, vérification clés, auto-auth GitHub.
-- `doppler-setup-termux.sh`:
-  - stockage local `.dotfiles-secrets.env` quand Doppler CLI absent.
 
 ## Modules de configuration liés
 
@@ -140,4 +142,4 @@ next_step: /sf-docs audit shipflow_data/technical/context-function-tree.md
 - `install.sh` contient explicitement l'ordre: dépendances -> outils -> node -> shell tools -> shell integration -> MCP -> auth.
 - `setup_configs` enchaîne les symlinks `nvim`, `ranger`, `starship`, `tmux`, `ghostty`, `codex`, skills Claude.
 - `setup_mcp_config` lit `mcp/mcp-servers.json`, merge/écrit `~/.claude.json`, `~/.config/mcp/servers.json`, `~/.config/claude/claude_desktop_config.json`.
-- `termux.sh` et `doppler-setup-termux.sh` montrent clairement la voie Android.
+- `termux.sh` montre clairement la voie Android Markdown-only.

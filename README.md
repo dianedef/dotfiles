@@ -4,7 +4,7 @@ metadata_schema_version: "1.0"
 artifact_version: "0.1.0"
 project: "dotfiles"
 created: "2026-04-26"
-updated: "2026-04-28"
+updated: "2026-05-22"
 status: draft
 source_skill: sf-docs
 scope: readme
@@ -21,12 +21,12 @@ next_step: "/sf-docs audit README.md"
 
 # My Dotfiles
 
-Multi-platform development environment with modern terminal tools and AI-assisted workflows.
+Multi-platform dotfiles repository with a full Linux/Codespaces setup and a deliberately lightweight Termux profile.
 
 - 🎨 Neovim for code editing
 - ✨ Starship prompt with git integration
 - 🔍 FZF, Ripgrep, and Zoxide for navigation
-- 🤖 BMAD Method for AI-driven development
+- 📱 Termux profile for Markdown editing on Android
 
 ## 📚 Documentation
 
@@ -36,7 +36,7 @@ Multi-platform development environment with modern terminal tools and AI-assiste
 - **[⚡ Quick Start](docs/installation/QUICK-START.md)** - Get started in 5 minutes
 - **[🪟 Windows Setup](docs/installation/WINDOWS.md)** - Windows installation
 - **[🐧 Linux/Codespaces](docs/installation/LINUX.md)** - Linux installation  
-- **[📱 Termux/Android](docs/installation/TERMUX.md)** - Android installation
+- **[📱 Termux/Android](nvim/MyNeovimTermux/README-TERMUX.md)** - Android Markdown profile
 - **[🤖 BMAD Usage](docs/workflows/BMAD-USAGE.md)** - AI-assisted development
 
 <!-- toc -->
@@ -105,13 +105,24 @@ ShipFlow is separate: its system installer must be run as `sudo ~/shipflow/insta
 ### Termux/Android
 
 ```bash
-# Clone and run lightweight installation
+# Install without manually cloning the repository
+curl -fsSL https://raw.githubusercontent.com/dianedef/dotfiles/master/install-termux.sh | sh
+source ~/.bashrc
+```
+
+Manual equivalent:
+
+```bash
 git clone https://github.com/dianedef/dotfiles.git ~/dotfiles
 cd ~/dotfiles && chmod +x termux.sh && ./termux.sh
 source ~/.bashrc
 ```
 
-**[→ Detailed Termux Guide](docs/installation/TERMUX.md)**
+After the first activation, use `re` to reload `.bashrc`.
+
+Termux is intentionally scoped to Markdown and small text files. It does not install Node.js, GitHub CLI, Doppler, MCP, Copilot, Claude/Codex/OpenCode, or Neovim AI agents.
+
+**[→ Detailed Termux Guide](nvim/MyNeovimTermux/README-TERMUX.md)**
 
 ## What's Included
 
@@ -128,6 +139,8 @@ source ~/.bashrc
 - **Nushell** - Modern shell (configs available)
 
 ### AI-Powered CLI Tools
+Linux/Codespaces only. The Termux installer intentionally skips this category.
+
 - **GitHub Copilot CLI** (`copilot`) - AI assistant in your terminal
 - **OpenCode AI** (`opencode`) - Open-source AI coding assistant
   - Supports: OpenAI (GPT), Anthropic (Claude), Google (Gemini), Groq
@@ -135,16 +148,20 @@ source ~/.bashrc
   - Automated setup via Doppler secrets
 
 ### MCP Servers
+Linux/Codespaces only. The Termux installer does not configure MCP clients or registries.
+
 - Shared MCP configuration lives in `mcp/mcp-servers.json`
 - Includes `consensus` at `https://mcp.consensus.app/mcp`
 - Consensus does not require an API key to get started; OAuth can trigger automatically on first use in supported clients
 - ShipFlow owns Claude/Codex MCP client configuration. Dotfiles only links shared MCP registry files via `./install.sh --only=mcp`.
 
 ### Secrets Management
+Linux/Codespaces only. The Termux Markdown profile does not install Doppler or local API-key setup.
+
 - **Doppler** - Secure API key management across devices
   - Auto-configures GitHub CLI authentication
   - Manages AI provider API keys (OpenAI, Claude, Gemini, Groq)
-  - Syncs secrets between Termux, Codespaces, and local machines
+  - Syncs secrets between Codespaces and local Linux machines
 
 ### Fonts & Icons
 - **Nerd Fonts** - Automatically installed for icons in Neovim and Starship
@@ -158,8 +175,9 @@ source ~/.bashrc
 | Starship | ✅ | ✅ | ✅ |
 | Nerd Fonts | ✅ | ✅ | ✅ |
 | GitHub Copilot | ✅ | ✅ | ❌ |
-| OpenCode AI | ✅ | ✅ | ✅ (Alpine) |
-| Doppler | ✅ | ✅ | ✅ |
+| OpenCode AI | ✅ | ✅ | ❌ |
+| Doppler | ✅ | ✅ | ❌ |
+| MCP config | ✅ | ✅ | ❌ |
 
 ## ShipFlow Ownership
 

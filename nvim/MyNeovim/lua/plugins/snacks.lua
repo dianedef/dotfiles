@@ -147,6 +147,14 @@ return {
     input = { enabled = true },
     notifier = { enabled = false }, -- using nvim-notify
     picker = {
+      icons = {
+        files = {
+          enabled = false,
+        },
+        git = {
+          enabled = false,
+        },
+      },
       sources = {
         git_diff = {
           focus = "list",
@@ -255,7 +263,7 @@ return {
     },
     quickfile = { enabled = true },
     scroll = { enabled = false }, -- using neoscroll
-    statuscolumn = { enabled = true },
+    statuscolumn = { enabled = false },
     words = { enabled = true },
   },
   config = function(_, opts)

@@ -3,6 +3,12 @@
 -- Add any additional options here
 vim.opt.wrap = true
 vim.opt.linebreak = true
+vim.opt.fillchars:append({
+  fold = " ",
+  foldopen = "-",
+  foldclose = "+",
+  foldsep = " ",
+})
 
 -- Ensure mouse is fully enabled (scroll + click in all modes)
 vim.opt.mouse = "a"

@@ -6,7 +6,6 @@ return {
   dependencies = { "nvim-tree/nvim-web-devicons" },
   config = function(_, opts)
     local groups = require("bufferline.groups")
-    local web_devicons = require("nvim-web-devicons")
 
     require("bufferline").setup({
       options = {
@@ -40,17 +39,13 @@ return {
         truncate_names = false,
         offsets = { { filetype = "NvimTree", text = "File Explorer", text_align = "left", separator = true } },
 
-        show_buffer_icons = true,
-        get_element_icon = function(element)
-          local icon, hl = web_devicons.get_icon_by_filetype(element.filetype, { default = false })
-          return icon, hl
-        end,
+        show_buffer_icons = false,
 
         show_buffer_close_icons = false,
         show_close_icon = false,
         hover = { enabled = false },
 
-        groups = { items = { groups.builtin.pinned:with({ icon = "" }) } },
+        groups = { items = { groups.builtin.pinned:with({ icon = "P" }) } },
         pick = { alphabet = "jklasdfghqwertyuiopzxcvbnm" },
       },
     })

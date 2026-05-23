@@ -4,7 +4,7 @@ metadata_schema_version: "1.0"
 artifact_version: "0.1.0"
 project: "dotfiles"
 created: "2026-04-26"
-updated: "2026-04-26"
+updated: "2026-05-22"
 status: draft
 source_skill: sf-docs
 scope: technical
@@ -36,7 +36,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Repository Overview
 
-Multi-platform dotfiles repository for **Termux (Android) → SSH → GitHub Codespaces (Linux)** workflow. Also supports Windows and local Linux machines.
+Multi-platform dotfiles repository. Linux/Codespaces is the full development setup; Termux is a lightweight Android profile for Markdown and small text files.
 
 ## Installation Commands
 
@@ -44,7 +44,7 @@ Multi-platform dotfiles repository for **Termux (Android) → SSH → GitHub Cod
 # Linux/Codespaces (runs automatically on Codespace creation)
 ./install.sh
 
-# Termux (Android) - lightweight
+# Termux (Android) - Markdown only, lightweight
 ./termux.sh
 
 # Windows (run as administrator)
@@ -61,11 +61,11 @@ cd ~/dotfiles && ./install.sh
 
 | Alias | Command | Description |
 |-------|---------|-------------|
-| `ds` | `doppler-setup.sh` | Configure all API keys |
+| `ds` | `doppler-setup.sh` | Configure API keys on Linux/Codespaces |
 | `i` | `install.sh` / `windows.ps1` | Re-run installation |
 | `r` | `ranger` | File manager |
 | `z <dir>` | `zoxide` | Smart directory jump |
-| `mcp` | `mcpc` | MCP CLI client for testing servers |
+| `mcp` | `mcpc` | MCP CLI client on Linux/Codespaces |
 
 ## Architecture
 
@@ -73,20 +73,20 @@ cd ~/dotfiles && ./install.sh
 - **nvim/** - Neovim configs (LazyVim-based). Multiple variants: `nvim11/`, `nvim22/`, `MyNeovim/`, `MyNeovimTermux/`
 - **starship/** - Shell prompt themes with `starship-switch.sh` for switching
 - **lazygit/** - Git TUI configuration
-- **mcp/** - MCP server configurations (single source of truth for Claude Code and related CLI clients)
+- **mcp/** - MCP server configurations for Linux/Codespaces clients
 - **_bmad/** - BMAD Method v6 (10 AI agents, 34 workflows)
 - **docs/** - Comprehensive documentation organized by category
 
 ### Configuration System
 - Configs are **symlinked** to `~/.config/`, not copied
-- Environment variables configured via `.env` file (see `.env.example`)
-- Doppler manages secrets (API keys for GitHub, OpenAI, Anthropic, Gemini, Groq)
+- Environment variables configured via `.env` file (see `.env.example`) for the full installer
+- Doppler manages secrets for Linux/Codespaces only
 
 ### Platform Differences
 | Platform | Installer | Notes |
 |----------|-----------|-------|
 | Linux/Codespaces | `install.sh` | Full-featured, auto-runs on Codespace creation |
-| Termux | `termux.sh` | Lightweight, no Copilot, uses `~/.cargo/bin` and `~/.local/bin` |
+| Termux | `termux.sh` | Markdown-only, no Node.js, no GitHub CLI, no Doppler, no MCP, no AI agents |
 | Windows | `windows.ps1` | Requires admin, uses winget |
 
 ## Code Style
@@ -177,6 +177,7 @@ The `ShipFlow` private repo (`~/shipflow/`) stores personal tracking data:
 - Requires `source ~/.bashrc` or shell restart after installation
 - Limited permissions, no systemd
 - Full app restart required after font installation
+- Do not add web-dev, MCP, or AI-agent tooling to `termux.sh`; use Linux/Codespaces for that.
 
 ## Context MCP — Token-Saving Protocol
 
