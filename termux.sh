@@ -38,6 +38,9 @@ pkg install -y \
   ripgrep \
   fd \
   fzf \
+  openssh \
+  mosh \
+  tmux \
   python \
   tar \
   unzip \
@@ -350,6 +353,7 @@ echo ""
 echo "📦 Packages installés:"
 echo "   • Neovim (MyNeovimTermux config)"
 echo "   • Ripgrep, fd, fzf"
+echo "   • OpenSSH, Mosh, tmux"
 echo "   • Starship prompt"
 echo "   • Zoxide (smart cd)"
 echo "   • termux-theme (thermux alias)"

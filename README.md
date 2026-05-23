@@ -181,6 +181,7 @@ Linux/Codespaces only. The Termux Markdown profile does not install Doppler or l
 | Neovim | ✅ Full | ✅ Full | ✅ Basic |
 | Starship | ✅ | ✅ | ✅ |
 | Nerd Fonts | ✅ | ✅ | ✅ |
+| Mosh / tmux | ✅ | ✅ | ✅ |
 | GitHub Copilot | ✅ | ✅ | ❌ |
 | OpenCode AI | ✅ | ✅ | ❌ |
 | Doppler | ✅ | ✅ | ❌ |

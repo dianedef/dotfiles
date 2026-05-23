@@ -35,7 +35,7 @@ Le bootstrap distant clone ou met à jour `~/dotfiles`, puis lance `termux.sh`. 
 
 ## Ce que `termux.sh` installe
 
-- Paquets Termux: `git`, `curl`, `wget`, `neovim`, `ripgrep`, `fd`, `fzf`, `python`, `tar`, `unzip`, `ranger`, `tree`, `termux-api`.
+- Paquets Termux: `git`, `curl`, `wget`, `neovim`, `ripgrep`, `fd`, `fzf`, `openssh`, `mosh`, `tmux`, `python`, `tar`, `unzip`, `ranger`, `tree`, `termux-api`.
 - Prompt et navigation: Starship dans `~/.local/bin`, Zoxide via `pkg`.
 - Thèmes Termux: `termux-theme` depuis `dianedef/termux-theme`, avec alias `thermux`.
 - Configs symlinkées: `nvim/MyNeovimTermux`, `termux/termux.properties`, `ranger`, `starship-simple.toml`.
