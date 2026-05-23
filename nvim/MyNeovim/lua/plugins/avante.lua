@@ -162,12 +162,6 @@ return {
     "AvanteSwitchProvider",
     "AvanteToggle",
     "AvanteToggleToolMessages",
-    "ShipFlowAvantePanel1",
-    "ShipFlowAvantePanel2",
-    "ShipFlowAvantePanel3",
-    "ShipFlowAvantePanel20",
-    "ShipFlowAvantePanel30",
-    "ShipFlowAvantePanelFull",
   },
   keys = {
     { "<leader>aa", false },
@@ -194,10 +188,6 @@ return {
     { "<leader>axh", "<cmd>AvanteHistory<CR>", desc = "Avante History" },
     { "<leader>axm", "<cmd>AvanteModels<CR>", desc = "Avante Select Model" },
     { "<leader>axn", "<cmd>AvanteChatNew<CR>", desc = "Avante New Chat" },
-    { "<leader>ax1", "<cmd>ShipFlowAvantePanel1<CR>", desc = "1" },
-    { "<leader>ax2", "<cmd>ShipFlowAvantePanel2<CR>", desc = "2" },
-    { "<leader>ax3", "<cmd>ShipFlowAvantePanel3<CR>", desc = "3" },
-    { "<leader>axF", "<cmd>ShipFlowAvantePanelFull<CR>", desc = "full" },
     { "<leader>axp", "<cmd>AvanteSwitchProvider<CR>", desc = "Avante Switch Provider" },
     { "<leader>axT", "<cmd>AvanteToggleToolMessages<CR>", desc = "Avante Toggle Tool Messages" },
     { "<leader>axu", "<cmd>AvanteRefresh<CR>", desc = "Avante Refresh" },
@@ -535,24 +525,6 @@ return {
 
       vim.notify("File picker Avante indisponible", vim.log.levels.WARN)
     end, { desc = "Avante Add File", force = true })
-    vim.api.nvim_create_user_command("ShipFlowAvantePanel1", function()
-      require("config.panel-resize").avante_preset(1)
-    end, { desc = "1", force = true })
-    vim.api.nvim_create_user_command("ShipFlowAvantePanel2", function()
-      require("config.panel-resize").avante_preset(2)
-    end, { desc = "2", force = true })
-    vim.api.nvim_create_user_command("ShipFlowAvantePanel3", function()
-      require("config.panel-resize").avante_preset(3)
-    end, { desc = "3", force = true })
-    vim.api.nvim_create_user_command("ShipFlowAvantePanel20", function()
-      require("config.panel-resize").avante_preset(1)
-    end, { desc = "1", force = true })
-    vim.api.nvim_create_user_command("ShipFlowAvantePanel30", function()
-      require("config.panel-resize").avante_preset(2)
-    end, { desc = "2", force = true })
-    vim.api.nvim_create_user_command("ShipFlowAvantePanelFull", function()
-      require("config.panel-resize").avante_preset("full")
-    end, { desc = "full", force = true })
     vim.api.nvim_create_user_command("AvanteToggleToolMessages", function()
       local currently_hidden = vim.g.avante_hide_tool_messages ~= false
       vim.g.avante_hide_tool_messages = not currently_hidden

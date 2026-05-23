@@ -42,10 +42,6 @@ function M.search_headings(levels, backward)
   search_headings(levels, backward)
 end
 
-local function set_explorer_width(width)
-  require("config.explorer-panel").set_width(width, { notify = false })
-end
-
 local function set_panel_preset(preset)
   require("config.panel-resize").preset(preset)
 end
@@ -82,18 +78,6 @@ M.setup = function()
     end,
   })
 
-  vim.api.nvim_create_user_command("ShipFlowExplorerWidth20", function()
-    set_explorer_width(20)
-  end, { desc = "Set width 20", force = true })
-
-  vim.api.nvim_create_user_command("ShipFlowExplorerWidth35", function()
-    set_explorer_width(35)
-  end, { desc = "Set width 35", force = true })
-
-  vim.api.nvim_create_user_command("ShipFlowExplorerWidthFull", function()
-    set_explorer_width("full")
-  end, { desc = "Set width full", force = true })
-
   vim.api.nvim_create_user_command("ShipFlowPanel1", function()
     set_panel_preset(1)
   end, { desc = "Set current panel size 1", force = true })
@@ -109,10 +93,6 @@ M.setup = function()
   vim.api.nvim_create_user_command("ShipFlowPanelFull", function()
     set_panel_preset("full")
   end, { desc = "Set current panel full size", force = true })
-
-  vim.keymap.set("n", "<leader>e2", "<cmd>ShipFlowExplorerWidth20<cr>", { desc = "width 20" })
-  vim.keymap.set("n", "<leader>e3", "<cmd>ShipFlowExplorerWidth35<cr>", { desc = "width 35" })
-  vim.keymap.set("n", "<leader>eF", "<cmd>ShipFlowExplorerWidthFull<cr>", { desc = "width full" })
 
   vim.keymap.set("n", "<leader>w1", "<cmd>ShipFlowPanel1<cr>", { desc = "panel size 1" })
   vim.keymap.set("n", "<leader>w2", "<cmd>ShipFlowPanel2<cr>", { desc = "panel size 2" })

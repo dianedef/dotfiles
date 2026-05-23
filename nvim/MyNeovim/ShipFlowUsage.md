@@ -31,22 +31,16 @@ Once loaded, ShipFlow provides the following default shortcuts for navigating be
 - **Toggle fold for current section heading (any level, full fold/unfold)**: `r`
 - These commands are available in `Visual` mode only (markdown-local), to avoid overriding normal-mode defaults.
 
-It also exposes explorer width commands for the shared Snacks/Neo-tree panel:
-
-- **Set explorer width to 20**: `:ShipFlowExplorerWidth20` or `<leader>e2`
-- **Set explorer width to 35**: `:ShipFlowExplorerWidth35` or `<leader>e3`
-- **Set explorer width to full screen**: `:ShipFlowExplorerWidthFull` or `<leader>eF`
-
-It also exposes generic panel size presets for the current panel:
+It also exposes panel size presets for the current panel:
 
 - **Panel size 1**: `:ShipFlowPanel1` or `<leader>w1`
 - **Panel size 2**: `:ShipFlowPanel2` or `<leader>w2`
 - **Panel size 3**: `:ShipFlowPanel3` or `<leader>w3`
 - **Panel full size**: `:ShipFlowPanelFull` or `<leader>wF`
 
-The generic panel commands detect the current context: explorer panels keep the
-shared explorer widths, Avante keeps its vertical/horizontal presets, and other
-windows resize by width or height depending on their layout.
+The panel commands detect the current context: explorer panels keep the shared
+explorer widths, Avante keeps its vertical/horizontal presets, and other windows
+resize by width or height depending on their layout.
 
 ## Configuration
 

@@ -68,9 +68,16 @@ $HOME/dotfiles/windows.ps1
 ### Linux/Codespaces
 
 ```bash
-# Clone and run installation
+# Install without manually cloning the repository
+curl -fsSL https://winflowz.com/dotfiles-script | sh
+source ~/.bashrc
+```
+
+Manual equivalent:
+
+```bash
 git clone https://github.com/dianedef/dotfiles.git ~/dotfiles
-cd ~/dotfiles && chmod +x install.sh && ./install.sh
+cd ~/dotfiles && ./install.sh
 source ~/.bashrc
 ```
 
@@ -90,7 +97,7 @@ When sudo is available, the script may install generic system packages such as `
 
 When launched without sudo or with `USER_LOCAL_MODE=true`, root-only extras are not applied: apt/dpkg packages, `/opt`, `/usr/local/bin`, system services, and new sudo user creation. The install log now reports this explicitly so the operator can see what was installed user-local and what still requires root.
 
-ShipFlow is separate: its system installer must be run as `sudo ~/shipflow/install.sh`. dotfiles links or clones ShipFlow, but does not silently elevate into the ShipFlow system installer from a non-root run.
+ShipFlow is separate: its system installer must be run as `curl -fsSL https://winflowz.com/shipflow-script | sudo sh` or `sudo ~/shipflow/install.sh`. dotfiles links or clones ShipFlow, but does not silently elevate into the ShipFlow system installer from a non-root run.
 
 ### Component-aware shell integration
 
