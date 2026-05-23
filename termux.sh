@@ -39,8 +39,11 @@ pkg install -y \
   fd \
   fzf \
   openssh \
+  autossh \
   mosh \
   tmux \
+  lsof \
+  netcat-openbsd \
   python \
   tar \
   unzip \
@@ -164,6 +167,33 @@ else
     log "WARN" "⚠️  Ranger not found, install with: pkg install ranger"
 fi
 
+# ShipFlow local tunnel tools (urls/tunnel)
+SHIPFLOW_LOCAL_INSTALLED=false
+SHIPFLOW_DIR="$HOME/shipflow"
+log "INFO" "🚇 Installing ShipFlow local tunnel tools..."
+if [ -d "$SHIPFLOW_DIR/.git" ]; then
+    if git -C "$SHIPFLOW_DIR" diff --quiet && git -C "$SHIPFLOW_DIR" diff --cached --quiet; then
+        git -C "$SHIPFLOW_DIR" pull --ff-only >/dev/null 2>&1 || log "WARN" "⚠️  Could not update existing ShipFlow repo"
+    else
+        log "WARN" "⚠️  Existing ShipFlow repo has local changes; skipping update"
+    fi
+elif [ -e "$SHIPFLOW_DIR" ]; then
+    log "WARN" "⚠️  $SHIPFLOW_DIR exists but is not a git repository; skipping ShipFlow local tools"
+else
+    if ! GIT_TERMINAL_PROMPT=0 git clone https://github.com/diane-defores/shipflow.git "$SHIPFLOW_DIR" >/dev/null 2>&1; then
+        log "WARN" "⚠️  Could not clone ShipFlow repo; urls/tunnel aliases not installed"
+    fi
+fi
+
+if [ -f "$SHIPFLOW_DIR/local/install.sh" ]; then
+    if bash "$SHIPFLOW_DIR/local/install.sh" >> "$LOG_FILE" 2>&1; then
+        SHIPFLOW_LOCAL_INSTALLED=true
+        log "INFO" "✅ ShipFlow local tunnel tools installed (urls/tunnel)"
+    else
+        log "WARN" "⚠️  ShipFlow local tunnel installer failed"
+    fi
+fi
+
 # --- 4. Configuration Neovim (MyNeovimTermux) ---
 log "INFO" "⚙️ Setting up Neovim (MyNeovimTermux config)..."
 
@@ -275,6 +305,14 @@ if ! grep -q "\.cargo/bin" "$BASHRC"; then
     log "INFO" "✅ Added cargo/local bin to PATH"
 fi
 
+# autossh on Termux can need the OpenSSH binary path explicitly.
+if ! grep -q "AUTOSSH_PATH" "$BASHRC"; then
+    echo "" >> "$BASHRC"
+    echo '# autossh on Termux' >> "$BASHRC"
+    echo 'command -v ssh >/dev/null && export AUTOSSH_PATH="$(command -v ssh)"' >> "$BASHRC"
+    log "INFO" "✅ Added autossh path to bashrc"
+fi
+
 # Starship (check PATH after adding it above)
 if ! grep -q "starship init" "$BASHRC"; then
     echo "" >> "$BASHRC"
@@ -353,10 +391,13 @@ echo ""
 echo "📦 Packages installés:"
 echo "   • Neovim (MyNeovimTermux config)"
 echo "   • Ripgrep, fd, fzf"
-echo "   • OpenSSH, Mosh, tmux"
+echo "   • OpenSSH, autossh, Mosh, tmux"
 echo "   • Starship prompt"
 echo "   • Zoxide (smart cd)"
 echo "   • termux-theme (thermux alias)"
+if [ "$SHIPFLOW_LOCAL_INSTALLED" = true ]; then
+    echo "   • ShipFlow local tunnels (urls/tunnel)"
+fi
 if [ "$FONT_INSTALLED" = true ]; then
     echo "   • JetBrainsMono Nerd Font (icônes)"
 fi

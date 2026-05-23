@@ -182,6 +182,7 @@ Linux/Codespaces only. The Termux Markdown profile does not install Doppler or l
 | Starship | ✅ | ✅ | ✅ |
 | Nerd Fonts | ✅ | ✅ | ✅ |
 | Mosh / tmux | ✅ | ✅ | ✅ |
+| ShipFlow local tunnels | ✅ | ✅ | ✅ |
 | GitHub Copilot | ✅ | ✅ | ❌ |
 | OpenCode AI | ✅ | ✅ | ❌ |
 | Doppler | ✅ | ✅ | ❌ |
