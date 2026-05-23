@@ -1,17 +1,35 @@
 -- Lightweight Termux keymaps. Keep this config independent from LazyVim.
 vim.keymap.set("t", "<C-Space>", "<C-\\><C-n>", { desc = "Exit terminal mode" })
 
+local function has_snacks()
+  return type(_G.Snacks) == "table"
+end
+
 -- Root/cwd convention under <leader>: lowercase = current working directory, uppercase = project root.
 pcall(vim.keymap.del, "n", "<leader>e")
 pcall(vim.keymap.del, "n", "<leader>E")
 vim.keymap.set("n", "<leader>es", function()
-  vim.cmd("Explore")
+  if has_snacks() then
+    Snacks.explorer()
+  else
+    vim.cmd("Explore")
+  end
 end, { desc = "Explorer (cwd)" })
-vim.keymap.set("n", "<leader>eS", "<cmd>Explore<cr>", { desc = "Explorer (cwd)" })
+vim.keymap.set("n", "<leader>eS", function()
+  if has_snacks() then
+    Snacks.explorer({ cwd = vim.fn.getcwd() })
+  else
+    vim.cmd("Explore")
+  end
+end, { desc = "Explorer (cwd)" })
 
 pcall(vim.keymap.del, "n", "<leader>,")
 vim.keymap.set("n", "<leader>bf", function()
-  vim.cmd("buffers")
+  if has_snacks() then
+    Snacks.picker.buffers()
+  else
+    vim.cmd("buffers")
+  end
 end, { desc = "Find Buffers" })
 
 pcall(vim.keymap.del, "n", "<leader>-")

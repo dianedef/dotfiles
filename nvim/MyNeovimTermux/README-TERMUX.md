@@ -44,7 +44,9 @@ Le bootstrap distant clone ou met à jour `~/dotfiles`, puis lance `termux.sh`. 
 
 ## Keybindings Neovim
 
-La config Termux n'utilise pas de gestionnaire de plugins au démarrage: pas de LazyVim, pas de Mason, pas de LSP, pas d'installation automatique d'outils Python/Node. Elle reprend seulement les raccourcis Markdown utiles de `MyNeovim`.
+La config Termux utilise `lazy.nvim` avec une whitelist courte: `snacks.nvim`, `vim-pencil`, `nvim-surround`, `gitsigns.nvim`, `markdown.nvim`. Elle n'importe pas LazyVim complet: pas de Mason, pas de LSP, pas d'installation automatique d'outils Python/Node.
+
+Au premier lancement de `nvim`, seuls ces plugins légers peuvent être téléchargés. Les anciens dossiers LazyVim/Mason sont nettoyés par `termux.sh`.
 
 | Key | Action |
 |-----|--------|
@@ -81,7 +83,7 @@ termux-theme
 - Plugins LSP lourds.
 - Plugins avec build natif ou dépendances web.
 - Installateurs automatiques d'outils externes type Mason.
-- Installation automatique de plugins au premier lancement de Neovim.
+- Plugins hors whitelist Termux.
 
 Objectif: garder une installation utilisable sur Android, avec peu de RAM et de stockage.
 
