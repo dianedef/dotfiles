@@ -180,7 +180,7 @@ Linux/Codespaces only. The Termux Markdown profile does not install Doppler or l
 ### Platform Support
 | Tool | Windows | Linux | Termux |
 |------|---------|-------|--------|
-| Neovim | ✅ Full | ✅ Full | ✅ Basic |
+| Neovim | ✅ Full | ✅ Full | ✅ Markdown |
 | Starship | ✅ | ✅ | ✅ |
 | Nerd Fonts | ✅ | ✅ | ✅ |
 | Mosh / tmux | ✅ | ✅ | ✅ |

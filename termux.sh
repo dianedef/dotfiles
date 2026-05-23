@@ -51,7 +51,6 @@ pkg install -y \
   tmux \
   lsof \
   netcat-openbsd \
-  python \
   tar \
   unzip \
   ranger \
@@ -268,6 +267,12 @@ if [ -d "$SOURCE_DIR/nvim/MyNeovimTermux" ]; then
     create_symlink "$SOURCE_DIR/nvim/MyNeovimTermux" "$NVIM_CONFIG_DIR"
 elif [ -d "$SOURCE_DIR/nvim/MyNeovim" ]; then
     create_symlink "$SOURCE_DIR/nvim/MyNeovim" "$NVIM_CONFIG_DIR"
+fi
+
+# Termux Neovim is plugin-free; remove leftovers from older LazyVim/Mason runs.
+if [ -d "$HOME/.local/share/nvim/lazy" ] || [ -d "$HOME/.local/share/nvim/mason" ]; then
+    rm -rf "$HOME/.local/share/nvim/lazy" "$HOME/.local/share/nvim/mason"
+    log "INFO" "Removed old Neovim Lazy/Mason data"
 fi
 
 # Termux properties

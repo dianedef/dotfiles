@@ -35,7 +35,7 @@ Le bootstrap distant clone ou met à jour `~/dotfiles`, puis lance `termux.sh`. 
 
 ## Ce que `termux.sh` installe
 
-- Paquets Termux: `git`, `curl`, `wget`, `neovim`, `ripgrep`, `fd`, `fzf`, `openssh`, `autossh`, `mosh`, `tmux`, `lsof`, `netcat-openbsd`, `python`, `tar`, `unzip`, `ranger`, `tree`, `termux-api`.
+- Paquets Termux: `git`, `curl`, `wget`, `neovim`, `ripgrep`, `fd`, `fzf`, `openssh`, `autossh`, `mosh`, `tmux`, `lsof`, `netcat-openbsd`, `tar`, `unzip`, `ranger`, `tree`, `termux-api`.
 - Prompt et navigation: Starship dans `~/.local/bin`, Zoxide via `pkg`.
 - Thèmes Termux: `termux-theme` depuis `dianedef/termux-theme`, avec alias `thermux`.
 - Tunnels locaux ShipFlow: clone ou mise à jour de `~/shipflow`, puis installation des alias `urls` et `tunnel`.
@@ -44,7 +44,7 @@ Le bootstrap distant clone ou met à jour `~/dotfiles`, puis lance `termux.sh`. 
 
 ## Keybindings Neovim
 
-La config Termux garde LazyVim léger et reprend les raccourcis Markdown utiles de `MyNeovim`.
+La config Termux n'utilise pas de gestionnaire de plugins au démarrage: pas de LazyVim, pas de Mason, pas de LSP, pas d'installation automatique d'outils Python/Node. Elle reprend seulement les raccourcis Markdown utiles de `MyNeovim`.
 
 | Key | Action |
 |-----|--------|
@@ -80,6 +80,8 @@ termux-theme
 - Neovim compilé depuis source.
 - Plugins LSP lourds.
 - Plugins avec build natif ou dépendances web.
+- Installateurs automatiques d'outils externes type Mason.
+- Installation automatique de plugins au premier lancement de Neovim.
 
 Objectif: garder une installation utilisable sur Android, avec peu de RAM et de stockage.
 

@@ -1,16 +1,18 @@
--- Keymaps are automatically loaded on the VeryLazy event
--- Default keymaps that are always set: https://github.com/LazyVim/LazyVim/blob/main/lua/lazyvim/config/keymaps.lua
--- Add any additional keymaps here
+-- Lightweight Termux keymaps. Keep this config independent from LazyVim.
 vim.keymap.set("t", "<C-Space>", "<C-\\><C-n>", { desc = "Exit terminal mode" })
 
 -- Root/cwd convention under <leader>: lowercase = current working directory, uppercase = project root.
 pcall(vim.keymap.del, "n", "<leader>e")
 pcall(vim.keymap.del, "n", "<leader>E")
-vim.keymap.set("n", "<leader>es", function() Snacks.explorer() end, { desc = "Snacks Explorer (cwd)" })
-vim.keymap.set("n", "<leader>eS", function() Snacks.explorer({ cwd = LazyVim.root() }) end, { desc = "Snacks Explorer (root)" })
+vim.keymap.set("n", "<leader>es", function()
+  vim.cmd("Explore")
+end, { desc = "Explorer (cwd)" })
+vim.keymap.set("n", "<leader>eS", "<cmd>Explore<cr>", { desc = "Explorer (cwd)" })
 
 pcall(vim.keymap.del, "n", "<leader>,")
-vim.keymap.set("n", "<leader>bf", function() Snacks.picker.buffers() end, { desc = "Find Buffers" })
+vim.keymap.set("n", "<leader>bf", function()
+  vim.cmd("buffers")
+end, { desc = "Find Buffers" })
 
 pcall(vim.keymap.del, "n", "<leader>-")
 pcall(vim.keymap.del, "n", "<leader>|")
