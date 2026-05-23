@@ -39,6 +39,20 @@ run_or_explain() {
     return 1
 }
 
+stash_dotfiles_changes() {
+    if [ -z "$(git -C "$DOTFILES_DIR" status --porcelain 2>/dev/null)" ]; then
+        return 0
+    fi
+
+    log "Modifications locales détectées dans ~/dotfiles; sauvegarde temporaire..."
+    run_or_explain "sauvegarde des modifications locales dotfiles" env \
+        GIT_AUTHOR_NAME="Termux Bootstrap" \
+        GIT_AUTHOR_EMAIL="termux-bootstrap@example.invalid" \
+        GIT_COMMITTER_NAME="Termux Bootstrap" \
+        GIT_COMMITTER_EMAIL="termux-bootstrap@example.invalid" \
+        git -C "$DOTFILES_DIR" stash push -u -m "termux-bootstrap backup $(date -u +%Y%m%dT%H%M%SZ)"
+}
+
 curl_works() {
     command -v curl >/dev/null 2>&1 && curl --version >/dev/null 2>&1
 }
@@ -82,6 +96,7 @@ run_or_explain "installation de git/curl/bash" apt_termux install -y git curl ba
 
 if [ -d "$DOTFILES_DIR/.git" ]; then
     log "Mise à jour du dépôt dotfiles..."
+    stash_dotfiles_changes
     run_or_explain "récupération de la dernière version dotfiles" git -C "$DOTFILES_DIR" fetch origin "$BRANCH"
     run_or_explain "sélection de la branche $BRANCH" git -C "$DOTFILES_DIR" checkout "$BRANCH"
     run_or_explain "mise à jour du dépôt dotfiles" git -C "$DOTFILES_DIR" pull --ff-only origin "$BRANCH"
@@ -94,5 +109,4 @@ else
     run_or_explain "téléchargement des dotfiles" git clone --quiet --branch "$BRANCH" "$REPO_URL" "$DOTFILES_DIR"
 fi
 
-chmod +x "$DOTFILES_DIR/termux.sh"
 exec bash "$DOTFILES_DIR/termux.sh"
