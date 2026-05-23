@@ -4,7 +4,7 @@ metadata_schema_version: "1.0"
 artifact_version: "0.1.0"
 project: "dotfiles"
 created: "2026-04-26"
-updated: "2026-05-22"
+updated: "2026-05-23"
 status: draft
 source_skill: sf-docs
 scope: technique
@@ -66,6 +66,8 @@ Ce dépôt regroupe un ensemble de configurations locales (terminal, éditeur, f
   - mode local sans sudo (`USER_LOCAL_MODE`) vers `~/.local/bin` et `~/.npm-global` quand nécessaire.
 - Gestion des configurations:
   - la logique privilégie les symlinks vers le dépôt pour garder un source of truth unique.
+  - Sur Termux, `termux/termux.properties` ne force pas le plein écran: `fullscreen` et `use-fullscreen-workaround` restent désactivés pour éviter les zones noires ou marges mortes au-dessus du clavier Android.
+  - La barre `extra-keys` Termux est désactivée avec `extra-keys = []`; ne pas utiliser `[[]]`, qui peut conserver une ligne vide.
 - Dépendances externes: GitHub releases, Starship install script, curl, npm/node, Doppler, gh, npx, outils système selon composants. Sur Termux, le périmètre est limité à `pkg`, Neovim, outils de recherche/navigation, Starship/Zoxide/Ranger et font Nerd Font.
 
 ## État documenté et preuves

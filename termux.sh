@@ -310,7 +310,12 @@ if [ -d "$HOME/.local/share/nvim/lazy" ]; then
 fi
 
 # Termux properties
-[ -f "$SOURCE_DIR/termux/termux.properties" ] && create_symlink "$SOURCE_DIR/termux/termux.properties" "$HOME/.termux/termux.properties"
+if [ -f "$SOURCE_DIR/termux/termux.properties" ]; then
+    create_symlink "$SOURCE_DIR/termux/termux.properties" "$HOME/.termux/termux.properties"
+    if command -v termux-reload-settings >/dev/null 2>&1; then
+        termux-reload-settings >> "$LOG_FILE" 2>&1 || log "WARN" "⚠️  Could not reload Termux settings automatically"
+    fi
+fi
 
 # Ranger (primary file manager for Termux)
 [ -d "$SOURCE_DIR/ranger" ] && create_symlink "$SOURCE_DIR/ranger" "$HOME/.config/ranger"
