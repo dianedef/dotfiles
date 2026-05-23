@@ -238,12 +238,6 @@ return {
     },
   },
   config = function(_, opts)
-    local avante_panel_presets = {
-      [1] = { vertical = 30, horizontal = 15 },
-      [2] = { vertical = 45, horizontal = 20 },
-      [3] = { vertical = 60, horizontal = 30 },
-    }
-
     local function apply_avante_theme_highlights()
       local normal = vim.api.nvim_get_hl(0, { name = "Normal", link = false })
       local normal_float = vim.api.nvim_get_hl(0, { name = "NormalFloat", link = false })
@@ -263,54 +257,6 @@ return {
       vim.api.nvim_set_hl(0, "AvanteReversedTitle", bg and { fg = bg } or {})
       vim.api.nvim_set_hl(0, "AvanteReversedSubtitle", bg and { fg = bg } or {})
       vim.api.nvim_set_hl(0, "AvanteReversedThirdTitle", bg and { fg = bg } or {})
-    end
-
-    local function set_avante_panel_size(size)
-      local avante = require("avante")
-      local Config = require("avante.config")
-      local sidebar = avante.get()
-      local layout = vim.tbl_contains({ "top", "bottom" }, Config.windows.position) and "horizontal" or "vertical"
-      if sidebar and type(sidebar.get_layout) == "function" then
-        layout = sidebar:get_layout()
-      end
-
-      local width = size == "full" and 100 or tonumber(size)
-      local height = width
-      if type(size) == "table" then
-        width = tonumber(size.vertical)
-        height = tonumber(size.horizontal)
-      end
-
-      if not width or not height then return end
-      width = math.max(1, math.min(100, math.floor(width)))
-      height = math.max(1, math.min(100, math.floor(height)))
-      Config.override({ windows = { width = width, height = height } })
-
-      local percent = layout == "horizontal" and height or width
-
-      local resized = false
-      if sidebar and type(sidebar.is_open) == "function" and sidebar:is_open() then
-        if size == "full" then
-          if not sidebar.is_in_full_view and type(sidebar.toggle_code_window) == "function" then
-            sidebar:toggle_code_window()
-          end
-        else
-          if sidebar.is_in_full_view and type(sidebar.toggle_code_window) == "function" then
-            sidebar:toggle_code_window()
-          end
-          if type(sidebar.adjust_result_container_layout) == "function" then
-            sidebar:adjust_result_container_layout()
-          end
-          if type(sidebar.render_input) == "function" then
-            pcall(function() sidebar:render_input() end)
-          end
-          if type(sidebar.render_selected_code) == "function" then
-            pcall(function() sidebar:render_selected_code() end)
-          end
-        end
-        resized = true
-      end
-
     end
 
     local function patch_avante_skip_explorer_panel_auto_file()
@@ -590,22 +536,22 @@ return {
       vim.notify("File picker Avante indisponible", vim.log.levels.WARN)
     end, { desc = "Avante Add File", force = true })
     vim.api.nvim_create_user_command("ShipFlowAvantePanel1", function()
-      set_avante_panel_size(avante_panel_presets[1])
+      require("config.panel-resize").avante_preset(1)
     end, { desc = "1", force = true })
     vim.api.nvim_create_user_command("ShipFlowAvantePanel2", function()
-      set_avante_panel_size(avante_panel_presets[2])
+      require("config.panel-resize").avante_preset(2)
     end, { desc = "2", force = true })
     vim.api.nvim_create_user_command("ShipFlowAvantePanel3", function()
-      set_avante_panel_size(avante_panel_presets[3])
+      require("config.panel-resize").avante_preset(3)
     end, { desc = "3", force = true })
     vim.api.nvim_create_user_command("ShipFlowAvantePanel20", function()
-      set_avante_panel_size(avante_panel_presets[1])
+      require("config.panel-resize").avante_preset(1)
     end, { desc = "1", force = true })
     vim.api.nvim_create_user_command("ShipFlowAvantePanel30", function()
-      set_avante_panel_size(avante_panel_presets[2])
+      require("config.panel-resize").avante_preset(2)
     end, { desc = "2", force = true })
     vim.api.nvim_create_user_command("ShipFlowAvantePanelFull", function()
-      set_avante_panel_size("full")
+      require("config.panel-resize").avante_preset("full")
     end, { desc = "full", force = true })
     vim.api.nvim_create_user_command("AvanteToggleToolMessages", function()
       local currently_hidden = vim.g.avante_hide_tool_messages ~= false

@@ -146,6 +146,29 @@ Trois portes d'entrée — attention, « root » ici n'est ni le root système (
 | `<leader>e3` | largeur panneau | 35 colonnes |
 | `<leader>eF` | largeur panneau | largeur totale écran |
 
+### Taille des panneaux
+
+Ces raccourcis s'appliquent au panneau courant :
+
+| Mapping | Effet |
+|---|---|
+| `<leader>w1` | taille 1 |
+| `<leader>w2` | taille 2 |
+| `<leader>w3` | taille 3 |
+| `<leader>wF` | full size |
+
+Ils détectent automatiquement le contexte :
+
+- explorateur à gauche : largeur 20 / 35 / 50 / full
+- Avante à droite : largeur 30% / 45% / 60% / full
+- Avante horizontal : hauteur 15% / 20% / 30% / full
+- autre fenêtre : largeur ou hauteur selon la forme du split courant
+
+Les anciens raccourcis restent disponibles :
+
+- `<leader>e2`, `<leader>e3`, `<leader>eF` pour l'explorateur
+- `<leader>ax1`, `<leader>ax2`, `<leader>ax3`, `<leader>axF` pour Avante
+
 Ce qu'il faut retenir :
 
 - les dossiers avec `*` contiennent du travail Git en cours
@@ -204,6 +227,18 @@ Important :
 - `neo-tree` et `Git status` ne montrent pas le diff ligne par ligne
 - ils montrent surtout quels fichiers ou dossiers sont modifiés, ajoutés ou non trackés
 - pour voir le vrai contenu des changements, il faut un plugin de diff ou une commande Git
+
+Nomenclature Git dans l'explorateur :
+
+- `M` : modifié
+- `U` : unstaged
+- `S` : staged
+- `A` : ajouté
+- `D` : supprimé
+- `R` : renommé
+- `?` : non tracké
+- `!` : ignoré
+- `C` : conflit
 
 ### Plugins qui montrent un vrai diff visuel
 

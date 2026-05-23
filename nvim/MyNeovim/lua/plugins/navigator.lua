@@ -11,7 +11,7 @@ return {
       format_on_save = false,
     },
     icons = {
-      code_action_icon = "💡",
+      code_action_icon = "󰌶",
     },
   },
 }
