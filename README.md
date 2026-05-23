@@ -106,7 +106,7 @@ ShipFlow is separate: its system installer must be run as `sudo ~/shipflow/insta
 
 ```bash
 # Install without manually cloning the repository
-curl -fsSL https://raw.githubusercontent.com/dianedef/dotfiles/master/install-termux.sh | sh
+curl -fsSL https://winflowz.com/termux-script | sh
 source ~/.bashrc
 ```
 
@@ -119,6 +119,13 @@ source ~/.bashrc
 ```
 
 After the first activation, use `re` to reload `.bashrc`.
+
+The installer attempts to repair a broken Termux `curl`/OpenSSL stack automatically. If `curl` cannot download the script at all, repair Termux packages first:
+
+```bash
+apt update && apt full-upgrade -y
+apt install --reinstall curl openssl libngtcp2 -y
+```
 
 Termux is intentionally scoped to Markdown and small text files. It does not install Node.js, GitHub CLI, Doppler, MCP, Copilot, Claude/Codex/OpenCode, or Neovim AI agents.
 

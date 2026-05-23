@@ -9,7 +9,7 @@ Objectif: édition de fichiers Markdown et de petits fichiers texte. Cette confi
 Depuis Termux:
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/dianedef/dotfiles/master/install-termux.sh | sh
+curl -fsSL https://winflowz.com/termux-script | sh
 source ~/.bashrc
 ```
 
@@ -23,6 +23,13 @@ source ~/.bashrc
 ```
 
 Après cette première activation, utiliser `re` pour recharger `.bashrc`.
+
+Le script tente de réparer automatiquement une pile Termux `curl`/OpenSSL cassée. Si `curl` ne peut même pas télécharger le script, réparer d'abord les paquets Termux:
+
+```bash
+apt update && apt full-upgrade -y
+apt install --reinstall curl openssl libngtcp2 -y
+```
 
 Le bootstrap distant clone ou met à jour `~/dotfiles`, puis lance `termux.sh`. Le script doit être lancé dans Termux, car il dépend de `pkg`.
 
