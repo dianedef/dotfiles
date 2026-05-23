@@ -11,6 +11,10 @@ log() {
     printf '%s\n' "$*"
 }
 
+run_quiet() {
+    "$@" </dev/null >/dev/null 2>&1
+}
+
 curl_works() {
     command -v curl >/dev/null 2>&1 && curl --version >/dev/null 2>&1
 }
@@ -20,48 +24,48 @@ repair_termux_curl() {
         return 0
     fi
 
-    log "curl is broken or missing; repairing Termux TLS packages..."
+    log "curl est cassé ou manquant; réparation des paquets Termux..."
 
     if ! command -v apt >/dev/null 2>&1; then
-        log "apt is not available, cannot repair curl automatically."
+        log "apt est indisponible, réparation automatique impossible."
         return 1
     fi
 
-    apt update </dev/null
-    apt full-upgrade -y </dev/null
-    apt install --reinstall curl openssl libngtcp2 -y </dev/null || \
-        apt install curl openssl libngtcp2 -y </dev/null
+    run_quiet apt update
+    run_quiet apt full-upgrade -y
+    run_quiet apt install --reinstall curl openssl libngtcp2 -y || \
+        run_quiet apt install curl openssl libngtcp2 -y
 
     if ! curl_works; then
-        log "curl is still not working after automatic repair."
+        log "curl ne fonctionne toujours pas après réparation automatique."
         return 1
     fi
 }
 
 if ! command -v pkg >/dev/null 2>&1; then
-    log "This installer must run inside Termux (pkg command not found)."
+    log "Ce script doit être lancé dans Termux (commande pkg introuvable)."
     exit 1
 fi
 
 repair_termux_curl
 
-log "Installing bootstrap dependencies..."
+log "Préparation de l'installation Termux..."
 # Keep subprocesses off stdin because this installer is commonly run as curl | sh.
 pkg update -y </dev/null >/dev/null 2>&1
 pkg install -y git curl bash </dev/null >/dev/null 2>&1
 
 if [ -d "$DOTFILES_DIR/.git" ]; then
-    log "Updating existing dotfiles repository: $DOTFILES_DIR"
-    git -C "$DOTFILES_DIR" fetch origin "$BRANCH" </dev/null
-    git -C "$DOTFILES_DIR" checkout "$BRANCH" </dev/null
-    git -C "$DOTFILES_DIR" pull --ff-only origin "$BRANCH" </dev/null
+    log "Mise à jour du dépôt dotfiles..."
+    git -C "$DOTFILES_DIR" fetch origin "$BRANCH" </dev/null >/dev/null 2>&1
+    git -C "$DOTFILES_DIR" checkout "$BRANCH" </dev/null >/dev/null 2>&1
+    git -C "$DOTFILES_DIR" pull --ff-only origin "$BRANCH" </dev/null >/dev/null 2>&1
 elif [ -e "$DOTFILES_DIR" ]; then
-    log "$DOTFILES_DIR already exists but is not a git repository."
-    log "Move it away or set DOTFILES_DIR to another path, then retry."
+    log "$DOTFILES_DIR existe déjà mais ce n'est pas un dépôt git."
+    log "Déplacez-le ou définissez DOTFILES_DIR vers un autre chemin, puis relancez."
     exit 1
 else
-    log "Cloning dotfiles into $DOTFILES_DIR..."
-    git clone --branch "$BRANCH" "$REPO_URL" "$DOTFILES_DIR" </dev/null
+    log "Téléchargement des dotfiles..."
+    git clone --quiet --branch "$BRANCH" "$REPO_URL" "$DOTFILES_DIR" </dev/null
 fi
 
 chmod +x "$DOTFILES_DIR/termux.sh"

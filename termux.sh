@@ -5,6 +5,7 @@
 
 ## Configuration logging
 LOG_FILE="${TERMUX_DOTFILES_LOG_FILE:-$HOME/termux-install.log}"
+VERBOSE="${TERMUX_DOTFILES_VERBOSE:-0}"
 mkdir -p "$(dirname "$LOG_FILE")"
 touch "$LOG_FILE"
 
@@ -14,11 +15,17 @@ log() {
     local timestamp=$(date +"%Y-%m-%d %H:%M:%S")
     echo "[$timestamp] [$level] $message" >> "$LOG_FILE"
     case "$level" in
-        INFO|ERROR|WARN) echo "$message" ;;
+        ERROR|WARN) echo "$message" ;;
+        INFO) [ "$VERBOSE" = "1" ] && echo "$message" ;;
     esac
 }
 
-log "INFO" "🤖 Starting TERMUX dotfiles installation (lightweight)"
+step() {
+    log "INFO" "$1"
+    echo "$1"
+}
+
+step "Installation Termux dotfiles..."
 
 if ! command -v pkg >/dev/null 2>&1; then
     log "ERROR" "❌ This installer must run inside Termux (pkg command not found)"
@@ -28,7 +35,7 @@ fi
 mkdir -p "$HOME/.local/bin" "$HOME/.cargo/bin" "$HOME/tmp"
 
 # --- 1. Packages Termux essentiels ---
-log "INFO" "📦 Installing Termux packages..."
+step "1/6 Installation des paquets Termux..."
 pkg update -y >/dev/null 2>&1
 pkg install -y \
   git \
@@ -62,7 +69,7 @@ else
 fi
 
 # --- 2. Nerd Fonts pour Termux ---
-log "INFO" "📝 Installing Nerd Fonts for Termux..."
+step "2/6 Configuration de la Nerd Font..."
 
 # Termux utilise un système de fonts différent
 FONT_DIR="$HOME/.termux"
@@ -119,7 +126,7 @@ else
 fi
 
 # --- 3. Outils légers uniquement ---
-log "INFO" "📦 Installing lightweight tools..."
+step "3/6 Installation des outils légers..."
 
 # Starship (prompt)
 if ! command -v starship &> /dev/null; then
@@ -170,7 +177,7 @@ fi
 # ShipFlow local tunnel tools (urls/tunnel)
 SHIPFLOW_LOCAL_INSTALLED=false
 SHIPFLOW_DIR="$HOME/shipflow"
-log "INFO" "🚇 Installing ShipFlow local tunnel tools..."
+step "4/6 Installation des tunnels ShipFlow..."
 if [ -d "$SHIPFLOW_DIR/.git" ]; then
     if git -C "$SHIPFLOW_DIR" diff --quiet && git -C "$SHIPFLOW_DIR" diff --cached --quiet; then
         git -C "$SHIPFLOW_DIR" pull --ff-only >/dev/null 2>&1 || log "WARN" "⚠️  Could not update existing ShipFlow repo"
@@ -195,13 +202,13 @@ if [ -f "$SHIPFLOW_DIR/local/install.sh" ]; then
 fi
 
 # --- 4. Configuration Neovim (MyNeovimTermux) ---
-log "INFO" "⚙️ Setting up Neovim (MyNeovimTermux config)..."
+step "5/6 Configuration de Neovim..."
 
 SOURCE_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 NVIM_CONFIG_DIR="$HOME/.config/nvim"
 
 # --- 5. Symlinks ---
-log "INFO" "🔗 Creating symlinks..."
+log "INFO" "Creating symlinks..."
 
 next_backup_path() {
     local TARGET=$1
@@ -278,7 +285,7 @@ elif [ -f "$SOURCE_DIR/starship/starship.toml" ]; then
 fi
 
 # --- 6. Shell integration ---
-log "INFO" "🔧 Setting up shell integration..."
+step "6/6 Configuration du shell..."
 
 # Make scripts executable
 for script in "switch-config.sh" "nvim-multi" "aliases.sh" "shell-integration.sh"; do
@@ -379,98 +386,25 @@ log "INFO" "✅ Git identity configured"
 
 # --- 8. Finalisation ---
 echo ""
-log "INFO" "✨ Termux installation complete!"
+log "INFO" "Termux installation complete"
+echo "Installation Termux terminée."
+echo "Log détaillé: $LOG_FILE"
 echo ""
-echo "✅ Installation Termux terminée!"
-echo "📝 Log: $LOG_FILE"
+echo "À faire maintenant:"
+echo "  source ~/.bashrc"
+echo "  re"
 echo ""
-echo "🚀 Pour activer: source ~/.bashrc"
-echo "   Ensuite, utilisez: re"
-echo "💡 Ou redémarrez Termux"
-echo ""
-echo "📦 Packages installés:"
-echo "   • Neovim (MyNeovimTermux config)"
-echo "   • Ripgrep, fd, fzf"
-echo "   • OpenSSH, autossh, Mosh, tmux"
-echo "   • Starship prompt"
-echo "   • Zoxide (smart cd)"
-echo "   • termux-theme (thermux alias)"
+echo "Installé: Neovim Markdown, Nerd Font, Starship, Zoxide, Ranger, Mosh/tmux, termux-theme."
 if [ "$SHIPFLOW_LOCAL_INSTALLED" = true ]; then
-    echo "   • ShipFlow local tunnels (urls/tunnel)"
+    echo "Installé aussi: ShipFlow local tunnels (urls/tunnel)."
 fi
-if [ "$FONT_INSTALLED" = true ]; then
-    echo "   • JetBrainsMono Nerd Font (icônes)"
-fi
-echo "   • Ranger file manager (use 'ranger' command)"
 echo ""
-echo "🎨 CONFIGURATION DES ICÔNES (Nerd Font):"
 if [ "$FONT_INSTALLED" = true ] && [ -s "$HOME/.termux/font.ttf" ]; then
-    echo "✅ Font installée dans ~/.termux/font.ttf"
-    echo ""
-    echo "📱 Pour activer les icônes dans Neovim:"
-    echo "   1. TUEZ complètement l'app Termux:"
-    echo "      • Paramètres Android > Apps > Termux > Forcer l'arrêt"
-    echo "      • Ou glissez Termux hors du multitâche"
-    echo "   2. Rouvrez Termux"
-    echo "   3. Lancez Neovim: nvim"
-    echo ""
-    echo "🧪 Testez si les icônes fonctionnent:"
-    echo "   echo '    '"
-    echo ""
+    echo "Pour activer les icônes: fermez complètement Termux puis rouvrez-le."
 else
-    echo "⚠️  Font non installée automatiquement dans ~/.termux/font.ttf"
-    echo "   Vérifiez la connexion GitHub ou utilisez Termux:Styling."
-    echo ""
+    echo "Font non installée automatiquement. Voir le log ou utiliser Termux:Styling."
 fi
-echo "❌ Si les icônes ne s'affichent TOUJOURS PAS après redémarrage:"
-echo "   Solution recommandée: Installez 'Termux:Styling' (officiel)"
-echo "   1. Ouvrez F-Droid"
-echo "   2. Cherchez 'Termux:Styling'"
-echo "   3. Installez l'app"
-echo "   4. Lancez Termux:Styling et choisissez une Nerd Font"
 echo ""
-echo "   Alternative: Supprimez ~/.termux/font.ttf pour désactiver"
-echo ""
-echo "⚠️  EXCLUS de cette installation (trop lourds):"
-echo "   ✗ Stack web / Node.js"
-echo "   ✗ MCP"
-echo "   ✗ Agents IA dans Neovim"
-echo "   ✗ GitHub Copilot"
-echo "   ✗ Aider (dépendances lourdes)"
-echo "   ✗ Claude/Codex/OpenCode"
-echo "   ✗ Neovim compilé from source"
-echo "   ✗ Plugins LSP lourds"
-echo ""
-echo "💡 Pour Codespaces, utilisez: bash install.sh"
-echo ""
-echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
-echo "📖 ALIASES DISPONIBLES (ajoutés à ~/.bashrc):"
-echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
-echo ""
-echo "🔄 Système:"
-echo "   re           → Recharger .bashrc"
-echo "   reload       → Recharger .bashrc"
-echo "   i            → Relancer le script d'installation"
-echo "   cls          → Effacer l'écran (clear)"
-echo "   ..           → cd .."
-echo "   ...          → cd ../.."
-echo ""
-echo "📁 Git:"
-echo "   gs           → git status"
-echo "   ga           → git add ."
-echo "   gc <msg>     → git commit -m '<msg>'"
-echo "   gp           → git push"
-echo "   gl           → git pull"
-echo "   gd           → git diff"
-echo ""
-echo "📱 Termux:"
-echo "   termux-wake  → Garder l'écran allumé"
-echo "   termux-sleep → Autoriser veille"
-echo "   storage      → cd ~/storage/shared"
-echo "   dl           → cd ~/storage/downloads"
-echo ""
-echo "📂 File Managers:"
-echo "   r            → ranger"
-echo ""
-echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
-echo ""
+echo "Commandes utiles: nvim, r, thermux, urls, tunnel."
+echo "Non installé volontairement: Node.js, MCP, agents IA, Copilot, Claude/Codex/OpenCode."
+echo "Pour plus de détails: TERMUX_DOTFILES_VERBOSE=1 bash ~/dotfiles/termux.sh"

@@ -120,6 +120,8 @@ source ~/.bashrc
 
 After the first activation, use `re` to reload `.bashrc`.
 
+The Termux installer keeps terminal output short for non-technical users. Detailed logs are written to `~/termux-install.log`; rerun with `TERMUX_DOTFILES_VERBOSE=1` to show detailed progress in the terminal.
+
 The installer attempts to repair a broken Termux `curl`/OpenSSL stack automatically. If `curl` cannot download the script at all, repair Termux packages first:
 
 ```bash
