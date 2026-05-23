@@ -6,6 +6,7 @@
 ## Configuration logging
 LOG_FILE="${TERMUX_DOTFILES_LOG_FILE:-$HOME/termux-install.log}"
 VERBOSE="${TERMUX_DOTFILES_VERBOSE:-0}"
+export DEBIAN_FRONTEND=noninteractive
 mkdir -p "$(dirname "$LOG_FILE")"
 touch "$LOG_FILE"
 
@@ -25,6 +26,17 @@ step() {
     echo "$1"
 }
 
+apt_termux() {
+    apt-get \
+        -o Dpkg::Options::=--force-confdef \
+        -o Dpkg::Options::=--force-confold \
+        "$@"
+}
+
+install_packages() {
+    apt_termux install -y "$@" >/dev/null 2>&1
+}
+
 step "Installation Termux dotfiles..."
 
 if ! command -v pkg >/dev/null 2>&1; then
@@ -36,8 +48,9 @@ mkdir -p "$HOME/.local/bin" "$HOME/.cargo/bin" "$HOME/tmp"
 
 # --- 1. Packages Termux essentiels ---
 step "1/6 Installation des paquets Termux..."
-pkg update -y >/dev/null 2>&1
-pkg install -y \
+apt_termux update >/dev/null 2>&1
+dpkg --force-confdef --force-confold --configure -a >/dev/null 2>&1 || true
+install_packages \
   git \
   curl \
   wget \
@@ -77,7 +90,7 @@ mkdir -p "$FONT_DIR"
 # Vérifier si unzip est installé
 if ! command -v unzip &> /dev/null; then
     log "INFO" "Installing unzip..."
-    pkg install -y unzip >/dev/null 2>&1
+    install_packages unzip
 fi
 
 FONT_INSTALLED=false
@@ -143,7 +156,7 @@ fi
 # Zoxide (smart cd) - available in Termux repos
 if ! command -v zoxide &> /dev/null; then
     log "INFO" "Installing Zoxide..."
-    pkg install -y zoxide >/dev/null 2>&1
+    install_packages zoxide
     if command -v zoxide &> /dev/null; then
         log "INFO" "✅ Zoxide installed via pkg"
     else
@@ -269,10 +282,31 @@ elif [ -d "$SOURCE_DIR/nvim/MyNeovim" ]; then
     create_symlink "$SOURCE_DIR/nvim/MyNeovim" "$NVIM_CONFIG_DIR"
 fi
 
-# Termux Neovim is plugin-free; remove leftovers from older LazyVim/Mason runs.
-if [ -d "$HOME/.local/share/nvim/lazy" ] || [ -d "$HOME/.local/share/nvim/mason" ]; then
-    rm -rf "$HOME/.local/share/nvim/lazy" "$HOME/.local/share/nvim/mason"
-    log "INFO" "Removed old Neovim Lazy/Mason data"
+# Remove leftovers from older LazyVim/Mason Termux runs without deleting the safe whitelist.
+if [ -d "$HOME/.local/share/nvim/mason" ]; then
+    rm -rf "$HOME/.local/share/nvim/mason"
+    log "INFO" "Removed old Neovim Mason data"
+fi
+
+if [ -d "$HOME/.local/share/nvim/lazy" ]; then
+    for plugin in \
+        LazyVim \
+        nvim-lspconfig \
+        mason.nvim \
+        mason-lspconfig.nvim \
+        nvim-treesitter \
+        conform.nvim \
+        CopilotChat.nvim \
+        copilot.lua \
+        avante.nvim \
+        codecompanion.nvim \
+        claudecode.nvim \
+        agentic.nvim \
+        augment.vim \
+        gemini-cli.nvim; do
+        rm -rf "$HOME/.local/share/nvim/lazy/$plugin"
+    done
+    log "INFO" "Removed old heavy Neovim plugin data"
 fi
 
 # Termux properties

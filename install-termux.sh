@@ -7,6 +7,7 @@ REPO_URL="${DOTFILES_REPO_URL:-https://github.com/dianedef/dotfiles.git}"
 BRANCH="${DOTFILES_BRANCH:-master}"
 DOTFILES_DIR="${DOTFILES_DIR:-$HOME/dotfiles}"
 BOOTSTRAP_LOG="${TERMUX_DOTFILES_BOOTSTRAP_LOG:-$HOME/termux-bootstrap.log}"
+export DEBIAN_FRONTEND=noninteractive
 
 log() {
     printf '%s\n' "$*"
@@ -14,6 +15,13 @@ log() {
 
 run_quiet() {
     "$@" </dev/null >/dev/null 2>&1
+}
+
+apt_termux() {
+    apt-get \
+        -o Dpkg::Options::=--force-confdef \
+        -o Dpkg::Options::=--force-confold \
+        "$@"
 }
 
 run_or_explain() {
@@ -47,10 +55,11 @@ repair_termux_curl() {
         return 1
     fi
 
-    run_quiet apt update
-    run_quiet apt full-upgrade -y
-    run_quiet apt install --reinstall curl openssl libngtcp2 -y || \
-        run_quiet apt install curl openssl libngtcp2 -y
+    run_quiet apt_termux update
+    run_quiet dpkg --force-confdef --force-confold --configure -a
+    run_quiet apt_termux full-upgrade -y
+    run_quiet apt_termux install --reinstall curl openssl libngtcp2 -y || \
+        run_quiet apt_termux install curl openssl libngtcp2 -y
 
     if ! curl_works; then
         log "curl ne fonctionne toujours pas après réparation automatique."
@@ -67,8 +76,9 @@ repair_termux_curl
 
 log "Préparation de l'installation Termux..."
 # Keep subprocesses off stdin because this installer is commonly run as curl | sh.
-run_or_explain "mise à jour des paquets Termux" pkg update -y
-run_or_explain "installation de git/curl/bash" pkg install -y git curl bash
+run_or_explain "mise à jour des paquets Termux" apt_termux update
+run_or_explain "réparation de l'état dpkg" dpkg --force-confdef --force-confold --configure -a
+run_or_explain "installation de git/curl/bash" apt_termux install -y git curl bash
 
 if [ -d "$DOTFILES_DIR/.git" ]; then
     log "Mise à jour du dépôt dotfiles..."
