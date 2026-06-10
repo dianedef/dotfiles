@@ -31,10 +31,10 @@ Si votre `leader` est celui par défaut de LazyVim, `<leader>` correspond en gé
 
 ### Gemini CLI
 
-- `Espace a g` : ouvrir / fermer Gemini CLI
-- `Espace a a` : ajouter le fichier courant au contexte Gemini
-- `Espace a d` : demander un fix du diagnostic courant
-- `Espace a /` : ouvrir le picker des slash commands Gemini
+- `Espace a g t` : ouvrir / fermer Gemini CLI
+- `Espace a g a` : ajouter le fichier courant au contexte Gemini
+- `Espace a g d` : demander un fix des diagnostics du buffer courant
+- `Espace a g /` : ouvrir le picker des slash commands Gemini
 
 ## Comment choisir
 

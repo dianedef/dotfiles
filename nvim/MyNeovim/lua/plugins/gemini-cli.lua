@@ -13,6 +13,19 @@ return {
     {
       "<leader>agt",
       function()
+        local config = require("gemini_cli.config")
+        local cmd = config.options.gemini_cmd or "gemini"
+        if vim.fn.executable(cmd) ~= 1 then
+          vim.notify(
+            (
+              "Gemini CLI introuvable: `%s` n'est pas dans le PATH de Neovim. "
+              .. "Installez `npm install -g @google/gemini-cli`, puis redemarrez Neovim."
+            ):format(cmd),
+            vim.log.levels.ERROR,
+            { title = "Gemini CLI" }
+          )
+          return
+        end
         require("gemini_cli.api").toggle_terminal()
       end,
       desc = "Gemini Toggle",
