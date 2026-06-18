@@ -15,16 +15,6 @@ return {
     "MunifTanjim/nui.nvim",
   },
   cmd = "Neotree",
-  event = "VimEnter",
-  init = function()
-    vim.api.nvim_create_autocmd("VimEnter", {
-      callback = function()
-        vim.schedule(function()
-          require("config.neotree-smart").open("git_status")
-        end)
-      end,
-    })
-  end,
   keys = {
     {
       "<leader>ec",

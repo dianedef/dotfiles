@@ -50,6 +50,8 @@ end
 
 vim.keymap.set("n", "<leader>bb", switch_to_other_buffer, { desc = "Switch to Other Buffer" })
 vim.keymap.del("n", "<leader>`")
+vim.keymap.set("n", "<Tab>", "<cmd>bnext<cr>", { desc = "Buffer suivant", silent = true })
+vim.keymap.set("n", "<S-Tab>", "<cmd>bprevious<cr>", { desc = "Buffer precedent", silent = true })
 
 local function toggle_cheat_sheet()
   local path = vim.fn.expand("~/dotfiles/nvim/MyNeovim/Cheat Sheet.md")

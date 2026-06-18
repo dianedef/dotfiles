@@ -138,6 +138,37 @@ return {
     if not _G.Snacks then
       _G.Snacks = require("snacks")
     end
+
+    vim.api.nvim_create_autocmd("VimEnter", {
+      callback = function()
+        if vim.fn.argc() ~= 0 then
+          return
+        end
+
+        local listed_file_buffers = vim.tbl_filter(function(buf)
+          if not vim.api.nvim_buf_is_valid(buf) or vim.fn.buflisted(buf) ~= 1 then
+            return false
+          end
+          if vim.bo[buf].buftype ~= "" then
+            return false
+          end
+          return vim.api.nvim_buf_get_name(buf) ~= ""
+        end, vim.api.nvim_list_bufs())
+
+        if #listed_file_buffers > 0 then
+          return
+        end
+
+        local current_buf = vim.api.nvim_get_current_buf()
+        if vim.bo[current_buf].modified or vim.api.nvim_buf_get_name(current_buf) ~= "" then
+          return
+        end
+
+        vim.schedule(function()
+          Snacks.picker.git_diff({ base = "origin", group = true })
+        end)
+      end,
+    })
   end,
   opts = {
     bigfile = { enabled = true },
@@ -175,18 +206,26 @@ return {
               keys = {
                 ["<Tab>"] = { "focus_list", mode = { "i", "n" } },
                 ["<S-Tab>"] = { "focus_preview", mode = { "i", "n" } },
+                ["<Down>"] = { "preview_scroll_down", mode = { "i", "n" } },
+                ["<Up>"] = { "preview_scroll_up", mode = { "i", "n" } },
               },
             },
             list = {
               keys = {
-                ["<Tab>"] = "focus_preview",
-                ["<S-Tab>"] = "focus_preview",
+                ["<Tab>"] = "list_down",
+                ["<S-Tab>"] = "list_up",
+                ["<Down>"] = "preview_scroll_down",
+                ["<Up>"] = "preview_scroll_up",
               },
             },
             preview = {
               keys = {
-                ["<Tab>"] = "focus_list",
-                ["<S-Tab>"] = "focus_list",
+                ["<Tab>"] = "list_down",
+                ["<S-Tab>"] = "list_up",
+                ["<Down>"] = "preview_scroll_down",
+                ["<Up>"] = "preview_scroll_up",
+                ["j"] = "preview_scroll_down",
+                ["k"] = "preview_scroll_up",
               },
             },
           },

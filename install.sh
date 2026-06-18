@@ -111,6 +111,8 @@ sync_component_artifacts() {
     fi
     sync_bashrc_alias "k" "''" false
     sync_bashrc_alias "o" "'opencode'" "${DOTFILES_INSTALLED_OPENCODE:-false}"
+    sync_bashrc_alias "kc" "'kilocode'" "${DOTFILES_INSTALLED_OPENCODE:-false}"
+    sync_bashrc_alias "oc" "'opencode'" "${DOTFILES_INSTALLED_OPENCODE:-false}"
     sync_bashrc_alias "mcp" "'mcpc'" "${DOTFILES_INSTALLED_MCPC:-false}"
     success "Component artifact synchronization applied"
 }

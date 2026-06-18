@@ -104,7 +104,7 @@ ShipFlow is separate: its system installer must be run as `curl -fsSL https://wi
 `dotfiles` applies shell aliases and config symlinks only for components that are actually installed when the run finishes.
 
 - `alias r='ranger'` is added only when `ranger` is available.
-- `alias k`, `alias o`, `alias mcp` are added when available. `alias co` is owned by ShipFlow.
+- `alias k`, `alias o`, `alias kc`, `alias oc`, `alias mcp` are added when available. `alias co` is owned by ShipFlow.
 - `~/.config/ranger` is created only when Ranger is installed.
 - In `--dry-run`, no `.bashrc` or config symlink is actually modified.
 - Synchronization runs on the final component state, including `--only` modes, so stale aliases/symlinks are removed and only installed-component artifacts are kept.

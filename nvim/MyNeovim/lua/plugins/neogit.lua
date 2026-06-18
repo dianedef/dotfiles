@@ -3,14 +3,12 @@ return {
   enabled = true,
   dependencies = {
     "nvim-lua/plenary.nvim",
-    "sindrets/diffview.nvim",
     "nvim-telescope/telescope.nvim",
   },
   cmd = "Neogit",
   opts = {
     integrations = {
       telescope = true,
-      diffview = true,
     },
   },
   keys = {

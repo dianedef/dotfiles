@@ -237,8 +237,6 @@ Nomenclature Git dans l'explorateur :
 - `gitsigns` : diff directement dans le fichier ouvert
 - `Snacks picker` : `<leader>gd` ouvre la liste des fichiers/hunks modifiés avec preview
 - `Snacks picker` : `<leader>gD` ouvre le diff contre `origin`
-- `Diffview` : `<leader>gv` ouvre la revue Git en plein écran avec fichiers en haut et diff en bas
-- `Diffview` : `<leader>gV` ouvre le diff contre la branche `origin` principale
 
 Dans le fichier courant avec `gitsigns` :
 
@@ -265,7 +263,9 @@ Diff rapide avec `Snacks` :
 - `<leader>gd` : Git Diff (hunks)
 - `<leader>gD` : Git Diff (origin)
 - le panneau de sélection est volontairement limité à 3 lignes pour mobile
-- `Tab` : basculer entre la liste des fichiers/hunks et le preview du diff
+- `Tab` : fichier suivant
+- `<S-Tab>` : fichier précédent
+- `↑` / `↓` : scroller le preview
 - `<C-f>` / `<C-b>` : scroller le preview
 - `<C-j>` / `<C-k>` : descendre / monter dans la liste
 
@@ -292,7 +292,6 @@ Dans le buffer Neogit (mode normal) :
 - `x` : discard (annule les changements)
 - `<Tab>` : déplier / replier un fichier pour voir le diff
 - `<Enter>` : ouvrir le fichier
-- `d` : ouvrir le diff dans Diffview
 
 Commits :
 
@@ -317,37 +316,10 @@ Branches / log :
 - `ll` : log de la branche
 - `q` : fermer Neogit
 
-### Diffview — relire les diffs en plein écran
-
-Raccourcis globaux :
-
-- `<leader>gv` : ouvrir Diffview (changements locaux)
-- `<leader>gV` : diff vs `origin/main` (ce que la PR contiendra)
-- `<leader>gq` : fermer Diffview
-- `<leader>gF` : historique du fichier courant
-
-Dans le panneau de fichiers (en haut) :
-
-- `j` / `k` : fichier suivant / précédent (le diff s'ouvre en bas)
-- `<Enter>` : ouvrir le fichier sélectionné
-- `-` : toggle stage / unstage du fichier
-- `s` : stage
-- `u` : unstage
-- `X` : discard
-- `R` : refresh
-- `<Tab>` / `<S-Tab>` : sauter au fichier suivant / précédent
-
-Dans la vue diff :
-
-- `]c` / `[c` : hunk suivant / précédent (natif Vim diff)
-- `do` : appliquer le hunk depuis l'autre côté (obtain)
-- `dp` : pousser le hunk vers l'autre côté (put)
-- `g?` : afficher l'aide complète des keymaps de Diffview
-
 Workflow type :
 
 - `neo-tree` = voir où ça a bougé
-- `Diffview` (`<leader>gv`) = lire ce qui a changé
+- `Snacks` (`<leader>gD`) = lire ce qui a changé
 - `Neogit` (`<leader>gn`) = stage + commit + push
 
 ## Recherche et navigation
