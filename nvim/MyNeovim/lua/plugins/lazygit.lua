@@ -2,7 +2,12 @@ return {
   "kdheepak/lazygit.nvim",
   enabled = true,
   dependencies = { "nvim-lua/plenary.nvim" },
-  event = "VeryLazy",
+  cmd = { "LazyGit", "LazyGitConfig", "LazyGitCurrentFile", "LazyGitFilter", "LazyGitFilterCurrentFile" },
+  keys = {
+    { "<leader>gg", "<cmd>LazyGit<cr>", desc = "LazyGit" },
+    { "<leader>gf", "<cmd>LazyGitFilter<cr>", desc = "LazyGit Filter" },
+    { "<leader>gF", "<cmd>LazyGitFilterCurrentFile<cr>", desc = "LazyGit Filter Current File" },
+  },
   init = function()
     vim.g.lazygit_floating_window_winblend = 0 -- transparency
     vim.g.lazygit_floating_window_scaling_factor = 0.95

@@ -8,17 +8,6 @@
 -- e.g. vim.api.nvim_del_augroup_by_name("lazyvim_wrap_spell")
 pcall(vim.api.nvim_del_augroup_by_name, "lazyvim_wrap_spell")
 
-vim.api.nvim_create_autocmd("VimEnter", {
-  nested = true,
-  callback = function()
-    if vim.fn.argc() == 0 then
-      pcall(function()
-        require("persistence").load()
-      end)
-    end
-  end,
-})
-
 local reload_changed_files_group = vim.api.nvim_create_augroup("reload_changed_files", { clear = true })
 
 vim.api.nvim_create_autocmd({ "WinEnter", "CursorHold" }, {

@@ -128,6 +128,7 @@ return {
     { "<leader>fR", LazyVim.pick("oldfiles"), desc = "Recent (root dir)" },
     { "<leader>ft", function() Snacks.terminal() end, desc = "Terminal (cwd)" },
     { "<leader>fT", function() Snacks.terminal(nil, { cwd = LazyVim.root() }) end, desc = "Terminal (root dir)" },
+    { "<leader>gD", function() Snacks.picker.git_diff({ base = "origin", group = true }) end, desc = "Git Diff Origin" },
     { "<leader>sg", LazyVim.pick("live_grep", { root = false }), desc = "Grep (cwd)" },
     { "<leader>sd", grep_in_selected_directory, desc = "Grep (pick dir)" },
     { "<leader>sw", LazyVim.pick("grep_word", { root = false }), mode = { "n", "x" }, desc = "Visual selection or word (cwd)" },
