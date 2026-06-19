@@ -7,7 +7,6 @@ gui:
   language: en
   mouseEvents: false
   nerdFontsVersion: "3"
-
 # Keybindings
 keybinding:
   universal:
@@ -28,22 +27,17 @@ keybinding:
     redo: "L"
     quit: <esc>
     quitWithoutChangingDirectory: <backspace>
-  
   status:
     checkForUpdate: <disabled>
-  
   files:
     ignoreFile: "h"
-  
   branches:
     viewGitFlowOptions: "I"
     setUpstream: "s"
-  
   commits:
     moveUpCommit: "<c-u>"
     moveDownCommit: "<c-e>"
     startInteractiveRebase: "I"
-
 # Commande personnalisée pour GitHub PR
 customCommands:
   - key: "v"
@@ -55,12 +49,10 @@ customCommands:
         title: "Which PR do you want to check out?"
         key: "PullRequestNumber"
         command: >-
-          gh pr list --json number,title,headRefName,updatedAt
-          --template '{{`{{range .}}{{printf "#%v: %s - %s (%s)" .number .title .headRefName (timeago .updatedAt)}}{{end}}`}}'
+          gh pr list --json number,title,headRefName,updatedAt --template '{{`{{range .}}{{printf "#%v: %s - %s (%s)" .number .title .headRefName (timeago .updatedAt)}}{{end}}`}}'
         filter: "#(?P<number>[0-9]+): (?P<title>.+) - (?P<ref_name>[^ ]+).*"
         valueFormat: "{{.number}}"
         labelFormat: '{{"#" | black | bold}}{{.number | white | bold}} {{.title | yellow | bold}}{{" [" | black | bold}}{{.ref_name | green}}{{"]" | black | bold}}'
-
 os:
   # This allows me to open Neovide when press "e" to edit a file in lazygit, it
   # works when I'm inside neovim
@@ -81,24 +73,20 @@ os:
   # If this is set to true, when editing a file from lazygit, it opens it in the
   # terminal, instead of Neovide, and you cannot go back to lazygit
   editInTerminal: false
-
   # # This is the snacks neovim plugin default option, if you want to use it,
   # # comment all the options above
   # # https://github.com/folke/snacks.nvim/blob/main/docs/lazygit.md
   # editPreset: "nvim-remote"
-
 git:
-  paging:
-    colorArg: always
-    # For this to work, first install `brew install git-delta`
-    # https://github.com/dandavison/delta
-    # https://github.com/jesseduffield/lazygit/issues/155#issuecomment-2260986940
-    pager: delta --dark --paging=never --syntax-theme base16-256 -s
-    externalDiffCommand: difft --color=always --display=inline --syntax-highlight=off
-
+  pagers:
+    - colorArg: always
+      # For this to work, first install `brew install git-delta`
+      # https://github.com/dandavison/delta
+      # https://github.com/jesseduffield/lazygit/issues/155#issuecomment-2260986940
+      pager: delta --dark --paging=never --syntax-theme base16-256 -s
+      externalDiffCommand: difft --color=always --display=inline --syntax-highlight=off
 update:
   method: never
-
 notARepository: "quit"
 promptToReturnFromSubprocess: false
 quitOnTopLevelReturn: true

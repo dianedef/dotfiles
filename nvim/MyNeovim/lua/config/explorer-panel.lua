@@ -67,13 +67,8 @@ function M.set_width(width, opts)
   opts = opts or {}
   M.width = normalize_width(width)
 
-  local resized = resize_neotree_windows(M.width)
-  resized = resize_snacks_explorers(M.width) or resized
-
-  if opts.notify ~= false then
-    local suffix = resized and "" or " (applique au prochain explorateur ouvert)"
-    vim.notify(("Largeur explorateur: %d%s"):format(M.width, suffix), vim.log.levels.INFO)
-  end
+  resize_neotree_windows(M.width)
+  resize_snacks_explorers(M.width)
 
   return M.width
 end

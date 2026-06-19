@@ -9,7 +9,7 @@ tui.terminal_title = ["spinner", "thread", "project"]
 # <<< shipflow codex tui <<<
 
 
-model = "gpt-5.5"
+model = "gpt-5.4"
 model_reasoning_effort = "high"
 # >>> shipflow codex rmcp >>>
 [beta]

@@ -98,6 +98,10 @@ M.setup = function()
   vim.keymap.set("n", "<leader>w2", "<cmd>ShipFlowPanel2<cr>", { desc = "panel size 2" })
   vim.keymap.set("n", "<leader>w3", "<cmd>ShipFlowPanel3<cr>", { desc = "panel size 3" })
   vim.keymap.set("n", "<leader>wF", "<cmd>ShipFlowPanelFull<cr>", { desc = "panel full size" })
+  vim.keymap.set("t", "<leader>w1", "<C-\\><C-n><cmd>ShipFlowPanel1<cr>", { desc = "panel size 1" })
+  vim.keymap.set("t", "<leader>w2", "<C-\\><C-n><cmd>ShipFlowPanel2<cr>", { desc = "panel size 2" })
+  vim.keymap.set("t", "<leader>w3", "<C-\\><C-n><cmd>ShipFlowPanel3<cr>", { desc = "panel size 3" })
+  vim.keymap.set("t", "<leader>wF", "<C-\\><C-n><cmd>ShipFlowPanelFull<cr>", { desc = "panel full size" })
 
   require("shipflow.mail").setup()
 end

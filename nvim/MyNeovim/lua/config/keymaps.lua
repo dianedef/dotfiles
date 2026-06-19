@@ -144,6 +144,47 @@ vim.keymap.set("n", "<leader>nC", function()
   vim.notify("Aucun message", "warn")
 end, { desc = "Copier tous les messages" })
 
+local function open_difftastic()
+  local file = vim.api.nvim_buf_get_name(0)
+  if file == "" then
+    vim.notify("Difftastic requires a file-backed buffer", vim.log.levels.WARN)
+    return
+  end
+
+  local root = vim.fs.root(0, ".git")
+  if not root then
+    vim.notify("Difftastic requires a git repository", vim.log.levels.WARN)
+    return
+  end
+
+  local relpath = file:sub(#root + 2)
+  if relpath == "" then
+    vim.notify("Unable to resolve file path relative to git root", vim.log.levels.WARN)
+    return
+  end
+
+  local head = vim.system({ "git", "-C", root, "show", ("HEAD:%s"):format(relpath) }, { text = true }):wait()
+  if head.code ~= 0 then
+    vim.notify(("Unable to read HEAD version for %s"):format(relpath), vim.log.levels.WARN)
+    return
+  end
+
+  if vim.fn.executable("difft") ~= 1 then
+    vim.notify("difft is not installed", vim.log.levels.ERROR)
+    return
+  end
+
+  local tmp = vim.fn.tempname()
+  vim.fn.writefile(vim.split(head.stdout or "", "\n", { plain = true }), tmp)
+
+  vim.cmd("botright split")
+  vim.cmd(("terminal difft --color=always %s %s"):format(vim.fn.shellescape(tmp), vim.fn.shellescape(file)))
+  vim.cmd("startinsert")
+end
+
+vim.api.nvim_create_user_command("Difftastic", open_difftastic, {})
+vim.keymap.set("n", "<leader>gt", open_difftastic, { desc = "Difftastic diff current file" })
+
 -- Front matter folding shortcut in same namespace as fold commands (z...)
 local function get_front_matter_end()
   local lines = vim.api.nvim_buf_get_lines(0, 0, -1, false)

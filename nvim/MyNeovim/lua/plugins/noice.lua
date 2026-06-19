@@ -8,6 +8,9 @@ return {
     "hrsh7th/nvim-cmp",
   },
   opts = {
+    notify = {
+      enabled = false,
+    },
     routes = {
       {
         filter = {

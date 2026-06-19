@@ -45,17 +45,73 @@ local function clamp(value, min_value, max_value)
   return math.max(min_value, math.min(max_value, value))
 end
 
+local function is_floating_window(winid)
+  local cfg = vim.api.nvim_win_get_config(winid)
+  return cfg and cfg.relative and cfg.relative ~= ""
+end
+
 local function current_window_orientation(winid)
+  local function find_parent_layout(node, target, parent_type)
+    local node_type = node[1]
+    local payload = node[2]
+
+    if node_type == "leaf" then
+      if payload == target then
+        return parent_type
+      end
+      return nil
+    end
+
+    if type(payload) ~= "table" then
+      return nil
+    end
+
+    for _, child in ipairs(payload) do
+      local found = find_parent_layout(child, target, node_type)
+      if found then
+        return found
+      end
+    end
+  end
+
+  if not is_floating_window(winid) then
+    local layout_type = find_parent_layout(vim.fn.winlayout(), winid, nil)
+    if layout_type == "col" then
+      return "horizontal"
+    end
+    if layout_type == "row" then
+      return "vertical"
+    end
+  end
+
   local width = vim.api.nvim_win_get_width(winid)
   local height = vim.api.nvim_win_get_height(winid)
   local screen_width = math.max(1, vim.o.columns)
   local screen_height = math.max(1, vim.o.lines - vim.o.cmdheight - 2)
 
-  if height <= math.floor(screen_height * 0.45) and width >= math.floor(screen_width * 0.55) then
+  if height <= math.floor(screen_height * 0.55) and width >= math.floor(screen_width * 0.55) then
     return "horizontal"
   end
 
   return "vertical"
+end
+
+local function resize_current_window_dimension(winid, orientation, size)
+  if is_floating_window(winid) then
+    local cfg = vim.api.nvim_win_get_config(winid)
+    if orientation == "horizontal" then
+      cfg.height = size
+    else
+      cfg.width = size
+    end
+    return pcall(vim.api.nvim_win_set_config, winid, cfg)
+  end
+
+  if orientation == "horizontal" then
+    return pcall(vim.api.nvim_win_set_height, winid, size)
+  end
+
+  return pcall(vim.api.nvim_win_set_width, winid, size)
 end
 
 local function current_snacks_explorer_picker()
@@ -179,8 +235,6 @@ function M.avante_size(size, opts)
     end
   end
 
-  local label = size == "full" and "full" or (layout == "horizontal" and height or width)
-  notify("Taille Avante: " .. label, opts)
   return true
 end
 
@@ -211,16 +265,14 @@ function M.current_window_preset(preset, opts)
     local max_height = math.max(1, vim.o.lines - vim.o.cmdheight - 2)
     local height = normalized == "full" and max_height or M.presets.horizontal[normalized]
     height = clamp(height, 1, max_height)
-    pcall(vim.api.nvim_win_set_height, winid, height)
-    notify(("Hauteur panneau: %s"):format(normalized == "full" and "full" or height), opts)
+    resize_current_window_dimension(winid, orientation, height)
     return true
   end
 
   local max_width = math.max(1, vim.o.columns)
   local width = normalized == "full" and max_width or M.presets.vertical[normalized]
   width = clamp(width, 1, max_width)
-  pcall(vim.api.nvim_win_set_width, winid, width)
-  notify(("Largeur panneau: %s"):format(normalized == "full" and "full" or width), opts)
+  resize_current_window_dimension(winid, orientation, width)
   return true
 end
 
