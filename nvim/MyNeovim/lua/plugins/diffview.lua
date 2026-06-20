@@ -33,8 +33,10 @@ return {
   },
   init = function()
     vim.api.nvim_create_user_command("DiffviewOrigin", open_origin_diff, {})
+    require("diffflowz").setup()
   end,
   keys = {
+    { "<leader>gT", "<cmd>DiffFlowz<cr>", desc = "DiffFlowz inline review" },
     { "<leader>gv", "<cmd>DiffviewOpen<cr>", desc = "Diffview" },
     { "<leader>gV", "<cmd>DiffviewOrigin<cr>", desc = "Diffview origin" },
     { "<leader>gq", "<cmd>DiffviewClose<cr>", desc = "Close Diffview" },

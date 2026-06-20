@@ -29,3 +29,16 @@ Terminal: [kitty](https://github.com/kovidgoyal/kitty)
 `pacman -Syu cmake fd ripgrep`
 
 Open Neovim and run `:Mason` to install the LSP servers you need.
+
+## Git review
+
+`Neogit` stays the staging and unstaging control surface.
+
+`DiffFlowz` opens a single-column Difftastic review of the repo changes:
+use `:DiffFlowz` or `<leader>gT` for working-tree changes, `:DiffFlowzStaged`
+for staged changes, and `:DiffFlowzClose` to close the view. The diff is
+rendered inline, so you review one combined output instead of two panes.
+
+`:Difftastic` and `<leader>gt` remain a syntax-aware preview for the current
+file. It is still a terminal renderer, so it is not the editable source of
+truth for the diff view.
