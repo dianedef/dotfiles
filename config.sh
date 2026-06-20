@@ -79,7 +79,7 @@ export USER_LOCAL_MODE="${USER_LOCAL_MODE:-false}"
 # PACKAGE LISTS
 # ============================================================================
 export DOTFILES_APT_PACKAGES="git curl wget unzip tar build-essential jq libsecret-1-0 tmux mosh"
-export DOTFILES_NPM_PACKAGES="@apify/mcpc @zed-industries/codex-acp tldr"
+export DOTFILES_NPM_PACKAGES="@apify/mcpc @zed-industries/codex-acp tldr eslint"
 
 # ============================================================================
 # CACHE CONFIGURATION
