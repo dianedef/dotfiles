@@ -72,6 +72,7 @@ return {
       { "<leader>t",     group = "Terminal", icon = "" },
       { "<leader>u",     group = "UI", icon = "󰙵" },
       { "<leader>w",     group = "Windows", icon = "" },
+      { "<leader>r",     desc = "Reload changed files", icon = "󰑐" },
       { "<leader>n",     group = "Notifications", icon = "󰎟" },
       { "<leader>x",     group = "Diagnostics/Quickfix", icon = "󰒡" },
       { "[",             group = "Prev", icon = "" },
