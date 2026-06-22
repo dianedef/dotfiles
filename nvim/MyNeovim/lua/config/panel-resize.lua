@@ -1,5 +1,59 @@
 local M = {}
 
+-- Store user-set sizes for terminal windows (keyed by buffer id)
+-- Persists across window toggles and VimResized events
+local terminal_size_overrides = {} -- buf_id -> { orientation, size }
+
+-- Register a user-chosen size for a terminal buffer
+local function set_terminal_override(buf, orientation, size)
+  terminal_size_overrides[buf] = { orientation = orientation, size = size }
+end
+
+-- Get the user-chosen size for a terminal buffer (nil if none)
+function M.get_terminal_size_override(buf)
+  return terminal_size_overrides[buf]
+end
+
+-- Apply stored override to the window currently displaying a buffer
+local function apply_terminal_override(buf, winid)
+  local override = terminal_size_overrides[buf]
+  if not override then
+    return false
+  end
+  if override.orientation == "horizontal" then
+    pcall(vim.api.nvim_win_set_height, winid, override.size)
+  else
+    pcall(vim.api.nvim_win_set_width, winid, override.size)
+  end
+  return true
+end
+
+-- Reapply stored size when a terminal window reappears (toggle / Tmux refocus)
+vim.api.nvim_create_autocmd("BufWinEnter", {
+  group = vim.api.nvim_create_augroup("panel_resize_terminal_persist", { clear = true }),
+  callback = function(ev)
+    if vim.bo[ev.buf].filetype ~= "snacks_terminal" then
+      return
+    end
+    local winid = vim.fn.bufwinid(ev.buf)
+    if winid ~= -1 then
+      vim.schedule(function()
+        if vim.api.nvim_win_is_valid(winid) then
+          apply_terminal_override(ev.buf, winid)
+        end
+      end)
+    end
+  end,
+})
+
+-- Cleanup when a terminal buffer is deleted
+vim.api.nvim_create_autocmd("BufDelete", {
+  group = vim.api.nvim_create_augroup("panel_resize_terminal_cleanup", { clear = true }),
+  callback = function(ev)
+    terminal_size_overrides[ev.buf] = nil
+  end,
+})
+
 M.presets = {
   explorer = { 20, 35, 50 },
   vertical = { 30, 45, 60 },
@@ -266,6 +320,11 @@ function M.current_window_preset(preset, opts)
     local height = normalized == "full" and max_height or M.presets.horizontal[normalized]
     height = clamp(height, 1, max_height)
     resize_current_window_dimension(winid, orientation, height)
+    -- Persist for terminal windows so VimResized / toggles don't override
+    local buf = vim.api.nvim_win_get_buf(winid)
+    if vim.bo[buf].filetype == "snacks_terminal" then
+      set_terminal_override(buf, orientation, height)
+    end
     return true
   end
 
@@ -273,6 +332,11 @@ function M.current_window_preset(preset, opts)
   local width = normalized == "full" and max_width or M.presets.vertical[normalized]
   width = clamp(width, 1, max_width)
   resize_current_window_dimension(winid, orientation, width)
+  -- Persist for terminal windows so VimResized / toggles don't override
+  local buf = vim.api.nvim_win_get_buf(winid)
+  if vim.bo[buf].filetype == "snacks_terminal" then
+    set_terminal_override(buf, orientation, width)
+  end
   return true
 end
 

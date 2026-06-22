@@ -6,13 +6,24 @@ local function half_height()
 end
 
 local function sync_terminal_height()
+  local panel_resize = require("config.panel-resize")
   for _, win in ipairs(vim.api.nvim_list_wins()) do
     if vim.api.nvim_win_is_valid(win) then
       local cfg = vim.api.nvim_win_get_config(win)
       if not cfg.relative or cfg.relative == "" then
         local buf = vim.api.nvim_win_get_buf(win)
         if vim.bo[buf].filetype == "snacks_terminal" then
-          pcall(vim.api.nvim_win_set_height, win, half_height())
+          local override = panel_resize.get_terminal_size_override(buf)
+          if override then
+            -- Respect the user's manually chosen size
+            if override.orientation == "horizontal" then
+              pcall(vim.api.nvim_win_set_height, win, override.size)
+            else
+              pcall(vim.api.nvim_win_set_width, win, override.size)
+            end
+          else
+            pcall(vim.api.nvim_win_set_height, win, half_height())
+          end
         end
       end
     end
