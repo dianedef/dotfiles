@@ -1444,8 +1444,8 @@ update_tool() {
             ;;
         fzf)
             info "Updating fzf..."
-            if [ -d "$HOME/.fzf" ]; then
-                cd "$HOME/.fzf" && git pull >/dev/null 2>&1 && ./install --all >/dev/null 2>&1
+            if [ -d "$DOTFILES_FZF_DIR" ]; then
+                cd "$DOTFILES_FZF_DIR" && git pull >/dev/null 2>&1 && ./install --all >/dev/null 2>&1
                 success "fzf updated"
             fi
             ;;
@@ -1712,7 +1712,7 @@ run_uninstall() {
     uninstall_tool "Neovim" "$bin_dir/nvim" "$opt_dir/nvim,$HOME/.config/nvim,$HOME/.local/share/nvim,$HOME/.local/state/nvim"
     uninstall_tool "Starship" "$bin_dir/starship" "$HOME/.config/starship.toml"
     uninstall_tool "Zoxide" "$bin_dir/zoxide" ""
-    uninstall_tool "fzf" "$bin_dir/fzf" "$HOME/.fzf"
+    uninstall_tool "fzf" "$bin_dir/fzf" "$DOTFILES_FZF_DIR"
     uninstall_tool "Doppler" "$bin_dir/doppler" ""
 
     # Remove shell integrations

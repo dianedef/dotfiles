@@ -611,17 +611,18 @@ install_fzf() {
 
     info "Installing fzf..."
 
-    # Clone if not exists
-    if [ ! -d ~/.fzf ]; then
-        git clone --depth 1 https://github.com/junegunn/fzf.git ~/.fzf
+    # Clone into a hidden user-local cache directory
+    mkdir -p "$(dirname "$DOTFILES_FZF_DIR")"
+    if [ ! -d "$DOTFILES_FZF_DIR" ]; then
+        git clone --depth 1 https://github.com/junegunn/fzf.git "$DOTFILES_FZF_DIR"
     fi
 
     # Install binary
-    ~/.fzf/install --bin
+    "$DOTFILES_FZF_DIR/install" --bin
 
     # Link to local bin
     mkdir -p "$DOTFILES_BIN_DIR"
-    ln -sf ~/.fzf/bin/fzf "$DOTFILES_BIN_DIR/fzf"
+    ln -sf "$DOTFILES_FZF_DIR/bin/fzf" "$DOTFILES_BIN_DIR/fzf"
 
     if is_installed fzf; then
         success "fzf installed: $(fzf --version 2>/dev/null | head -1)"

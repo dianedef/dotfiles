@@ -38,6 +38,11 @@ export DOTFILES_CONFIG_DIR="${DOTFILES_CONFIG_DIR:-$HOME/.config}"
 export DOTFILES_NPM_DIR="${DOTFILES_NPM_DIR:-$HOME/.npm-global}"
 export DOTFILES_FONTS_DIR="${DOTFILES_FONTS_DIR:-$HOME/.local/share/fonts}"
 export DOTFILES_BACKUP_DIR="${DOTFILES_BACKUP_DIR:-$HOME/.dotfiles-backup}"
+export DOTFILES_FZF_DIR="${DOTFILES_FZF_DIR:-$HOME/.local/share/.fzf}"
+export DOTFILES_GO_DIR="${DOTFILES_GO_DIR:-$HOME/.local/share/.go}"
+export GOPATH="${GOPATH:-$DOTFILES_GO_DIR}"
+export GOMODCACHE="${GOMODCACHE:-$DOTFILES_GO_DIR/pkg/mod}"
+export GOCACHE="${GOCACHE:-$HOME/.cache/go-build}"
 
 # ============================================================================
 # LOGGING CONFIGURATION

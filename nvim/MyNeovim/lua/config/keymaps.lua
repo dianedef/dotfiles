@@ -53,8 +53,21 @@ vim.keymap.del("n", "<leader>`")
 vim.keymap.set("n", "<Tab>", "<cmd>bnext<cr>", { desc = "Buffer suivant", silent = true })
 vim.keymap.set("n", "<S-Tab>", "<cmd>bprevious<cr>", { desc = "Buffer precedent", silent = true })
 
-local function toggle_cheat_sheet()
-  local path = vim.fn.expand("~/dotfiles/nvim/MyNeovim/Cheat Sheet.md")
+local cheat_sheets = {
+  {
+    label = "Neovim",
+    detail = "Cheatsheet privee de la config Neovim",
+    path = "~/dotfiles/nvim/MyNeovim/Cheat Sheet.md",
+  },
+  {
+    label = "Focus Tags",
+    detail = "Cheatsheet publique docs/focus-tags-cheatsheet.md",
+    path = "~/dotfiles/docs/focus-tags-cheatsheet.md",
+  },
+}
+
+local function open_cheat_sheet(sheet)
+  local path = vim.fn.expand(sheet.path)
   local target = vim.uv.fs_realpath(path) or vim.fn.fnamemodify(path, ":p")
   local current_name = vim.api.nvim_buf_get_name(0)
   local current = current_name ~= "" and (vim.uv.fs_realpath(current_name) or vim.fn.fnamemodify(current_name, ":p")) or ""
@@ -78,12 +91,26 @@ local function toggle_cheat_sheet()
   vim.cmd("edit " .. vim.fn.fnameescape(path))
   vim.bo.buflisted = false
 
-  vim.keymap.set("n", "q", close_and_return, { buffer = true, desc = "Fermer cheatsheet" })
-  vim.keymap.set("n", "<leader>bd", close_and_return, { buffer = true, desc = "Fermer cheatsheet" })
-  vim.keymap.set("n", "<leader>wd", close_and_return, { buffer = true, desc = "Fermer cheatsheet" })
+  local close_desc = "Fermer " .. sheet.label
+  vim.keymap.set("n", "q", close_and_return, { buffer = true, desc = close_desc })
+  vim.keymap.set("n", "<leader>bd", close_and_return, { buffer = true, desc = close_desc })
+  vim.keymap.set("n", "<leader>wd", close_and_return, { buffer = true, desc = close_desc })
 end
 
-vim.keymap.set("n", "<leader>H", toggle_cheat_sheet, { desc = "Cheat Sheet" })
+local function choose_cheat_sheet()
+  vim.ui.select(cheat_sheets, {
+    prompt = "Cheatsheet",
+    format_item = function(item)
+      return item.label .. " - " .. item.detail
+    end,
+  }, function(choice)
+    if choice then
+      open_cheat_sheet(choice)
+    end
+  end)
+end
+
+vim.keymap.set("n", "<leader>H", choose_cheat_sheet, { desc = "Cheat Sheet" })
 
 require("shipflow").setup()
 

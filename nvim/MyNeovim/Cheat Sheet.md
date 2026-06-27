@@ -1,4 +1,4 @@
-# NeoVim Cheat Sheet
+# H rVim Cheat Sheet
 
 Cheat sheet courte pour les fonctions que tu utilises vraiment.
 
