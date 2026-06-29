@@ -167,6 +167,21 @@ is_installed() {
     command -v "$1" &>/dev/null
 }
 
+ensure_pnpm_global_env() {
+    export PNPM_HOME="${DOTFILES_PNPM_HOME:-$HOME/.local/share/pnpm}"
+    mkdir -p "$PNPM_HOME"
+    export PATH="$PNPM_HOME:${DOTFILES_NPM_DIR:-$HOME/.npm-global}/bin:$PATH"
+
+    if ! command -v pnpm >/dev/null 2>&1; then
+        if command -v corepack >/dev/null 2>&1; then
+            corepack prepare pnpm@latest --activate >/dev/null 2>&1 || true
+            hash -r 2>/dev/null || true
+        fi
+    fi
+
+    command -v pnpm >/dev/null 2>&1
+}
+
 require_command() {
     local cmd=$1
     local install_hint=${2:-"Please install $cmd"}
@@ -1389,11 +1404,15 @@ run_update_check() {
 # Update npm packages
 update_npm_packages() {
     local packages=("$@")
+    if ! ensure_pnpm_global_env; then
+        warn "pnpm required to update Node global packages"
+        return 1
+    fi
     for pkg in "${packages[@]}"; do
         # Remove npm: prefix
         pkg="${pkg#npm:}"
         info "Updating $pkg..."
-        npm install -g "$pkg" 2>/dev/null && success "$pkg updated" || warn "$pkg update failed"
+        pnpm add -g "$pkg" 2>/dev/null && success "$pkg updated" || warn "$pkg update failed"
     done
 }
 
@@ -1547,7 +1566,11 @@ run_direct_updates() {
         if [[ "$tool" == npm:* ]]; then
             local pkg="${tool#npm:}"
             info "Updating $pkg..."
-            npm install -g "$pkg" </dev/null >/dev/null 2>&1 && success "$pkg updated" || warn "$pkg update failed"
+            if ensure_pnpm_global_env; then
+                pnpm add -g "$pkg" </dev/null >/dev/null 2>&1 && success "$pkg updated" || warn "$pkg update failed"
+            else
+                warn "pnpm required to update $pkg"
+            fi
         else
             update_tool "$tool"
         fi
@@ -1909,7 +1932,7 @@ Options:
   --only=COMPONENTS  Install only specified components (comma-separated)
                      Available: neovim,fzf,nerd-fonts,node,npm-tools,
                                 starship,zoxide,ranger,doppler,gh,
-                                lsd,bat,claude-code,claude-chill,copilot,
+                                lsd,bat,claude-chill,copilot,
                                 opencode,gemini,crush,vercel,mcp,
                                 configs,shell-integration
   -p, --parallel     Run independent installations in parallel
@@ -2200,7 +2223,6 @@ select_components() {
         "gh          │ GitHub CLI" \
         "bat         │ cat with syntax highlighting" \
         "lsd         │ ls with icons" \
-        "claude-code │ Claude Code (native binary)" \
         "claude-chill│ PTY proxy for Claude (mosh)" \
         "copilot     │ GitHub Copilot CLI" \
         "opencode    │ OpenCode AI" \
@@ -2437,17 +2459,17 @@ install_component() {
             echo "  sudo apt install -y nodejs"
             ;;
         npm-tools)
-            info "Installing npm tools..."
-            if is_installed npm; then
+            info "Installing Node global tools..."
+            if ensure_pnpm_global_env; then
                 for pkg in $DOTFILES_NPM_PACKAGES; do
-                    if npm list -g "$pkg" >/dev/null 2>&1; then
+                    if pnpm list -g --depth=-1 "$pkg" >/dev/null 2>&1; then
                         success "$pkg already installed"
                     else
-                        npm install -g "$pkg" </dev/null >/dev/null 2>&1 && success "$pkg installed" || warn "$pkg installation failed"
+                        pnpm add -g "$pkg" </dev/null >/dev/null 2>&1 && success "$pkg installed" || warn "$pkg installation failed"
                     fi
                 done
             else
-                warn "npm required (install Node.js first)"
+                warn "pnpm required (install Node.js/corepack first)"
             fi
             ;;
         nerd-fonts)
@@ -2482,13 +2504,7 @@ install_component() {
             success "Shell configured"
             ;;
         claude-code)
-            if is_installed claude; then
-                success "Claude Code already installed"
-                return 0
-            fi
-            info "Installing Claude Code..."
-            curl -fsSL https://claude.ai/install.sh | bash </dev/null >/dev/null 2>&1
-            is_installed claude && success "Claude Code installed" || warn "Claude Code installation failed"
+            warn "claude-code is owned by ShipFlow. Run the ShipFlow installer instead."
             ;;
         claude-chill)
             if is_installed claude-chill; then
@@ -2508,12 +2524,12 @@ install_component() {
                 success "Copilot already installed"
                 return 0
             fi
-            if ! is_installed npm; then
-                warn "npm required (install Node.js first)"
+            if ! ensure_pnpm_global_env; then
+                warn "pnpm required (install Node.js/corepack first)"
                 return 1
             fi
             info "Installing Copilot..."
-            npm install -g @github/copilot </dev/null >/dev/null 2>&1
+            pnpm add -g @github/copilot </dev/null >/dev/null 2>&1
             is_installed github-copilot-cli && success "Copilot installed" || warn "Copilot installation failed"
             ;;
         opencode)
@@ -2521,12 +2537,12 @@ install_component() {
                 success "OpenCode already installed"
                 return 0
             fi
-            if ! is_installed npm; then
-                warn "npm required (install Node.js first)"
+            if ! ensure_pnpm_global_env; then
+                warn "pnpm required (install Node.js/corepack first)"
                 return 1
             fi
             info "Installing OpenCode..."
-            npm install -g opencode-ai </dev/null >/dev/null 2>&1
+            pnpm add -g opencode-ai </dev/null >/dev/null 2>&1
             is_installed opencode && success "OpenCode installed" || warn "OpenCode installation failed"
             ;;
         gemini)
@@ -2534,12 +2550,12 @@ install_component() {
                 success "Gemini CLI already installed"
                 return 0
             fi
-            if ! is_installed npm; then
-                warn "npm required (install Node.js first)"
+            if ! ensure_pnpm_global_env; then
+                warn "pnpm required (install Node.js/corepack first)"
                 return 1
             fi
             info "Installing Gemini CLI..."
-            npm install -g @google/gemini-cli </dev/null >/dev/null 2>&1
+            pnpm add -g @google/gemini-cli </dev/null >/dev/null 2>&1
             is_installed gemini && success "Gemini CLI installed" || warn "Gemini CLI installation failed"
             ;;
         crush)
@@ -2547,12 +2563,12 @@ install_component() {
                 success "Crush already installed"
                 return 0
             fi
-            if ! is_installed npm; then
-                warn "npm required (install Node.js first)"
+            if ! ensure_pnpm_global_env; then
+                warn "pnpm required (install Node.js/corepack first)"
                 return 1
             fi
             info "Installing Crush..."
-            npm install -g @charmland/crush </dev/null >/dev/null 2>&1
+            pnpm add -g @charmland/crush </dev/null >/dev/null 2>&1
             is_installed crush && success "Crush installed" || warn "Crush installation failed"
             ;;
         vercel)
@@ -2560,12 +2576,12 @@ install_component() {
                 success "Vercel already installed"
                 return 0
             fi
-            if ! is_installed npm; then
-                warn "npm required (install Node.js first)"
+            if ! ensure_pnpm_global_env; then
+                warn "pnpm required (install Node.js/corepack first)"
                 return 1
             fi
             info "Installing Vercel..."
-            npm install -g vercel </dev/null >/dev/null 2>&1
+            pnpm add -g vercel </dev/null >/dev/null 2>&1
             is_installed vercel && success "Vercel installed" || warn "Vercel installation failed"
             ;;
         mcp)
@@ -2577,11 +2593,6 @@ install_component() {
             fi
             mkdir -p "$HOME/.config/mcp"
             ln -sf "$mcp_source" "$HOME/.config/mcp/servers.json" && success "MCP config linked"
-            # Claude Code
-            if [ -d "$HOME/.claude" ]; then
-                mkdir -p "$HOME/.claude"
-                ln -sf "$mcp_source" "$HOME/.claude/mcp-servers.json" && success "Claude Code MCP linked"
-            fi
             ;;
         *)
             warn "Unknown component: $comp"

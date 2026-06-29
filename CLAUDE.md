@@ -100,9 +100,9 @@ cd ~/dotfiles && ./install.sh
 - Format with StyLua: 2-space indent, 120 column width
 - Use return table pattern for modules; lazy.nvim spec format for plugins
 
-## Claude Code Skills
+## ShipFlow Skills
 
-Global skills live in `claude/skills/` and are symlinked to `~/.claude/skills/`. Available across all projects.
+Global workflow skills are owned by ShipFlow and synced from `~/shipflow/skills/` into the runtime by the ShipFlow installer. This repository may keep historical samples or editor-facing notes, but it is not the source of truth for live Claude/Codex skills.
 
 ### Task & Workflow Skills
 - `/shipflow-tasks` — Update TASKS.md, mark completed items, suggest next steps

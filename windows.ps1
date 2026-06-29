@@ -40,24 +40,24 @@ winget install OpenJS.NodeJS.LTS
 Write-Host "Installing pnpm..." -ForegroundColor Yellow
 winget install pnpm.pnpm
 
-# Wait for npm to be available after Node.js installation
-Write-Host "Waiting for npm to be available..." -ForegroundColor Yellow
+# Wait for pnpm/npm to be available after Node.js installation
+Write-Host "Waiting for pnpm/npm to be available..." -ForegroundColor Yellow
 Start-Sleep -Seconds 5
 $env:Path = [System.Environment]::GetEnvironmentVariable("Path","Machine") + ";" + [System.Environment]::GetEnvironmentVariable("Path","User")
 
-# Verify npm is installed
-if (Get-Command npm -ErrorAction SilentlyContinue) {
-    Write-Host "Installing CLI tools via npm..." -ForegroundColor Yellow
+# Verify pnpm is installed
+if (Get-Command pnpm -ErrorAction SilentlyContinue) {
+    Write-Host "Installing CLI tools via pnpm..." -ForegroundColor Yellow
     
     Write-Host "Installing GitHub Copilot CLI..." -ForegroundColor Yellow
-    npm install -g @github/copilot
+    pnpm add -g @github/copilot
     
     Write-Host "Installing OpenCode AI..." -ForegroundColor Yellow
-    npm install -g opencode-ai
+    pnpm add -g opencode-ai
     
-    Write-Host "CLI tools installed via npm (update with: npm update -g)" -ForegroundColor Green
+    Write-Host "CLI tools installed via pnpm (update with: pnpm update -g)" -ForegroundColor Green
 } else {
-    Write-Host "npm not found, skipping CLI tools installation" -ForegroundColor Red
+    Write-Host "pnpm not found, skipping CLI tools installation" -ForegroundColor Red
 }
 
 Write-Host "Installing Cloudflared..." -ForegroundColor Yellow

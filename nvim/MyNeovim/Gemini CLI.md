@@ -46,7 +46,7 @@ Avec le `leader` par defaut de LazyVim, cela donne en general `Espace a g t`, `E
 
 - Verifier que `gemini` marche hors de NeoVim
 - Verifier que le `PATH` de NeoVim trouve bien le binaire
-- Si le terminal Gemini affiche `code 127`, installer le CLI avec `npm install -g @google/gemini-cli`, puis redemarrer NeoVim
+- Si le terminal Gemini affiche `code 127`, installer le CLI avec `pnpm add -g @google/gemini-cli`, puis redemarrer NeoVim
 - `No diagnostics found in the current buffer` signifie qu'aucun diagnostic LSP n'est present dans le buffer courant
 - `No valid file in current buffer` signifie que le buffer courant n'a pas de chemin de fichier reel
 - Relancer une session Gemini CLI hors NeoVim si l'authentification n'est pas initialisee

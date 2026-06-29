@@ -12,9 +12,15 @@ local function normalize_dir(path)
 end
 
 local function resolve_codex_acp_command()
-  local local_bin = vim.fn.expand("~/.npm-global/bin/codex-acp")
-  if vim.fn.executable(local_bin) == 1 then
-    return local_bin
+  local candidates = {
+    vim.fn.expand("~/.local/share/pnpm/codex-acp"),
+    vim.fn.expand("~/.npm-global/bin/codex-acp"),
+  }
+
+  for _, local_bin in ipairs(candidates) do
+    if vim.fn.executable(local_bin) == 1 then
+      return local_bin
+    end
   end
 
   return "codex-acp"

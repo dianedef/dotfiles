@@ -19,7 +19,7 @@ return {
           vim.notify(
             (
               "Gemini CLI introuvable: `%s` n'est pas dans le PATH de Neovim. "
-              .. "Installez `npm install -g @google/gemini-cli`, puis redemarrez Neovim."
+              .. "Installez `pnpm add -g @google/gemini-cli`, puis redemarrez Neovim."
             ):format(cmd),
             vim.log.levels.ERROR,
             { title = "Gemini CLI" }

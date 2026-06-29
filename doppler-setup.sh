@@ -110,7 +110,7 @@ if command -v opencode &> /dev/null; then
         echo "⏭️  Configuration OpenCode skippée (lancez 'opencode auth login' plus tard)"
     fi
 else
-    echo "⚠️  OpenCode CLI non installé, installation via: npm install -g opencode-ai"
+    echo "⚠️  OpenCode CLI non installé, installation via: pnpm add -g opencode-ai"
 fi
 
 echo ""

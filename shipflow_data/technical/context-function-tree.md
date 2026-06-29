@@ -140,6 +140,6 @@ next_step: /sf-docs audit shipflow_data/technical/context-function-tree.md
 ## Preuves liées
 
 - `install.sh` contient explicitement l'ordre: dépendances -> outils -> node -> shell tools -> shell integration -> MCP -> auth.
-- `setup_configs` enchaîne les symlinks `nvim`, `ranger`, `starship`, `tmux`, `ghostty`, `codex`, skills Claude.
-- `setup_mcp_config` lit `mcp/mcp-servers.json`, merge/écrit `~/.claude.json`, `~/.config/mcp/servers.json`, `~/.config/claude/claude_desktop_config.json`.
+- `setup_configs` enchaîne les symlinks `nvim`, `ranger`, `starship`, `tmux`, `ghostty`.
+- `setup_mcp_config` publie seulement le registre MCP partagé sous `~/.config/mcp/servers.json`; les fichiers runtime Claude/Codex sont gérés par ShipFlow.
 - `termux.sh` montre clairement la voie Android Markdown-only.

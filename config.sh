@@ -36,6 +36,7 @@ export DOTFILES_DIR="${DOTFILES_DIR:-$HOME/dotfiles}"
 export DOTFILES_BIN_DIR="${DOTFILES_BIN_DIR:-$HOME/.local/bin}"
 export DOTFILES_CONFIG_DIR="${DOTFILES_CONFIG_DIR:-$HOME/.config}"
 export DOTFILES_NPM_DIR="${DOTFILES_NPM_DIR:-$HOME/.npm-global}"
+export DOTFILES_PNPM_HOME="${DOTFILES_PNPM_HOME:-$HOME/.local/share/pnpm}"
 export DOTFILES_FONTS_DIR="${DOTFILES_FONTS_DIR:-$HOME/.local/share/fonts}"
 export DOTFILES_BACKUP_DIR="${DOTFILES_BACKUP_DIR:-$HOME/.dotfiles-backup}"
 export DOTFILES_FZF_DIR="${DOTFILES_FZF_DIR:-$HOME/.local/share/.fzf}"
@@ -101,7 +102,7 @@ export DOTFILES_DANGEROUS_CHARS_REGEX='[;&|$`]'
 # ============================================================================
 # AVAILABLE COMPONENTS (for --only flag)
 # ============================================================================
-export DOTFILES_ALL_COMPONENTS="neovim,fzf,gum,nerd-fonts,node,npm-tools,starship,zoxide,ranger,doppler,gh,lsd,bat,claude-code,claude-chill,copilot,opencode,gemini,crush,vercel,mcp,configs,shell-integration"
+export DOTFILES_ALL_COMPONENTS="neovim,fzf,gum,nerd-fonts,node,npm-tools,starship,zoxide,ranger,doppler,gh,lsd,bat,claude-chill,copilot,opencode,gemini,crush,vercel,mcp,configs,shell-integration"
 
 # ============================================================================
 # CHECKSUMS (SHA256 for critical downloads - updated periodically)

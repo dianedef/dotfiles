@@ -121,8 +121,9 @@ Contrainte: la même orchestration est réutilisable en mode non-interactif (CI)
 - `Starship`
   - installation via script officiel ou cargo fallback, initialisation shell dans `.bashrc`.
 - `Zoxide`, `Doppler`, `FZF`, `GH CLI`, `lsd`, `bat`.
-- Outils AI via `install_ai_tools` + `npm`:
-  - `@anthropic-ai/claude-code`, `@openai/codex`, `@apify/mcpc`, `tldr`, plus outils listés dans `DOTFILES_ALL_COMPONENTS`.
+- Outils Node globaux via `pnpm` quand disponible:
+  - `@apify/mcpc`, `@zed-industries/codex-acp`, `tldr`, `eslint`, plus outils listés dans `DOTFILES_ALL_COMPONENTS`.
+  - `claude`, `codex`, les skills ShipFlow, et les configs runtime `~/.claude` / `~/.codex` sont exclus de ce périmètre et appartiennent à ShipFlow.
 
 ### Modules spécifiques Termux
 
@@ -142,8 +143,6 @@ Contrainte: la même orchestration est réutilisable en mode non-interactif (CI)
   - `starship` -> `~/.config/starship.toml`
   - `tmux` -> `~/.tmux.conf`
   - `ghostty/config` -> `~/.config/ghostty/config`
-  - `codex/config.toml` -> `~/.codex/config.toml`
-  - `claude/skills/*` -> `~/.claude/skills/*`
   - `.config/mcp/servers.json` -> `mcp/mcp-servers.json`
   - liaisons de `TASKS.md` et `AUDIT_LOG.md` depuis `~/shipflow` quand disponible.
 

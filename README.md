@@ -90,7 +90,8 @@ source ~/.bashrc
 `dotfiles` is primarily a user-level installer. Its normal target is the current user's home directory:
 
 - `~/.local/bin` for user-local binaries
-- `~/.npm-global` for npm global tools without writing to `/usr/local`
+- `~/.local/share/pnpm` for pnpm global tools without writing to `/usr/local`
+- `~/.npm-global` as a legacy compatibility fallback when an older install already used npm globals
 - `~/.config` and `~/.bashrc` for editor, shell, and terminal configuration
 
 When sudo is available, the script may install generic system packages such as `git`, `curl`, `ripgrep`, `fd`, `bat`, `lsd`, `tmux`, or `mosh`. User configuration still remains scoped to the current `$HOME`.
@@ -199,7 +200,7 @@ Linux/Codespaces only. The Termux Markdown profile does not install Doppler or l
 
 ## ShipFlow Ownership
 
-Claude Code skills, Codex config, Claude settings, and ShipFlow AI aliases are owned by the ShipFlow installer. Dotfiles no longer writes `~/.claude` or `~/.codex` for that workflow.
+Claude Code skills, Codex config, Claude settings, and ShipFlow AI aliases are owned by the ShipFlow installer. Dotfiles no longer writes `~/.claude` or `~/.codex` for that workflow, aside from non-runtime repository samples kept under version control.
 
 ## Audit System (8 domains)
 

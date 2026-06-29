@@ -283,20 +283,23 @@ setup_user_local_mode() {
     fi
 
     echo "📦 USER-LOCAL MODE ENABLED"
-    echo "   Installing to ~/.local/bin and ~/.npm-global"
+    echo "   Installing to ~/.local/bin, ~/.local/share/pnpm and ~/.npm-global"
     echo ""
 
     run_action "Create ~/.local/bin" mkdir -p "$DOTFILES_BIN_DIR"
     run_action "Create ~/.npm-global" mkdir -p "$DOTFILES_NPM_DIR"
+    run_action "Create PNPM_HOME" mkdir -p "$DOTFILES_PNPM_HOME"
 
-    if is_installed npm && ! is_dry_run; then
-        npm config set prefix "$DOTFILES_NPM_DIR" 2>/dev/null
+    if ! is_dry_run && command -v corepack >/dev/null 2>&1; then
+        corepack prepare pnpm@latest --activate 2>/dev/null || true
     fi
 
-    export PATH="$DOTFILES_BIN_DIR:$DOTFILES_NPM_DIR/bin:$PATH"
+    export PNPM_HOME="$DOTFILES_PNPM_HOME"
+    export PATH="$DOTFILES_BIN_DIR:$PNPM_HOME:$DOTFILES_NPM_DIR/bin:$PATH"
 
     if ! is_dry_run; then
-        append_to_bashrc '.local/bin' 'export PATH="$HOME/.local/bin:$HOME/.npm-global/bin:$PATH"' "User-local binaries" || true
+        append_to_bashrc 'PNPM_HOME=' 'export PNPM_HOME="$HOME/.local/share/pnpm"' "PNPM home" || true
+        append_to_bashrc '.npm-global' 'export PATH="$HOME/.local/bin:$PNPM_HOME:$HOME/.npm-global/bin:$PATH"' "User-local binaries" || true
     fi
 
     success "User-local paths configured"
@@ -311,9 +314,9 @@ log_privilege_scope() {
         log INFO "Privilege scope: root run. Available: /opt, /usr/local/bin, apt/dpkg, sudo user provisioning, root-owned system services."
     elif [ "$USER_LOCAL_MODE" = "true" ]; then
         info "Privilege scope: non-root user-local run"
-        echo "   Installing user-local tools only: ~/.local/bin, ~/.npm-global, ~/.config"
+        echo "   Installing user-local tools only: ~/.local/bin, ~/.local/share/pnpm, ~/.npm-global, ~/.config"
         echo "   Not applied here: apt/dpkg, /opt, /usr/local/bin, system services, ShipFlow system install"
-        log WARN "Privilege scope: non-root user-local run. Installs target ~/.local/bin, ~/.npm-global, and user config only."
+        log WARN "Privilege scope: non-root user-local run. Installs target ~/.local/bin, ~/.local/share/pnpm, ~/.npm-global, and user config only."
         log WARN "Root-only extras unavailable in this mode: apt/dpkg packages, /opt installs, /usr/local/bin symlinks, system service setup, new sudo user creation, and ShipFlow system installer."
         log WARN "To add root-only extras later: run ShipFlow with sudo, or rerun dotfiles without USER_LOCAL_MODE when passwordless sudo is available."
     elif [ "$HAS_SUDO" = "true" ]; then
@@ -724,18 +727,23 @@ install_npm_tools() {
     fi
 
     if is_dry_run; then
-        echo -e "${BLUE}[DRY-RUN]${NC} Would install npm tools: $DOTFILES_NPM_PACKAGES"
+        echo -e "${BLUE}[DRY-RUN]${NC} Would install Node global tools via pnpm: $DOTFILES_NPM_PACKAGES"
         return 0
     fi
 
-    info "Configuring npm for user-local global installs..."
+    info "Configuring pnpm for user-local global installs..."
     mkdir -p "$DOTFILES_NPM_DIR"
-    npm config set prefix "$DOTFILES_NPM_DIR" 2>/dev/null
-    export PATH="$DOTFILES_NPM_DIR/bin:$PATH"
+    mkdir -p "$DOTFILES_PNPM_HOME"
+    export PNPM_HOME="$DOTFILES_PNPM_HOME"
+    export PATH="$PNPM_HOME:$DOTFILES_NPM_DIR/bin:$PATH"
+    if ! ensure_pnpm_global_env; then
+        warn "pnpm not found, skipping Node global tools"
+        return 0
+    fi
 
-    info "Installing CLI tools via npm..."
+    info "Installing CLI tools via pnpm..."
     for pkg in $DOTFILES_NPM_PACKAGES; do
-        npm install -g "$pkg" 2>/dev/null && success "$pkg installed" || warn "$pkg failed"
+        pnpm add -g "$pkg" 2>/dev/null && success "$pkg installed" || warn "$pkg failed"
     done
 
     hash -r 2>/dev/null
@@ -1301,7 +1309,8 @@ install_node
 # Refresh PATH so npm/node are available for subsequent steps
 export NVM_DIR="${NVM_DIR:-$HOME/.nvm}"
 [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh" 2>/dev/null || true
-export PATH="$HOME/.npm-global/bin:${DOTFILES_NPM_DIR:-$HOME/.npm-global}/bin:$PATH"
+export PNPM_HOME="${DOTFILES_PNPM_HOME:-$HOME/.local/share/pnpm}"
+export PATH="$PNPM_HOME:$HOME/.npm-global/bin:${DOTFILES_NPM_DIR:-$HOME/.npm-global}/bin:$PATH"
 hash -r 2>/dev/null || true
 
 install_npm_tools
@@ -1326,7 +1335,8 @@ install_ai_tools() {
 install_ai_tools
 
 # Ensure claude CLI is in PATH for MCP setup
-export PATH="$HOME/.local/bin:$HOME/.npm-global/bin:${DOTFILES_NPM_DIR:-$HOME/.npm-global}/bin:$PATH"
+export PNPM_HOME="${DOTFILES_PNPM_HOME:-$HOME/.local/share/pnpm}"
+export PATH="$HOME/.local/bin:$PNPM_HOME:$HOME/.npm-global/bin:${DOTFILES_NPM_DIR:-$HOME/.npm-global}/bin:$PATH"
 hash -r 2>/dev/null || true
 
 # --- Phase 6: Configuration ---
@@ -1435,7 +1445,8 @@ setup_non_root_user() {
         cat >> "$user_home/.bashrc" << 'USERPATH'
 
 # Tool paths
-export PATH="$HOME/.local/bin:$HOME/.npm-global/bin:$HOME/.cargo/bin:$PATH"
+export PNPM_HOME="$HOME/.local/share/pnpm"
+export PATH="$HOME/.local/bin:$PNPM_HOME:$HOME/.npm-global/bin:$HOME/.cargo/bin:$PATH"
 export NVM_DIR="$HOME/.nvm"
 [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
 USERPATH
