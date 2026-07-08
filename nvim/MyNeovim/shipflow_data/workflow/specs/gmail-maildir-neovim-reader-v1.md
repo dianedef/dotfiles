@@ -1,7 +1,7 @@
 ---
 artifact: spec
 metadata_schema_version: "1.0"
-artifact_version: "0.1.0"
+artifact_version: "1.0.0"
 project: "MyNeovim"
 created: "2026-05-17"
 created_at: "2026-05-17 14:35:01 UTC"
@@ -14,6 +14,7 @@ scope: "read-only Gmail-to-Maildir-to-Neovim competitor email reader"
 owner: "dianedef"
 user_story: "En tant qu'utilisatrice de Neovim qui surveille des emails concurrents recus sur plusieurs comptes Gmail personnels, je veux lister, rechercher, ouvrir et copier le contenu texte des emails depuis Neovim, afin de les envoyer manuellement a mes agents IA pour analyse."
 risk_level: "medium"
+confidence: "medium"
 security_impact: "yes"
 docs_impact: "yes"
 linked_systems:
@@ -41,7 +42,7 @@ supersedes: []
 evidence:
   - "User wants read-only access to competitor emails from Gmail personal accounts for AI analysis."
   - "User prefers Gmail -> local Maildir option and does not need to write emails."
-  - "lua/shipflow/init.lua already hosts local Neovim commands and mappings."
+  - "lua/shipglowz/init.lua already hosts local Neovim commands and mappings."
   - "User asked whether the plugin can live in one dedicated folder instead of scattering code across the current config."
   - "lua/plugins/claudecode.lua and lua/plugins/gemini-cli.lua already expose AI agent surfaces inside Neovim."
   - "AI Plugins.md documents current AI plugin choices."
@@ -96,7 +97,7 @@ Build a read-only local pipeline: Gmail personal account syncs to Maildir with `
 - Local Maildir storage under a configurable root such as `~/Mail/competitors/<account>/`.
 - `mbsync/isync` configuration guidance for read-focused Gmail sync.
 - `notmuch` setup and indexing for the local Maildir.
-- A centralized local plugin module under `lua/shipflow/mail/`.
+  - A centralized local plugin module under `lua/shipglowz/mail/`.
 - A local CLI, tentatively `mail-intel`, with read-only commands:
   - `accounts`
   - `folders`
@@ -104,7 +105,7 @@ Build a read-only local pipeline: Gmail personal account syncs to Maildir with `
   - `search`
   - `show`
   - `export --markdown`
-- A minimal Neovim setup hook from `lua/shipflow/init.lua` into the centralized mail module, exposing commands:
+  - A minimal Neovim setup hook from `lua/shipglowz/init.lua` into the centralized mail module, exposing commands:
   - `:CompetitorMailInbox`
   - `:CompetitorMailSearch`
   - `:CompetitorMailOpen`
@@ -128,10 +129,10 @@ Build a read-only local pipeline: Gmail personal account syncs to Maildir with `
 
 - Keep v1 read-only from the Neovim and CLI perspective.
 - Do not store Gmail passwords, app passwords, OAuth tokens, or cookies in the repository.
-- Do not persist email contents in ShipFlow specs, docs, logs, or examples.
+- Do not persist email contents in ShipGlowz specs, docs, logs, or examples.
 - Prefer local files and CLI calls over embedding Gmail auth in Neovim.
 - Preserve existing LazyVim conventions and local module style.
-- Keep the feature implementation centralized under `lua/shipflow/mail/`; the only allowed touchpoint in existing Neovim config is a small setup call/command registration from `lua/shipflow/init.lua`.
+- Keep the feature implementation centralized under `lua/shipglowz/mail/`; the only allowed touchpoint in existing Neovim config is a small setup call/command registration from `lua/shipglowz/init.lua`.
 - Do not break existing AI plugin mappings documented in `AI Plugins.md`.
 - Gmail auth must follow current Google guidance: modern Sign in with Google/OAuth is preferred; app passwords are only an optional fallback when available.
 
@@ -140,7 +141,7 @@ Build a read-only local pipeline: Gmail personal account syncs to Maildir with `
 - `mbsync/isync` for IMAP-to-Maildir synchronization.
 - `notmuch` for local mail indexing and search.
 - Neovim/LazyVim local config.
-- Existing `lua/shipflow/init.lua` command registration pattern.
+- Existing `lua/shipglowz/init.lua` command registration pattern.
 - Official Google Gmail Help, accessed 2026-05-17:
   - `https://support.google.com/mail/answer/7126229`
   - Relevant rule: personal Gmail IMAP access is always on from January 2025, and Gmail recommends Sign in with Google instead of sharing Google username/password with third-party clients.
@@ -162,8 +163,8 @@ Build a read-only local pipeline: Gmail personal account syncs to Maildir with `
 - `lua/plugins/claudecode.lua`: possible manual destination for copied email context.
 - `lua/plugins/gemini-cli.lua`: possible manual destination for copied email context.
 - `AI Plugins.md`: should document the new email-to-AI workflow after implementation.
-- `lua/shipflow/init.lua`: must remain a thin setup/delegation point, not the main implementation.
-- `lua/shipflow/mail/`: dedicated implementation directory for config, CLI calls, rendering, and command handlers.
+- `lua/shipglowz/init.lua`: must remain a thin setup/delegation point, not the main implementation.
+- `lua/shipglowz/mail/`: dedicated implementation directory for config, CLI calls, rendering, and command handlers.
 - Local mail storage can contain sensitive business and personal data; backup, logging, and repo hygiene matter.
 - Gmail account security choices affect setup friction and must be documented explicitly.
 
@@ -193,11 +194,11 @@ Build a read-only local pipeline: Gmail personal account syncs to Maildir with `
 ## Implementation Tasks
 
 - [x] Task 1: Add centralized mail module configuration contract
-  - File: `lua/shipflow/mail/config.lua`
+  - File: `lua/shipglowz/mail/config.lua`
   - Action: Define account names, Maildir root, default account, default folders, result limit, and CLI command names without secrets.
   - User story link: Establishes where competitor emails are read from.
   - Depends on: none
-  - Validate with: `nvim --headless "+lua require('shipflow.mail.config')" +qa`
+  - Validate with: `nvim --headless "+lua require('shipglowz.mail.config')" +qa`
   - Notes: Keep account addresses optional or allow aliases to avoid exposing private details in repo.
 
 - [x] Task 2: Add read-only CLI wrapper
@@ -217,27 +218,27 @@ Build a read-only local pipeline: Gmail personal account syncs to Maildir with `
   - Notes: Do not fetch remote images or links; list links that already appear in the message body.
 
 - [x] Task 4: Add Neovim mail module
-  - File: `lua/shipflow/mail/init.lua`
+  - File: `lua/shipglowz/mail/init.lua`
   - Action: Call the CLI with `vim.system`, handle errors, render scratch buffers, and expose Lua functions for inbox/search/open/copy.
   - User story link: Makes the workflow usable from Neovim.
   - Depends on: Tasks 1-3
-  - Validate with: `nvim --headless "+lua require('shipflow.mail')" +qa`
+  - Validate with: `nvim --headless "+lua require('shipglowz.mail')" +qa`
   - Notes: Commands should fail gracefully if `scripts/mail-intel` or `notmuch` is missing.
 
 - [x] Task 4.1: Split mail implementation into small files only if needed
-  - File: `lua/shipflow/mail/*.lua`
-  - Action: Keep parsing of CLI results, buffer rendering, picker/list handling, and copy behavior in the `lua/shipflow/mail/` directory if the implementation grows.
+  - File: `lua/shipglowz/mail/*.lua`
+  - Action: Keep parsing of CLI results, buffer rendering, picker/list handling, and copy behavior in the `lua/shipglowz/mail/` directory if the implementation grows.
   - User story link: Keeps the plugin maintainable without scattering behavior across the dotfiles config.
   - Depends on: Task 4
-  - Validate with: `rg -n "CompetitorMail|mail%-intel|notmuch" lua/config lua/plugins lua/shipflow`
+  - Validate with: `rg -n "CompetitorMail|mail%-intel|notmuch" lua/config lua/plugins lua/shipglowz`
   - Notes: Existing `lua/config/*` and `lua/plugins/*` should not receive feature logic for this v1.
 
 - [x] Task 5: Register Neovim commands and mappings
-  - File: `lua/shipflow/init.lua`
-  - Action: Delegate to `require("shipflow.mail").setup()` for `CompetitorMailInbox`, `CompetitorMailSearch`, `CompetitorMailOpen`, and `CompetitorMailCopyMarkdown`; add optional leader mappings only if they can stay inside the mail module setup.
+  - File: `lua/shipglowz/init.lua`
+  - Action: Delegate to `require("shipglowz.mail").setup()` for `CompetitorMailInbox`, `CompetitorMailSearch`, `CompetitorMailOpen`, and `CompetitorMailCopyMarkdown`; add optional leader mappings only if they can stay inside the mail module setup.
   - User story link: Gives the user direct commands for reading and copying selected emails.
   - Depends on: Task 4
-  - Validate with: `nvim --headless "+lua require('shipflow').setup()" +qa`
+  - Validate with: `nvim --headless "+lua require('shipglowz').setup()" +qa`
   - Notes: Avoid colliding with existing mappings in `lua/config/keymaps.lua`; do not add feature code to `lua/config/keymaps.lua`.
 
 - [x] Task 6: Document setup and v1 boundary
@@ -263,9 +264,9 @@ Build a read-only local pipeline: Gmail personal account syncs to Maildir with `
 ## Test Strategy
 
 - Static Lua load checks:
-  - `nvim --headless "+lua require('shipflow.mail.config')" +qa`
-  - `nvim --headless "+lua require('shipflow.mail')" +qa`
-  - `nvim --headless "+lua require('shipflow').setup()" +qa`
+  - `nvim --headless "+lua require('shipglowz.mail.config')" +qa`
+  - `nvim --headless "+lua require('shipglowz.mail')" +qa`
+  - `nvim --headless "+lua require('shipglowz').setup()" +qa`
 - CLI smoke checks:
   - `scripts/mail-intel --help`
   - `scripts/mail-intel accounts`
@@ -310,7 +311,7 @@ Build a read-only local pipeline: Gmail personal account syncs to Maildir with `
 | Date UTC | Skill | Model | Action | Result | Next step |
 |----------|-------|-------|--------|--------|-----------|
 | 2026-05-17 14:35:01 UTC | sf-spec | GPT-5 Codex | Created first v1 spec for read-only Gmail/Maildir/Neovim email reader | Draft spec written with security and freshness gates | /sf-ready gmail maildir neovim reader v1 |
-| 2026-05-17 14:38:34 UTC | sf-spec | GPT-5 Codex | Clarified implementation layout after user asked whether code must be scattered through the config | Spec now requires a centralized `lua/shipflow/mail/` module with only a thin setup hook in `lua/shipflow/init.lua` | /sf-ready gmail maildir neovim reader v1 |
+| 2026-05-17 14:38:34 UTC | sf-spec | GPT-5 Codex | Clarified implementation layout after user asked whether code must be scattered through the config | Spec now requires a centralized `lua/shipglowz/mail/` module with only a thin setup hook in `lua/shipglowz/init.lua` | /sf-ready gmail maildir neovim reader v1 |
 | 2026-05-17 14:41:23 UTC | sf-verify | GPT-5 Codex | Verified draft spec coherence and ship-readiness before implementation | not verified: spec contract is coherent, but implementation and runtime proof do not exist yet | /sf-ready gmail maildir neovim reader v1 |
 | 2026-05-17 14:49:46 UTC | sf-ready | GPT-5 Codex | Checked readiness inside sf-build run | ready: structure, scope, security boundary, docs freshness, and implementation tasks were actionable | /sf-start gmail maildir neovim reader v1 |
 | 2026-05-17 14:49:46 UTC | sf-start | GPT-5 Codex | Implemented read-only CLI, centralized Neovim module, setup hook, and documentation | implemented: local module and CLI smoke checks pass; full notmuch-backed runtime proof pending dependency setup | /sf-verify gmail maildir neovim reader v1 |

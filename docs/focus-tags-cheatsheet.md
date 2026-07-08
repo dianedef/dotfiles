@@ -18,6 +18,7 @@ Cheatsheet publique pour qualifier rapidement le type d'attention qu'une tache d
 | `#strategy` | Arbitrer priorites, scope, positionnement ou plan d'action. | La decision, les compromis et la prochaine action sont nets. |
 
 ## Tags secondaires
+  
 
 | Tag | Sens |
 |---|---|

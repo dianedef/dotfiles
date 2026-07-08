@@ -1,4 +1,4 @@
--- ShipFlow Plugin for NeoVim
+-- ShipGlowz Plugin for NeoVim
 -- This plugin allows navigation between Markdown headers using customizable shortcuts.
 
 local M = {}
@@ -46,7 +46,6 @@ local function set_panel_preset(preset)
   require("config.panel-resize").preset(preset)
 end
 
--- Mappings for navigating between headers
 M.setup = function()
   local heading_modes = { "x" }
   local function setup_heading_keymaps(buf)
@@ -78,32 +77,32 @@ M.setup = function()
     end,
   })
 
-  vim.api.nvim_create_user_command("ShipFlowPanel1", function()
+  vim.api.nvim_create_user_command("ShipGlowzPanel1", function()
     set_panel_preset(1)
   end, { desc = "Set current panel size 1", force = true })
 
-  vim.api.nvim_create_user_command("ShipFlowPanel2", function()
+  vim.api.nvim_create_user_command("ShipGlowzPanel2", function()
     set_panel_preset(2)
   end, { desc = "Set current panel size 2", force = true })
 
-  vim.api.nvim_create_user_command("ShipFlowPanel3", function()
+  vim.api.nvim_create_user_command("ShipGlowzPanel3", function()
     set_panel_preset(3)
   end, { desc = "Set current panel size 3", force = true })
 
-  vim.api.nvim_create_user_command("ShipFlowPanelFull", function()
+  vim.api.nvim_create_user_command("ShipGlowzPanelFull", function()
     set_panel_preset("full")
   end, { desc = "Set current panel full size", force = true })
 
-  vim.keymap.set("n", "<leader>w1", "<cmd>ShipFlowPanel1<cr>", { desc = "panel size 1" })
-  vim.keymap.set("n", "<leader>w2", "<cmd>ShipFlowPanel2<cr>", { desc = "panel size 2" })
-  vim.keymap.set("n", "<leader>w3", "<cmd>ShipFlowPanel3<cr>", { desc = "panel size 3" })
-  vim.keymap.set("n", "<leader>wF", "<cmd>ShipFlowPanelFull<cr>", { desc = "panel full size" })
-  vim.keymap.set("t", "<leader>w1", "<C-\\><C-n><cmd>ShipFlowPanel1<cr>", { desc = "panel size 1" })
-  vim.keymap.set("t", "<leader>w2", "<C-\\><C-n><cmd>ShipFlowPanel2<cr>", { desc = "panel size 2" })
-  vim.keymap.set("t", "<leader>w3", "<C-\\><C-n><cmd>ShipFlowPanel3<cr>", { desc = "panel size 3" })
-  vim.keymap.set("t", "<leader>wF", "<C-\\><C-n><cmd>ShipFlowPanelFull<cr>", { desc = "panel full size" })
+  vim.keymap.set("n", "<leader>w1", "<cmd>ShipGlowzPanel1<cr>", { desc = "panel size 1" })
+  vim.keymap.set("n", "<leader>w2", "<cmd>ShipGlowzPanel2<cr>", { desc = "panel size 2" })
+  vim.keymap.set("n", "<leader>w3", "<cmd>ShipGlowzPanel3<cr>", { desc = "panel size 3" })
+  vim.keymap.set("n", "<leader>wF", "<cmd>ShipGlowzPanelFull<cr>", { desc = "panel full size" })
+  vim.keymap.set("t", "<leader>w1", "<C-\\><C-n><cmd>ShipGlowzPanel1<cr>", { desc = "panel size 1" })
+  vim.keymap.set("t", "<leader>w2", "<C-\\><C-n><cmd>ShipGlowzPanel2<cr>", { desc = "panel size 2" })
+  vim.keymap.set("t", "<leader>w3", "<C-\\><C-n><cmd>ShipGlowzPanel3<cr>", { desc = "panel size 3" })
+  vim.keymap.set("t", "<leader>wF", "<C-\\><C-n><cmd>ShipGlowzPanelFull<cr>", { desc = "panel full size" })
 
-  require("shipflow.mail").setup()
+  require("shipglowz.mail").setup()
 end
 
 return M

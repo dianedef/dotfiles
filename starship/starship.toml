@@ -109,8 +109,8 @@ ahead = "📤${count} "
 behind = "📬${count} "
 diverged = "⇕ "
 up_to_date = "✅ "
-# Hidden because Starship miscounts generated Flutter artifacts in this repo.
-untracked = ""
+# Show untracked files in the prompt.
+untracked = "⚠️${count} "
 stashed = "⏳${count} "
 modified = "📝${count} "
 staged = "🚀${count} "

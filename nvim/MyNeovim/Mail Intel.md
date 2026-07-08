@@ -10,7 +10,7 @@ Gmail personnel
   -> ~/Mail/competitors/<account>/
   -> notmuch
   -> scripts/mail-intel
-  -> lua/shipflow/mail/
+  -> lua/shipglowz/mail/
   -> Neovim
 ```
 

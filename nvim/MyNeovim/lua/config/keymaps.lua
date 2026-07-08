@@ -112,7 +112,7 @@ end
 
 vim.keymap.set("n", "<leader>H", choose_cheat_sheet, { desc = "Cheat Sheet" })
 
-require("shipflow").setup()
+require("shipglowz").setup()
 
 pcall(vim.keymap.del, "n", "<leader>L")
 

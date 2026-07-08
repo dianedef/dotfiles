@@ -151,7 +151,7 @@ local function markdown_set_h1_fold_policy()
   end, { buffer = true, desc = "Fold below H5 (keep H1/H2/H3/H4/H5 visible)" })
 
   vim.keymap.set(heading_fold_modes, "zh", function()
-    require("shipflow").search_headings({ 1, 2, 3, 4, 5, 6 })
+    require("shipglowz").search_headings({ 1, 2, 3, 4, 5, 6 })
   end, { buffer = true, desc = "Next heading (any level)" })
 
   vim.keymap.set(heading_fold_modes, "za", function()
