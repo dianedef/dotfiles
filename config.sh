@@ -41,6 +41,8 @@ export DOTFILES_FONTS_DIR="${DOTFILES_FONTS_DIR:-$HOME/.local/share/fonts}"
 export DOTFILES_BACKUP_DIR="${DOTFILES_BACKUP_DIR:-$HOME/.dotfiles-backup}"
 export DOTFILES_FZF_DIR="${DOTFILES_FZF_DIR:-$HOME/.local/share/.fzf}"
 export DOTFILES_GO_DIR="${DOTFILES_GO_DIR:-$HOME/.local/share/.go}"
+export SHIPGLOWZ_PRIVATE_DIR="${SHIPGLOWZ_PRIVATE_DIR:-$HOME/.shipglowz/private}"
+export SHIPGLOWZ_PRIVATE_DATA_DIR="${SHIPGLOWZ_PRIVATE_DATA_DIR:-$SHIPGLOWZ_PRIVATE_DIR/data}"
 export GOPATH="${GOPATH:-$DOTFILES_GO_DIR}"
 export GOMODCACHE="${GOMODCACHE:-$DOTFILES_GO_DIR/pkg/mod}"
 export GOCACHE="${GOCACHE:-$HOME/.cache/go-build}"
@@ -69,6 +71,7 @@ export DOTFILES_REPO_NEOVIM="neovim/neovim"
 export DOTFILES_REPO_DOPPLER="DopplerHQ/cli"
 export DOTFILES_REPO_FZF="junegunn/fzf"
 export DOTFILES_REPO_LAZYVIM="LazyVim/starter"
+export SHIPGLOWZ_PRIVATE_DATA_REPO="${SHIPGLOWZ_PRIVATE_DATA_REPO:-${GITHUB_USERNAME:-dianedef}/shipglowz-private-data.git}"
 
 # ============================================================================
 # FEATURE FLAGS

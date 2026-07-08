@@ -6,7 +6,4 @@ debug
 foo.*
 *.log
 data
-!/.shipglowz/
-!/.shipglowz/private/
-!/.shipglowz/private/data/
-!/.shipglowz/private/data/.gitkeep
+/.shipglowz/private/data/

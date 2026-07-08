@@ -1155,6 +1155,34 @@ setup_configs() {
             fi
         fi
     fi
+
+    if [ "${SKIP_SHIPGLOWZ_PRIVATE_DATA:-false}" != "true" ]; then
+        local private_dir="${SHIPGLOWZ_PRIVATE_DIR:-$HOME/.shipglowz/private}"
+        local private_data_dir="${SHIPGLOWZ_PRIVATE_DATA_DIR:-$private_dir/data}"
+        local private_data_repo="${SHIPGLOWZ_PRIVATE_DATA_REPO:-${GITHUB_USERNAME:-dianedef}/shipglowz-private-data.git}"
+        local private_data_https="https://github.com/${private_data_repo}"
+        local private_data_ssh="git@github.com:${private_data_repo}"
+
+        mkdir -p "$private_dir"
+
+        if [ ! -d "$private_data_dir/.git" ]; then
+            if [ -e "$private_data_dir" ] && [ ! -d "$private_data_dir/.git" ]; then
+                warn "Private data path exists but is not a git repo: $private_data_dir"
+            else
+                info "Cloning ShipGlowz private data repo..."
+                git clone "$private_data_ssh" "$private_data_dir" 2>/dev/null || \
+                    git clone "$private_data_https" "$private_data_dir" 2>/dev/null || \
+                    warn "Could not clone ShipGlowz private data repo"
+            fi
+        else
+            info "Updating ShipGlowz private data repo..."
+            git -C "$private_data_dir" pull --ff-only 2>/dev/null || warn "Could not update ShipGlowz private data repo"
+        fi
+
+        if [ -d "$private_data_dir/.git" ]; then
+            success "ShipGlowz private data ready at $private_data_dir"
+        fi
+    fi
 }
 
 # ============================================================================

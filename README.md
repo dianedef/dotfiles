@@ -100,6 +100,8 @@ When launched without sudo or with `USER_LOCAL_MODE=true`, root-only extras are 
 
 ShipFlow is separate: its system installer must be run as `curl -fsSL https://winflowz.com/shipflow-script | sudo sh` or `sudo ~/shipflow/install.sh`. dotfiles links or clones ShipFlow, but does not silently elevate into the ShipFlow system installer from a non-root run.
 
+dotfiles also prepares the private ShipGlowz data repo under `~/.shipglowz/private/data/`. This repository is intended for versioned private operational data such as local email-management registries, and remains separate from the public `dotfiles` repo.
+
 ### Component-aware shell integration
 
 `dotfiles` applies shell aliases and config symlinks only for components that are actually installed when the run finishes.
