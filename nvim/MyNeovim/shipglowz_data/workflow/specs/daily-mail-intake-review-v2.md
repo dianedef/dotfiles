@@ -26,20 +26,24 @@ linked_systems:
   - "Avante"
   - "ShipGlowz source-intake classification"
   - "ShipGlowz private memory store"
+  - "Gmail filter management for Mail Intel"
 depends_on:
-  - artifact: "shipflow_data/workflow/specs/gmail-maildir-neovim-reader-v1.md"
+  - artifact: "shipglowz_data/workflow/specs/gmail-maildir-neovim-reader-v1.md"
     artifact_version: "0.1.0"
     required_status: "ready"
+  - artifact: "shipglowz_data/workflow/specs/gmail-filter-management-for-mail-intel.md"
+    artifact_version: "0.1.0"
+    required_status: "draft"
   - artifact: "Mail Intel.md"
     artifact_version: "unknown"
     required_status: "active"
-  - artifact: "/home/claude/shipflow/skills/references/source-intake-classification.md"
+  - artifact: "/home/claude/shipglowz/skills/references/source-intake-classification.md"
     artifact_version: "1.0.0"
     required_status: "active"
-  - artifact: "/home/claude/shipflow/skills/references/private-memory-store.md"
+  - artifact: "/home/claude/shipglowz/skills/references/private-memory-store.md"
     artifact_version: "1.0.0"
     required_status: "active"
-  - artifact: "/home/claude/shipflow/shipflow_data/business/portfolio-project-pitch-links.md"
+  - artifact: "/home/claude/shipglowz/shipglowz_data/business/portfolio-project-pitch-links.md"
     artifact_version: "0.1.0"
     required_status: "draft"
 supersedes: []
@@ -98,7 +102,7 @@ Add a `v2` intake layer around the existing Mail Intel pipeline. A local daily c
 
 ## Queue Storage Contract
 
-- The private queue root is `~/.shipglowz/private/mail-intake/` by default.
+- The private queue root is `~/.shipglowz/private/mail-intake/` by default and stays separate from durable versioned data under `~/.shipglowz/private/data/`.
 - Storage is `one file per queue item`, using a human-editable text format with YAML frontmatter and Markdown body.
 - The queue is ephemeral operational state, not a durable email archive.
 - Pending items live in `~/.shipglowz/private/mail-intake/inbox/`.
@@ -108,6 +112,7 @@ Add a `v2` intake layer around the existing Mail Intel pipeline. A local daily c
 - Once an item is accepted and routed, the queue file is no longer the canonical business artifact; the canonical artifact becomes the downstream output or a minimal private note if one is explicitly created.
 - Automatic cleanup may purge `done/` items after a short retention window such as `7` or `14` days.
 - The storage contract must optimize for direct operator review and manual correction inside Neovim before optimizing for analytics or long-term history.
+- Durable, versioned email-management memory such as declarative Gmail filter rules belongs under `~/.shipglowz/private/data/`, not in the ephemeral review queue.
 
 ## Scope In
 
@@ -174,9 +179,9 @@ Add a `v2` intake layer around the existing Mail Intel pipeline. A local daily c
   - `notmuch`
 - Existing Neovim runtime with `vim.system`, `vim.ui.select`, and current AI plugin surfaces.
 - ShipGlowz governance inputs:
-  - `/home/claude/shipflow/skills/references/source-intake-classification.md`
-  - `/home/claude/shipflow/skills/references/private-memory-store.md`
-  - `/home/claude/shipflow/shipflow_data/business/portfolio-project-pitch-links.md`
+  - `/home/claude/shipglowz/skills/references/source-intake-classification.md`
+  - `/home/claude/shipglowz/skills/references/private-memory-store.md`
+  - `/home/claude/shipglowz/shipglowz_data/business/portfolio-project-pitch-links.md`
 - Fresh docs verdict: `fresh-docs not needed` for this spec pass because the design builds on local Maildir/notmuch behavior already present in the environment and does not introduce a new external provider contract.
 
 ## Invariants
@@ -191,10 +196,11 @@ Add a `v2` intake layer around the existing Mail Intel pipeline. A local daily c
 ## Links & Consequences
 
 - `scripts/mail-intel` is the current logical entrypoint and may need a subcommand expansion or a sibling script if the responsibilities become too broad.
+- Upstream Gmail filter administration now has its own sibling spec and should remain a separate operator-invoked surface, even if it lives in the same Mail Intel ecosystem.
 - `lua/shipglowz/mail/init.lua` already owns Mail Intel commands and is the right review surface owner for queue actions.
 - `lua/shipglowz/mail/config.lua` should grow only with queue root, default review filters, and bounded execution settings, not secrets.
 - `Mail Intel.md` and `Cheat Sheet.md` must be updated so the review queue becomes the default daily workflow, not a hidden extra.
-- The private queue will operationally depend on `~/.shipglowz/private/`, so local setup and backups matter.
+- The private queue will operationally depend on `~/.shipglowz/private/`, while durable versioned email-management data may live under `~/.shipglowz/private/data/`, so local setup and backups matter.
 - Wrong classification can create operator drag, so confidence and review state are first-class fields, not optional metadata.
 
 ## Documentation Coherence
@@ -222,7 +228,7 @@ Add a `v2` intake layer around the existing Mail Intel pipeline. A local daily c
 ## Implementation Tasks
 
 - [x] Task 1: Define the queue record contract
-  - File: `shipflow_data/workflow/specs/daily-mail-intake-review-v2.md`
+  - File: `shipglowz_data/workflow/specs/daily-mail-intake-review-v2.md`
   - Action: Freeze the fields, statuses, dedupe key, and allowed persisted content for mail-intake queue records.
   - User story link: Gives the operator a stable object to review instead of free-form AI output.
   - Depends on: none
@@ -300,9 +306,9 @@ Add a `v2` intake layer around the existing Mail Intel pipeline. A local daily c
 ## Test Strategy
 
 - Static/load checks:
-  - `nvim --headless "+lua require('shipflow.mail.config')" +qa`
-  - `nvim --headless "+lua require('shipflow.mail')" +qa`
-  - `nvim --headless "+lua require('shipflow').setup()" +qa`
+  - `nvim --headless "+lua require('shipglowz.mail.config')" +qa`
+  - `nvim --headless "+lua require('shipglowz.mail')" +qa`
+  - `nvim --headless "+lua require('shipglowz').setup()" +qa`
 - CLI smoke checks:
   - `scripts/mail-intel --help` or new intake CLI help
   - dry-run intake command
@@ -333,6 +339,7 @@ Add a `v2` intake layer around the existing Mail Intel pipeline. A local daily c
 ## Execution Notes
 
 - Keep the current Mail Intel read-only contract intact and layer queue operations on top of it.
+- Treat Gmail filter creation as optional upstream inbox shaping owned by the sibling Gmail admin spec, not by the local review queue runtime itself.
 - Prefer a sibling `mail-intake` CLI if `scripts/mail-intel` becomes semantically overloaded.
 - Start with one account and one or two folders before generalizing the classifier.
 - Keep queue files machine-readable and easy to diff locally.
@@ -352,6 +359,8 @@ The spec is still blocked on two implementation-shaping decisions:
 | 2026-07-01 08:01:48 UTC | sf-spec | GPT-5 Codex | Created a v2 spec for daily mail intake classification and Neovim review queue on top of Mail Intel v1 | Draft spec written with private storage, review-state, idempotency, and downstream routing constraints | /101-sf-ready daily mail intake review v2 |
 | 2026-07-01 22:13:06 UTC | 101-sf-ready | GPT-5 Codex | Reviewed readiness for daily mail intake review v2 | not ready: queue storage contract, classifier mode, and Neovim review surface remain materially undecided | /100-sf-spec daily mail intake review v2 |
 | 2026-07-08 00:00:00 UTC | 100-sf-spec | GPT-5 Codex | Resolved the queue storage blocker by fixing ephemeral one-file-per-item queue storage under the private root | Storage shape, lifecycle, retention, and canonical-output boundary are now explicit; classifier mode and review-surface blockers remain | /100-sf-spec daily mail intake review v2 |
+| 2026-07-08 00:00:00 UTC | 703-sg-review | GPT-5 Codex | Migrated spec references from shipflow to shipglowz namespace | Spec paths and headless test commands now match the current repo naming; implementation gaps remain | /100-sf-spec daily mail intake review v2 |
+| 2026-07-08 00:00:00 UTC | 100-sf-spec | GPT-5 Codex | Linked the daily intake spec to a new sibling Gmail filter-management spec | Upstream Gmail routing is now modeled as part of the broader email-management system without weakening the local review queue boundary | /101-sf-ready gmail filter management for mail intel |
 
 ## Current Chantier Flow
 
