@@ -536,7 +536,7 @@ Ceux que tu devrais connaître d'abord :
 - `Copilot` : autocomplétion rapide
 - `Copilot Chat` : explication / review / fix rapide d'un buffer
 - `vim-pencil` : confort d'écriture en Markdown et texte
-- `ShipFlow` : navigation dans les titres Markdown (ce que tu appelles parfois *Wispr Flow*)
+- `ShipGlowz` : navigation dans les titres Markdown (ce que tu appelles parfois *Wispr Flow*)
 
 Ceux qui valent le coup plus tard pour la rédaction :
 
