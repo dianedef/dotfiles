@@ -2,10 +2,14 @@
 
 Mail Intel est une passerelle locale en lecture seule pour lire des emails Gmail synchronisés en Maildir, les ouvrir dans Neovim, puis copier leur contenu en Markdown pour un agent IA.
 
+L'administration amont des labels et filtres Gmail vit maintenant a cote, via `scripts/mail-admin`, avec un registre local versionne sous `~/.shipglowz/private/data/mail-admin/`.
+
 ## Architecture
 
 ```text
 Gmail personnel
+  -> scripts/mail-admin
+  -> labels/filtres Gmail
   -> mbsync/isync
   -> ~/Mail/competitors/<account>/
   -> notmuch
@@ -14,7 +18,9 @@ Gmail personnel
   -> Neovim
 ```
 
-La v1 ne sait pas envoyer, supprimer, archiver, déplacer, taguer ou marquer des emails. Elle lit uniquement un Maildir local déjà synchronisé.
+`scripts/mail-intel` ne sait pas envoyer, supprimer, archiver, deplacer, taguer ou marquer des emails. Il lit uniquement un Maildir local deja synchronise.
+
+`scripts/mail-admin` est le seul chemin de mutation Gmail de ce systeme. Il gere les labels et filtres Gmail via l'API officielle, avec un `dry-run` possible avant application.
 
 ## Prérequis
 
@@ -64,6 +70,53 @@ scripts/mail-intel export <message-or-thread-id> --markdown
 ```
 
 `list`, `search`, `show` et `export` utilisent `notmuch`. Si `notmuch` n'est pas installé ou si le Maildir n'est pas encore indexé, la commande renvoie une erreur explicite.
+
+## Gmail Admin
+
+Le registre declaratif non secret vit sous :
+
+```text
+~/.shipglowz/private/data/mail-admin/
+  registry.json
+  registry.example.json
+```
+
+Les secrets OAuth restent hors Git, par exemple :
+
+```text
+~/.config/mail-admin/oauth/<account>/credentials.json
+~/.config/mail-admin/oauth/<account>/token.json
+```
+
+Commandes principales :
+
+```bash
+scripts/mail-admin init-registry
+scripts/mail-admin validate
+scripts/mail-admin list-rules
+scripts/mail-admin plan
+scripts/mail-admin plan --live
+scripts/mail-admin apply --dry-run
+scripts/mail-admin apply
+scripts/mail-admin bootstrap-auth <account>
+scripts/mail-admin list-labels <account>
+scripts/mail-admin list-filters <account>
+```
+
+`plan` sans `--live` reste purement local. `plan --live` et `apply` comparent le registre local a Gmail et evitent de recreer des filtres equivalents. En cas de meme requete distante avec une action differente, la commande signale un conflit au lieu d'empiler des doublons.
+
+Quand une regle declare `"trash": true`, `mail-admin` applique le label cible et ajoute aussi `TRASH` au filtre Gmail. Cela correspond a la suppression immediate voulue, avec recuperation possible via la corbeille Gmail.
+
+Dependances Python distantes a installer avant les commandes Gmail API :
+
+```bash
+python3 -m pip install --user google-api-python-client google-auth-oauthlib google-auth-httplib2
+```
+
+Scopes utilises :
+
+- `https://www.googleapis.com/auth/gmail.labels`
+- `https://www.googleapis.com/auth/gmail.settings.basic`
 
 ## Commandes Neovim
 

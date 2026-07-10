@@ -2,6 +2,32 @@
 
 Cheat sheet courte pour les fonctions que tu utilises vraiment.
 
+## Mail admin
+
+Gestion des filtres Gmail depuis le systeme local :
+
+```bash
+scripts/mail-admin validate
+scripts/mail-admin list-rules
+scripts/mail-admin plan
+scripts/mail-admin plan --live
+scripts/mail-admin apply --dry-run
+scripts/mail-admin apply
+scripts/mail-admin bootstrap-auth <account>
+scripts/mail-admin list-labels <account>
+scripts/mail-admin list-filters <account>
+```
+
+Chemins utiles :
+
+```text
+~/.shipglowz/private/data/mail-admin/registry.json
+~/.shipglowz/private/data/mail-admin/registry.example.json
+~/.shipglowz/private/data/mail-intake/inbox/
+~/.shipglowz/private/data/mail-intake/done/
+~/.config/mail-admin/oauth/<account>/
+```
+
 ## Comment trouver un raccourci que tu ne connais pas
 
 ### L'aide intégrée

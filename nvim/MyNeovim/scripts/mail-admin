@@ -1,0 +1,662 @@
+#!/usr/bin/env python3
+import argparse
+import json
+import os
+import sys
+from dataclasses import dataclass
+from pathlib import Path
+from typing import Any
+
+
+REGISTRY_VERSION = 1
+DEFAULT_DATA_ROOT = Path.home() / ".shipglowz" / "private" / "data"
+DEFAULT_REGISTRY = "mail-admin/registry.json"
+DEFAULT_SCOPES = [
+    "https://www.googleapis.com/auth/gmail.labels",
+    "https://www.googleapis.com/auth/gmail.settings.basic",
+]
+SYSTEM_LABELS = {"INBOX", "UNREAD", "SPAM", "IMPORTANT", "TRASH", "STARRED"}
+
+
+class MailAdminError(RuntimeError):
+    pass
+
+
+@dataclass
+class GmailDeps:
+    build: Any
+    Credentials: Any
+    InstalledAppFlow: Any
+    Request: Any
+    HttpError: Any
+
+
+def error(message: str, code: int = 1) -> int:
+    print(f"mail-admin: {message}", file=sys.stderr)
+    return code
+
+
+def expand_path(value: str | None) -> Path | None:
+    if not value:
+        return None
+    return Path(os.path.expanduser(value)).resolve()
+
+
+def ensure_data_root(root_value: str | None) -> Path:
+    root = expand_path(root_value) if root_value else DEFAULT_DATA_ROOT
+    if root is None:
+        raise MailAdminError("invalid data root")
+    return root
+
+
+def registry_path(root: Path, path_value: str | None) -> Path:
+    if path_value:
+        path = expand_path(path_value)
+        if path is None:
+            raise MailAdminError("invalid registry path")
+        return path
+    return root / DEFAULT_REGISTRY
+
+
+def ensure_parent(path: Path) -> None:
+    path.parent.mkdir(parents=True, exist_ok=True)
+
+
+def load_registry(path: Path) -> dict[str, Any]:
+    if not path.exists():
+        raise MailAdminError(
+            f"registry not found: {path}. Run `scripts/mail-admin init-registry` first."
+        )
+    try:
+        data = json.loads(path.read_text(encoding="utf-8"))
+    except json.JSONDecodeError as exc:
+        raise MailAdminError(f"invalid registry JSON in {path}: {exc}") from exc
+    if not isinstance(data, dict):
+        raise MailAdminError("registry root must be a JSON object")
+    version = data.get("version")
+    if version != REGISTRY_VERSION:
+        raise MailAdminError(
+            f"unsupported registry version {version!r}; expected {REGISTRY_VERSION}"
+        )
+    if not isinstance(data.get("accounts", []), list):
+        raise MailAdminError("registry.accounts must be a list")
+    if not isinstance(data.get("rules", []), list):
+        raise MailAdminError("registry.rules must be a list")
+    return data
+
+
+def write_registry(path: Path, data: dict[str, Any]) -> None:
+    ensure_parent(path)
+    path.write_text(json.dumps(data, ensure_ascii=True, indent=2) + "\n", encoding="utf-8")
+
+
+def default_registry() -> dict[str, Any]:
+    return {
+        "version": REGISTRY_VERSION,
+        "accounts": [],
+        "rules": [],
+    }
+
+
+def normalize_string_list(value: Any) -> list[str]:
+    if value is None:
+        return []
+    if isinstance(value, str):
+        items = [value]
+    elif isinstance(value, list):
+        items = value
+    else:
+        raise MailAdminError("expected string or list of strings")
+    normalized: list[str] = []
+    for item in items:
+        if not isinstance(item, str):
+            raise MailAdminError("expected string entries")
+        cleaned = item.strip()
+        if cleaned:
+            normalized.append(cleaned)
+    return normalized
+
+
+def require_bool(value: Any, field_name: str) -> bool:
+    if isinstance(value, bool):
+        return value
+    raise MailAdminError(f"{field_name} must be a boolean")
+
+
+def validate_account(account: dict[str, Any]) -> dict[str, Any]:
+    if not isinstance(account, dict):
+        raise MailAdminError("each account must be an object")
+    account_id = str(account.get("id", "")).strip()
+    if not account_id:
+        raise MailAdminError("account.id is required")
+    email = str(account.get("email", "")).strip()
+    if not email:
+        raise MailAdminError(f"account {account_id!r} is missing email")
+    credentials_file = str(account.get("credentials_file", "")).strip()
+    token_file = str(account.get("token_file", "")).strip()
+    if not credentials_file:
+        raise MailAdminError(f"account {account_id!r} is missing credentials_file")
+    if not token_file:
+        raise MailAdminError(f"account {account_id!r} is missing token_file")
+    return {
+        "id": account_id,
+        "email": email,
+        "credentials_file": credentials_file,
+        "token_file": token_file,
+    }
+
+
+def match_to_query(match: dict[str, Any]) -> str | None:
+    senders = normalize_string_list(match.get("senders"))
+    domains = normalize_string_list(match.get("domains"))
+    raw_query = str(match.get("query", "")).strip()
+    parts: list[str] = []
+    if senders:
+        sender_terms = [f'from:"{sender}"' if " " in sender else f"from:{sender}" for sender in senders]
+        parts.append("(" + " OR ".join(sender_terms) + ")")
+    if domains:
+        domain_terms = [f"from:@{domain.lstrip('@')}" for domain in domains]
+        parts.append("(" + " OR ".join(domain_terms) + ")")
+    if raw_query:
+        parts.append(f"({raw_query})")
+    if not parts:
+        return None
+    return " AND ".join(parts)
+
+
+def validate_rule(rule: dict[str, Any], account_ids: set[str]) -> dict[str, Any]:
+    if not isinstance(rule, dict):
+        raise MailAdminError("each rule must be an object")
+    rule_id = str(rule.get("id", "")).strip()
+    if not rule_id:
+        raise MailAdminError("rule.id is required")
+    account = str(rule.get("account", "")).strip()
+    if not account:
+        raise MailAdminError(f"rule {rule_id!r} is missing account")
+    if account not in account_ids:
+        raise MailAdminError(f"rule {rule_id!r} references unknown account {account!r}")
+    label = str(rule.get("label", "")).strip()
+    if not label:
+        raise MailAdminError(f"rule {rule_id!r} is missing label")
+    match = rule.get("match", {})
+    if not isinstance(match, dict):
+        raise MailAdminError(f"rule {rule_id!r} match must be an object")
+    negated_query = str(match.get("negated_query", "")).strip() or None
+    compiled_query = match_to_query(match)
+    if not compiled_query and not negated_query:
+        raise MailAdminError(
+            f"rule {rule_id!r} must declare at least one positive condition in match"
+        )
+    trash = require_bool(rule.get("trash", False), f"rule {rule_id!r} trash")
+    return {
+        "id": rule_id,
+        "account": account,
+        "label": label,
+        "trash": trash,
+        "match": {
+            "senders": normalize_string_list(match.get("senders")),
+            "domains": normalize_string_list(match.get("domains")),
+            "query": str(match.get("query", "")).strip() or None,
+            "negated_query": negated_query,
+            "compiled_query": compiled_query,
+        },
+    }
+
+
+def normalize_registry(data: dict[str, Any]) -> dict[str, Any]:
+    normalized_accounts: list[dict[str, Any]] = []
+    seen_accounts: set[str] = set()
+    for raw_account in data.get("accounts", []):
+        account = validate_account(raw_account)
+        if account["id"] in seen_accounts:
+            raise MailAdminError(f"duplicate account id {account['id']!r}")
+        seen_accounts.add(account["id"])
+        normalized_accounts.append(account)
+
+    normalized_rules: list[dict[str, Any]] = []
+    seen_rules: set[str] = set()
+    for raw_rule in data.get("rules", []):
+        rule = validate_rule(raw_rule, seen_accounts)
+        if rule["id"] in seen_rules:
+            raise MailAdminError(f"duplicate rule id {rule['id']!r}")
+        seen_rules.add(rule["id"])
+        normalized_rules.append(rule)
+
+    signatures: dict[tuple[str, str, bool, str | None], str] = {}
+    for rule in normalized_rules:
+        signature = (
+            rule["account"],
+            rule["label"],
+            rule["trash"],
+            normalized_query_key(rule["match"]["compiled_query"], rule["match"]["negated_query"]),
+        )
+        previous = signatures.get(signature)
+        if previous:
+            raise MailAdminError(
+                f"rules {previous!r} and {rule['id']!r} are logically equivalent; keep only one"
+            )
+        signatures[signature] = rule["id"]
+
+    return {
+        "version": REGISTRY_VERSION,
+        "accounts": normalized_accounts,
+        "rules": normalized_rules,
+    }
+
+
+def normalized_query_key(compiled_query: str | None, negated_query: str | None) -> str | None:
+    joined = {
+        "query": compiled_query or None,
+        "negated_query": negated_query or None,
+    }
+    return json.dumps(joined, sort_keys=True, ensure_ascii=True)
+
+
+def print_json(data: Any) -> None:
+    print(json.dumps(data, ensure_ascii=False, indent=2))
+
+
+def account_map(normalized: dict[str, Any]) -> dict[str, dict[str, Any]]:
+    return {account["id"]: account for account in normalized["accounts"]}
+
+
+def require_gmail_deps() -> GmailDeps:
+    try:
+        from google.auth.transport.requests import Request
+        from google.oauth2.credentials import Credentials
+        from google_auth_oauthlib.flow import InstalledAppFlow
+        from googleapiclient.discovery import build
+        from googleapiclient.errors import HttpError
+    except ImportError as exc:
+        raise MailAdminError(
+            "missing Gmail API dependencies. Install `google-api-python-client`, "
+            "`google-auth-oauthlib`, and `google-auth-httplib2` before using remote commands."
+        ) from exc
+    return GmailDeps(
+        build=build,
+        Credentials=Credentials,
+        InstalledAppFlow=InstalledAppFlow,
+        Request=Request,
+        HttpError=HttpError,
+    )
+
+
+def scopes_for_account(account: dict[str, Any]) -> list[str]:
+    scopes = account.get("scopes") or DEFAULT_SCOPES
+    if not isinstance(scopes, list) or not all(isinstance(item, str) and item for item in scopes):
+        raise MailAdminError(f"account {account['id']!r} scopes must be a non-empty string list")
+    return scopes
+
+
+def gmail_service(account: dict[str, Any], allow_browser: bool) -> Any:
+    deps = require_gmail_deps()
+    scopes = scopes_for_account(account)
+    token_file = expand_path(account["token_file"])
+    credentials_file = expand_path(account["credentials_file"])
+    if token_file is None or credentials_file is None:
+        raise MailAdminError(f"account {account['id']!r} has invalid credential paths")
+    creds = None
+    if token_file.exists():
+        creds = deps.Credentials.from_authorized_user_file(str(token_file), scopes)
+    if not creds or not creds.valid:
+        if creds and creds.expired and creds.refresh_token:
+            creds.refresh(deps.Request())
+        elif allow_browser:
+            if not credentials_file.exists():
+                raise MailAdminError(
+                    f"OAuth client file missing for account {account['id']!r}: {credentials_file}"
+                )
+            flow = deps.InstalledAppFlow.from_client_secrets_file(str(credentials_file), scopes)
+            creds = flow.run_local_server(port=0)
+            ensure_parent(token_file)
+            token_file.write_text(creds.to_json(), encoding="utf-8")
+        else:
+            raise MailAdminError(
+                f"token missing or invalid for account {account['id']!r}: {token_file}. "
+                "Run `scripts/mail-admin bootstrap-auth <account>` first."
+            )
+    return deps.build("gmail", "v1", credentials=creds)
+
+
+def label_payload(name: str) -> dict[str, Any]:
+    return {
+        "name": name,
+        "labelListVisibility": "labelShow",
+        "messageListVisibility": "show",
+    }
+
+
+def desired_filter_payload(rule: dict[str, Any], label_id: str) -> dict[str, Any]:
+    criteria: dict[str, Any] = {}
+    if rule["match"]["compiled_query"]:
+        criteria["query"] = rule["match"]["compiled_query"]
+    if rule["match"]["negated_query"]:
+        criteria["negatedQuery"] = rule["match"]["negated_query"]
+    action = {"addLabelIds": [label_id]}
+    if rule["trash"]:
+        action["addLabelIds"].append("TRASH")
+    return {"criteria": criteria, "action": action}
+
+
+def normalize_live_filter(filter_obj: dict[str, Any]) -> dict[str, Any]:
+    criteria = filter_obj.get("criteria", {}) or {}
+    action = filter_obj.get("action", {}) or {}
+    return {
+        "criteria": {
+            "from": criteria.get("from"),
+            "to": criteria.get("to"),
+            "subject": criteria.get("subject"),
+            "query": criteria.get("query"),
+            "negatedQuery": criteria.get("negatedQuery"),
+            "hasAttachment": criteria.get("hasAttachment"),
+            "size": criteria.get("size"),
+            "sizeComparison": criteria.get("sizeComparison"),
+        },
+        "action": {
+            "addLabelIds": sorted(action.get("addLabelIds", []) or []),
+            "removeLabelIds": sorted(action.get("removeLabelIds", []) or []),
+            "forward": action.get("forward"),
+        },
+    }
+
+
+def normalize_desired_filter(payload: dict[str, Any]) -> dict[str, Any]:
+    criteria = payload.get("criteria", {})
+    action = payload.get("action", {})
+    return {
+        "criteria": {
+            "from": criteria.get("from"),
+            "to": criteria.get("to"),
+            "subject": criteria.get("subject"),
+            "query": criteria.get("query"),
+            "negatedQuery": criteria.get("negatedQuery"),
+            "hasAttachment": criteria.get("hasAttachment"),
+            "size": criteria.get("size"),
+            "sizeComparison": criteria.get("sizeComparison"),
+        },
+        "action": {
+            "addLabelIds": sorted(action.get("addLabelIds", []) or []),
+            "removeLabelIds": sorted(action.get("removeLabelIds", []) or []),
+            "forward": action.get("forward"),
+        },
+    }
+
+
+def list_labels(service: Any) -> list[dict[str, Any]]:
+    result = service.users().labels().list(userId="me").execute()
+    return result.get("labels", [])
+
+
+def list_filters(service: Any) -> list[dict[str, Any]]:
+    result = service.users().settings().filters().list(userId="me").execute()
+    return result.get("filter", [])
+
+
+def ensure_label(service: Any, name: str, dry_run: bool) -> dict[str, Any]:
+    labels = list_labels(service)
+    for label in labels:
+        if label.get("name") == name:
+            return {"id": label["id"], "name": label["name"], "created": False}
+    if dry_run:
+        return {"id": f"planned:{name}", "name": name, "created": True}
+    created = service.users().labels().create(userId="me", body=label_payload(name)).execute()
+    return {"id": created["id"], "name": created["name"], "created": True}
+
+
+def compare_filter(rule: dict[str, Any], label_id: str, live_filters: list[dict[str, Any]]) -> dict[str, Any]:
+    desired_payload = desired_filter_payload(rule, label_id)
+    desired_normalized = normalize_desired_filter(desired_payload)
+    equivalents: list[dict[str, Any]] = []
+    same_query_different_action: list[dict[str, Any]] = []
+    for filter_obj in live_filters:
+        normalized = normalize_live_filter(filter_obj)
+        if normalized == desired_normalized:
+            equivalents.append(filter_obj)
+            continue
+        if normalized["criteria"] == desired_normalized["criteria"]:
+            same_query_different_action.append(filter_obj)
+    if len(equivalents) > 1:
+        return {"status": "conflict", "reason": "duplicate_live_filters", "filters": equivalents}
+    if equivalents:
+        return {"status": "satisfied", "filter": equivalents[0]}
+    if same_query_different_action:
+        return {
+            "status": "conflict",
+            "reason": "same_query_different_action",
+            "filters": same_query_different_action,
+        }
+    return {"status": "create", "payload": desired_payload}
+
+
+def build_plan(normalized: dict[str, Any], account_filter: str | None, live: bool) -> list[dict[str, Any]]:
+    accounts = account_map(normalized)
+    plan: list[dict[str, Any]] = []
+    remote_cache: dict[str, tuple[Any, list[dict[str, Any]]]] = {}
+    for rule in normalized["rules"]:
+        if account_filter and rule["account"] != account_filter:
+            continue
+        account = accounts[rule["account"]]
+        entry = {
+            "rule_id": rule["id"],
+            "account": rule["account"],
+            "label": rule["label"],
+            "trash": rule["trash"],
+            "query": rule["match"]["compiled_query"],
+            "negated_query": rule["match"]["negated_query"],
+        }
+        if not live:
+            entry["status"] = "planned"
+            plan.append(entry)
+            continue
+        service, live_filters = remote_cache.get(rule["account"], (None, None))
+        if service is None:
+            service = gmail_service(account, allow_browser=False)
+            remote_cache[rule["account"]] = (service, list_filters(service))
+            live_filters = remote_cache[rule["account"]][1]
+        ensured_label = ensure_label(service, rule["label"], dry_run=True)
+        comparison = compare_filter(rule, ensured_label["id"], live_filters)
+        entry["status"] = comparison["status"]
+        if ensured_label["created"]:
+            entry["label_status"] = "create"
+        else:
+            entry["label_status"] = "exists"
+        if comparison["status"] == "conflict":
+            entry["reason"] = comparison["reason"]
+        plan.append(entry)
+    return plan
+
+
+def apply_rules(normalized: dict[str, Any], account_filter: str | None, dry_run: bool) -> list[dict[str, Any]]:
+    accounts = account_map(normalized)
+    results: list[dict[str, Any]] = []
+    live_cache: dict[str, tuple[Any, list[dict[str, Any]]]] = {}
+    for rule in normalized["rules"]:
+        if account_filter and rule["account"] != account_filter:
+            continue
+        account = accounts[rule["account"]]
+        service, live_filters = live_cache.get(rule["account"], (None, None))
+        if service is None:
+            service = gmail_service(account, allow_browser=False)
+            live_cache[rule["account"]] = (service, list_filters(service))
+            live_filters = live_cache[rule["account"]][1]
+        label = ensure_label(service, rule["label"], dry_run=dry_run)
+        comparison = compare_filter(rule, label["id"], live_filters)
+        result = {
+            "rule_id": rule["id"],
+            "account": rule["account"],
+            "label": rule["label"],
+            "label_created": label["created"],
+            "status": comparison["status"],
+        }
+        if comparison["status"] == "satisfied":
+            result["filter_id"] = comparison["filter"].get("id")
+        elif comparison["status"] == "conflict":
+            result["reason"] = comparison["reason"]
+        elif comparison["status"] == "create":
+            if dry_run:
+                result["status"] = "planned-create"
+            else:
+                created = (
+                    service.users()
+                    .settings()
+                    .filters()
+                    .create(userId="me", body=comparison["payload"])
+                    .execute()
+                )
+                live_filters.append(created)
+                result["status"] = "created"
+                result["filter_id"] = created.get("id")
+        results.append(result)
+    return results
+
+
+def handle_init_registry(args: argparse.Namespace) -> int:
+    root = ensure_data_root(args.data_root)
+    path = registry_path(root, args.registry)
+    if path.exists() and not args.force:
+        raise MailAdminError(f"registry already exists: {path}")
+    data = default_registry()
+    write_registry(path, data)
+    print(path)
+    return 0
+
+
+def handle_validate(args: argparse.Namespace) -> int:
+    root = ensure_data_root(args.data_root)
+    path = registry_path(root, args.registry)
+    normalized = normalize_registry(load_registry(path))
+    print_json(
+        {
+            "status": "ok",
+            "registry": str(path),
+            "accounts": len(normalized["accounts"]),
+            "rules": len(normalized["rules"]),
+        }
+    )
+    return 0
+
+
+def handle_list_rules(args: argparse.Namespace) -> int:
+    root = ensure_data_root(args.data_root)
+    path = registry_path(root, args.registry)
+    normalized = normalize_registry(load_registry(path))
+    rules = normalized["rules"]
+    if args.account:
+        rules = [rule for rule in rules if rule["account"] == args.account]
+    print_json(rules)
+    return 0
+
+
+def handle_plan(args: argparse.Namespace) -> int:
+    root = ensure_data_root(args.data_root)
+    path = registry_path(root, args.registry)
+    normalized = normalize_registry(load_registry(path))
+    plan = build_plan(normalized, args.account, live=args.live)
+    print_json(plan)
+    return 0
+
+
+def handle_apply(args: argparse.Namespace) -> int:
+    root = ensure_data_root(args.data_root)
+    path = registry_path(root, args.registry)
+    normalized = normalize_registry(load_registry(path))
+    results = apply_rules(normalized, args.account, dry_run=args.dry_run)
+    print_json(results)
+    return 0
+
+
+def handle_bootstrap_auth(args: argparse.Namespace) -> int:
+    root = ensure_data_root(args.data_root)
+    path = registry_path(root, args.registry)
+    normalized = normalize_registry(load_registry(path))
+    accounts = account_map(normalized)
+    account = accounts.get(args.account)
+    if not account:
+        raise MailAdminError(f"unknown account {args.account!r}")
+    gmail_service(account, allow_browser=True)
+    token_path = expand_path(account["token_file"])
+    print(token_path)
+    return 0
+
+
+def handle_list_labels(args: argparse.Namespace) -> int:
+    root = ensure_data_root(args.data_root)
+    path = registry_path(root, args.registry)
+    normalized = normalize_registry(load_registry(path))
+    account = account_map(normalized).get(args.account)
+    if not account:
+        raise MailAdminError(f"unknown account {args.account!r}")
+    labels = list_labels(gmail_service(account, allow_browser=False))
+    print_json(labels)
+    return 0
+
+
+def handle_list_filters(args: argparse.Namespace) -> int:
+    root = ensure_data_root(args.data_root)
+    path = registry_path(root, args.registry)
+    normalized = normalize_registry(load_registry(path))
+    account = account_map(normalized).get(args.account)
+    if not account:
+        raise MailAdminError(f"unknown account {args.account!r}")
+    filters = list_filters(gmail_service(account, allow_browser=False))
+    print_json(filters)
+    return 0
+
+
+def build_parser() -> argparse.ArgumentParser:
+    parser = argparse.ArgumentParser(
+        description="Manage declarative Gmail labels and filters for Mail Intel."
+    )
+    parser.add_argument("--data-root", default=os.environ.get("SHIPGLOWZ_PRIVATE_DATA_ROOT"))
+    parser.add_argument("--registry", default=os.environ.get("MAIL_ADMIN_REGISTRY"))
+    sub = parser.add_subparsers(dest="command", required=True)
+
+    init_registry = sub.add_parser("init-registry")
+    init_registry.add_argument("--force", action="store_true")
+    init_registry.set_defaults(func=handle_init_registry)
+
+    validate = sub.add_parser("validate")
+    validate.set_defaults(func=handle_validate)
+
+    list_rules = sub.add_parser("list-rules")
+    list_rules.add_argument("--account")
+    list_rules.set_defaults(func=handle_list_rules)
+
+    plan = sub.add_parser("plan")
+    plan.add_argument("--account")
+    plan.add_argument("--live", action="store_true")
+    plan.set_defaults(func=handle_plan)
+
+    apply_cmd = sub.add_parser("apply")
+    apply_cmd.add_argument("--account")
+    apply_cmd.add_argument("--dry-run", action="store_true")
+    apply_cmd.set_defaults(func=handle_apply)
+
+    bootstrap = sub.add_parser("bootstrap-auth")
+    bootstrap.add_argument("account")
+    bootstrap.set_defaults(func=handle_bootstrap_auth)
+
+    list_labels_cmd = sub.add_parser("list-labels")
+    list_labels_cmd.add_argument("account")
+    list_labels_cmd.set_defaults(func=handle_list_labels)
+
+    list_filters_cmd = sub.add_parser("list-filters")
+    list_filters_cmd.add_argument("account")
+    list_filters_cmd.set_defaults(func=handle_list_filters)
+
+    return parser
+
+
+def main() -> int:
+    parser = build_parser()
+    args = parser.parse_args()
+    try:
+        return args.func(args)
+    except MailAdminError as exc:
+        return error(str(exc))
+    except Exception as exc:
+        return error(str(exc))
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())

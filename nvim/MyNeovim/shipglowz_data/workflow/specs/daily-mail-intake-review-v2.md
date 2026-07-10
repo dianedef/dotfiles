@@ -33,7 +33,7 @@ depends_on:
     required_status: "ready"
   - artifact: "shipglowz_data/workflow/specs/gmail-filter-management-for-mail-intel.md"
     artifact_version: "0.1.0"
-    required_status: "draft"
+    required_status: "ready"
   - artifact: "Mail Intel.md"
     artifact_version: "unknown"
     required_status: "active"
@@ -52,6 +52,7 @@ evidence:
   - "Mail Intel currently supports listing, searching, opening, and copying emails, but not daily classification or a review queue."
   - "The operator wants daily automation that classifies emails by probable project, useful angle, and next action before downstream skill use."
   - "The operator plans to review email-derived proposals inside Neovim, so the review surface should live close to the existing Mail Intel workflow."
+  - "Gmail filter management is now a sibling ready spec and should be treated as upstream inbox shaping, not as part of the daily review queue implementation."
 next_step: "/100-sf-spec daily mail intake review v2"
 ---
 
@@ -69,7 +70,7 @@ En tant qu'utilisatrice de Neovim qui lit des emails synchronises localement, je
 
 ## Minimal Behavior Contract
 
-The system reads a bounded set of fresh local emails from the existing Maildir/notmuch pipeline, classifies each candidate into a probable project, useful angle, owner skill, and suggested next action, then writes only review records into a private queue outside the repository. The queue is an operator-local ephemeral work queue, not a durable archive: each candidate is stored as one editable file, pending items live in `inbox/`, recently routed items may live briefly in `done/`, and processed items are expected to age out quickly. Neovim exposes commands to inspect the pending queue, open the source email, accept/edit/reject a proposal, and copy a governed prompt or handoff. The system must not send mail, mutate remote inbox state, or persist raw private email bodies into the public repository. The easy-to-miss edge case is rerun drift: the daily classifier must be idempotent and must not create duplicate pending records for the same message unless the source changed or the operator explicitly requeues it.
+The system reads a bounded set of fresh local emails from the existing Maildir/notmuch pipeline, classifies each candidate into a probable project, useful angle, owner skill, and suggested next action, then writes only review records into a private queue inside the private data repository. The queue is short-retention working state, not a durable archive: each candidate is stored as one editable file, pending items live in `inbox/`, recently routed items may live briefly in `done/`, and processed items are expected to age out quickly even though the state is versioned for operator recovery. Neovim exposes commands to inspect the pending queue, open the source email, accept/edit/reject a proposal, and copy a governed prompt or handoff. The system must not send mail, mutate remote inbox state, or persist raw private email bodies into the public repository. The easy-to-miss edge case is rerun drift: the daily classifier must be idempotent and must not create duplicate pending records for the same message unless the source changed or the operator explicitly requeues it.
 
 ## Success Behavior
 
@@ -102,17 +103,17 @@ Add a `v2` intake layer around the existing Mail Intel pipeline. A local daily c
 
 ## Queue Storage Contract
 
-- The private queue root is `~/.shipglowz/private/mail-intake/` by default and stays separate from durable versioned data under `~/.shipglowz/private/data/`.
+- The private queue root is `~/.shipglowz/private/data/mail-intake/` by default.
 - Storage is `one file per queue item`, using a human-editable text format with YAML frontmatter and Markdown body.
-- The queue is ephemeral operational state, not a durable email archive.
-- Pending items live in `~/.shipglowz/private/mail-intake/inbox/`.
-- Reviewed and routed items may be moved to `~/.shipglowz/private/mail-intake/done/` for short retention only.
+- The queue is short-retention operational state, not a durable email archive, but it is still versioned in the private repo for operator recovery.
+- Pending items live in `~/.shipglowz/private/data/mail-intake/inbox/`.
+- Reviewed and routed items may be moved to `~/.shipglowz/private/data/mail-intake/done/` for short retention only.
 - Optional `rejected/` retention is allowed, but it is not required for v2.
 - Queue filenames must use a stable key derived from the source message identifier so reruns can detect existing items.
 - Once an item is accepted and routed, the queue file is no longer the canonical business artifact; the canonical artifact becomes the downstream output or a minimal private note if one is explicitly created.
 - Automatic cleanup may purge `done/` items after a short retention window such as `7` or `14` days.
 - The storage contract must optimize for direct operator review and manual correction inside Neovim before optimizing for analytics or long-term history.
-- Durable, versioned email-management memory such as declarative Gmail filter rules belongs under `~/.shipglowz/private/data/`, not in the ephemeral review queue.
+- Durable reference state such as declarative Gmail filter rules and short-retention working state such as the review queue may both live under `~/.shipglowz/private/data/`, but they must remain in clearly separated subtrees with distinct cleanup expectations.
 
 ## Scope In
 
@@ -122,7 +123,7 @@ Add a `v2` intake layer around the existing Mail Intel pipeline. A local daily c
   - bounded candidate selection
   - classification
   - private queue update
-- Private queue storage under a dedicated path such as `~/.shipglowz/private/mail-intake/`.
+- Private queue storage under a dedicated path such as `~/.shipglowz/private/data/mail-intake/`.
 - Structured queue record schema for proposal review.
 - Extensions to `scripts/mail-intel` or a sibling local CLI dedicated to review queue operations.
 - Neovim commands for:
@@ -149,7 +150,7 @@ Add a `v2` intake layer around the existing Mail Intel pipeline. A local daily c
 ## Constraints
 
 - Preserve the existing read-only Mail Intel safety boundary for raw mail access.
-- Keep all durable private email-derived records outside Git and outside the `MyNeovim` repository.
+- Keep all private email-derived records outside the public `MyNeovim` repository; versioning inside the separate private data repository is allowed and expected for both durable rule state and short-retention queue state.
 - Use the ShipGlowz private-memory contract and source-intake classification contract as the routing/storage source of truth.
 - Default to storing compact summaries and structured fields, not full raw bodies.
 - Treat processed queue items as disposable working state with short retention, not permanent records.
@@ -200,7 +201,7 @@ Add a `v2` intake layer around the existing Mail Intel pipeline. A local daily c
 - `lua/shipglowz/mail/init.lua` already owns Mail Intel commands and is the right review surface owner for queue actions.
 - `lua/shipglowz/mail/config.lua` should grow only with queue root, default review filters, and bounded execution settings, not secrets.
 - `Mail Intel.md` and `Cheat Sheet.md` must be updated so the review queue becomes the default daily workflow, not a hidden extra.
-- The private queue will operationally depend on `~/.shipglowz/private/`, while durable versioned email-management data may live under `~/.shipglowz/private/data/`, so local setup and backups matter.
+- The private queue and the durable email-management registry will operationally depend on `~/.shipglowz/private/data/`, so local setup, private-repo sync, and bounded cleanup matter.
 - Wrong classification can create operator drag, so confidence and review state are first-class fields, not optional metadata.
 
 ## Documentation Coherence
@@ -233,7 +234,7 @@ Add a `v2` intake layer around the existing Mail Intel pipeline. A local daily c
   - User story link: Gives the operator a stable object to review instead of free-form AI output.
   - Depends on: none
   - Validate with: spec review and fixture examples in dry-run notes.
-  - Notes: Fixed as one-file-per-item, ephemeral queue storage under `inbox/` and short-retention `done/`, with compact metadata and summaries instead of full email bodies.
+  - Notes: Fixed as one-file-per-item, short-retention queue storage under `~/.shipglowz/private/data/mail-intake/` with `inbox/` and short-retention `done/`, plus compact metadata and summaries instead of full email bodies.
 
 - [ ] Task 2: Add private storage configuration
   - Files: `lua/shipglowz/mail/config.lua`, queue storage helper path
@@ -241,7 +242,7 @@ Add a `v2` intake layer around the existing Mail Intel pipeline. A local daily c
   - User story link: Makes durable review state available between runs.
   - Depends on: Task 1
   - Validate with: headless config load and a no-root error check.
-  - Notes: The default root should align with `~/.shipglowz/private/mail-intake/`.
+  - Notes: The default root should align with `~/.shipglowz/private/data/mail-intake/`.
 
 - [ ] Task 3: Add candidate selection and classification CLI
   - Files: `scripts/mail-intel` or `scripts/mail-intake`
@@ -358,7 +359,8 @@ The spec is still blocked on two implementation-shaping decisions:
 |----------|-------|-------|--------|--------|-----------|
 | 2026-07-01 08:01:48 UTC | sf-spec | GPT-5 Codex | Created a v2 spec for daily mail intake classification and Neovim review queue on top of Mail Intel v1 | Draft spec written with private storage, review-state, idempotency, and downstream routing constraints | /101-sf-ready daily mail intake review v2 |
 | 2026-07-01 22:13:06 UTC | 101-sf-ready | GPT-5 Codex | Reviewed readiness for daily mail intake review v2 | not ready: queue storage contract, classifier mode, and Neovim review surface remain materially undecided | /100-sf-spec daily mail intake review v2 |
-| 2026-07-08 00:00:00 UTC | 100-sf-spec | GPT-5 Codex | Resolved the queue storage blocker by fixing ephemeral one-file-per-item queue storage under the private root | Storage shape, lifecycle, retention, and canonical-output boundary are now explicit; classifier mode and review-surface blockers remain | /100-sf-spec daily mail intake review v2 |
+| 2026-07-08 00:00:00 UTC | 100-sf-spec | GPT-5 Codex | Resolved the queue storage blocker by fixing one-file-per-item queue storage under the private root | Storage shape, lifecycle, retention, and canonical-output boundary are now explicit; classifier mode and review-surface blockers remain | /100-sf-spec daily mail intake review v2 |
+| 2026-07-09 00:00:00 UTC | 100-sf-spec | GPT-5 Codex | Updated the queue storage contract so short-retention review state is also versioned in the private data repository | Queue recovery/versioning now lives under `~/.shipglowz/private/data/mail-intake/` while retention stays intentionally short | /101-sf-ready daily mail intake review v2 |
 | 2026-07-08 00:00:00 UTC | 703-sg-review | GPT-5 Codex | Migrated spec references from shipflow to shipglowz namespace | Spec paths and headless test commands now match the current repo naming; implementation gaps remain | /100-sf-spec daily mail intake review v2 |
 | 2026-07-08 00:00:00 UTC | 100-sf-spec | GPT-5 Codex | Linked the daily intake spec to a new sibling Gmail filter-management spec | Upstream Gmail routing is now modeled as part of the broader email-management system without weakening the local review queue boundary | /101-sf-ready gmail filter management for mail intel |
 

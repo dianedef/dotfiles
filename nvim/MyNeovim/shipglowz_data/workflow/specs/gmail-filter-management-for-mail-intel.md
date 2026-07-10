@@ -54,7 +54,11 @@ En tant qu'utilisatrice qui n'a parfois qu'un telephone, je veux que notre syste
 
 ## Minimal Behavior Contract
 
-The system provides an explicit operator-invoked Gmail admin path that can create and list Gmail labels and filters through the official Gmail API using local OAuth credentials. The feature stays separate from the read-only Maildir reading path: remote Gmail mutation is allowed for labels and filters and may send matching incoming mail to Gmail Trash immediately, but it must not read message bodies through Gmail API, send mail, or blur the local Maildir review boundary. Filter rules are stored in a local versioned declarative registry under `~/.shipglowz/private/data/mail-admin/` and applied in a controlled sync step. The easy-to-miss edge case is drift between declared rules and live Gmail settings: the tool must detect duplicate or conflicting filters rather than blindly creating more rules on each run.
+The system provides an explicit operator-invoked Gmail admin path that can create and list Gmail labels and filters through the official Gmail API using local OAuth credentials. The feature stays separate from the read-only Maildir reading path: remote Gmail mutation is allowed for labels and filters and may send matching incoming mail to Gmail Trash immediately, but it must not read message bodies through Gmail API, send mail, or blur the local Maildir review boundary. Filter rules are stored in a local versioned declarative registry under `~/.shipglowz/private/data/mail-admin/registry.json`, and the canonical dry-run normalization output must be stable across repeated runs. The easy-to-miss edge case is drift between declared rules and live Gmail settings: the tool must detect duplicate or conflicting filters rather than blindly creating more rules on each run.
+
+The exact Gmail OAuth scope set is pinned to:
+- `https://www.googleapis.com/auth/gmail.labels`
+- `https://www.googleapis.com/auth/gmail.settings.basic`
 
 ## Success Behavior
 
@@ -90,7 +94,7 @@ Add an official Gmail API admin capability adjacent to Mail Intel. This capabili
   - list Gmail filters
   - create Gmail filters from declarative local definitions
   - dry-run planned changes
-- Storage of non-secret filter definitions in `~/.shipglowz/private/data/mail-admin/`, intended to be versioned and backed up.
+- Storage of non-secret filter definitions in `~/.shipglowz/private/data/mail-admin/registry.json`, intended to be versioned and backed up.
 - Integration notes showing how upstream filters improve the Maildir/daily intake workflow.
 
 ## Scope Out
@@ -137,19 +141,21 @@ Add an official Gmail API admin capability adjacent to Mail Intel. This capabili
 - The system never stores OAuth secrets, refresh tokens, or real account addresses in `~/.shipglowz/private/data/`, repository docs, or fixtures.
 - Reapplying the same declarative rules does not create duplicate filters.
 - The local registry is the source of truth for desired rules; Gmail is the applied remote state.
+- Rule normalization must sort accounts and rules deterministically, reject duplicate ids, and reject logically equivalent rules that target the same account, label, trash behavior, and normalized match expression.
 
 ## Links & Consequences
 
 - This capability lives as a sibling CLI `scripts/mail-admin` separate from the current read-only `scripts/mail-intel`.
 - `daily-mail-intake-review-v2` should treat Gmail filters as optional upstream shaping, not as a replacement for local review classification.
 - Documentation must explain the boundary clearly: Gmail admin mutates remote settings; Mail Intel reading remains local-first.
-- The durable local registry path is `~/.shipglowz/private/data/mail-admin/`; queue-like review state belongs elsewhere.
+- The durable local registry path is `~/.shipglowz/private/data/mail-admin/registry.json`; short-retention review state may also be versioned in the same private repo under a separate subtree such as `~/.shipglowz/private/data/mail-intake/`.
 
 ## Documentation Coherence
 
 - Update `Mail Intel.md` with an explicit section on upstream Gmail filter management.
 - Update `Cheat Sheet.md` with safe commands for filter dry-run/apply once implemented.
 - Do not document real sender addresses, credentials, or live Gmail filter examples.
+- Document the required OAuth scopes and registry normalization rules.
 
 ## Edge Cases
 
@@ -222,6 +228,7 @@ None. This spec is ready on the following decisions: rules live in `~/.shipglowz
 |----------|-------|-------|--------|--------|-----------|
 | 2026-07-08 00:00:00 UTC | 100-sf-spec | GPT-5 Codex | Added a sibling spec for Gmail filter management integrated with the Mail Intel ecosystem | Draft spec written; readiness still depends on storage, command surface, and OAuth decisions | /101-sf-ready gmail filter management for mail intel |
 | 2026-07-08 00:00:00 UTC | 101-sg-ready | GPT-5 Codex | Reviewed Gmail filter management readiness after operator decisions on local registry, command surface, and immediate-trash behavior | ready: operator-facing decisions are now explicit, scope is bounded, and the proof contract is sufficient for implementation | /102-sg-start gmail filter management for mail intel |
+| 2026-07-09 00:00:00 UTC | 102-sg-start | GPT-5 Codex | Implemented the first Mail Admin slice with a versioned registry, local validation/planning, Gmail OAuth bootstrap hooks, and Gmail label/filter apply logic | partial: command surface and local registry are implemented, but live Gmail proof and installer/bootstrap follow-through remain pending | /103-sg-verify gmail filter management for mail intel |
 
 ## Current Chantier Flow
 
@@ -229,7 +236,7 @@ None. This spec is ready on the following decisions: rules live in `~/.shipglowz
 |------|--------|-------|
 | sf-spec | done | New sibling spec defines Gmail admin integration as part of the email-management system. |
 | sf-ready | done | Registry path `~/.shipglowz/private/data/mail-admin/`, `scripts/mail-admin`, and immediate-trash behavior are fixed in the spec. |
-| sf-start | pending | No implementation yet. |
-| sf-verify | pending | No proof yet. |
+| sf-start | partial | `scripts/mail-admin` exists, private data roots are created, and docs now describe the Gmail admin boundary. |
+| sf-verify | pending | Local CLI checks remain to run, and live Gmail API proof is still pending. |
 | sf-end | pending | Closure depends on implementation and verification. |
 | sf-ship | pending | Optional, only if the user wants commit/push workflow. |
