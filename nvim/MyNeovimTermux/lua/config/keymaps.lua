@@ -102,7 +102,7 @@ end
 
 vim.keymap.set("n", "<leader>H", toggle_termux_notes, { desc = "Termux Notes" })
 
-require("shipflow").setup()
+require("shipglowz").setup()
 
 pcall(vim.keymap.del, "n", "<leader>L")
 

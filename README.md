@@ -98,7 +98,7 @@ When sudo is available, the script may install generic system packages such as `
 
 When launched without sudo or with `USER_LOCAL_MODE=true`, root-only extras are not applied: apt/dpkg packages, `/opt`, `/usr/local/bin`, system services, and new sudo user creation. The install log now reports this explicitly so the operator can see what was installed user-local and what still requires root.
 
-ShipFlow is separate: its system installer must be run as `curl -fsSL https://winflowz.com/shipflow-script | sudo sh` or `sudo ~/shipflow/install.sh`. dotfiles links or clones ShipFlow, but does not silently elevate into the ShipFlow system installer from a non-root run.
+ShipGlowz is separate: its system installer must be run as `curl -fsSL https://winflowz.com/shipglowz-script | sudo sh` or `sudo ~/shipglowz/install.sh`. dotfiles links or clones ShipGlowz, but does not silently elevate into the ShipGlowz system installer from a non-root run.
 
 dotfiles also prepares the private ShipGlowz data repo under `~/.shipglowz/private/data/`. This repository is intended for versioned private operational data such as local email-management registries, and remains separate from the public `dotfiles` repo.
 
@@ -107,7 +107,7 @@ dotfiles also prepares the private ShipGlowz data repo under `~/.shipglowz/priva
 `dotfiles` applies shell aliases and config symlinks only for components that are actually installed when the run finishes.
 
 - `alias r='ranger'` is added only when `ranger` is available.
-- `alias k`, `alias o`, `alias kc`, `alias oc`, `alias mcp` are added when available. `alias co` is owned by ShipFlow.
+- `alias k`, `alias o`, `alias kc`, `alias oc`, `alias mcp` are added when available. `alias co` is owned by ShipGlowz.
 - `~/.config/ranger` is created only when Ranger is installed.
 - In `--dry-run`, no `.bashrc` or config symlink is actually modified.
 - Synchronization runs on the final component state, including `--only` modes, so stale aliases/symlinks are removed and only installed-component artifacts are kept.
@@ -172,7 +172,7 @@ Linux/Codespaces only. The Termux installer does not configure MCP clients or re
 - Shared MCP configuration lives in `mcp/mcp-servers.json`
 - Includes `consensus` at `https://mcp.consensus.app/mcp`
 - Consensus does not require an API key to get started; OAuth can trigger automatically on first use in supported clients
-- ShipFlow owns Claude/Codex MCP client configuration. Dotfiles only links shared MCP registry files via `./install.sh --only=mcp`.
+- ShipGlowz owns Claude/Codex MCP client configuration. Dotfiles only links shared MCP registry files via `./install.sh --only=mcp`.
 
 ### Secrets Management
 Linux/Codespaces only. The Termux Markdown profile does not install Doppler or local API-key setup.
@@ -194,81 +194,81 @@ Linux/Codespaces only. The Termux Markdown profile does not install Doppler or l
 | Starship | ✅ | ✅ | ✅ |
 | Nerd Fonts | ✅ | ✅ | ✅ |
 | Mosh / tmux | ✅ | ✅ | ✅ |
-| ShipFlow local tunnels | ✅ | ✅ | ✅ |
+| ShipGlowz local tunnels | ✅ | ✅ | ✅ |
 | GitHub Copilot | ✅ | ✅ | ❌ |
 | OpenCode AI | ✅ | ✅ | ❌ |
 | Doppler | ✅ | ✅ | ❌ |
 | MCP config | ✅ | ✅ | ❌ |
 
-## ShipFlow Ownership
+## ShipGlowz Ownership
 
-Claude Code skills, Codex config, Claude settings, and ShipFlow AI aliases are owned by the ShipFlow installer. Dotfiles no longer writes `~/.claude` or `~/.codex` for that workflow, aside from non-runtime repository samples kept under version control.
+Claude Code skills, Codex config, Claude settings, and ShipGlowz AI aliases are owned by the ShipGlowz installer. Dotfiles no longer writes `~/.claude` or `~/.codex` for that workflow, aside from non-runtime repository samples kept under version control.
 
 ## Audit System (8 domains)
 
-Run `/shipflow-audit` in any project to launch a full 8-domain audit (code, design, copy, SEO, GTM, translation, dependencies, performance) with parallel agents. Three modes:
+Run `/shipglowz-audit` in any project to launch a full 8-domain audit (code, design, copy, SEO, GTM, translation, dependencies, performance) with parallel agents. Three modes:
 
 ```bash
 # Page mode — audit a single file
-/shipflow-audit-seo @src/pages/index.astro
+/shipglowz-audit-seo @src/pages/index.astro
 
 # Project mode — audit the current project
-/shipflow-audit-code
-/shipflow-audit                      # All 8 domains in parallel
+/shipglowz-audit-code
+/shipglowz-audit                      # All 8 domains in parallel
 
 # Global mode — audit ALL projects in the workspace
-/shipflow-audit-seo global           # SEO across all web projects
-/shipflow-audit global               # Everything, everywhere, all at once
-/shipflow-deps global                # Dependencies across all projects
+/shipglowz-audit-seo global           # SEO across all web projects
+/shipglowz-audit global               # Everything, everywhere, all at once
+/shipglowz-deps global                # Dependencies across all projects
 ```
 
-Global mode reads `~/shipflow/PROJECTS.md` (private, 8-domain applicability matrix) and launches parallel agents per project.
+Global mode reads `~/shipglowz/PROJECTS.md` (private, 8-domain applicability matrix) and launches parallel agents per project.
 
 Each audit:
 - Scores every category A/B/C/D
-- Fixes issues directly (or asks first for `/shipflow-audit` master)
+- Fixes issues directly (or asks first for `/shipglowz-audit` master)
 - Logs scores to `AUDIT_LOG.md` (global + project-local)
 - Creates tasks in `TASKS.md` for all issues found
 
 ### Task Tracking
 
 ```bash
-/shipflow-tasks       # Update task tracker
-/shipflow-backlog     # Capture ideas
-/shipflow-priorities  # Re-rank by impact/effort
-/shipflow-review      # Session review + planning
+/shipglowz-tasks       # Update task tracker
+/shipglowz-backlog     # Capture ideas
+/shipglowz-priorities  # Re-rank by impact/effort
+/shipglowz-review      # Session review + planning
 /sf-resume            # Fast thread summary + close/keep-open verdict
-/shipflow-ship        # Commit, push, sync ShipFlow
+/shipglowz-ship        # Commit, push, sync ShipGlowz
 ```
 
 ### DevOps & Shipping
 
 ```bash
-/shipflow-check       # Typecheck + lint + build + auto-fix
-/shipflow-deploy      # Full deploy: check → ship → restart → verify
-/shipflow-status      # Cross-project git dashboard
+/shipglowz-check       # Typecheck + lint + build + auto-fix
+/shipglowz-deploy      # Full deploy: check → ship → restart → verify
+/shipglowz-status      # Cross-project git dashboard
 ```
 
 ### Scaffolding & Init
 
 ```bash
-/shipflow-init        # Bootstrap new project for ShipFlow tracking
-/shipflow-scaffold page about    # Generate files matching project patterns
+/shipglowz-init        # Bootstrap new project for ShipGlowz tracking
+/shipglowz-scaffold page about    # Generate files matching project patterns
 ```
 
 ### Research & Documentation
 
 ```bash
-/shipflow-research "topic"  # Deep web research → saved report
-/shipflow-docs readme       # Generate/update docs from code
-/shipflow-enrich @file      # Web research + content upgrade
+/shipglowz-research "topic"  # Deep web research → saved report
+/shipglowz-docs readme       # Generate/update docs from code
+/shipglowz-enrich @file      # Web research + content upgrade
 ```
 
 ### Upgrades
 
 ```bash
-/shipflow-migrate astro@5   # Framework upgrade assistant
-/shipflow-changelog         # Auto-generate CHANGELOG from git
+/shipglowz-migrate astro@5   # Framework upgrade assistant
+/shipglowz-changelog         # Auto-generate CHANGELOG from git
 ```
 
 ### Interactive Prompts
@@ -276,20 +276,20 @@ Each audit:
 All skills are **context-aware** with interactive selection prompts:
 
 - **Workspace root detection** — Run any skill from `~/` and it detects you're not inside a project. Instead of failing, it asks "Which project(s)?" with checkboxes.
-- **Scope selection** — `/shipflow-review` asks time scope (daily/weekly/sprint), `/shipflow-check` asks which checks (typecheck/lint/build/test), `/shipflow-audit` asks which domains.
-- **Global mode** — `/shipflow-audit global` prompts both "Which projects?" and "Which domains?" before launching.
-- **Content targeting** — `/shipflow-enrich` with a folder prompts which files to process.
+- **Scope selection** — `/shipglowz-review` asks time scope (daily/weekly/sprint), `/shipglowz-check` asks which checks (typecheck/lint/build/test), `/shipglowz-audit` asks which domains.
+- **Global mode** — `/shipglowz-audit global` prompts both "Which projects?" and "Which domains?" before launching.
+- **Content targeting** — `/shipglowz-enrich` with a folder prompts which files to process.
 
 When arguments are provided explicitly, prompts are skipped.
 
-### ShipFlow Data (Private)
+### ShipGlowz Data (Private)
 
-Personal tracking data lives in a separate private repo (`~/shipflow/`):
+Personal tracking data lives in a separate private repo (`~/shipglowz/`):
 - `TASKS.md` — master tracker across all projects
 - `AUDIT_LOG.md` — audit history with scores over time
 - `PROJECTS.md` — project registry with domain applicability matrix
 
-`install.sh` clones it automatically. Create yours with `gh repo create shipflow --private`.
+`install.sh` clones it automatically. Create yours with `gh repo create shipglowz --private`.
 
 ## BMAD Method Integration
 

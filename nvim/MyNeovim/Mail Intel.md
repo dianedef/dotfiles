@@ -2,6 +2,17 @@
 
 Mail Intel est une passerelle locale en lecture seule pour lire des emails Gmail synchronisés en Maildir, les ouvrir dans Neovim, puis copier leur contenu en Markdown pour un agent IA.
 
+## Mail Intelligence review
+
+La revue interactive se lance avec `:MailIntake` ou `<leader>mi`. Elle ouvre une liste buffer-driven des propositions en attente, puis un panneau voisin en lecture seule avec l'email source. Depuis la liste :
+
+- `<CR>` ouvre l'email source.
+- `a` ouvre l'email et demande à Avante de proposer projet, angle, owner skill, risques et action.
+- `h` copie un handoff `#source` gouverné pour la skill suivante.
+- `y` accepte, `e` marque comme édité, `x` rejette et `i` ignore.
+
+`:MailIntakeScan` crée les fiches metadata-only dans `~/.shipglowz/private/data/mail-intake/inbox/`. `:MailIntakeScan!` effectue un dry-run. Les corps bruts restent dans le Maildir et ne sont jamais écrits dans la queue privée.
+
 L'administration amont des labels et filtres Gmail vit maintenant a cote, via `scripts/mail-admin`, avec un registre local versionne sous `~/.shipglowz/private/data/mail-admin/`.
 
 ## Architecture
@@ -19,6 +30,8 @@ Gmail personnel
 ```
 
 `scripts/mail-intel` ne sait pas envoyer, supprimer, archiver, deplacer, taguer ou marquer des emails. Il lit uniquement un Maildir local deja synchronise.
+
+`scripts/mail-intake` est le voisin review-first : il crée une queue privée idempotente et déplace les décisions terminées vers `mail-intake/done/`. Il ne modifie pas le Maildir ni Gmail.
 
 `scripts/mail-admin` est le seul chemin de mutation Gmail de ce systeme. Il gere les labels et filtres Gmail via l'API officielle, avec un `dry-run` possible avant application.
 

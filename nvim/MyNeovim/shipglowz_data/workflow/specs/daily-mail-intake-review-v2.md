@@ -7,7 +7,7 @@ created: "2026-07-01"
 created_at: "2026-07-01 08:01:48 UTC"
 updated: "2026-07-08"
 updated_at: "2026-07-08 00:00:00 UTC"
-status: reviewed
+status: ready
 source_skill: 100-sf-spec
 source_model: "GPT-5 Codex"
 scope: "daily Maildir intake classification and Neovim review queue"
@@ -62,7 +62,7 @@ Daily Mail Intake Review V2
 
 ## Status
 
-Reviewed but not ready. The v2 direction is sound, and the queue storage contract is now fixed, but implementation-critical decisions remain open around classifier mode and the primary review surface inside Neovim.
+Ready for implementation. The operator chose a buffer-driven Neovim review surface inspired by lazygit/neogit, with bounded model assistance from the existing Avante surface. Classification is interactive and explicit: the system never silently routes an email or creates downstream content.
 
 ## User Story
 
@@ -236,7 +236,7 @@ Add a `v2` intake layer around the existing Mail Intel pipeline. A local daily c
   - Validate with: spec review and fixture examples in dry-run notes.
   - Notes: Fixed as one-file-per-item, short-retention queue storage under `~/.shipglowz/private/data/mail-intake/` with `inbox/` and short-retention `done/`, plus compact metadata and summaries instead of full email bodies.
 
-- [ ] Task 2: Add private storage configuration
+- [x] Task 2: Add private storage configuration
   - Files: `lua/shipglowz/mail/config.lua`, queue storage helper path
   - Action: Add configurable private queue root, default queue file naming, and bounded limits.
   - User story link: Makes durable review state available between runs.
@@ -244,7 +244,7 @@ Add a `v2` intake layer around the existing Mail Intel pipeline. A local daily c
   - Validate with: headless config load and a no-root error check.
   - Notes: The default root should align with `~/.shipglowz/private/data/mail-intake/`.
 
-- [ ] Task 3: Add candidate selection and classification CLI
+- [x] Task 3: Add candidate selection and classification CLI
   - Files: `scripts/mail-intel` or `scripts/mail-intake`
   - Action: Implement bounded candidate selection from notmuch plus `classify`, `queue-list`, `queue-show`, `queue-update`, and `queue-requeue` style operations.
   - User story link: Produces the daily proposal queue from fresh local emails.
@@ -260,7 +260,7 @@ Add a `v2` intake layer around the existing Mail Intel pipeline. A local daily c
   - Validate with: fixture-based classification comparisons and explicit unknown/ambiguous cases.
   - Notes: Separate observed facts from inference in persisted records.
 
-- [ ] Task 5: Add Neovim queue review commands
+- [x] Task 5: Add Neovim queue review commands
   - File: `lua/shipglowz/mail/init.lua`
   - Action: Add commands and mappings for queue listing, queue item open, accept/edit/reject, and governed prompt copy.
   - User story link: Lets the operator validate proposals without leaving Neovim.
@@ -268,7 +268,7 @@ Add a `v2` intake layer around the existing Mail Intel pipeline. A local daily c
   - Validate with: headless command registration and manual queue-fixture review checks.
   - Notes: Reuse the existing Mail Intel UX patterns where they are good enough.
 
-- [ ] Task 6: Add downstream prompt/handoff generation
+- [x] Task 6: Add downstream prompt/handoff generation
   - File: `lua/shipglowz/mail/init.lua` and CLI helpers as needed
   - Action: Replace the current monolithic `$sf-content` prompt path with queue-aware governed handoffs aligned to `#source` and the selected owner skill.
   - User story link: Makes accepted proposals immediately usable by downstream skills.
@@ -284,7 +284,7 @@ Add a `v2` intake layer around the existing Mail Intel pipeline. A local daily c
   - Validate with: `systemctl --user` dry-run or sample-unit review plus idempotent rerun proof.
   - Notes: Scheduling is last, not first.
 
-- [ ] Task 8: Update docs
+- [x] Task 8: Update docs
   - Files: `Mail Intel.md`, `Cheat Sheet.md`, optional dedicated queue doc
   - Action: Document setup, review workflow, queue states, and storage boundaries.
   - User story link: Makes the v2 workflow repeatable without chat history.
@@ -346,12 +346,10 @@ Add a `v2` intake layer around the existing Mail Intel pipeline. A local daily c
 - Keep queue files machine-readable and easy to diff locally.
 - Treat the private queue as operator-local working state, not as a collaborative artifact or archive.
 
-## Open Questions
+## Resolved Decisions
 
-The spec is still blocked on two implementation-shaping decisions:
-
-- Classifier mode: local heuristics only versus bounded model-assisted classification.
-- Primary Neovim review surface: `vim.ui.select`-style picker versus a richer buffer-driven review workflow.
+- Classifier mode: bounded model-assisted classification initiated by the operator from the open source buffer. Queue creation stores metadata only and leaves project, angle, owner skill, and action as review fields until the operator or AI fills them.
+- Primary Neovim review surface: a persistent buffer-driven review panel with a pending list, adjacent read-only source buffer, explicit decision mappings, and an Avante analysis action. `vim.ui.select` may be used only for secondary choices.
 
 ## Skill Run History
 
@@ -361,16 +359,17 @@ The spec is still blocked on two implementation-shaping decisions:
 | 2026-07-01 22:13:06 UTC | 101-sf-ready | GPT-5 Codex | Reviewed readiness for daily mail intake review v2 | not ready: queue storage contract, classifier mode, and Neovim review surface remain materially undecided | /100-sf-spec daily mail intake review v2 |
 | 2026-07-08 00:00:00 UTC | 100-sf-spec | GPT-5 Codex | Resolved the queue storage blocker by fixing one-file-per-item queue storage under the private root | Storage shape, lifecycle, retention, and canonical-output boundary are now explicit; classifier mode and review-surface blockers remain | /100-sf-spec daily mail intake review v2 |
 | 2026-07-09 00:00:00 UTC | 100-sf-spec | GPT-5 Codex | Updated the queue storage contract so short-retention review state is also versioned in the private data repository | Queue recovery/versioning now lives under `~/.shipglowz/private/data/mail-intake/` while retention stays intentionally short | /101-sf-ready daily mail intake review v2 |
-| 2026-07-08 00:00:00 UTC | 703-sg-review | GPT-5 Codex | Migrated spec references from shipflow to shipglowz namespace | Spec paths and headless test commands now match the current repo naming; implementation gaps remain | /100-sf-spec daily mail intake review v2 |
+| 2026-07-08 00:00:00 UTC | 703-sg-review | GPT-5 Codex | Migrated spec references from shipglowz to shipglowz namespace | Spec paths and headless test commands now match the current repo naming; implementation gaps remain | /100-sf-spec daily mail intake review v2 |
 | 2026-07-08 00:00:00 UTC | 100-sf-spec | GPT-5 Codex | Linked the daily intake spec to a new sibling Gmail filter-management spec | Upstream Gmail routing is now modeled as part of the broader email-management system without weakening the local review queue boundary | /101-sf-ready gmail filter management for mail intel |
+| 2026-07-11 00:00:00 UTC | 100-sf-spec | GPT-5 Codex | Resolved classifier and review-surface decisions from operator request | Ready: buffer-driven review panel with explicit Avante-assisted classification and no silent downstream action | /102-sf-start daily mail intake review v2 |
 
 ## Current Chantier Flow
 
 | Step | Status | Notes |
 |------|--------|-------|
 | sf-spec | done | New v2 chantier drafted on top of the existing Mail Intel v1 pipeline. |
-| sf-ready | not ready | Storage contract is fixed; classifier strategy and review-surface choice still change implementation and proof paths. |
-| sf-start | pending | Implementation has not started. |
+| sf-ready | done | Operator selected interactive Avante-assisted classification and a persistent buffer-driven review panel. |
+| sf-start | done | Private queue CLI, adjacent source panel, Avante analysis action, decisions, and governed `#source` handoff are implemented. |
 | sf-verify | pending | No implementation proof yet. |
 | sf-end | pending | Closure depends on implementation and verification. |
 | sf-ship | pending | Optional, only if the user wants commit/push workflow. |

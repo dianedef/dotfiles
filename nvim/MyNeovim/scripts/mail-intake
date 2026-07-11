@@ -1,0 +1,183 @@
+#!/usr/bin/env python3
+"""Private, review-first queue for local Maildir intelligence."""
+
+import argparse
+import hashlib
+import json
+import os
+import subprocess
+import sys
+from datetime import date
+from pathlib import Path
+
+
+DEFAULT_PRIVATE_ROOT = "~/.shipglowz/private/data/mail-intake"
+
+
+def fail(message):
+    print(f"mail-intake: {message}", file=sys.stderr)
+    return 1
+
+
+def private_root(value):
+    return Path(value or os.environ.get("SHIPGLOWZ_MAIL_INTAKE_ROOT", DEFAULT_PRIVATE_ROOT)).expanduser()
+
+
+def source_key(message_id):
+    return hashlib.sha256(message_id.encode("utf-8")).hexdigest()[:20]
+
+
+def run_mail_intel(args):
+    command = [str(Path(__file__).with_name("mail-intel")), "--format", "json", *args]
+    result = subprocess.run(command, text=True, capture_output=True, check=False)
+    if result.returncode:
+        raise RuntimeError(result.stderr.strip() or "mail-intel failed")
+    return json.loads(result.stdout or "null")
+
+
+def ensure_root(root):
+    (root / "inbox").mkdir(parents=True, exist_ok=True)
+    (root / "done").mkdir(parents=True, exist_ok=True)
+
+
+def parse_frontmatter(path):
+    lines = path.read_text(encoding="utf-8").splitlines()
+    if not lines or lines[0] != "---":
+        return {}
+    result = {}
+    for line in lines[1:]:
+        if line == "---":
+            break
+        if ":" in line:
+            key, value = line.split(":", 1)
+            result[key.strip()] = value.strip().strip('"')
+    return result
+
+
+def write_item(root, item):
+    message_id = str(item.get("id") or "")
+    if not message_id:
+        return False
+    key = source_key(message_id)
+    target = root / "inbox" / f"{key}.md"
+    if target.exists():
+        return False
+    subject = str(item.get("subject") or "(sans sujet)").replace("\n", " ").strip()
+    authors = str(item.get("authors") or "unknown").replace("\n", " ").strip()
+    tags = ", ".join(item.get("tags") or [])
+    content = "\n".join(
+        [
+            "---",
+            "artifact: mail_review_item",
+            'metadata_schema_version: "1.0"',
+            'artifact_version: "1.0.0"',
+            f'created: "{date.today().isoformat()}"',
+            f'updated: "{date.today().isoformat()}"',
+            "status: pending",
+            f'source_id: "{message_id.replace(chr(34), chr(39))}"',
+            f'source_key: "{key}"',
+            'project: "unknown"',
+            'angle: "unknown"',
+            'owner_skill: "unknown"',
+            'confidence: "unclassified"',
+            'risk: "review required"',
+            "---",
+            "",
+            f"# {subject}",
+            "",
+            f"- Sender summary: `{authors}`",
+            f"- Source date: `{item.get('date') or 'unknown'}`",
+            f"- Local tags: `{tags or 'none'}`",
+            "- Source body: kept in the local Maildir and opened read-only through Mail Intel.",
+            "",
+            "## Operator decision",
+            "",
+            "- Action: pending",
+            "- Notes:",
+            "",
+        ]
+    )
+    target.write_text(content, encoding="utf-8")
+    return True
+
+
+def scan(args):
+    root = private_root(args.private_root)
+    ensure_root(root)
+    items = run_mail_intel(
+        [
+            "--maildir-root",
+            os.path.expanduser(args.maildir_root),
+            "list",
+            args.account,
+            args.folder,
+            "--limit",
+            str(args.limit),
+        ]
+    )
+    if args.dry_run:
+        print(json.dumps(items, ensure_ascii=False, indent=2))
+        return 0
+    created = sum(write_item(root, item) for item in items)
+    print(json.dumps({"seen": len(items), "created": created, "root": str(root)}, ensure_ascii=False))
+    return 0
+
+
+def list_items(args):
+    root = private_root(args.private_root)
+    folder = root / ("done" if getattr(args, "done", False) else "inbox")
+    for path in sorted(folder.glob("*.md")):
+        data = parse_frontmatter(path)
+        print(json.dumps({"file": str(path), **data}, ensure_ascii=False))
+    return 0
+
+
+def update(args):
+    root = private_root(args.private_root)
+    candidates = list((root / "inbox").glob(f"{args.key}*.md")) + list((root / "done").glob(f"{args.key}*.md"))
+    if len(candidates) != 1:
+        raise RuntimeError(f"queue item not found or ambiguous: {args.key}")
+    path = candidates[0]
+    text = path.read_text(encoding="utf-8")
+    text = text.replace("status: pending", f"status: {args.status}", 1)
+    text = text.replace("- Action: pending", f"- Action: {args.status}", 1)
+    path.write_text(text, encoding="utf-8")
+    if args.status in {"accepted", "edited", "rejected", "ignored"}:
+        target = root / "done" / path.name
+        path.replace(target)
+        path = target
+    print(str(path))
+    return 0
+
+
+def main():
+    parser = argparse.ArgumentParser(description="Review-first local Maildir intake queue.")
+    parser.add_argument("--private-root", default=None)
+    sub = parser.add_subparsers(dest="command", required=True)
+    scan_cmd = sub.add_parser("scan")
+    scan_cmd.add_argument("--maildir-root", default=os.environ.get("MAIL_INTEL_ROOT", "~/Mail/competitors"))
+    scan_cmd.add_argument("--account", default=os.environ.get("MAIL_INTEL_ACCOUNT", "business-a"))
+    scan_cmd.add_argument("--folder", default=os.environ.get("MAIL_INTEL_FOLDER", "INBOX"))
+    scan_cmd.add_argument("--limit", type=int, default=30)
+    scan_cmd.add_argument("--dry-run", action="store_true")
+    sub.add_parser("list")
+    done = sub.add_parser("list-done")
+    done.set_defaults(done=True)
+    update_cmd = sub.add_parser("update")
+    update_cmd.add_argument("key")
+    update_cmd.add_argument("status", choices=["accepted", "edited", "rejected", "ignored"])
+    args = parser.parse_args()
+    try:
+        if args.command == "scan":
+            return scan(args)
+        if args.command in {"list", "list-done"}:
+            return list_items(args)
+        if args.command == "update":
+            return update(args)
+    except Exception as exc:
+        return fail(str(exc))
+    return 0
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())

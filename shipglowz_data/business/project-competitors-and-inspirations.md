@@ -17,16 +17,16 @@ evidence:
   - "Initial inspiration triage captured in legacy root concurrent.md."
   - "Dotfiles primarily hosts reusable environment, editor, scripts, and agent workflow configuration."
 depends_on:
-  - artifact: "shipflow_data/business/product.md"
+  - artifact: "shipglowz_data/business/product.md"
     artifact_version: "1.0.0"
     required_status: reviewed
-  - artifact: "shipflow_data/business/gtm.md"
+  - artifact: "shipglowz_data/business/gtm.md"
     artifact_version: "1.0.0"
     required_status: reviewed
 supersedes:
   - "concurrent.md"
 next_review: "2026-06-11"
-next_step: "/sf-docs audit shipflow_data/business/project-competitors-and-inspirations.md"
+next_step: "/sf-docs audit shipglowz_data/business/project-competitors-and-inspirations.md"
 target_projects:
   - dotfiles
 reference_categories:
@@ -48,7 +48,7 @@ source_policy: "Track public sources only; do not copy private positioning, paid
 | [Spec27](https://betalist.com/startups/spec27) | Inspiration validation | 6/10 | S'inspirer de la validation spec-driven pour tester skills, prompts et workflows CLI. |
 | [MemoryPlugin](https://betalist.com/startups/memoryplugin) | Inspiration mémoire | 5/10 | Réfléchir à une mémoire persistante maîtrisée pour agents et sessions. |
 | [DiffHook](https://betalist.com/startups/diffhook) | Inspiration veille | 5/10 | Surveiller changements de docs/outils qui impactent les scripts et skills. |
-| [frp](https://github.com/fatedier/frp) | Inspiration réseau | 4/10 | Référence de tunnel à connaître, mais plutôt côté ShipFlow que dotfiles. |
+| [frp](https://github.com/fatedier/frp) | Inspiration réseau | 4/10 | Référence de tunnel à connaître, mais plutôt côté ShipGlowz que dotfiles. |
 
 ## Statut
 

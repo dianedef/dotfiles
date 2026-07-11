@@ -28,6 +28,16 @@ Chemins utiles :
 ~/.config/mail-admin/oauth/<account>/
 ```
 
+## Mail Intelligence review
+
+```text
+:MailIntake       ouvrir le panneau de revue
+:MailIntakeScan   créer les fiches d'attente depuis le Maildir local
+:MailIntakeScan!  dry-run sans écrire de fiche
+```
+
+Dans le panneau : `<CR>` ouvre la source, `a` demande l'analyse Avante, `h` copie un handoff `#source`, `y` accepte, `e` marque édité, `x` rejette, `i` ignore.
+
 ## Comment trouver un raccourci que tu ne connais pas
 
 ### L'aide intégrée

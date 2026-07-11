@@ -100,67 +100,67 @@ cd ~/dotfiles && ./install.sh
 - Format with StyLua: 2-space indent, 120 column width
 - Use return table pattern for modules; lazy.nvim spec format for plugins
 
-## ShipFlow Skills
+## ShipGlowz Skills
 
-Global workflow skills are owned by ShipFlow and synced from `~/shipflow/skills/` into the runtime by the ShipFlow installer. This repository may keep historical samples or editor-facing notes, but it is not the source of truth for live Claude/Codex skills.
+Global workflow skills are owned by ShipGlowz and synced from `~/shipglowz/skills/` into the runtime by the ShipGlowz installer. This repository may keep historical samples or editor-facing notes, but it is not the source of truth for live Claude/Codex skills.
 
 ### Task & Workflow Skills
-- `/shipflow-tasks` — Update TASKS.md, mark completed items, suggest next steps
-- `/shipflow-backlog` — Capture ideas, defer non-urgent tasks
-- `/shipflow-priorities` — Re-rank tasks by impact/effort
-- `/shipflow-review` — Session review, update docs, plan next
+- `/shipglowz-tasks` — Update TASKS.md, mark completed items, suggest next steps
+- `/shipglowz-backlog` — Capture ideas, defer non-urgent tasks
+- `/shipglowz-priorities` — Re-rank tasks by impact/effort
+- `/shipglowz-review` — Session review, update docs, plan next
 - `/sf-resume` — Fast thread summary with task statuses and close/keep-open verdict
-- `/shipflow-ship` — Stage, commit, push + auto-sync ShipFlow data
+- `/shipglowz-ship` — Stage, commit, push + auto-sync ShipGlowz data
 
 ### Audit Skills (8 domains, 3 modes: `@file` = page, no arg = project, `global` = all projects)
-- `/shipflow-audit` — Master orchestrator: launches all 8 domains in parallel
-- `/shipflow-audit-code` — Architecture, security, reliability
-- `/shipflow-audit-design` — UI/UX, accessibility, responsiveness
-- `/shipflow-audit-copy` — Copywriting, tone, CTAs, grammar
-- `/shipflow-audit-seo` — Meta tags, structured data, internal linking
-- `/shipflow-audit-gtm` — Go-to-market, conversion, trust, analytics
-- `/shipflow-audit-translate` — i18n completeness, consistency, terminology
-- `/shipflow-deps` — Dependencies: vulnerabilities, outdated, unused, licenses
-- `/shipflow-perf` — Performance: bundle, rendering, CWV, data fetching
+- `/shipglowz-audit` — Master orchestrator: launches all 8 domains in parallel
+- `/shipglowz-audit-code` — Architecture, security, reliability
+- `/shipglowz-audit-design` — UI/UX, accessibility, responsiveness
+- `/shipglowz-audit-copy` — Copywriting, tone, CTAs, grammar
+- `/shipglowz-audit-seo` — Meta tags, structured data, internal linking
+- `/shipglowz-audit-gtm` — Go-to-market, conversion, trust, analytics
+- `/shipglowz-audit-translate` — i18n completeness, consistency, terminology
+- `/shipglowz-deps` — Dependencies: vulnerabilities, outdated, unused, licenses
+- `/shipglowz-perf` — Performance: bundle, rendering, CWV, data fetching
 
-Project registry for global mode: `~/shipflow/PROJECTS.md` (private) — lists all projects with domain applicability matrix (8 domains).
+Project registry for global mode: `~/shipglowz/PROJECTS.md` (private) — lists all projects with domain applicability matrix (8 domains).
 
 ### DevOps & Shipping Skills
-- `/shipflow-check` — Typecheck + lint + build, auto-fix errors
-- `/shipflow-deploy` — Full deploy cycle: check → ship → restart → verify
-- `/shipflow-status` — Cross-project git dashboard
+- `/shipglowz-check` — Typecheck + lint + build, auto-fix errors
+- `/shipglowz-deploy` — Full deploy cycle: check → ship → restart → verify
+- `/shipglowz-status` — Cross-project git dashboard
 
 ### Scaffolding & Init Skills
-- `/shipflow-init` — Bootstrap new project for ShipFlow tracking
-- `/shipflow-scaffold` — Generate files matching existing project patterns
+- `/shipglowz-init` — Bootstrap new project for ShipGlowz tracking
+- `/shipglowz-scaffold` — Generate files matching existing project patterns
 
 ### Research & Documentation Skills
-- `/shipflow-research` — Deep web research → structured markdown report
-- `/shipflow-docs` — Generate/update docs from code (README, API, components)
-- `/shipflow-enrich` — Web research + content upgrade
+- `/shipglowz-research` — Deep web research → structured markdown report
+- `/shipglowz-docs` — Generate/update docs from code (README, API, components)
+- `/shipglowz-enrich` — Web research + content upgrade
 
 ### Upgrade Skills
-- `/shipflow-migrate` — Framework upgrade assistant with backup branch
-- `/shipflow-changelog` — Auto-generate CHANGELOG.md from git history
+- `/shipglowz-migrate` — Framework upgrade assistant with backup branch
+- `/shipglowz-changelog` — Auto-generate CHANGELOG.md from git history
 
 ### Interactive Prompts
 
 All skills use `AskUserQuestion` for interactive selection when context is ambiguous:
 
 - **Workspace root detection**: Every skill detects when run from `~/` (no project markers) and prompts "Which project(s)?" instead of failing silently.
-- **Scope selection**: `/shipflow-review` prompts for time scope (daily/weekly/sprint/release). `/shipflow-check` prompts for which checks (typecheck/lint/build/test). `/shipflow-audit` prompts for which domains.
-- **Global mode**: `/shipflow-audit global` and `/shipflow-audit-* global` prompt for project and domain selection with multiSelect checkboxes.
-- **Content selection**: `/shipflow-enrich` with folder arg prompts which files to enrich.
+- **Scope selection**: `/shipglowz-review` prompts for time scope (daily/weekly/sprint/release). `/shipglowz-check` prompts for which checks (typecheck/lint/build/test). `/shipglowz-audit` prompts for which domains.
+- **Global mode**: `/shipglowz-audit global` and `/shipglowz-audit-* global` prompt for project and domain selection with multiSelect checkboxes.
+- **Content selection**: `/shipglowz-enrich` with folder arg prompts which files to enrich.
 
 When arguments are provided explicitly, prompts are skipped — the skill runs directly.
 
-### ShipFlow Data
+### ShipGlowz Data
 
-The `ShipFlow` private repo (`~/shipflow/`) stores personal tracking data:
+The `ShipGlowz` private repo (`~/shipglowz/`) stores personal tracking data:
 - `TASKS.md` — master task tracker (symlinked to `~/TASKS.md`)
 - `AUDIT_LOG.md` — cross-project audit history (symlinked to `~/AUDIT_LOG.md`)
 
-`install.sh` clones it automatically via `git@github.com:${GITHUB_USERNAME}/shipflow.git`.
+`install.sh` clones it automatically via `git@github.com:${GITHUB_USERNAME}/shipglowz.git`.
 
 ## Key Conventions
 

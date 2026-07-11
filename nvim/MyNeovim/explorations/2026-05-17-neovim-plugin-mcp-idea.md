@@ -66,7 +66,7 @@ This setup already has many AI frontends. The interesting opportunity is probabl
 
 ### Option B: MCP Server For Dotfiles And Neovim Context
 
-- Summary: Build an MCP server that exposes curated tools such as reading current project context, listing ShipFlow docs, or preparing prompts.
+- Summary: Build an MCP server that exposes curated tools such as reading current project context, listing ShipGlowz docs, or preparing prompts.
 - Pros: Useful from Claude Code and other MCP clients; can make local context portable.
 - Cons: More moving parts; requires deciding which client should consume it; security boundaries matter.
 

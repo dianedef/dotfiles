@@ -2,7 +2,7 @@
   "enableAllProjectMcpServers": false,
   "statusLine": {
     "type": "command",
-    "command": "bash /home/ubuntu/shipflow/.claude/statusline-starship.sh"
+    "command": "bash /home/ubuntu/shipglowz/.claude/statusline-starship.sh"
   },
   "theme": "dark",
   "mcpServers": {

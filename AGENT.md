@@ -89,5 +89,5 @@ Avant toute modification de logique, lire en priorité:
   - fiabiliser les sorties de santé/trace,
   - corriger des régressions d'installation,
   - améliorer la portabilité des chemins.
-- Documenter chaque décision de configuration dans `shipflow_data/technical/context.md`, `shipflow_data/technical/context-function-tree.md` ou `shipflow_data/technical/README.md`.
+- Documenter chaque décision de configuration dans `shipglowz_data/technical/context.md`, `shipglowz_data/technical/context-function-tree.md` ou `shipglowz_data/technical/README.md`.
 - Éviter d'introduire des dépendances externes non déclarées dans `.env`/`env.example`.

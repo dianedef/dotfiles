@@ -26,7 +26,7 @@ depends_on:
   - "/home/claude/dotfiles/install.sh"
   - "/home/claude/dotfiles/lib.sh"
   - "/home/claude/dotfiles/config.sh"
-next_step: /sf-docs audit shipflow_data/technical/context.md
+next_step: /sf-docs audit shipglowz_data/technical/context.md
 supersedes: []
 next_review: "2026-07-26"
 next_step: /sf-docs audit CONTEXT.md
@@ -107,4 +107,4 @@ Ce dépôt regroupe un ensemble de configurations locales (terminal, éditeur, f
 - La base de configuration peut évoluer vite (MCP/AI tools), maintenir la cohérence entre `config.sh` et `install.sh` lors de tout ajout.
 - Le profil Termux ne doit pas réintroduire Node.js, GitHub CLI, Doppler, MCP, Copilot, Claude/Codex/OpenCode, Aider ou agents Neovim; il cible Markdown seulement.
 - Les dépendances de santé (`run_health_check`) doivent rester alignées avec les composants réellement installés via `DOTFILES_ONLY`.
-- Le panneau explorateur Neovim partage sa largeur via `nvim/MyNeovim/lua/config/explorer-panel.lua`; `shipflow` expose `ShipFlowExplorerWidth20`, `ShipFlowExplorerWidth35` et `ShipFlowExplorerWidthFull` avec les mappings `<leader>e2`, `<leader>e3`, `<leader>eF` pour Snacks et Neo-tree.
+- Le panneau explorateur Neovim partage sa largeur via `nvim/MyNeovim/lua/config/explorer-panel.lua`; `shipglowz` expose `ShipGlowzExplorerWidth20`, `ShipGlowzExplorerWidth35` et `ShipGlowzExplorerWidthFull` avec les mappings `<leader>e2`, `<leader>e3`, `<leader>eF` pour Snacks et Neo-tree.

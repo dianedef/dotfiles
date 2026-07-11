@@ -2504,7 +2504,7 @@ install_component() {
             success "Shell configured"
             ;;
         claude-code)
-            warn "claude-code is owned by ShipFlow. Run the ShipFlow installer instead."
+            warn "claude-code is owned by ShipGlowz. Run the ShipGlowz installer instead."
             ;;
         claude-chill)
             if is_installed claude-chill; then

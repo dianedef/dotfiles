@@ -24,8 +24,8 @@ evidence:
 depends_on:
   - "/home/claude/dotfiles/README.md"
   - "/home/claude/dotfiles/CLAUDE.md"
-  - "/home/claude/dotfiles/shipflow_data/technical/context.md"
-  - "/home/claude/dotfiles/shipflow_data/technical/context-function-tree.md"
+  - "/home/claude/dotfiles/shipglowz_data/technical/context.md"
+  - "/home/claude/dotfiles/shipglowz_data/technical/context-function-tree.md"
 linked_systems:
   - Bash
   - Neovim
@@ -42,7 +42,7 @@ invariants:
   - config.sh and lib.sh must stay in sync for component behavior.
 supersedes: []
 next_review: "2026-07-26"
-next_step: /sf-docs audit shipflow_data/technical/README.md
+next_step: /sf-docs audit shipglowz_data/technical/README.md
 ---
 
 # ARCHITECTURE
@@ -123,7 +123,7 @@ Contrainte: la même orchestration est réutilisable en mode non-interactif (CI)
 - `Zoxide`, `Doppler`, `FZF`, `GH CLI`, `lsd`, `bat`.
 - Outils Node globaux via `pnpm` quand disponible:
   - `@apify/mcpc`, `@zed-industries/codex-acp`, `tldr`, `eslint`, plus outils listés dans `DOTFILES_ALL_COMPONENTS`.
-  - `claude`, `codex`, les skills ShipFlow, et les configs runtime `~/.claude` / `~/.codex` sont exclus de ce périmètre et appartiennent à ShipFlow.
+  - `claude`, `codex`, les skills ShipGlowz, et les configs runtime `~/.claude` / `~/.codex` sont exclus de ce périmètre et appartiennent à ShipGlowz.
 
 ### Modules spécifiques Termux
 
@@ -144,7 +144,7 @@ Contrainte: la même orchestration est réutilisable en mode non-interactif (CI)
   - `tmux` -> `~/.tmux.conf`
   - `ghostty/config` -> `~/.config/ghostty/config`
   - `.config/mcp/servers.json` -> `mcp/mcp-servers.json`
-  - liaisons de `TASKS.md` et `AUDIT_LOG.md` depuis `~/shipflow` quand disponible.
+  - liaisons de `TASKS.md` et `AUDIT_LOG.md` depuis `~/shipglowz` quand disponible.
 
 ## Données et flux de secrets
 

@@ -186,30 +186,30 @@ else
     log "WARN" "⚠️  Ranger not found, install with: pkg install ranger"
 fi
 
-# ShipFlow local tunnel tools (urls/tunnel)
-SHIPFLOW_LOCAL_INSTALLED=false
-SHIPFLOW_DIR="$HOME/shipflow"
-step "4/6 Installation des tunnels ShipFlow..."
-if [ -d "$SHIPFLOW_DIR/.git" ]; then
-    if git -C "$SHIPFLOW_DIR" diff --quiet && git -C "$SHIPFLOW_DIR" diff --cached --quiet; then
-        git -C "$SHIPFLOW_DIR" pull --ff-only >/dev/null 2>&1 || log "WARN" "⚠️  Could not update existing ShipFlow repo"
+# ShipGlowz local tunnel tools (urls/tunnel)
+SHIPGLOWZ_LOCAL_INSTALLED=false
+SHIPGLOWZ_DIR="$HOME/shipglowz"
+step "4/6 Installation des tunnels ShipGlowz..."
+if [ -d "$SHIPGLOWZ_DIR/.git" ]; then
+    if git -C "$SHIPGLOWZ_DIR" diff --quiet && git -C "$SHIPGLOWZ_DIR" diff --cached --quiet; then
+        git -C "$SHIPGLOWZ_DIR" pull --ff-only >/dev/null 2>&1 || log "WARN" "⚠️  Could not update existing ShipGlowz repo"
     else
-        log "WARN" "⚠️  Existing ShipFlow repo has local changes; skipping update"
+        log "WARN" "⚠️  Existing ShipGlowz repo has local changes; skipping update"
     fi
-elif [ -e "$SHIPFLOW_DIR" ]; then
-    log "WARN" "⚠️  $SHIPFLOW_DIR exists but is not a git repository; skipping ShipFlow local tools"
+elif [ -e "$SHIPGLOWZ_DIR" ]; then
+    log "WARN" "⚠️  $SHIPGLOWZ_DIR exists but is not a git repository; skipping ShipGlowz local tools"
 else
-    if ! GIT_TERMINAL_PROMPT=0 git clone https://github.com/diane-defores/shipflow.git "$SHIPFLOW_DIR" >/dev/null 2>&1; then
-        log "WARN" "⚠️  Could not clone ShipFlow repo; urls/tunnel aliases not installed"
+    if ! GIT_TERMINAL_PROMPT=0 git clone https://github.com/diane-defores/shipglowz.git "$SHIPGLOWZ_DIR" >/dev/null 2>&1; then
+        log "WARN" "⚠️  Could not clone ShipGlowz repo; urls/tunnel aliases not installed"
     fi
 fi
 
-if [ -f "$SHIPFLOW_DIR/local/install.sh" ]; then
-    if bash "$SHIPFLOW_DIR/local/install.sh" >> "$LOG_FILE" 2>&1; then
-        SHIPFLOW_LOCAL_INSTALLED=true
-        log "INFO" "✅ ShipFlow local tunnel tools installed (urls/tunnel)"
+if [ -f "$SHIPGLOWZ_DIR/local/install.sh" ]; then
+    if bash "$SHIPGLOWZ_DIR/local/install.sh" >> "$LOG_FILE" 2>&1; then
+        SHIPGLOWZ_LOCAL_INSTALLED=true
+        log "INFO" "✅ ShipGlowz local tunnel tools installed (urls/tunnel)"
     else
-        log "WARN" "⚠️  ShipFlow local tunnel installer failed"
+        log "WARN" "⚠️  ShipGlowz local tunnel installer failed"
     fi
 fi
 
@@ -461,16 +461,16 @@ report "  ${REPORT_GREEN}✓${REPORT_RESET} 📁 Navigation fichiers: ranger, ri
 report "  ${REPORT_GREEN}✓${REPORT_RESET} 🐚 Shell: Starship, Zoxide, aliases Termux"
 report "  ${REPORT_GREEN}✓${REPORT_RESET} 🔐 Connexion: OpenSSH, autossh, Mosh, tmux"
 report "  ${REPORT_GREEN}✓${REPORT_RESET} 🎨 Apparence: JetBrainsMono Nerd Font, termux-theme"
-if [ "$SHIPFLOW_LOCAL_INSTALLED" = true ]; then
-    report "  ${REPORT_GREEN}✓${REPORT_RESET} 🚇 ShipFlow local tunnels: urls, tunnel"
+if [ "$SHIPGLOWZ_LOCAL_INSTALLED" = true ]; then
+    report "  ${REPORT_GREEN}✓${REPORT_RESET} 🚇 ShipGlowz local tunnels: urls, tunnel"
 fi
 report ""
 report "${REPORT_BOLD}${REPORT_BLUE}⌨️  Commandes utiles${REPORT_RESET}"
 report "  ${REPORT_CYAN}n${REPORT_RESET}          Ouvrir Neovim"
 report "  ${REPORT_CYAN}r${REPORT_RESET}          Ouvrir Ranger"
 report "  ${REPORT_CYAN}thermux${REPORT_RESET}    Ouvrir le sélecteur de thème"
-report "  ${REPORT_CYAN}urls${REPORT_RESET}       Ouvrir les tunnels ShipFlow"
-report "  ${REPORT_CYAN}tunnel${REPORT_RESET}     Gérer un tunnel ShipFlow"
+report "  ${REPORT_CYAN}urls${REPORT_RESET}       Ouvrir les tunnels ShipGlowz"
+report "  ${REPORT_CYAN}tunnel${REPORT_RESET}     Gérer un tunnel ShipGlowz"
 report "  ${REPORT_CYAN}re${REPORT_RESET}         Recharger le shell"
 report ""
 if [ "$FONT_INSTALLED" = true ] && [ -s "$HOME/.termux/font.ttf" ]; then

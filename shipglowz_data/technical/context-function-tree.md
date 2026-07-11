@@ -21,10 +21,10 @@ evidence:
   - "/home/claude/dotfiles/doppler-setup.sh"
 depends_on:
   - "/home/claude/dotfiles/AGENT.md"
-  - "/home/claude/dotfiles/shipflow_data/technical/context.md"
+  - "/home/claude/dotfiles/shipglowz_data/technical/context.md"
 supersedes: []
 next_review: "2026-07-26"
-next_step: /sf-docs audit shipflow_data/technical/context-function-tree.md
+next_step: /sf-docs audit shipglowz_data/technical/context-function-tree.md
 ---
 
 # CONTEXT-FUNCTION-TREE
@@ -141,5 +141,5 @@ next_step: /sf-docs audit shipflow_data/technical/context-function-tree.md
 
 - `install.sh` contient explicitement l'ordre: dépendances -> outils -> node -> shell tools -> shell integration -> MCP -> auth.
 - `setup_configs` enchaîne les symlinks `nvim`, `ranger`, `starship`, `tmux`, `ghostty`.
-- `setup_mcp_config` publie seulement le registre MCP partagé sous `~/.config/mcp/servers.json`; les fichiers runtime Claude/Codex sont gérés par ShipFlow.
+- `setup_mcp_config` publie seulement le registre MCP partagé sous `~/.config/mcp/servers.json`; les fichiers runtime Claude/Codex sont gérés par ShipGlowz.
 - `termux.sh` montre clairement la voie Android Markdown-only.

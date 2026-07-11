@@ -24,10 +24,10 @@ linked_systems:
   - Git
   - difftastic
 depends_on:
-  - artifact: "shipflow_data/technical/context.md"
+  - artifact: "shipglowz_data/technical/context.md"
     artifact_version: "0.1.0"
     required_status: "draft"
-  - artifact: "shipflow_data/editorial/content-map.md"
+  - artifact: "shipglowz_data/editorial/content-map.md"
     artifact_version: "1.0.0"
     required_status: "reviewed"
 supersedes: []
@@ -35,7 +35,7 @@ evidence:
   - "nvim/MyNeovim/lua/neogit/integrations/codediff.lua now shadows Neogit's codediff backend with a local Difftastic snapshot renderer."
   - "nvim/MyNeovim/lua/diffflowz/init.lua validates Git context and opens the inline review for working-tree or staged changes."
   - "difftastic 0.69.0 is installed as difft and renders a single-column terminal diff, not an editable diff-buffer engine."
-next_step: "/101-sf-ready shipflow_data/workflow/specs/diffflowz-editable-git-review.md"
+next_step: "/101-sf-ready shipglowz_data/workflow/specs/diffflowz-editable-git-review.md"
 ---
 
 # Spec: DiffFlowz Editable Git Review
@@ -108,7 +108,7 @@ Creer un module local `diffflowz` qui valide le contexte Git puis delegue l'ouve
 ## Dependencies
 
 - Runtime: `git`, Neovim 0.10+, `sindrets/diffview.nvim`; `difft` reste optionnel pour la commande de rendu existante.
-- Document contracts: `shipflow_data/technical/context.md` 0.1.0 et `shipflow_data/editorial/content-map.md` 1.0.0.
+- Document contracts: `shipglowz_data/technical/context.md` 0.1.0 et `shipglowz_data/editorial/content-map.md` 1.0.0.
 - Metadata gaps: `context.md` est draft, mais il couvre la configuration Neovim et ne bloque pas ce chantier local.
 - Fresh external docs: fresh-docs not needed; la premiere version compose des interfaces locales deja presentes et n'actualise aucune API externe.
 
@@ -205,7 +205,7 @@ Creer un module local `diffflowz` qui valide le contexte Git puis delegue l'ouve
 ### Manual checklist
 
 - Needed: yes.
-- Checklist path: `shipflow_data/workflow/test-checklists/diffflowz-editable-git-review.md`.
+- Checklist path: `shipglowz_data/workflow/test-checklists/diffflowz-editable-git-review.md`.
 - Required scenario coverage: `DF-01 multi-file working tree`, `DF-02 buffer edit outside diff`, `DF-03 no changes`, `DF-04 staged`, `DF-05 Neogit regression`.
 - Exception with proof: Difftastic's terminal UI has no local automated visual harness; commands/imports and a reproducible manual checklist provide alternate evidence.
 
@@ -238,10 +238,10 @@ None
 
 | Date UTC | Skill | Model | Action | Result | Next step |
 |----------|-------|-------|--------|--------|-----------|
-| 2026-06-19 22:07:26 UTC | 100-sf-spec | GPT-5 Codex | Created spec for DiffFlowz editable Git review | draft | /101-sf-ready shipflow_data/workflow/specs/diffflowz-editable-git-review.md |
-| 2026-06-19 22:10:00 UTC | 101-sf-ready | GPT-5 Codex | Reviewed behavior, scope, error states, proof contract and Neogit boundary | ready | /102-sf-start shipflow_data/workflow/specs/diffflowz-editable-git-review.md |
-| 2026-06-19 22:14:00 UTC | 102-sf-start | GPT-5 Codex | Removed the Neogit renderer patch; added DiffFlowz commands, Diffview mapping, documentation and manual checklist | implemented | /103-sf-verify shipflow_data/workflow/specs/diffflowz-editable-git-review.md |
-| 2026-06-19 22:17:00 UTC | 103-sf-verify | GPT-5 Codex | Verified formatting, imports, commands, Diffview lazy loading and Neogit loading; interactive scenarios remain unrun | partial | /107-sf-test shipflow_data/workflow/test-checklists/diffflowz-editable-git-review.md |
+| 2026-06-19 22:07:26 UTC | 100-sf-spec | GPT-5 Codex | Created spec for DiffFlowz editable Git review | draft | /101-sf-ready shipglowz_data/workflow/specs/diffflowz-editable-git-review.md |
+| 2026-06-19 22:10:00 UTC | 101-sf-ready | GPT-5 Codex | Reviewed behavior, scope, error states, proof contract and Neogit boundary | ready | /102-sf-start shipglowz_data/workflow/specs/diffflowz-editable-git-review.md |
+| 2026-06-19 22:14:00 UTC | 102-sf-start | GPT-5 Codex | Removed the Neogit renderer patch; added DiffFlowz commands, Diffview mapping, documentation and manual checklist | implemented | /103-sf-verify shipglowz_data/workflow/specs/diffflowz-editable-git-review.md |
+| 2026-06-19 22:17:00 UTC | 103-sf-verify | GPT-5 Codex | Verified formatting, imports, commands, Diffview lazy loading and Neogit loading; interactive scenarios remain unrun | partial | /107-sf-test shipglowz_data/workflow/test-checklists/diffflowz-editable-git-review.md |
 
 ## Current Chantier Flow
 
@@ -252,4 +252,4 @@ None
 - `104-sf-end`: not launched.
 - `005-sf-ship`: not launched.
 
-Next step: `/107-sf-test shipflow_data/workflow/test-checklists/diffflowz-editable-git-review.md`
+Next step: `/107-sf-test shipglowz_data/workflow/test-checklists/diffflowz-editable-git-review.md`
