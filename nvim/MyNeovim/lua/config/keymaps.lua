@@ -123,18 +123,7 @@ vim.keymap.set("i", "<ScrollWheelUp>", "<C-o>3<C-y>", { desc = "Scroll up" })
 vim.keymap.set("i", "<ScrollWheelDown>", "<C-o>3<C-e>", { desc = "Scroll down" })
 
 -- Notifications (which-key group)
-local function copy_to_clipboard(text)
-  -- OSC 52 pour copier via terminal (fonctionne sur SSH/Termux)
-  local b64 = vim.base64.encode(text)
-  local osc52 = string.format("\027]52;c;%s\027\\", b64)
-  io.stdout:write(osc52)
-  -- Aussi sauvegarder dans un fichier
-  local f = io.open("/tmp/nvim_notif.txt", "w")
-  if f then
-    f:write(text)
-    f:close()
-  end
-end
+local copy_to_clipboard = require("shipglowz.clipboard").copy
 
 vim.keymap.set("n", "<leader>nn", "<cmd>Noice history<cr>", { desc = "Afficher notifications" })
 

@@ -29,6 +29,16 @@ def require_notmuch():
     return exe
 
 
+def notmuch_environment():
+    env = os.environ.copy()
+    if env.get("NOTMUCH_CONFIG"):
+        return env
+    private_config = Path("~/.config/notmuch/mail-intel-config").expanduser()
+    if private_config.exists():
+        env["NOTMUCH_CONFIG"] = str(private_config)
+    return env
+
+
 def account_path(root, account):
     path = root / account
     if not path.exists():
@@ -51,7 +61,13 @@ def list_folders(root, account):
 
 def run_notmuch(args):
     exe = require_notmuch()
-    result = subprocess.run([exe, *args], text=True, capture_output=True, check=False)
+    result = subprocess.run(
+        [exe, *args],
+        text=True,
+        capture_output=True,
+        check=False,
+        env=notmuch_environment(),
+    )
     if result.returncode != 0:
         raise RuntimeError(result.stderr.strip() or result.stdout.strip() or "notmuch command failed")
     return result.stdout

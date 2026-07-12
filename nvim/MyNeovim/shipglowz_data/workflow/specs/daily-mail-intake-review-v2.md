@@ -104,6 +104,7 @@ Add a `v2` intake layer around the existing Mail Intel pipeline. A local daily c
 ## Queue Storage Contract
 
 - The private queue root is `~/.shipglowz/private/data/mail-intake/` by default.
+- The approved local raw-mail source may live under `~/.shipglowz/private/data/mail-source/`; raw source files are excluded from the private Git working tree and are not queue records.
 - Storage is `one file per queue item`, using a human-editable text format with YAML frontmatter and Markdown body.
 - The queue is short-retention operational state, not a durable email archive, but it is still versioned in the private repo for operator recovery.
 - Pending items live in `~/.shipglowz/private/data/mail-intake/inbox/`.
@@ -266,7 +267,7 @@ Add a `v2` intake layer around the existing Mail Intel pipeline. A local daily c
   - User story link: Lets the operator validate proposals without leaving Neovim.
   - Depends on: Tasks 2-4
   - Validate with: headless command registration and manual queue-fixture review checks.
-  - Notes: Reuse the existing Mail Intel UX patterns where they are good enough.
+  - Notes: The v2 review commands remain active alongside the restored v1 reader. Shared configuration lives in `lua/shipglowz/mail/config.lua`; `<leader>mi` and `<leader>ms` remain owned by v2.
 
 - [x] Task 6: Add downstream prompt/handoff generation
   - File: `lua/shipglowz/mail/init.lua` and CLI helpers as needed
@@ -276,13 +277,13 @@ Add a `v2` intake layer around the existing Mail Intel pipeline. A local daily c
   - Validate with: prompt generation checks for `emailing`, repurpose, research, and docs-oriented cases.
   - Notes: Do not hardcode every case into one giant prompt string.
 
-- [ ] Task 7: Add scheduling path
+- [x] Task 7: Add scheduling path
   - Files: local docs, optional user-systemd unit samples, optional helper script
-  - Action: Document and, if justified, provide a user-level timer/service pattern for daily runs after the manual command is proven reliable.
+  - Action: Provide and document a user-level timer/service that runs `mbsync`, `notmuch new`, and the bounded intake scan twice daily after the manual command is proven reliable.
   - User story link: Removes the need to remember the intake pass every day.
   - Depends on: Tasks 3-6
-  - Validate with: `systemctl --user` dry-run or sample-unit review plus idempotent rerun proof.
-  - Notes: Scheduling is last, not first.
+  - Validate with: `systemd-analyze verify`, active timer inspection, one manual service run, and successful sync/index/scan exit statuses.
+  - Notes: Active units are `~/.config/systemd/user/shipglowz-mail-intake.{service,timer}`; the timer runs at 07:00 and 14:00 Europe/Paris and does not invoke Avante or send mail.
 
 - [x] Task 8: Update docs
   - Files: `Mail Intel.md`, `Cheat Sheet.md`, optional dedicated queue doc
@@ -362,6 +363,15 @@ Add a `v2` intake layer around the existing Mail Intel pipeline. A local daily c
 | 2026-07-08 00:00:00 UTC | 703-sg-review | GPT-5 Codex | Migrated spec references from shipglowz to shipglowz namespace | Spec paths and headless test commands now match the current repo naming; implementation gaps remain | /100-sf-spec daily mail intake review v2 |
 | 2026-07-08 00:00:00 UTC | 100-sf-spec | GPT-5 Codex | Linked the daily intake spec to a new sibling Gmail filter-management spec | Upstream Gmail routing is now modeled as part of the broader email-management system without weakening the local review queue boundary | /101-sf-ready gmail filter management for mail intel |
 | 2026-07-11 00:00:00 UTC | 100-sf-spec | GPT-5 Codex | Resolved classifier and review-surface decisions from operator request | Ready: buffer-driven review panel with explicit Avante-assisted classification and no silent downstream action | /102-sf-start daily mail intake review v2 |
+| 2026-07-12 00:00:00 UTC | 001-sg-build | inherited current model | Restored the Mail Intelligence v1 Neovim reader from commit `8860949`, integrated it with v2, and validated both command surfaces headlessly | implemented and locally verified for the reader/review integration, including the v2 LuaJIT unpack compatibility fix; overall v2 remains partial because Task 4 classification adapter and Task 7 scheduling are pending | Implement Task 4 classification adapter |
+| 2026-07-12 15:34:33 UTC | 103-sg-verify | inherited current model (applied) | Independently verified Mail Intelligence v1 reader restoration and v2 review coexistence with evidence-first local probes only | not verified: v1 commands, mappings, CLI construction, help surfaces, security boundary, and wrapper removal pass, but the v2 Avante action passes `ask` while the installed API requires `question`, and the checked Task 6 handoff does not include the queue project, angle, owner skill, risks, or suggested action; Tasks 4 and 7 also remain pending | /106-sg-fix repair the v2 Avante option and queue-aware handoff, then rerun /103-sg-verify |
+| 2026-07-12 15:49:49 UTC | 106-sg-fix | inherited current model (delegated sequential) | Applied the bounded v2 Avante and queue-aware handoff repair under BUG-2026-07-12-001 | fix-attempted; local headless/static retest pending, with real Avante provider and notmuch/Maildir interaction explicitly out of scope | /103-sg-verify daily mail intake review v2 |
+| 2026-07-12 15:53:15 UTC | 103-sg-verify | GPT-5 Codex | Re-ran the bounded post-fix verification with a sanitized queue fixture | partial: all 10 commands, both review mappings, metadata-only handoff fields, body redaction, Avante `question` contract, unavailable-Avante fallback, CLI help, diff hygiene, duplicate-wrapper removal, and docs/security boundary checks pass; real Avante provider/notmuch/Maildir proof remains out of scope and Tasks 4 and 7 remain pending | /104-sg-end only for the bounded fix record, while the v2 chantier remains partial and Task 4 classification adapter remains next |
+| 2026-07-12 21:10:43 UTC | 107-sg-test | GPT-5 Codex | Ran the first guided manual scenario against the migrated private Maildir source | pass: the Neovim review panel displayed 5 pending proposals and opened the first real email body; AI analysis and governed handoff remain to be tested | Continue /107-sg-test with `a` and `h` |
+| 2026-07-12 21:43:58 UTC | 107-sg-test | GPT-5 Codex | Retested the source-buffer lifecycle after BUG-2026-07-12-002 | pass: opening a source, returning to the list, and invoking `a` opened Avante with its pre-prompt without E95; governed handoff remains to be tested | Continue /107-sg-test with `h` |
+| 2026-07-12 22:42:46 UTC | 107-sg-test | GPT-5 Codex | Retested the governed handoff clipboard after BUG-2026-07-12-003 | pass: `h` copied the expected `#source` metadata and did not include the email body | Continue broader v2 verification |
+| 2026-07-12 22:44:54 UTC | 300-sg-docs | GPT-5 Codex | Aligned Mail Intelligence docs with the private raw-mail source, dedicated notmuch config, OSC 52 clipboard fallback, and Which-Key registration | docs aligned; runtime behavior and QA evidence remain tracked separately | Continue broader v2 verification |
+| 2026-07-12 22:50:53 UTC | 102-sg-start | GPT-5 Codex | Activated the twice-daily user systemd sync/index/intake schedule after the manual flow passed | Task 7 implemented; `mbsync`, `notmuch new`, and `mail-intake scan` completed successfully in one manual service run | Continue Task 4 classification adapter and broader v2 verification |
 
 ## Current Chantier Flow
 
@@ -369,7 +379,7 @@ Add a `v2` intake layer around the existing Mail Intel pipeline. A local daily c
 |------|--------|-------|
 | sf-spec | done | New v2 chantier drafted on top of the existing Mail Intel v1 pipeline. |
 | sf-ready | done | Operator selected interactive Avante-assisted classification and a persistent buffer-driven review panel. |
-| sf-start | done | Private queue CLI, adjacent source panel, Avante analysis action, decisions, and governed `#source` handoff are implemented. |
-| sf-verify | pending | No implementation proof yet. |
+| sf-start | done | Private queue review, restored v1 reader, and the twice-daily user timer are integrated under `lua/shipglowz/mail/`; Task 4 classification adapter remains pending. |
+| sf-verify | partial | The original v1/v2 defects and the scheduled sync/index/intake path have bounded/manual proof. Task 4 classification remains pending, and broader v2 verification is not complete. |
 | sf-end | pending | Closure depends on implementation and verification. |
 | sf-ship | pending | Optional, only if the user wants commit/push workflow. |

@@ -163,7 +163,13 @@ def main():
     parser.add_argument("--private-root", default=None)
     sub = parser.add_subparsers(dest="command", required=True)
     scan_cmd = sub.add_parser("scan")
-    scan_cmd.add_argument("--maildir-root", default=os.environ.get("MAIL_INTEL_ROOT", "~/Mail/competitors"))
+    scan_cmd.add_argument(
+        "--maildir-root",
+        default=os.environ.get(
+            "MAIL_INTEL_ROOT",
+            os.path.expanduser("~/.shipglowz/private/data/mail-source/competitors"),
+        ),
+    )
     scan_cmd.add_argument("--account", default=os.environ.get("MAIL_INTEL_ACCOUNT", "business-a"))
     scan_cmd.add_argument("--folder", default=os.environ.get("MAIL_INTEL_FOLDER", "_to_transcribe"))
     scan_cmd.add_argument("--limit", type=int, default=30)

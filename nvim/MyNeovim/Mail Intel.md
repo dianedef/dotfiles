@@ -13,6 +13,12 @@ La revue interactive se lance avec `:MailIntake` ou `<leader>mi`. Elle ouvre une
 
 `:MailIntakeScan` crée les fiches metadata-only dans `~/.shipglowz/private/data/mail-intake/inbox/`. `:MailIntakeScan!` effectue un dry-run. Les corps bruts restent dans le Maildir et ne sont jamais écrits dans la queue privée.
 
+Le corps brut peut résider dans la source Maildir privée approuvée sous `~/.shipglowz/private/data/mail-source/`, mais cette arborescence est exclue du Git privé. Seules les fiches de revue metadata-only sont écrites dans `mail-intake/`.
+
+Le handoff `h` utilise le registre Neovim, le transport terminal OSC 52 et le fallback local `/tmp/nvim_notif.txt`. Il ne contient que les métadonnées de routage et le `source_id`, jamais le corps de l’email.
+
+Le lecteur v1 reste actif en parallèle pour explorer directement le Maildir, rechercher un message et l'envoyer explicitement vers le workflow `$sf-content`. La review v2 est le flux quotidien; le lecteur v1 est la surface d'exploration ponctuelle.
+
 L'administration amont des labels et filtres Gmail vit maintenant a cote, via `scripts/mail-admin`, avec un registre local versionne sous `~/.shipglowz/private/data/mail-admin/`.
 
 ## Architecture
@@ -22,7 +28,7 @@ Gmail personnel
   -> scripts/mail-admin
   -> labels/filtres Gmail
   -> mbsync/isync
-  -> ~/Mail/competitors/<account>/
+  -> ~/.shipglowz/private/data/mail-source/<account>/
   -> notmuch
   -> scripts/mail-intel
   -> lua/shipglowz/mail/
@@ -35,11 +41,40 @@ Gmail personnel
 
 `scripts/mail-admin` est le seul chemin de mutation Gmail de ce systeme. Il gere les labels et filtres Gmail via l'API officielle, avec un `dry-run` possible avant application.
 
+## Planification locale
+
+Un timer systemd utilisateur lance automatiquement deux passages par jour, à 07:00 et 14:00 Europe/Paris :
+
+```text
+mbsync business-a-mail
+  -> notmuch new
+  -> scripts/mail-intake scan
+```
+
+Le service ne lance pas Avante, ne classe pas automatiquement les projets et n'envoie aucun email. Il prépare seulement les fiches privées à revoir dans Neovim.
+
+Contrôle :
+
+```bash
+systemctl --user status shipglowz-mail-intake.timer
+systemctl --user list-timers shipglowz-mail-intake.timer
+journalctl --user -u shipglowz-mail-intake.service -n 50 --no-pager
+```
+
+Déclenchement manuel du même passage :
+
+```bash
+systemctl --user start shipglowz-mail-intake.service
+```
+
+Les unités vivent sous `~/.config/systemd/user/shipglowz-mail-intake.{service,timer}` et utilisent la source privée `~/.shipglowz/private/data/mail-source/`.
+Le linger systemd utilisateur est activé pour que le timer continue à fonctionner après déconnexion : `loginctl show-user "$USER" -p Linger` doit afficher `Linger=yes`.
+
 ## Prérequis
 
 - `mbsync` ou `isync` pour synchroniser Gmail vers Maildir.
 - `notmuch` pour indexer et rechercher les emails locaux.
-- Un dossier local hors dépôt, par exemple `~/Mail/competitors`.
+- La source Maildir privée locale `~/.shipglowz/private/data/mail-source`.
 
 Ne committez jamais de mot de passe Gmail, app password, token OAuth, cookie ou contenu réel d'email dans ce dépôt.
 
@@ -55,16 +90,18 @@ sudo apt-get install -y notmuch isync
 Variables utiles:
 
 ```bash
-export MAIL_INTEL_ROOT="$HOME/Mail/competitors"
+export MAIL_INTEL_ROOT="$HOME/.shipglowz/private/data/mail-source/competitors"
 export MAIL_INTEL_ACCOUNT="business-a"
 export MAIL_INTEL_FOLDER="_to_transcribe"
 export MAIL_INTEL_LIMIT="30"
+# Optionnel si un autre index notmuch est utilisé :
+export NOTMUCH_CONFIG="$HOME/.config/notmuch/mail-intel-config"
 ```
 
 Structure attendue:
 
 ```text
-~/Mail/competitors/
+~/.shipglowz/private/data/mail-source/competitors/
   business-a/
     INBOX/
       cur/
@@ -75,14 +112,21 @@ Structure attendue:
 ## CLI
 
 ```bash
-scripts/mail-intel --maildir-root "$HOME/Mail/competitors" accounts
-scripts/mail-intel --maildir-root "$HOME/Mail/competitors" folders business-a
-scripts/mail-intel --maildir-root "$HOME/Mail/competitors" --format json list business-a _to_transcribe --limit 10
-scripts/mail-intel --maildir-root "$HOME/Mail/competitors" --format json search business-a "pricing" --limit 10
+scripts/mail-intel --maildir-root "$HOME/.shipglowz/private/data/mail-source/competitors" accounts
+scripts/mail-intel --maildir-root "$HOME/.shipglowz/private/data/mail-source/competitors" folders business-a
+scripts/mail-intel --maildir-root "$HOME/.shipglowz/private/data/mail-source/competitors" --format json list business-a _to_transcribe --limit 10
+scripts/mail-intel --maildir-root "$HOME/.shipglowz/private/data/mail-source/competitors" --format json search business-a "pricing" --limit 10
 scripts/mail-intel export <message-or-thread-id> --markdown
 ```
 
 `list`, `search`, `show` et `export` utilisent `notmuch`. Si `notmuch` n'est pas installé ou si le Maildir n'est pas encore indexé, la commande renvoie une erreur explicite.
+
+L’index de cette installation est séparé de l’ancien Maildir de test :
+
+```text
+~/.config/notmuch/mail-intel-config
+  path=/home/claude/.shipglowz/private/data/mail-source/competitors
+```
 
 ## Gmail Admin
 
@@ -131,20 +175,42 @@ Scopes utilises :
 - `https://www.googleapis.com/auth/gmail.labels`
 - `https://www.googleapis.com/auth/gmail.settings.basic`
 
-## Commandes Neovim legacy
+## Lecteur Neovim v1
 
-Les anciennes commandes `CompetitorMail*` appartiennent à la spec v1 historique et ne sont plus enregistrées par le module actuel. Utiliser `:MailIntake`, `:MailIntakeScan` et les mappings de la section `Mail Intelligence review` en haut de ce document.
+Les commandes `CompetitorMail*` sont actives sous le namespace `shipglowz.mail.reader` et réutilisent le CLI local en lecture seule `scripts/mail-intel`.
 
 ```vim
 :CompetitorMailAccounts
 :CompetitorMailInbox
 :CompetitorMailInbox business-a
+:CompetitorMailFolder _to_transcribe
 :CompetitorMailSearch pricing
 :CompetitorMailOpen <message-or-thread-id>
 :CompetitorMailCopyMarkdown
+:CompetitorMailCopySfContent
+:CompetitorMailSfContent
 ```
 
 `CompetitorMailInbox` et `CompetitorMailSearch` ouvrent une sélection via `vim.ui.select`. L'email choisi est rendu dans un buffer Markdown temporaire. `CompetitorMailCopyMarkdown` copie le contenu courant dans le presse-papiers et le registre par défaut.
+
+`CompetitorMailCopySfContent` copie le prompt et l'email courant sans appeler d'IA. `CompetitorMailSfContent` copie le même prompt puis l'envoie à Avante si celui-ci est disponible; sinon le prompt reste copié. L'alias historique `:CompetitorMailAvanteSfContent` reste enregistré pour compatibilité.
+
+Mappings du lecteur v1 :
+
+```text
+<leader>mI  inbox du lecteur
+<leader>mS  recherche dans le lecteur
+<leader>mf  choisir un dossier
+<leader>ma  lister les comptes
+<leader>mO  ouvrir par identifiant
+<leader>my  copier le Markdown
+<leader>mb  copier le prompt $sf-content
+<leader>mA  envoyer le prompt $sf-content a Avante
+```
+
+Les mappings minuscules `<leader>mi` et `<leader>ms` restent réservés à la review v2 (`:MailIntake` et `:MailIntakeScan`). Aucun chemin du lecteur ne modifie Gmail, les labels, le Maildir ou l'état distant.
+
+Dans Which-Key, appuyer sur `<leader>`, puis `m`, ouvre le groupe `Mail Intelligence / Markdown` avec les commandes de review et du lecteur. Les mappings `mi`, `ms`, `mI`, `mS`, `mf`, `ma`, `mO`, `my`, `mb` et `mA` sont enregistrés lorsque le module Mail est chargé.
 
 ## Gmail
 
@@ -169,7 +235,7 @@ sudo apt-get install -y notmuch isync
 2. Préparer les dossiers locaux:
 
 ```bash
-mkdir -p "$HOME/Mail/competitors/business-a/INBOX"
+mkdir -p "$HOME/.shipglowz/private/data/mail-source/competitors/business-a/INBOX"
 ```
 
 3. Créer un secret local hors dépôt:
@@ -198,8 +264,8 @@ Account business-a
 
 MaildirStore business-a-local
 SubFolders Verbatim
-Path ~/Mail/competitors/business-a/
-Inbox ~/Mail/competitors/business-a/INBOX
+Path ~/.shipglowz/private/data/mail-source/competitors/business-a/
+Inbox ~/.shipglowz/private/data/mail-source/competitors/business-a/INBOX
 
 Channel business-a-inbox
 Far :business-a-remote:
@@ -228,7 +294,7 @@ notmuch setup
 Quand `notmuch setup` demande le dossier mail, indiquez:
 
 ```text
-~/Mail/competitors
+~/.shipglowz/private/data/mail-source/competitors
 ```
 
 Puis indexez:
@@ -240,7 +306,7 @@ notmuch new
 7. Exporter les variables pour Neovim:
 
 ```bash
-export MAIL_INTEL_ROOT="$HOME/Mail/competitors"
+export MAIL_INTEL_ROOT="$HOME/.shipglowz/private/data/mail-source/competitors"
 export MAIL_INTEL_ACCOUNT="business-a"
 export MAIL_INTEL_FOLDER="_to_transcribe"
 ```
@@ -250,13 +316,14 @@ Pour les rendre permanentes, ajoutez-les à votre shell (`~/.bashrc`, `~/.zshrc`
 8. Tester:
 
 ```bash
-scripts/mail-intel --maildir-root "$HOME/Mail/competitors" accounts
-scripts/mail-intel --maildir-root "$HOME/Mail/competitors" folders business-a
-scripts/mail-intel --maildir-root "$HOME/Mail/competitors" --format json list business-a _to_transcribe --limit 10
+scripts/mail-intel --maildir-root "$HOME/.shipglowz/private/data/mail-source/competitors" accounts
+scripts/mail-intel --maildir-root "$HOME/.shipglowz/private/data/mail-source/competitors" folders business-a
+scripts/mail-intel --maildir-root "$HOME/.shipglowz/private/data/mail-source/competitors" --format json list business-a _to_transcribe --limit 10
 ```
 
 Ensuite dans Neovim:
 
 ```vim
 :MailIntake
+:CompetitorMailInbox
 ```

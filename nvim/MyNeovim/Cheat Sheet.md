@@ -38,6 +38,37 @@ Chemins utiles :
 
 Dans le panneau : `<CR>` ouvre la source, `a` demande l'analyse Avante, `h` copie un handoff `#source`, `y` accepte, `e` édite la fiche, `E` la marque éditée, `x` rejette, `i` ignore.
 
+Mappings du flux quotidien : `<leader>mi` ouvre la review et `<leader>ms` lance le scan.
+
+Which-Key : `<leader>`, puis `m` ouvre le groupe Mail Intelligence / Markdown.
+
+Le handoff `h` est copié via le registre Neovim et OSC 52 ; le fallback local est `/tmp/nvim_notif.txt`.
+
+Planification automatique à 07:00 et 14:00 Europe/Paris :
+
+```bash
+systemctl --user status shipglowz-mail-intake.timer
+systemctl --user list-timers shipglowz-mail-intake.timer
+journalctl --user -u shipglowz-mail-intake.service -n 50 --no-pager
+```
+
+## Mail Intelligence reader
+
+Exploration ponctuelle du Maildir local en lecture seule :
+
+```text
+:CompetitorMailAccounts       lister les comptes
+:CompetitorMailInbox          ouvrir le dossier par defaut
+:CompetitorMailFolder         ouvrir un dossier
+:CompetitorMailSearch         rechercher
+:CompetitorMailOpen           ouvrir par identifiant
+:CompetitorMailCopyMarkdown   copier l'email en Markdown
+:CompetitorMailCopySfContent  copier le prompt $sf-content
+:CompetitorMailSfContent      envoyer le prompt a Avante
+```
+
+Mappings : `<leader>mI` inbox, `<leader>mS` recherche, `<leader>mf` dossier, `<leader>ma` comptes, `<leader>mO` ouverture par ID, `<leader>my` copie Markdown, `<leader>mb` copie `$sf-content`, `<leader>mA` Avante.
+
 ## Comment trouver un raccourci que tu ne connais pas
 
 ### L'aide intégrée
@@ -431,7 +462,7 @@ Il est volontairement en lecture seule :
 
 ### Workflow simple
 
-1. Synchroniser Gmail vers le Maildir local avec `mbsync`.
+1. Synchroniser Gmail vers le Maildir privé local avec `mbsync`.
 2. Indexer avec `notmuch new`.
 3. Dans Neovim, lancer `<leader>mi`.
 4. Choisir un email dans la liste.
@@ -443,9 +474,10 @@ Il est volontairement en lecture seule :
 Les variables importantes sont :
 
 ```bash
-export MAIL_INTEL_ROOT="$HOME/Mail/competitors"
+export MAIL_INTEL_ROOT="$HOME/.shipglowz/private/data/mail-source/competitors"
 export MAIL_INTEL_ACCOUNT="business-a"
 export MAIL_INTEL_FOLDER="_to_transcribe"
+export NOTMUCH_CONFIG="$HOME/.config/notmuch/mail-intel-config"
 ```
 
 La doc complète est dans `Mail Intel.md`.
