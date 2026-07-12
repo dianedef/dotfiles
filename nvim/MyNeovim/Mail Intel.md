@@ -9,7 +9,7 @@ La revue interactive se lance avec `:MailIntake` ou `<leader>mi`. Elle ouvre une
 - `<CR>` ouvre l'email source.
 - `a` ouvre l'email et demande à Avante de proposer projet, angle, owner skill, risques et action.
 - `h` copie un handoff `#source` gouverné pour la skill suivante.
-- `y` accepte, `e` marque comme édité, `x` rejette et `i` ignore.
+- `y` accepte, `e` ouvre la fiche pour édition, `E` la marque éditée, `x` rejette et `i` ignore.
 
 `:MailIntakeScan` crée les fiches metadata-only dans `~/.shipglowz/private/data/mail-intake/inbox/`. `:MailIntakeScan!` effectue un dry-run. Les corps bruts restent dans le Maildir et ne sont jamais écrits dans la queue privée.
 
@@ -57,7 +57,7 @@ Variables utiles:
 ```bash
 export MAIL_INTEL_ROOT="$HOME/Mail/competitors"
 export MAIL_INTEL_ACCOUNT="business-a"
-export MAIL_INTEL_FOLDER="INBOX"
+export MAIL_INTEL_FOLDER="_to_transcribe"
 export MAIL_INTEL_LIMIT="30"
 ```
 
@@ -77,7 +77,7 @@ Structure attendue:
 ```bash
 scripts/mail-intel --maildir-root "$HOME/Mail/competitors" accounts
 scripts/mail-intel --maildir-root "$HOME/Mail/competitors" folders business-a
-scripts/mail-intel --maildir-root "$HOME/Mail/competitors" --format json list business-a INBOX --limit 10
+scripts/mail-intel --maildir-root "$HOME/Mail/competitors" --format json list business-a _to_transcribe --limit 10
 scripts/mail-intel --maildir-root "$HOME/Mail/competitors" --format json search business-a "pricing" --limit 10
 scripts/mail-intel export <message-or-thread-id> --markdown
 ```
@@ -131,7 +131,9 @@ Scopes utilises :
 - `https://www.googleapis.com/auth/gmail.labels`
 - `https://www.googleapis.com/auth/gmail.settings.basic`
 
-## Commandes Neovim
+## Commandes Neovim legacy
+
+Les anciennes commandes `CompetitorMail*` appartiennent à la spec v1 historique et ne sont plus enregistrées par le module actuel. Utiliser `:MailIntake`, `:MailIntakeScan` et les mappings de la section `Mail Intelligence review` en haut de ce document.
 
 ```vim
 :CompetitorMailAccounts
@@ -240,7 +242,7 @@ notmuch new
 ```bash
 export MAIL_INTEL_ROOT="$HOME/Mail/competitors"
 export MAIL_INTEL_ACCOUNT="business-a"
-export MAIL_INTEL_FOLDER="INBOX"
+export MAIL_INTEL_FOLDER="_to_transcribe"
 ```
 
 Pour les rendre permanentes, ajoutez-les à votre shell (`~/.bashrc`, `~/.zshrc`, ou le fichier équivalent utilisé par votre dotfiles).
@@ -250,11 +252,11 @@ Pour les rendre permanentes, ajoutez-les à votre shell (`~/.bashrc`, `~/.zshrc`
 ```bash
 scripts/mail-intel --maildir-root "$HOME/Mail/competitors" accounts
 scripts/mail-intel --maildir-root "$HOME/Mail/competitors" folders business-a
-scripts/mail-intel --maildir-root "$HOME/Mail/competitors" --format json list business-a INBOX --limit 10
+scripts/mail-intel --maildir-root "$HOME/Mail/competitors" --format json list business-a _to_transcribe --limit 10
 ```
 
 Ensuite dans Neovim:
 
 ```vim
-:CompetitorMailInbox
+:MailIntake
 ```

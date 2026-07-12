@@ -36,7 +36,7 @@ Chemins utiles :
 :MailIntakeScan!  dry-run sans écrire de fiche
 ```
 
-Dans le panneau : `<CR>` ouvre la source, `a` demande l'analyse Avante, `h` copie un handoff `#source`, `y` accepte, `e` marque édité, `x` rejette, `i` ignore.
+Dans le panneau : `<CR>` ouvre la source, `a` demande l'analyse Avante, `h` copie un handoff `#source`, `y` accepte, `e` édite la fiche, `E` la marque éditée, `x` rejette, `i` ignore.
 
 ## Comment trouver un raccourci que tu ne connais pas
 
@@ -418,23 +418,16 @@ Il est volontairement en lecture seule :
 
 ### Commandes utiles
 
-- `<leader>mi` : ouvrir le dossier par défaut (`_to_transcribe`)
-- `<leader>mf` : ouvrir un dossier Gmail précis
-- `<leader>ms` : chercher dans les emails
-- `<leader>ma` : lister les comptes locaux
-- `<leader>mO` : ouvrir un email par identifiant `notmuch`
-- `<leader>my` : copier l'email ouvert en Markdown
-- `<leader>mb` : copier un prompt `$sf-content` pour placer l'email dans tes sites
-- `<leader>mA` : envoyer l'email ouvert à Avante avec `$sf-content`
-- `:CompetitorMailAccounts` : lister les comptes locaux disponibles
-- `:CompetitorMailInbox` : ouvrir le dossier par défaut (`_to_transcribe`)
-- `:CompetitorMailFolder _to_transcribe` : ouvrir un dossier Gmail précis
-- `:CompetitorMailInbox business-a` : ouvrir l'inbox d'un compte précis
-- `:CompetitorMailSearch pricing` : chercher dans les emails du compte par défaut
-- `:CompetitorMailOpen <id>` : ouvrir un email par identifiant `notmuch`
-- `:CompetitorMailCopyMarkdown` : copier l'email ouvert en Markdown
-- `:CompetitorMailCopySfContent` : copier un prompt `$sf-content`
-- `:CompetitorMailAvanteSfContent` : envoyer à Avante avec `$sf-content`
+- `<leader>mi` : ouvrir le panneau Mail Intelligence
+- `<leader>ms` : scanner `_to_transcribe` vers la queue privée
+- `<CR>` : ouvrir l'email source en lecture seule
+- `a` : demander l'analyse Avante
+- `h` : copier un handoff `#source`
+- `e` : éditer la fiche de revue
+- `E` : marquer la fiche éditée
+- `y` : accepter
+- `x` : rejeter
+- `i` : ignorer
 
 ### Workflow simple
 
@@ -442,7 +435,7 @@ Il est volontairement en lecture seule :
 2. Indexer avec `notmuch new`.
 3. Dans Neovim, lancer `<leader>mi`.
 4. Choisir un email dans la liste.
-5. Lancer `<leader>mA` pour envoyer l'email à Avante avec `$sf-content`.
+5. Utiliser `a` pour demander l'analyse Avante, puis éditer et valider la fiche.
 6. Ou lancer `<leader>mb` pour copier le prompt et le coller ailleurs.
 
 ### Configuration à connaître

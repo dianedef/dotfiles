@@ -60,7 +60,7 @@ Multi-platform dotfiles repository with a full Linux/Codespaces setup and a deli
 # Clone and run installation (as administrator)
 git clone https://github.com/dianedef/dotfiles.git $HOME/dotfiles
 Set-ExecutionPolicy Bypass -Scope Process -Force
-$HOME/dotfiles/windows.ps1
+$HOME/dotfiles/dotfiles/windows.ps1
 ```
 
 **[→ Detailed Windows Guide](docs/installation/WINDOWS.md)**
@@ -77,7 +77,7 @@ Manual equivalent:
 
 ```bash
 git clone https://github.com/dianedef/dotfiles.git ~/dotfiles
-cd ~/dotfiles && ./install.sh
+cd ~/dotfiles && ./dotfiles/install.sh
 source ~/.bashrc
 ```
 
@@ -124,7 +124,7 @@ Manual equivalent:
 
 ```bash
 git clone https://github.com/dianedef/dotfiles.git ~/dotfiles
-cd ~/dotfiles && chmod +x termux.sh && ./termux.sh
+cd ~/dotfiles && chmod +x dotfiles/termux.sh && ./dotfiles/termux.sh
 source ~/.bashrc
 ```
 
@@ -172,7 +172,7 @@ Linux/Codespaces only. The Termux installer does not configure MCP clients or re
 - Shared MCP configuration lives in `mcp/mcp-servers.json`
 - Includes `consensus` at `https://mcp.consensus.app/mcp`
 - Consensus does not require an API key to get started; OAuth can trigger automatically on first use in supported clients
-- ShipGlowz owns Claude/Codex MCP client configuration. Dotfiles only links shared MCP registry files via `./install.sh --only=mcp`.
+- ShipGlowz owns Claude/Codex MCP client configuration. Dotfiles only links shared MCP registry files via `./dotfiles/install.sh --only=mcp`.
 
 ### Secrets Management
 Linux/Codespaces only. The Termux Markdown profile does not install Doppler or local API-key setup.

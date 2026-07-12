@@ -1,10 +1,10 @@
 ---
 artifact: technical_context
 metadata_schema_version: "1.0"
-artifact_version: "0.1.0"
+artifact_version: "0.1.1"
 project: "dotfiles"
 created: "2026-04-26"
-updated: "2026-05-22"
+updated: "2026-07-12"
 status: draft
 source_skill: sf-docs
 scope: function_tree
@@ -14,11 +14,11 @@ risk_level: low
 security_impact: low
 docs_impact: yes
 evidence:
-  - "/home/claude/dotfiles/install.sh"
-  - "/home/claude/dotfiles/lib.sh"
-  - "/home/claude/dotfiles/config.sh"
-  - "/home/claude/dotfiles/termux.sh"
-  - "/home/claude/dotfiles/doppler-setup.sh"
+  - "/home/claude/dotfiles/dotfiles/install.sh"
+  - "/home/claude/dotfiles/dotfiles/lib.sh"
+  - "/home/claude/dotfiles/dotfiles/config.sh"
+  - "/home/claude/dotfiles/dotfiles/termux.sh"
+  - "/home/claude/dotfiles/dotfiles/doppler-setup.sh"
 depends_on:
   - "/home/claude/dotfiles/AGENT.md"
   - "/home/claude/dotfiles/shipglowz_data/technical/context.md"

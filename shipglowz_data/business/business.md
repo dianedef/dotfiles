@@ -1,10 +1,10 @@
 ---
 artifact: business_context
 metadata_schema_version: "1.0"
-artifact_version: "0.1.0"
+artifact_version: "0.1.1"
 project: "dotfiles"
 created: "2026-04-26"
-updated: "2026-04-26"
+updated: "2026-07-12"
 status: draft
 source_skill: sf-docs
 scope: business
@@ -20,10 +20,10 @@ market: "utilisateurs techniques, équipes lean, workflows d’onboarding infra"
 evidence:
   - "/home/claude/dotfiles/CLAUDE.md"
   - "/home/claude/dotfiles/README.md"
-  - "/home/claude/dotfiles/install.sh"
+  - "/home/claude/dotfiles/dotfiles/install.sh"
 depends_on:
   - "/home/claude/dotfiles/CLAUDE.md"
-  - "/home/claude/dotfiles/install.sh"
+  - "/home/claude/dotfiles/dotfiles/install.sh"
 supersedes: []
 next_review: "2026-07-26"
 next_step: /sf-docs audit BUSINESS.md

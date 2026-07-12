@@ -14,12 +14,12 @@ risk_level: low
 security_impact: low
 docs_impact: yes
 evidence:
-  - "/home/claude/dotfiles/install.sh"
-  - "/home/claude/dotfiles/lib.sh"
-  - "/home/claude/dotfiles/config.sh"
-  - "/home/claude/dotfiles/bootstrap.sh"
-  - "/home/claude/dotfiles/termux.sh"
-  - "/home/claude/dotfiles/doppler-setup.sh"
+  - "/home/claude/dotfiles/dotfiles/install.sh"
+  - "/home/claude/dotfiles/dotfiles/lib.sh"
+  - "/home/claude/dotfiles/dotfiles/config.sh"
+  - "/home/claude/dotfiles/dotfiles/bootstrap.sh"
+  - "/home/claude/dotfiles/dotfiles/termux.sh"
+  - "/home/claude/dotfiles/dotfiles/doppler-setup.sh"
 depends_on:
   - "/home/claude/dotfiles/README.md"
   - "/home/claude/dotfiles/CLAUDE.md"

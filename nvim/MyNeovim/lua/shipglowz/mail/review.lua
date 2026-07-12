@@ -32,6 +32,12 @@ local function source_id(path)
   end
 end
 
+local function queue_item_path()
+  local line = vim.api.nvim_get_current_line()
+  local key = line:match("^%[([^%]]+)%]")
+  return key and (root() .. "/inbox/" .. key .. ".md") or nil
+end
+
 local function open_source(path, callback)
   local id = source_id(path)
   if not id then
@@ -41,7 +47,7 @@ local function open_source(path, callback)
   local command = {
     vim.fn.stdpath("config") .. "/scripts/mail-intel",
     "--maildir-root",
-    vim.env.MAIL_INTEL_ROOT or "~/Mail/competitors",
+    require("shipglowz.mail.config").maildir_root,
     "export",
     id,
     "--markdown",
@@ -77,9 +83,7 @@ local function render_list()
   vim.cmd("botright new")
   vim.api.nvim_win_set_buf(0, buf)
   local function current_path()
-    local line = vim.api.nvim_get_current_line()
-    local key = line:match("^%[([^%]]+)%]")
-    return key and (root() .. "/inbox/" .. key .. ".md") or nil
+    return queue_item_path()
   end
   local function open_item()
     local path = current_path()
@@ -120,6 +124,14 @@ local function render_list()
       vim.cmd("MailIntake")
     end)
   end
+  local function edit_item()
+    local path = current_path()
+    if not path then return end
+    vim.cmd("botright split " .. vim.fn.fnameescape(path))
+    local buf = vim.api.nvim_get_current_buf()
+    vim.bo[buf].modifiable = true
+    vim.bo[buf].bufhidden = "wipe"
+  end
   local function handoff()
     local path = current_path()
     if not path then return end
@@ -142,7 +154,8 @@ local function render_list()
   vim.keymap.set("n", "a", ask_ai, vim.tbl_extend("force", opts, { desc = "Ask AI about email" }))
   vim.keymap.set("n", "h", handoff, vim.tbl_extend("force", opts, { desc = "Copy governed handoff" }))
   vim.keymap.set("n", "y", function() update("accepted") end, opts)
-  vim.keymap.set("n", "e", function() update("edited") end, opts)
+  vim.keymap.set("n", "e", edit_item, vim.tbl_extend("force", opts, { desc = "Edit review record" }))
+  vim.keymap.set("n", "E", function() update("edited") end, opts)
   vim.keymap.set("n", "x", function() update("rejected") end, opts)
   vim.keymap.set("n", "i", function() update("ignored") end, opts)
 end

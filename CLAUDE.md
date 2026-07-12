@@ -14,12 +14,12 @@ risk_level: low
 security_impact: medium
 docs_impact: yes
 evidence:
-  - "/home/claude/dotfiles/install.sh"
-  - "/home/claude/dotfiles/termux.sh"
-  - "/home/claude/dotfiles/config.sh"
-  - "/home/claude/dotfiles/lib.sh"
+  - "/home/claude/dotfiles/dotfiles/install.sh"
+  - "/home/claude/dotfiles/dotfiles/termux.sh"
+  - "/home/claude/dotfiles/dotfiles/config.sh"
+  - "/home/claude/dotfiles/dotfiles/lib.sh"
 depends_on:
-  - "/home/claude/dotfiles/install.sh"
+  - "/home/claude/dotfiles/dotfiles/install.sh"
   - "/home/claude/dotfiles/CONTEXT.md"
 linked_systems:
   - Bash
@@ -42,19 +42,19 @@ Multi-platform dotfiles repository. Linux/Codespaces is the full development set
 
 ```bash
 # Linux/Codespaces (runs automatically on Codespace creation)
-./install.sh
+./dotfiles/install.sh
 
 # Termux (Android) - Markdown only, lightweight
-./termux.sh
+./dotfiles/termux.sh
 
 # Windows (run as administrator)
-.\windows.ps1
+.\dotfiles\windows.ps1
 
 # Sync Neovim plugins
 nvim --headless "+Lazy! sync" +qa
 
 # Re-run installation after updates
-cd ~/dotfiles && ./install.sh
+cd ~/dotfiles && ./dotfiles/install.sh
 ```
 
 ## Key Aliases

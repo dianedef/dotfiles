@@ -12,9 +12,9 @@ export DOTFILES_LOG_LEVEL=ERROR
 mkdir -p "$HOME"
 
 # shellcheck source=/dev/null
-source "$ROOT_DIR/config.sh"
+source "$ROOT_DIR/dotfiles/config.sh"
 # shellcheck source=/dev/null
-source "$ROOT_DIR/lib.sh"
+source "$ROOT_DIR/dotfiles/lib.sh"
 
 fail() {
     echo "FAIL: $*" >&2
@@ -89,7 +89,7 @@ awk '
     /^next_backup_path\(\) \{/ { capture=1 }
     capture { print }
     /^# Neovim config/ { exit }
-' "$ROOT_DIR/termux.sh" > "$termux_functions"
+' "$ROOT_DIR/dotfiles/termux.sh" > "$termux_functions"
 
 log() {
     :

@@ -1,10 +1,10 @@
 ---
 artifact: architecture_context
 metadata_schema_version: "1.0"
-artifact_version: "0.1.0"
+artifact_version: "0.1.1"
 project: "dotfiles"
 created: "2026-04-26"
-updated: "2026-05-22"
+updated: "2026-07-12"
 status: draft
 source_skill: sf-docs
 scope: architecture
@@ -14,12 +14,12 @@ risk_level: low
 security_impact: medium
 docs_impact: yes
 evidence:
-  - "/home/claude/dotfiles/install.sh"
-  - "/home/claude/dotfiles/lib.sh"
-  - "/home/claude/dotfiles/config.sh"
-  - "/home/claude/dotfiles/bootstrap.sh"
-  - "/home/claude/dotfiles/termux.sh"
-  - "/home/claude/dotfiles/doppler-setup.sh"
+  - "/home/claude/dotfiles/dotfiles/install.sh"
+  - "/home/claude/dotfiles/dotfiles/lib.sh"
+  - "/home/claude/dotfiles/dotfiles/config.sh"
+  - "/home/claude/dotfiles/dotfiles/bootstrap.sh"
+  - "/home/claude/dotfiles/dotfiles/termux.sh"
+  - "/home/claude/dotfiles/dotfiles/doppler-setup.sh"
   - "/home/claude/dotfiles/mcp/mcp-servers.json"
 depends_on:
   - "/home/claude/dotfiles/README.md"
@@ -60,13 +60,13 @@ Le dépôt fonctionne comme une plateforme de bootstrap de workstation:
 
 ```text
 Entrée d'installation
-├─ bootstrap.sh (one-click ubuntu) -> install.sh
-├─ termux.sh (workflow Android allégé Markdown-only)
-└─ windows.ps1 (workflow Windows référencé)
+├─ dotfiles/bootstrap.sh (one-click ubuntu) -> dotfiles/install.sh
+├─ dotfiles/termux.sh (workflow Android allégé Markdown-only)
+└─ dotfiles/windows.ps1 (workflow Windows référencé)
 
-install.sh (orchestrateur)
-├─ config.sh (paramètres)
-├─ lib.sh (moteur utilitaire)
+dotfiles/install.sh (orchestrateur)
+├─ dotfiles/config.sh (paramètres)
+├─ dotfiles/lib.sh (moteur utilitaire)
 ├─ install system/tools
 ├─ create symlink configs
 ├─ configure MCP
@@ -161,10 +161,10 @@ Contrainte: la même orchestration est réutilisable en mode non-interactif (CI)
 - `/home/claude/dotfiles/CLAUDE.md`
 - `/home/claude/dotfiles/.env.example`
 - `/home/claude/dotfiles/env.example`
-- `/home/claude/dotfiles/config.sh`
-- `/home/claude/dotfiles/lib.sh`
-- `/home/claude/dotfiles/install.sh`
-- `/home/claude/dotfiles/termux.sh`
+- `/home/claude/dotfiles/dotfiles/config.sh`
+- `/home/claude/dotfiles/dotfiles/lib.sh`
+- `/home/claude/dotfiles/dotfiles/install.sh`
+- `/home/claude/dotfiles/dotfiles/termux.sh`
 - `/home/claude/dotfiles/mcp/mcp-servers.json`
 - `/home/claude/dotfiles/starship/README.md`
 - `/home/claude/dotfiles/nvim/README.md`

@@ -1,10 +1,10 @@
 ---
 artifact: content_map
 metadata_schema_version: "1.0"
-artifact_version: "1.0.0"
+artifact_version: "1.0.1"
 project: "dotfiles"
 created: "2026-04-26"
-updated: "2026-04-26"
+updated: "2026-07-12"
 status: reviewed
 source_skill: manual
 scope: content-map
@@ -15,8 +15,8 @@ security_impact: low
 docs_impact: high
 evidence:
   - "README.md: point d’entrée principal avec liens d’installation"
-  - "install.sh, termux.sh, windows.ps1, bootstrap.sh: surfaces d’action pour l’onboarding"
-  - "config.sh and lib.sh: cœur réutilisable de l’automatisation"
+  - "dotfiles/install.sh, dotfiles/termux.sh, dotfiles/windows.ps1, dotfiles/bootstrap.sh: surfaces d’action pour l’onboarding"
+  - "dotfiles/config.sh and dotfiles/lib.sh: cœur réutilisable de l’automatisation"
   - "zoxide/README.md, starship/README.md, nvim/*, mpv/README.md: documentation locale des composants"
 depends_on:
   - artifact: "README.md"
@@ -34,11 +34,11 @@ content_surfaces:
   - "BUSINESS.md | mission cible, valeur métier, indicateurs"
   - "BRANDING.md | ton, style, repères visuels et éditoriaux"
   - "CLAUDE.md | conventions opérationnelles pour l’agent"
-  - "install.sh | canal principal d’activation: installation/rejeu/update/health/uninstall"
-  - "termux.sh | canal dédié Android/Termux"
-  - "windows.ps1 | canal dédié Windows"
-  - "bootstrap.sh | canal d’entrée Ubuntu one-click"
-  - "config.sh + lib.sh | support technique pour les scripts d’orchestration"
+  - "dotfiles/install.sh | canal principal d’activation: installation/rejeu/update/health/uninstall"
+  - "dotfiles/termux.sh | canal dédié Android/Termux"
+  - "dotfiles/windows.ps1 | canal dédié Windows"
+  - "dotfiles/bootstrap.sh | canal d’entrée Ubuntu one-click"
+  - "dotfiles/config.sh + dotfiles/lib.sh | support technique pour les scripts d’orchestration"
   - "sous-README par outil (zoxide, starship, nvim, mpv, ranger) | support ciblé par composant"
 ---
 
@@ -58,9 +58,9 @@ content_surfaces:
 | `BUSINESS.md` | Contexte métier | Markdown | Mainteneur | Changement de cible d’usage ou d’hypothèses business |
 | `BRANDING.md` | Ton + repères visuels | Markdown | Mainteneur | Changement de la ligne éditoriale |
 | `CLAUDE.md` | Règles d’exécution agent | Markdown | Mainteneur | Ajout de scripts, conventions de contribution |
-| `install.sh` | Contrat d’exécution | Script | Mainteneur | Ajout de modes ou de nouvelles dépendances |
-| `termux.sh` / `windows.ps1` / `bootstrap.sh` | Points d’entrée par plateforme | Scripts | Mainteneur | Adaptation d’UX d’installation |
-| `config.sh` + `lib.sh` | Infrastructure de scripts | Scripts | Mainteneur | Changement de logique d’orchestration |
+| `dotfiles/install.sh` | Contrat d’exécution | Script | Mainteneur | Ajout de modes ou de nouvelles dépendances |
+| `dotfiles/termux.sh` / `dotfiles/windows.ps1` / `dotfiles/bootstrap.sh` | Points d’entrée par plateforme | Scripts | Mainteneur | Adaptation d’UX d’installation |
+| `dotfiles/config.sh` + `dotfiles/lib.sh` | Infrastructure de scripts | Scripts | Mainteneur | Changement de logique d’orchestration |
 | README composants | Documentation locale | Markdown | Propriétaire de chaque composant | Nouvelle config ou breaking change locale |
 
 ## Règles de repurposing

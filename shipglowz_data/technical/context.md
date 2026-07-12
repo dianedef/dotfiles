@@ -4,7 +4,7 @@ metadata_schema_version: "1.0"
 artifact_version: "0.1.1"
 project: "dotfiles"
 created: "2026-04-26"
-updated: "2026-06-20"
+updated: "2026-07-12"
 status: draft
 source_skill: sf-docs
 scope: technique
@@ -16,16 +16,16 @@ docs_impact: yes
 evidence:
   - "/home/claude/dotfiles/README.md"
   - "/home/claude/dotfiles/CLAUDE.md"
-  - "/home/claude/dotfiles/install.sh"
-  - "/home/claude/dotfiles/lib.sh"
-  - "/home/claude/dotfiles/config.sh"
-  - "/home/claude/dotfiles/bootstrap.sh"
-  - "/home/claude/dotfiles/termux.sh"
+  - "/home/claude/dotfiles/dotfiles/install.sh"
+  - "/home/claude/dotfiles/dotfiles/lib.sh"
+  - "/home/claude/dotfiles/dotfiles/config.sh"
+  - "/home/claude/dotfiles/dotfiles/bootstrap.sh"
+  - "/home/claude/dotfiles/dotfiles/termux.sh"
 depends_on:
   - "/home/claude/dotfiles/AGENT.md"
-  - "/home/claude/dotfiles/install.sh"
-  - "/home/claude/dotfiles/lib.sh"
-  - "/home/claude/dotfiles/config.sh"
+  - "/home/claude/dotfiles/dotfiles/install.sh"
+  - "/home/claude/dotfiles/dotfiles/lib.sh"
+  - "/home/claude/dotfiles/dotfiles/config.sh"
 next_step: /sf-docs audit shipglowz_data/technical/context.md
 supersedes: []
 next_review: "2026-07-26"
@@ -54,7 +54,7 @@ Ce dépôt regroupe un ensemble de configurations locales (terminal, éditeur, f
   - `.env.example` et `env.example` décrivent les variables supportées.
   - `mcp/mcp-servers.json` est la source principale des serveurs MCP.
 - Couche intégration shell:
-  - `nvim/shell-integration.sh`, alias (`alias dot='~/dotfiles/install.sh'`), `append_to_bashrc` dans `lib.sh`.
+  - `nvim/shell-integration.sh`, alias (`alias dot='~/dotfiles/dotfiles/install.sh'`), `append_to_bashrc` dans `dotfiles/lib.sh`.
   - `setup_shell_integration` (dans `install.sh`) injecte `starship init`, `zoxide init` et éditeurs.
 
 ## Contraintes techniques
@@ -74,15 +74,15 @@ Ce dépôt regroupe un ensemble de configurations locales (terminal, éditeur, f
 ## État documenté et preuves
 
 - Entrée principale install:
-  - `/home/claude/dotfiles/install.sh`
+  - `/home/claude/dotfiles/dotfiles/install.sh`
 - Bibliothèque d'exécution:
-  - `/home/claude/dotfiles/lib.sh`
+  - `/home/claude/dotfiles/dotfiles/lib.sh`
 - Paramètres centralisés:
-  - `/home/claude/dotfiles/config.sh`
+  - `/home/claude/dotfiles/dotfiles/config.sh`
 - Démarrage multi-plateforme:
-  - `/home/claude/dotfiles/bootstrap.sh`
-  - `/home/claude/dotfiles/install-termux.sh`
-  - `/home/claude/dotfiles/termux.sh`
+  - `/home/claude/dotfiles/dotfiles/bootstrap.sh`
+  - `/home/claude/dotfiles/dotfiles/install-termux.sh`
+  - `/home/claude/dotfiles/dotfiles/termux.sh`
   - `/home/claude/dotfiles/windows.ps1`
 - Documentation de produit:
   - `/home/claude/dotfiles/README.md`

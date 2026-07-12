@@ -25,11 +25,12 @@ set -uo pipefail
 # ============================================================================
 # INITIALIZATION
 # ============================================================================
-SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd -P)"
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd -P)"
+SCRIPT_IMPL_DIR="$SCRIPT_DIR/dotfiles"
 
 # Source configuration and library
-source "$SCRIPT_DIR/config.sh"
-source "$SCRIPT_DIR/lib.sh"
+source "$SCRIPT_IMPL_DIR/config.sh"
+source "$SCRIPT_IMPL_DIR/lib.sh"
 
 # Parse command-line arguments FIRST
 parse_arguments "$@"
@@ -1250,8 +1251,8 @@ alias o='opencode'
 alias mcp='mcpc'
 
 # Dotfiles management
-alias dot='~/dotfiles/install.sh'
-alias dotfiles='~/dotfiles/install.sh -i'
+    alias dot='~/dotfiles/dotfiles/install.sh'
+    alias dotfiles='~/dotfiles/dotfiles/install.sh -i'
 ALIASES
         success "Added productivity aliases"
     else
@@ -1270,8 +1271,8 @@ ALIASES
             cat >> "$HOME/.bashrc" << 'DOTALIASES'
 
 # Dotfiles management
-alias dot='~/dotfiles/install.sh'
-alias dotfiles='~/dotfiles/install.sh -i'
+    alias dot='~/dotfiles/dotfiles/install.sh'
+    alias dotfiles='~/dotfiles/dotfiles/install.sh -i'
 DOTALIASES
             success "Added dotfiles aliases"
         fi
@@ -1483,7 +1484,7 @@ USERPATH
 
     # Run dotfiles install for this user (user-local mode)
     info "Installation des dotfiles pour '$username'..."
-    sudo -u "$username" bash -c "cd $SCRIPT_DIR && ./install.sh --only=configs,shell-integration,mcp" 2>&1 || warn "User dotfiles setup had issues"
+    sudo -u "$username" bash -c "cd $SCRIPT_DIR && ./dotfiles/install.sh --only=configs,shell-integration,mcp" 2>&1 || warn "User dotfiles setup had issues"
 
     success "Utilisateur '$username' configure avec SSH + sudo"
     echo ""

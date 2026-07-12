@@ -3,7 +3,7 @@
 # One-Click Bootstrap for Fresh Ubuntu 24.04 LTS Servers
 # ============================================================================
 # Usage:
-#   curl -fsSL https://raw.githubusercontent.com/dianedef/dotfiles/main/bootstrap.sh | bash
+#   curl -fsSL https://raw.githubusercontent.com/dianedef/dotfiles/main/dotfiles/bootstrap.sh | bash
 #
 # What it does:
 #   1. Installs minimal prerequisites (git, curl, jq)
@@ -92,8 +92,8 @@ else
     git clone "$DOTFILES_REPO" "$DOTFILES_DIR"
 fi
 
-if [ ! -f "$DOTFILES_DIR/install.sh" ]; then
-    echo -e "${RED}FATAL: install.sh introuvable dans $DOTFILES_DIR${NC}"
+if [ ! -f "$DOTFILES_DIR/dotfiles/install.sh" ]; then
+    echo -e "${RED}FATAL: dotfiles/install.sh introuvable dans $DOTFILES_DIR${NC}"
     exit 1
 fi
 echo -e "${GREEN}Dotfiles prets${NC}"
@@ -102,7 +102,7 @@ echo -e "${GREEN}Dotfiles prets${NC}"
 echo ""
 echo -e "${BLUE}[3/3]${NC} Lancement de l'installation..."
 echo ""
-chmod +x "$DOTFILES_DIR/install.sh"
+chmod +x "$DOTFILES_DIR/dotfiles/install.sh"
 
 # Pass through environment variables and arguments
-cd "$DOTFILES_DIR" && exec ./install.sh "$@"
+cd "$DOTFILES_DIR" && exec ./dotfiles/install.sh "$@"

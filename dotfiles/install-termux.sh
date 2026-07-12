@@ -109,4 +109,4 @@ else
     run_or_explain "téléchargement des dotfiles" git clone --quiet --branch "$BRANCH" "$REPO_URL" "$DOTFILES_DIR"
 fi
 
-exec bash "$DOTFILES_DIR/termux.sh"
+exec bash "$DOTFILES_DIR/dotfiles/termux.sh"

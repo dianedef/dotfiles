@@ -97,4 +97,4 @@ else
     run_or_explain "téléchargement des dotfiles" git clone --quiet --branch "$BRANCH" "$REPO_URL" "$DOTFILES_DIR"
 fi
 
-exec bash "$DOTFILES_DIR/install.sh" "$@"
+exec bash "$DOTFILES_DIR/dotfiles/install.sh" "$@"
