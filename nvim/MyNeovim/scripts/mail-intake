@@ -61,9 +61,19 @@ def write_item(root, item):
     key = source_key(message_id)
     target = root / "inbox" / f"{key}.md"
     if target.exists():
+        sender = sender_label(item.get("authors"))
+        text = target.read_text(encoding="utf-8")
+        if "\nsender:" not in text and sender != "expéditeur inconnu":
+            text = text.replace(
+                f'source_key: "{key}"\n',
+                f'source_key: "{key}"\nsender: {json.dumps(sender, ensure_ascii=False)}\n',
+                1,
+            )
+            text = text.replace("- Sender domain: `unknown`", f"- Sender: `{sender}`", 1)
+            target.write_text(text, encoding="utf-8")
         return False
     subject = str(item.get("subject") or "(sans sujet)").replace("\n", " ").strip()
-    authors = sender_summary(item.get("authors"))
+    sender = sender_label(item.get("authors"))
     tags = ", ".join(item.get("tags") or [])
     content = "\n".join(
         [
@@ -76,6 +86,7 @@ def write_item(root, item):
             "status: pending",
             f'source_id: "{message_id.replace(chr(34), chr(39))}"',
             f'source_key: "{key}"',
+            f'sender: {json.dumps(sender, ensure_ascii=False)}',
             'project: "unknown"',
             'angle: "unknown"',
             'owner_skill: "unknown"',
@@ -85,7 +96,7 @@ def write_item(root, item):
             "",
             f"# {subject}",
             "",
-            f"- Sender domain: `{authors}`",
+            f"- Sender: `{sender}`",
             f"- Source date: `{item.get('date') or 'unknown'}`",
             f"- Local tags: `{tags or 'none'}`",
             "- Source body: kept in the local Maildir and opened read-only through Mail Intel.",
@@ -101,12 +112,10 @@ def write_item(root, item):
     return True
 
 
-def sender_summary(value):
-    """Keep only a routing-safe sender domain, never a full address or name."""
+def sender_label(value):
+    """Keep the display-safe author label returned by the local Maildir index."""
     text = str(value or "").replace("\n", " ").strip()
-    if "@" in text:
-        return text.rsplit("@", 1)[-1].strip(" >") or "unknown"
-    return "unknown"
+    return text or "expéditeur inconnu"
 
 
 def scan(args):

@@ -1,10 +1,10 @@
 ---
 artifact: technical_context
 metadata_schema_version: "1.0"
-artifact_version: "0.1.1"
+artifact_version: "0.1.2"
 project: "dotfiles"
 created: "2026-04-26"
-updated: "2026-07-12"
+updated: "2026-07-13"
 status: draft
 source_skill: sf-docs
 scope: function_tree
@@ -68,6 +68,9 @@ next_step: /sf-docs audit shipglowz_data/technical/context-function-tree.md
 - Groupe Runtime:
   - `install_node`
   - `install_npm_tools`
+    - installe les paquets globaux avec `install_node_global_package`
+    - valide Codex ACP avec `verify_codex_acp_installation`
+    - interrompt l'installation si le lanceur ou le runtime natif manque
 - Groupe Shell:
   - `install_starship`
   - `install_zoxide`
@@ -92,7 +95,7 @@ next_step: /sf-docs audit shipglowz_data/technical/context-function-tree.md
 ### Sorties et vérification
 
 - `run_health_check` :
-  - vérifie `Neovim`, `Starship`, `Doppler`, `mcpc`, alias/symlinks, `.bashrc`.
+  - vérifie `Neovim`, `Starship`, `Doppler`, `mcpc`, Codex ACP, alias/symlinks, `.bashrc`.
 
 ## Arbre fonctionnel (`lib.sh`)
 
@@ -100,6 +103,12 @@ next_step: /sf-docs audit shipglowz_data/technical/context-function-tree.md
 - `init_logging`, `setup_error_traps`, `error_trap_handler`.
 - `detect_system`, `get_install_path`, `is_installed`.
 - `create_symlink`, `append_to_bashrc`, `health_check_tool`, `health_check_symlink`.
+- Helpers Codex ACP:
+  - `codex_acp_platform_package` choisit le paquet natif OS/architecture.
+  - `resolve_codex_acp_native_binary` couvre les implantations globales npm et PNPM.
+  - `verify_codex_acp_installation` exige le lanceur et un runtime natif exécutable.
+  - `health_check_codex_acp` expose le résultat dans `--check`.
+  - `install_node_global_package` conserve les dépendances optionnelles pour Codex ACP.
 - `parse_arguments`, `show_help`.
 - `install_system_packages`, `install_gum`, `install_neovim` (legacy fallback), `install_ai_tools_legacy` via `run_single_component`.
 - `run_health_check`, `run_uninstall`, `run_interactive_update`.

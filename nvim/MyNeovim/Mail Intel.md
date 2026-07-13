@@ -4,7 +4,7 @@ Mail Intel est une passerelle locale en lecture seule pour lire des emails Gmail
 
 ## Mail Intelligence review
 
-La revue interactive se lance avec `:MailIntake` ou `<leader>mm`. Elle ouvre une vue plein écran avec la liste des propositions en haut et le premier email source déjà ouvert en bas. Depuis la liste :
+La revue interactive se lance avec `:MailIntake` ou `<leader>mi`. Elle ouvre une vue plein écran avec la liste des propositions en haut et le premier email source déjà ouvert en bas. La liste conserve environ 24 % de la hauteur disponible quand la fenêtre Neovim ou le terminal est redimensionné. `<leader>mm` ou `:MailIntakeMessage` ouvre l'email actif seul en plein écran. Depuis la liste :
 
 - `<CR>` ouvre l'email source.
 - `a` ouvre l'email et demande à Avante de proposer projet, angle, owner skill, risques et action.
@@ -16,6 +16,8 @@ La revue interactive se lance avec `:MailIntake` ou `<leader>mm`. Elle ouvre une
 Après `y`, `E`, `x`, `i` ou `d`, la fiche traitée sort de la queue et l'email suivant s'ouvre automatiquement. Si c'était le dernier, l'email précédent devient actif.
 
 `:MailIntakeScan` crée les fiches metadata-only dans `~/.shipglowz/private/data/mail-intake/inbox/`. `:MailIntakeScan!` effectue un dry-run. Les corps bruts restent dans le Maildir et ne sont jamais écrits dans la queue privée.
+
+L'action `a` analyse l'email avec le provider IA configuré via la couche provider-neutre de `lua/shipglowz/mail/ai.lua`, attend un JSON de classification, puis persiste le résumé et les champs de routage dans la fiche privée. Avec un provider Avante ACP comme `codex`, elle donne à l'agent le chemin absolu du message Maildir privé plutôt que de recopier son corps dans le prompt. Les providers HTTP reçoivent encore l'export borné du corps, car ils ne peuvent pas lire un chemin local. Pour les messages HTML/multipart, Mail Intel extrait le texte visible avec BeautifulSoup quand la bibliothèque est disponible, puis utilise un fallback standard-library qui ignore explicitement les balises de style, script et métadonnées. Les règles CSS et le JavaScript du template ne sont donc pas affichés dans le corps. L'action `o` extrait les URLs présentes dans le message et affiche le libellé du lien quand il existe avant d'ouvrir le lien choisi via le navigateur système. Le contexte de routage est chargé depuis le cache privé approuvé `~/.shipglowz/private/data/projects/`; il contient les fiches de pitch, audiences et angles des projets. Le provider par défaut reste celui configuré par Avante. Le provider ACP `codex` est lancé avec `gpt-5.4-mini` et un effort `medium` afin de ne pas hériter d'un modèle global encore inconnu de `codex-acp`; `AVANTE_CODEX_MODEL` et `AVANTE_CODEX_REASONING_EFFORT` permettent de surcharger ces valeurs. Chaque analyse Mail Intelligence ouvre un nouveau chat Avante afin qu'une ancienne session ACP ne conserve pas son précédent modèle. `MAIL_INTEL_AI_PROVIDER=gemini` sélectionne le provider Gemini via Avante si sa configuration et ses identifiants sont disponibles.
 
 Le corps brut peut résider dans la source Maildir privée approuvée sous `~/.shipglowz/private/data/mail-source/`, mais cette arborescence est exclue du Git privé. Seules les fiches de revue metadata-only sont écrites dans `mail-intake/`.
 
@@ -214,7 +216,7 @@ Mappings du lecteur v1 :
 <leader>mA  envoyer le prompt $sf-content a Avante
 ```
 
-Les mappings `<leader>mm` et `<leader>ms` sont réservés à la review v2 (`:MailIntake` et `:MailIntakeScan`). Aucun chemin du lecteur ne modifie Gmail, les labels, le Maildir ou l'état distant.
+Les mappings `<leader>mi`, `<leader>mm` et `<leader>ms` sont réservés à la review v2 (`:MailIntake`, `:MailIntakeMessage` et `:MailIntakeScan`). Aucun chemin du lecteur ne modifie Gmail, les labels, le Maildir ou l'état distant.
 
 Dans Which-Key, appuyer sur `<leader>`, puis `m`, ouvre le groupe `Mail Intelligence / Markdown` avec les commandes de review et du lecteur. Les mappings `mm`, `ms`, `mI`, `mS`, `mf`, `ma`, `mO`, `my`, `mb` et `mA` sont enregistrés lorsque le module Mail est chargé. Markmap, désactivé dans cette configuration, est réservé à `<leader>mK` s'il est réactivé.
 

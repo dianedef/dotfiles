@@ -1,3 +1,71 @@
+local function codex_acp_native_package()
+  local platform = ({
+    Linux = "linux",
+    OSX = "darwin",
+    Windows = "win32",
+  })[jit.os]
+  local architecture = ({
+    arm64 = "arm64",
+    x64 = "x64",
+  })[jit.arch]
+
+  if not platform or not architecture then
+    return nil
+  end
+
+  return "codex-acp-" .. platform .. "-" .. architecture
+end
+
+local function resolve_native_codex_acp(wrapper)
+  local native_package = codex_acp_native_package()
+  if not native_package then
+    return nil
+  end
+
+  local binary_name = jit.os == "Windows" and "codex-acp.exe" or "codex-acp"
+  local patterns = {
+    vim.fn.expand("~/.npm-global/lib/node_modules/@zed-industries/codex-acp/node_modules/@zed-industries/")
+      .. native_package
+      .. "/bin/"
+      .. binary_name,
+    vim.fn.expand("~/.local/share/pnpm/global/*/*/node_modules/.pnpm/node_modules/@zed-industries/")
+      .. native_package
+      .. "/bin/"
+      .. binary_name,
+    vim.fn.expand("~/.local/share/pnpm/global/*/node_modules/@zed-industries/codex-acp/node_modules/@zed-industries/")
+      .. native_package
+      .. "/bin/"
+      .. binary_name,
+  }
+  local real_wrapper = (vim.uv or vim.loop).fs_realpath(wrapper)
+
+  if real_wrapper then
+    local package_root = vim.fs.dirname(vim.fs.dirname(real_wrapper))
+    table.insert(
+      patterns,
+      1,
+      vim.fs.joinpath(
+        package_root,
+        "node_modules",
+        "@zed-industries",
+        native_package,
+        "bin",
+        binary_name
+      )
+    )
+  end
+
+  for _, pattern in ipairs(patterns) do
+    for _, native_bin in ipairs(vim.fn.glob(pattern, false, true)) do
+      if vim.fn.executable(native_bin) == 1 then
+        return native_bin
+      end
+    end
+  end
+
+  return nil
+end
+
 local function resolve_codex_acp_command()
   local candidates = {
     vim.fn.expand("~/.local/share/pnpm/codex-acp"),
@@ -6,13 +74,13 @@ local function resolve_codex_acp_command()
 
   for _, local_bin in ipairs(candidates) do
     if vim.fn.executable(local_bin) == 1 then
-      return local_bin
+      return resolve_native_codex_acp(local_bin) or local_bin
     end
   end
 
   local path_bin = vim.fn.exepath("codex-acp")
   if path_bin ~= "" then
-    return path_bin
+    return resolve_native_codex_acp(path_bin) or path_bin
   end
 
   return "codex-acp"
@@ -30,6 +98,22 @@ local function codex_acp_env()
   end
 
   return env
+end
+
+local function env_or_default(name, default)
+  local value = vim.env[name]
+  return value and value ~= "" and value or default
+end
+
+local function codex_acp_args()
+  local model = env_or_default("AVANTE_CODEX_MODEL", "gpt-5.4-mini")
+  local reasoning_effort = env_or_default("AVANTE_CODEX_REASONING_EFFORT", "medium")
+  return {
+    "-c",
+    "model=" .. vim.json.encode(model),
+    "-c",
+    "model_reasoning_effort=" .. vim.json.encode(reasoning_effort),
+  }
 end
 
 return {
@@ -109,7 +193,7 @@ return {
     acp_providers = {
       codex = {
         command = resolve_codex_acp_command(),
-        args = {},
+        args = codex_acp_args(),
         env = codex_acp_env(),
         auth_method = "chatgpt",
       },

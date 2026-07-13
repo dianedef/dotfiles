@@ -18,6 +18,10 @@ M.options = {
   cli = repo_root() .. "/scripts/mail-intel",
   intake_cli = repo_root() .. "/scripts/mail-intake",
   delete_cli = repo_root() .. "/scripts/mail-delete",
+  ai_provider = vim.env.MAIL_INTEL_AI_PROVIDER or "avante",
+  ai_model_provider = vim.env.MAIL_INTEL_AI_MODEL_PROVIDER,
+  project_index_root = vim.env.SHIPGLOWZ_PROJECT_INDEX_ROOT
+    or (private_data_root .. "/projects"),
 }
 
 local function publish_direct_fields()
@@ -30,6 +34,9 @@ local function publish_direct_fields()
   M.cli = M.options.cli
   M.intake_cli = M.options.intake_cli
   M.delete_cli = M.options.delete_cli
+  M.ai_provider = M.options.ai_provider
+  M.ai_model_provider = M.options.ai_model_provider
+  M.project_index_root = M.options.project_index_root
 end
 
 function M.setup(opts)

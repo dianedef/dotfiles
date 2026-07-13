@@ -1,10 +1,10 @@
 ---
 artifact: architecture_context
 metadata_schema_version: "1.0"
-artifact_version: "0.1.1"
+artifact_version: "0.1.3"
 project: "dotfiles"
 created: "2026-04-26"
-updated: "2026-07-12"
+updated: "2026-07-13"
 status: draft
 source_skill: sf-docs
 scope: architecture
@@ -21,16 +21,19 @@ evidence:
   - "/home/claude/dotfiles/dotfiles/termux.sh"
   - "/home/claude/dotfiles/dotfiles/doppler-setup.sh"
   - "/home/claude/dotfiles/mcp/mcp-servers.json"
+  - "/home/claude/dotfiles/shipglowz_data/technical/operator-guides/avante-codex-acp.md"
 depends_on:
   - "/home/claude/dotfiles/README.md"
   - "/home/claude/dotfiles/CLAUDE.md"
   - "/home/claude/dotfiles/shipglowz_data/technical/context.md"
   - "/home/claude/dotfiles/shipglowz_data/technical/context-function-tree.md"
+  - "/home/claude/dotfiles/shipglowz_data/technical/code-docs-map.md"
 linked_systems:
   - Bash
   - Neovim
   - Starship
   - MCP
+  - Codex ACP
   - Doppler
   - Termux
 external_dependencies:
@@ -122,7 +125,8 @@ Contrainte: la même orchestration est réutilisable en mode non-interactif (CI)
   - installation via script officiel ou cargo fallback, initialisation shell dans `.bashrc`.
 - `Zoxide`, `Doppler`, `FZF`, `GH CLI`, `lsd`, `bat`.
 - Outils Node globaux via `pnpm` quand disponible:
-  - `@apify/mcpc`, `@zed-industries/codex-acp`, `tldr`, `eslint`, plus outils listés dans `DOTFILES_ALL_COMPONENTS`.
+  - `@apify/mcpc`, `@zed-industries/codex-acp@0.16.0`, `tldr`, `eslint`, plus outils listés dans `DOTFILES_ALL_COMPONENTS`.
+  - La version Codex ACP reste figée tant qu'Avante dépend de ses arguments `-c`; l'installateur force les dépendances optionnelles, vérifie le binaire natif OS/architecture après installation, puis répète ce contrôle avec `--check`.
   - `claude`, `codex`, les skills ShipGlowz, et les configs runtime `~/.claude` / `~/.codex` sont exclus de ce périmètre et appartiennent à ShipGlowz.
 
 ### Modules spécifiques Termux
@@ -157,6 +161,8 @@ Contrainte: la même orchestration est réutilisable en mode non-interactif (CI)
 
 ### Documentation interne
 
+- `/home/claude/dotfiles/shipglowz_data/technical/code-docs-map.md`
+- `/home/claude/dotfiles/shipglowz_data/technical/operator-guides/avante-codex-acp.md`
 - `/home/claude/dotfiles/README.md`
 - `/home/claude/dotfiles/CLAUDE.md`
 - `/home/claude/dotfiles/.env.example`

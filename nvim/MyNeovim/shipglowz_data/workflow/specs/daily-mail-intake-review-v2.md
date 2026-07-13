@@ -353,6 +353,8 @@ Add a `v2` intake layer around the existing Mail Intel pipeline. A local daily c
 
 - Classifier mode: bounded model-assisted classification initiated by the operator from the open source buffer. Queue creation stores metadata only and leaves project, angle, owner skill, and action as review fields until the operator or AI fills them.
 - Primary Neovim review surface: a persistent buffer-driven review panel with a pending list, adjacent read-only source buffer, explicit decision mappings, and an Avante analysis action. `vim.ui.select` may be used only for secondary choices.
+- Provider boundary: Mail Intelligence owns a provider-neutral analysis contract. The first adapter routes through Avante, with the selected model provider configurable (including Gemini), while project routing context is loaded from the approved private project cache under `~/.shipglowz/private/data/projects/`.
+- Project context: the classifier receives the reviewed private project fiches as routing context, but must keep raw email bodies and cached pitch contents out of public repositories and must leave ambiguous matches as `unknown`.
 
 ## Skill Run History
 
@@ -377,6 +379,11 @@ Add a `v2` intake layer around the existing Mail Intel pipeline. A local daily c
 | 2026-07-12 | 102-sg-start | GPT-5 Codex | Added a focused Avante summary action for long review sources | `r` requests a factual summary of 1 to 5 sentences without replacing the separate classification action | Manually test `r` on a long email |
 | 2026-07-12 | 102-sg-start | GPT-5 Codex | Reworked the review layout and primary mapping after operator UX feedback | `<leader>mm` now opens a full-screen two-pane view with the list above and the first source already open below; source panes are reused | Manually retest the new layout and `r` action |
 | 2026-07-12 | 102-sg-start | GPT-5 Codex | Added next-item progression after review decisions | `y`, `E`, `x`, `i`, and `d` reopen the queue on the next pending email, falling back to the previous item at the end | Manually retest a decision transition |
+| 2026-07-13 | 001-sg-build | GPT-5 Codex | Added the first provider-neutral Mail Intelligence analysis boundary and injected the approved private project cache into Avante prompts | `lua/shipglowz/mail/ai.lua` loads `~/.shipglowz/private/data/projects/`, supports the configured Avante/Gemini provider route, and preserves the human review boundary; structured provider response persistence remains pending | Implement structured classification result parsing and queue persistence |
+| 2026-07-13 | 706-continue | GPT-5 Codex | Added the structured classification contract, tolerant JSON parsing, private queue persistence, and direct Avante stream capture for action `a` | Classification now writes summary, project, angle, owner skill, suggested action, confidence, risks, and pending status without persisting raw email bodies; real provider credentials and live Neovim run remain to be proven | Run one live `a` classification against a migrated email, then verify and close the bounded unit |
+| 2026-07-13 | 107-sg-test | GPT-5 Codex | Tested action `a` with the configured Avante ACP `codex` provider and replaced body embedding with a private Maildir path fallback | The source reached Avante; the ACP session still ended with `-32603 Internal error`, so live classification persistence is not proven | Retest `a` after the path-based fallback |
+| 2026-07-13 11:07:11 UTC | 106-sg-fix | GPT-5 Codex | Diagnosed BUG-2026-07-13-001 and pinned the Avante Codex ACP subprocess to `gpt-5.4-mini` with `medium` reasoning | fix-attempted: ACP default and environment-override arguments pass headlessly and the CLI accepts them; a live `a` retest after Neovim restart remains required | /107-sg-test --retest BUG-2026-07-13-001 |
+| 2026-07-13 20:46:24 UTC | 106-sg-fix | GPT-5 Codex | Prevented Mail Intelligence from restoring ACP sessions created under an obsolete model by forcing a new Avante chat per analysis | regression and sanitized live ACP proof pass with `gpt-5.4-mini`; one real Mail Intelligence UI retest remains before closure | /107-sg-test --retest BUG-2026-07-13-001 in Mail Intelligence |
 
 ## Current Chantier Flow
 
@@ -384,7 +391,7 @@ Add a `v2` intake layer around the existing Mail Intel pipeline. A local daily c
 |------|--------|-------|
 | sf-spec | done | New v2 chantier drafted on top of the existing Mail Intel v1 pipeline. |
 | sf-ready | done | Operator selected interactive Avante-assisted classification and a persistent buffer-driven review panel. |
-| sf-start | done | Private queue review, restored v1 reader, and the twice-daily user timer are integrated under `lua/shipglowz/mail/`; Task 4 classification adapter remains pending. |
-| sf-verify | partial | The original v1/v2 defects and the scheduled sync/index/intake path have bounded/manual proof. Task 4 classification remains pending, and broader v2 verification is not complete. |
+| sf-start | partial | Private queue review, restored v1 reader, twice-daily timer, provider-neutral project context, structured Task 4 classification persistence, fixed Avante ACP model override, and fresh-session guard are integrated; real Mail Intelligence UI proof and final verification remain. |
+| sf-verify | partial | The original v1/v2 defects, scheduled sync/index/intake path, and sanitized live ACP model selection have proof. One real Mail Intelligence analysis and broader v2 verification remain. |
 | sf-end | pending | Closure depends on implementation and verification. |
 | sf-ship | pending | Optional, only if the user wants commit/push workflow. |

@@ -1,11 +1,21 @@
 #!/usr/bin/env python3
 import argparse
+import quopri
 import json
+import html
 import os
 import shutil
 import subprocess
 import sys
 from pathlib import Path
+from html.parser import HTMLParser
+from email import policy
+from email.parser import BytesParser
+
+try:
+    from bs4 import BeautifulSoup
+except ImportError:  # Optional: keep the bridge usable on minimal installs.
+    BeautifulSoup = None
 
 
 def error(message, code=1):
@@ -129,6 +139,41 @@ def extract_text_part(part):
     content = part.get("content")
     if content_type.startswith("text/plain") and isinstance(content, str):
         return content
+    if content_type.startswith("text/html") and isinstance(content, str):
+        if BeautifulSoup is not None:
+            soup = BeautifulSoup(content, "html.parser")
+            for tag in soup(["style", "script", "head", "title", "meta", "link", "noscript"]):
+                tag.decompose()
+            lines = []
+            for line in soup.get_text("\n").splitlines():
+                line = " ".join(line.split())
+                if line:
+                    lines.append(line)
+            return "\n".join(lines)
+
+        class TextExtractor(HTMLParser):
+            def __init__(self):
+                super().__init__()
+                self.parts = []
+                self.ignored_depth = 0
+
+            def handle_starttag(self, tag, attrs):
+                if tag in {"style", "script", "head", "title", "meta", "link", "noscript"}:
+                    self.ignored_depth += 1
+
+            def handle_endtag(self, tag):
+                if tag in {"style", "script", "head", "title", "meta", "link", "noscript"}:
+                    self.ignored_depth = max(0, self.ignored_depth - 1)
+
+            def handle_data(self, data):
+                if self.ignored_depth:
+                    return
+                text = " ".join(data.split())
+                if text: self.parts.append(text)
+
+        parser = TextExtractor()
+        parser.feed(content)
+        return "\n".join(parser.parts)
     if isinstance(content, list):
         chunks = [extract_text_part(child) for child in content]
         chunks = [chunk for chunk in chunks if chunk]
@@ -138,7 +183,7 @@ def extract_text_part(part):
 
 
 def show_message(message_id):
-    stdout = run_notmuch(["show", "--format=json", message_id])
+    stdout = run_notmuch(["show", "--format=json", "--include-html", message_id])
     data = json.loads(stdout or "[]")
     messages = list(iter_messages(data))
     if not messages:
@@ -159,7 +204,7 @@ def markdown_for_message(message):
         text = extract_text_part(body)
 
     if not text:
-        text = "[Aucun contenu text/plain lisible. Email HTML ou multipart non supporté complètement en v1.]"
+        text = "[Aucun contenu texte lisible.]"
 
     lines = [
         "# Email concurrent",
@@ -176,6 +221,50 @@ def markdown_for_message(message):
         "",
     ]
     return "\n".join(lines)
+
+
+def urls_for_message(message_id):
+    stdout = run_notmuch(["search", "--output=files", "id:" + message_id.removeprefix("id:").strip("<>")])
+    paths = stdout.splitlines()
+    if not paths: raise RuntimeError(f"message not found: {message_id}")
+    raw = Path(paths[0]).read_bytes()
+    decoded = quopri.decodestring(raw).decode("utf-8", errors="replace")
+    import re
+    class LinkExtractor(HTMLParser):
+        def __init__(self):
+            super().__init__()
+            self.links = []
+            self.current = None
+
+        def handle_starttag(self, tag, attrs):
+            if tag != "a": return
+            href = dict(attrs).get("href", "")
+            if href.startswith(("http://", "https://")):
+                self.current = {"url": html.unescape(href), "label_parts": []}
+
+        def handle_data(self, data):
+            if self.current:
+                text = " ".join(data.split())
+                if text: self.current["label_parts"].append(text)
+
+        def handle_endtag(self, tag):
+            if tag != "a" or not self.current: return
+            item = self.current
+            self.current = None
+            item["label"] = html.unescape(" ".join(item.pop("label_parts"))) or "Lien web"
+            self.links.append(item)
+
+    parser = LinkExtractor()
+    parser.feed(decoded)
+    urls = parser.links or [{"url": url, "label": "Lien web"} for url in re.findall(r'''https?://[^"'<>\s]+''', decoded)]
+    result = []
+    seen = set()
+    for item in urls:
+        url = item["url"].rstrip(".,;)\\\\")
+        if url not in seen:
+            seen.add(url)
+            result.append({"url": url, "label": item.get("label") or "Lien web"})
+    return result
 
 
 def print_json(data):
@@ -211,6 +300,12 @@ def main():
     export.add_argument("message_id")
     export.add_argument("--markdown", action="store_true")
 
+    locate = sub.add_parser("locate")
+    locate.add_argument("message_id")
+
+    urls = sub.add_parser("urls")
+    urls.add_argument("message_id")
+
     args = parser.parse_args()
 
     try:
@@ -228,6 +323,17 @@ def main():
         elif args.command == "search":
             data = search_messages(args.account, query=args.query, limit=args.limit)
             print_json(data) if args.format == "json" else print("\n".join(item["id"] for item in data))
+        elif args.command == "locate":
+            message_id = args.message_id
+            if message_id.startswith("id:"): message_id = message_id[3:]
+            message_id = message_id.strip("<>")
+            matches = run_notmuch(["search", "--output=files", "id:" + message_id]).splitlines()
+            if not matches:
+                raise RuntimeError(f"message not found: {args.message_id}")
+            print(str(Path(matches[0]).expanduser().resolve()))
+        elif args.command == "urls":
+            data = urls_for_message(args.message_id)
+            print_json(data) if args.format == "json" else print("\n".join(data))
         elif args.command in {"show", "export"}:
             message = show_message(args.message_id)
             if args.markdown or args.command == "export":

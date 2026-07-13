@@ -58,6 +58,25 @@ DOTFILES_REPORT_FILE="${DOTFILES_REPORT_FILE:-$DOTFILES_REPORT_DIR/dotfiles-repo
 mkdir -p "$DOTFILES_REPORT_DIR"
 
 dotfiles_capture_status() {
+    DOTFILES_PRE_STATUS_NODE=""
+    DOTFILES_PRE_STATUS_NPM=""
+    DOTFILES_PRE_STATUS_CLAUDE=""
+    DOTFILES_PRE_STATUS_CODEX=""
+    DOTFILES_PRE_STATUS_MCPC=""
+    DOTFILES_PRE_STATUS_NVIM=""
+    DOTFILES_PRE_STATUS_FZF=""
+    DOTFILES_PRE_STATUS_BAT=""
+    DOTFILES_PRE_STATUS_STARSHIP=""
+    DOTFILES_PRE_STATUS_ZOXIDE=""
+    DOTFILES_PRE_STATUS_RANGER=""
+    DOTFILES_PRE_STATUS_TMUX=""
+    DOTFILES_PRE_STATUS_MOSH=""
+    DOTFILES_PRE_STATUS_GH=""
+    DOTFILES_PRE_STATUS_DOPPLER=""
+    DOTFILES_PRE_STATUS_PM2=""
+    DOTFILES_PRE_STATUS_FLOX=""
+    DOTFILES_PRE_STATUS_CADDY=""
+
     command -v node >/dev/null 2>&1 && DOTFILES_PRE_STATUS_NODE="present" || true
     command -v npm >/dev/null 2>&1 && DOTFILES_PRE_STATUS_NPM="present" || true
     command -v claude >/dev/null 2>&1 && DOTFILES_PRE_STATUS_CLAUDE="present" || true
@@ -744,10 +763,17 @@ install_npm_tools() {
 
     info "Installing CLI tools via pnpm..."
     for pkg in $DOTFILES_NPM_PACKAGES; do
-        pnpm add -g "$pkg" 2>/dev/null && success "$pkg installed" || warn "$pkg failed"
+        install_node_global_package "$pkg" 2>/dev/null && success "$pkg installed" || warn "$pkg failed"
     done
 
     hash -r 2>/dev/null
+
+    if verify_codex_acp_installation; then
+        success "Codex ACP native runtime verified"
+    else
+        warn "Codex ACP installation is incomplete: wrapper or platform-native runtime missing"
+        return 1
+    fi
 }
 
 # ============================================================================
@@ -1342,7 +1368,10 @@ export PNPM_HOME="${DOTFILES_PNPM_HOME:-$HOME/.local/share/pnpm}"
 export PATH="$PNPM_HOME:$HOME/.npm-global/bin:${DOTFILES_NPM_DIR:-$HOME/.npm-global}/bin:$PATH"
 hash -r 2>/dev/null || true
 
-install_npm_tools
+if ! install_npm_tools; then
+    error "Node global tools are incomplete; refusing to continue with an unusable Codex ACP runtime"
+    exit 1
+fi
 
 # --- Phase 4: Shell tools ---
 if [ "${DOTFILES_PARALLEL:-false}" = "true" ]; then

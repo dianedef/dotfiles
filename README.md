@@ -94,6 +94,10 @@ source ~/.bashrc
 - `~/.npm-global` as a legacy compatibility fallback when an older install already used npm globals
 - `~/.config` and `~/.bashrc` for editor, shell, and terminal configuration
 
+The Node-tools phase pins the Avante-compatible `@zed-industries/codex-acp@0.16.0`, enables its platform-specific optional dependency, and verifies the native executable after installation. `./dotfiles/install.sh --check` repeats that verification, so a new server cannot silently keep only the JavaScript launcher while missing the runtime Avante owns and terminates.
+
+For safe installation, everyday use, checks, and troubleshooting in French, see the [Avante and Codex ACP operator guide](shipglowz_data/technical/operator-guides/avante-codex-acp.md).
+
 When sudo is available, the script may install generic system packages such as `git`, `curl`, `ripgrep`, `fd`, `bat`, `lsd`, `tmux`, or `mosh`. User configuration still remains scoped to the current `$HOME`.
 
 When launched without sudo or with `USER_LOCAL_MODE=true`, root-only extras are not applied: apt/dpkg packages, `/opt`, `/usr/local/bin`, system services, and new sudo user creation. The install log now reports this explicitly so the operator can see what was installed user-local and what still requires root.

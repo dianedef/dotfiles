@@ -28,6 +28,13 @@ Si votre `leader` est celui par défaut de LazyVim, `<leader>` correspond en gé
 - `Espace a x e` : editer avec Avante
 - `Espace a x p` : changer de provider Avante
 - `Espace a x m` : choisir le modele Avante
+- `Espace a x s` : arrêter la génération et son processus ACP
+
+Avante lance directement le binaire natif `codex-acp`, afin que `:AvanteStop` et la fermeture normale de Neovim puissent arrêter le processus qu'ils possèdent. Il n'est donc pas nécessaire de fermer manuellement Codex ACP après chaque analyse. Après un crash brutal ou un arrêt forcé de la machine, un contrôle ponctuel des processus orphelins reste recommandé.
+
+L'installateur dotfiles conserve `@zed-industries/codex-acp@0.16.0`, la version compatible avec les arguments `-c` configurés ici, et refuse de considérer l'installation complète si le runtime natif OS/architecture manque. Le successeur officiel `@agentclientprotocol/codex-acp` utilise une autre interface de configuration et doit faire l'objet d'une migration dédiée avant remplacement.
+
+Pour l'installation, les vérifications sûres, les erreurs à éviter et la procédure de dépannage, lire le [guide opérateur Avante et Codex ACP](../../shipglowz_data/technical/operator-guides/avante-codex-acp.md).
 
 ### Gemini CLI
 

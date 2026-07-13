@@ -182,6 +182,92 @@ ensure_pnpm_global_env() {
     command -v pnpm >/dev/null 2>&1
 }
 
+codex_acp_platform_package() {
+    local platform architecture
+
+    case "$(uname -s)" in
+        Linux) platform="linux" ;;
+        Darwin) platform="darwin" ;;
+        MINGW*|MSYS*|CYGWIN*) platform="win32" ;;
+        *) return 1 ;;
+    esac
+
+    case "$(uname -m)" in
+        x86_64|amd64) architecture="x64" ;;
+        arm64|aarch64) architecture="arm64" ;;
+        *) return 1 ;;
+    esac
+
+    printf 'codex-acp-%s-%s\n' "$platform" "$architecture"
+}
+
+resolve_codex_acp_native_binary() {
+    local platform_package binary_name pnpm_root npm_root root native
+    platform_package=$(codex_acp_platform_package) || return 1
+    binary_name="codex-acp"
+    case "$platform_package" in
+        *-win32-*) binary_name="codex-acp.exe" ;;
+    esac
+
+    pnpm_root=$(pnpm root -g 2>/dev/null || true)
+    npm_root=$(npm root -g 2>/dev/null || true)
+
+    for native in \
+        "${DOTFILES_PNPM_HOME:-$HOME/.local/share/pnpm}"/global/*/*/node_modules/.pnpm/node_modules/@zed-industries/"$platform_package"/bin/"$binary_name"; do
+        if [ -x "$native" ]; then
+            printf '%s\n' "$native"
+            return 0
+        fi
+    done
+
+    for root in \
+        "${DOTFILES_NPM_DIR:-$HOME/.npm-global}/lib/node_modules" \
+        "${DOTFILES_PNPM_HOME:-$HOME/.local/share/pnpm}"/global/*/node_modules \
+        "$pnpm_root" \
+        "$npm_root"; do
+        [ -d "$root" ] || continue
+        native="$root/@zed-industries/codex-acp/node_modules/@zed-industries/$platform_package/bin/$binary_name"
+        if [ -x "$native" ]; then
+            printf '%s\n' "$native"
+            return 0
+        fi
+    done
+
+    return 1
+}
+
+verify_codex_acp_installation() {
+    local native
+
+    command -v codex-acp >/dev/null 2>&1 || return 1
+    native=$(resolve_codex_acp_native_binary) || return 1
+    "$native" --help >/dev/null 2>&1
+}
+
+install_node_global_package() {
+    local package="$1"
+    local package_name
+    package_name=$(node_package_name "$package")
+
+    if [ "$package_name" = "@zed-industries/codex-acp" ]; then
+        npm_config_optional=true pnpm add -g "$package"
+    else
+        pnpm add -g "$package"
+    fi
+}
+
+node_package_name() {
+    local package="$1"
+
+    if [[ "$package" == @*/*@* ]]; then
+        printf '%s\n' "${package%@*}"
+    elif [[ "$package" != @* && "$package" == *@* ]]; then
+        printf '%s\n' "${package%@*}"
+    else
+        printf '%s\n' "$package"
+    fi
+}
+
 require_command() {
     local cmd=$1
     local install_hint=${2:-"Please install $cmd"}
@@ -593,6 +679,19 @@ health_check_tool() {
         echo -e "${RED}✗${NC} $name: not installed"
         return 1
     fi
+}
+
+health_check_codex_acp() {
+    local native
+
+    if verify_codex_acp_installation; then
+        native=$(resolve_codex_acp_native_binary)
+        echo -e "${GREEN}✓${NC} Codex ACP native runtime: $native"
+        return 0
+    fi
+
+    echo -e "${RED}✗${NC} Codex ACP native runtime: wrapper or platform binary missing"
+    return 1
 }
 
 health_check_symlink() {
@@ -1078,6 +1177,7 @@ run_health_check() {
     health_check_tool "Git" "git" || failed=$((failed + 1))
     health_check_tool "GitHub CLI" "gh" || failed=$((failed + 1))
     health_check_tool "mcpc (MCP CLI)" "mcpc" || failed=$((failed + 1))
+    health_check_codex_acp || failed=$((failed + 1))
 
     echo ""
     echo "🔗 Symlinks:"
@@ -1412,7 +1512,7 @@ update_npm_packages() {
         # Remove npm: prefix
         pkg="${pkg#npm:}"
         info "Updating $pkg..."
-        pnpm add -g "$pkg" 2>/dev/null && success "$pkg updated" || warn "$pkg update failed"
+        install_node_global_package "$pkg" 2>/dev/null && success "$pkg updated" || warn "$pkg update failed"
     done
 }
 
@@ -1567,7 +1667,7 @@ run_direct_updates() {
             local pkg="${tool#npm:}"
             info "Updating $pkg..."
             if ensure_pnpm_global_env; then
-                pnpm add -g "$pkg" </dev/null >/dev/null 2>&1 && success "$pkg updated" || warn "$pkg update failed"
+                install_node_global_package "$pkg" </dev/null >/dev/null 2>&1 && success "$pkg updated" || warn "$pkg update failed"
             else
                 warn "pnpm required to update $pkg"
             fi
@@ -2214,7 +2314,7 @@ select_components() {
         "fzf         │ Fuzzy finder" \
         "nerd-fonts  │ Nerd Fonts (icons)" \
         "node        │ Node.js + npm" \
-        "npm-tools   │ CLI tools (mcpc, tldr)" \
+        "npm-tools   │ CLI tools (mcpc, codex-acp, tldr, eslint)" \
         "gum         │ Terminal UI (menus)" \
         "starship    │ Shell prompt" \
         "zoxide      │ Smart cd" \
@@ -2462,12 +2562,20 @@ install_component() {
             info "Installing Node global tools..."
             if ensure_pnpm_global_env; then
                 for pkg in $DOTFILES_NPM_PACKAGES; do
-                    if pnpm list -g --depth=-1 "$pkg" >/dev/null 2>&1; then
+                    local package_name
+                    package_name=$(node_package_name "$pkg")
+                    if pnpm list -g --depth=-1 "$package_name" >/dev/null 2>&1; then
                         success "$pkg already installed"
                     else
-                        pnpm add -g "$pkg" </dev/null >/dev/null 2>&1 && success "$pkg installed" || warn "$pkg installation failed"
+                        install_node_global_package "$pkg" </dev/null >/dev/null 2>&1 && success "$pkg installed" || warn "$pkg installation failed"
                     fi
                 done
+                if verify_codex_acp_installation; then
+                    success "Codex ACP native runtime verified"
+                else
+                    warn "Codex ACP wrapper or platform-native runtime is missing"
+                    return 1
+                fi
             else
                 warn "pnpm required (install Node.js/corepack first)"
             fi
