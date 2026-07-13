@@ -36,9 +36,11 @@ Chemins utiles :
 :MailIntakeScan!  dry-run sans écrire de fiche
 ```
 
-Dans le panneau : `<CR>` ouvre la source, `a` demande l'analyse Avante, `h` copie un handoff `#source`, `y` accepte, `e` édite la fiche, `E` la marque éditée, `x` rejette, `i` ignore.
+Dans le panneau : `<CR>` ouvre la source, `r` demande un résumé de 1 à 5 phrases, `a` demande l'analyse Avante, `h` copie un handoff `#source`, `y` accepte, `e` édite la fiche, `E` la marque éditée, `x` rejette, `d` envoie dans la corbeille Gmail sans confirmation, `i` ignore.
 
-Mappings du flux quotidien : `<leader>mi` ouvre la review et `<leader>ms` lance le scan.
+Après une décision (`y`, `E`, `x`, `i` ou `d`), l'email suivant s'ouvre automatiquement.
+
+Mappings du flux quotidien : `<leader>mm` ouvre la review et `<leader>ms` lance le scan.
 
 Which-Key : `<leader>`, puis `m` ouvre le groupe Mail Intelligence / Markdown.
 
@@ -440,34 +442,41 @@ Workflow utile :
 
 Le plugin local `Mail Intel` sert à lire des emails Gmail déjà synchronisés en Maildir, les ouvrir dans Neovim, puis copier leur contenu en Markdown pour Codex, Claude, Gemini, Copilot Chat ou Avante.
 
-Il est volontairement en lecture seule :
+La lecture reste sans effet de bord ; l'action `d` est l'exception explicite pour envoyer un email dans la corbeille Gmail :
 
 - pas d'envoi d'email
-- pas de suppression
 - pas d'archive
 - pas de modification Gmail
 
 ### Commandes utiles
 
-- `<leader>mi` : ouvrir le panneau Mail Intelligence
+- `<leader>mm` : ouvrir le panneau Mail Intelligence plein écran
 - `<leader>ms` : scanner `_to_transcribe` vers la queue privée
 - `<CR>` : ouvrir l'email source en lecture seule
 - `a` : demander l'analyse Avante
+- `r` : résumer l'email en 1 à 5 phrases
 - `h` : copier un handoff `#source`
 - `e` : éditer la fiche de revue
 - `E` : marquer la fiche éditée
 - `y` : accepter
 - `x` : rejeter
+- `d` : envoyer l'email dans la corbeille Gmail sans confirmation
 - `i` : ignorer
 
 ### Workflow simple
 
 1. Synchroniser Gmail vers le Maildir privé local avec `mbsync`.
 2. Indexer avec `notmuch new`.
-3. Dans Neovim, lancer `<leader>mi`.
+3. Dans Neovim, lancer `<leader>mm`.
 4. Choisir un email dans la liste.
 5. Utiliser `a` pour demander l'analyse Avante, puis éditer et valider la fiche.
 6. Ou lancer `<leader>mb` pour copier le prompt et le coller ailleurs.
+
+Pour vérifier la résolution d'un message sans le supprimer :
+
+```bash
+scripts/mail-delete --account business-a --folder _to_transcribe --source-id <source-id> --dry-run
+```
 
 ### Configuration à connaître
 

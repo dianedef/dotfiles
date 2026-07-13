@@ -17,6 +17,7 @@ M.options = {
   notmuch_config = vim.env.NOTMUCH_CONFIG or vim.fn.expand("~/.config/notmuch/mail-intel-config"),
   cli = repo_root() .. "/scripts/mail-intel",
   intake_cli = repo_root() .. "/scripts/mail-intake",
+  delete_cli = repo_root() .. "/scripts/mail-delete",
 }
 
 local function publish_direct_fields()
@@ -28,6 +29,7 @@ local function publish_direct_fields()
   M.notmuch_config = M.options.notmuch_config
   M.cli = M.options.cli
   M.intake_cli = M.options.intake_cli
+  M.delete_cli = M.options.delete_cli
 end
 
 function M.setup(opts)
@@ -43,7 +45,12 @@ end
 function M.system_opts()
   return {
     text = true,
-    env = { NOTMUCH_CONFIG = M.options.notmuch_config },
+    env = {
+      NOTMUCH_CONFIG = M.options.notmuch_config,
+      MAIL_INTEL_ROOT = M.options.maildir_root,
+      MAIL_INTEL_ACCOUNT = M.options.default_account,
+      MAIL_INTEL_FOLDER = M.options.default_folder,
+    },
   }
 end
 

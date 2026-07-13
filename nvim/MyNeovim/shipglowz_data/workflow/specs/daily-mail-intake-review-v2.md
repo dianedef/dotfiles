@@ -267,7 +267,7 @@ Add a `v2` intake layer around the existing Mail Intel pipeline. A local daily c
   - User story link: Lets the operator validate proposals without leaving Neovim.
   - Depends on: Tasks 2-4
   - Validate with: headless command registration and manual queue-fixture review checks.
-  - Notes: The v2 review commands remain active alongside the restored v1 reader. Shared configuration lives in `lua/shipglowz/mail/config.lua`; `<leader>mi` and `<leader>ms` remain owned by v2.
+  - Notes: The v2 review commands remain active alongside the restored v1 reader. Shared configuration lives in `lua/shipglowz/mail/config.lua`; `<leader>mm` and `<leader>ms` remain owned by v2.
 
 - [x] Task 6: Add downstream prompt/handoff generation
   - File: `lua/shipglowz/mail/init.lua` and CLI helpers as needed
@@ -299,8 +299,10 @@ Add a `v2` intake layer around the existing Mail Intel pipeline. A local daily c
 - Running the intake command twice without new mail does not create duplicate pending records.
 - Queue records are written only under the configured private root and not in the repository.
 - Queue records are stored as one editable file per item and can be purged after routing without breaking the source Maildir state.
-- A pending record can be opened in Neovim and linked back to its source email.
+- Neovim can open a full-screen review layout with the pending list above and the first linked source email already open below.
+- Neovim can request a factual 1-to-5 sentence summary before the operator decides how to route a long source.
 - The operator can accept, edit, reject, or ignore a queue item from Neovim.
+- After a queue decision, the next pending source becomes active automatically, with the previous item as fallback at the end of the list.
 - Accepted records can generate a downstream prompt or handoff that includes project, angle, owner skill, risks, and suggested next action.
 - Ambiguous records remain reviewable without false precision.
 - Docs clearly explain that raw email content is private and must not be committed.
@@ -372,6 +374,9 @@ Add a `v2` intake layer around the existing Mail Intel pipeline. A local daily c
 | 2026-07-12 22:42:46 UTC | 107-sg-test | GPT-5 Codex | Retested the governed handoff clipboard after BUG-2026-07-12-003 | pass: `h` copied the expected `#source` metadata and did not include the email body | Continue broader v2 verification |
 | 2026-07-12 22:44:54 UTC | 300-sg-docs | GPT-5 Codex | Aligned Mail Intelligence docs with the private raw-mail source, dedicated notmuch config, OSC 52 clipboard fallback, and Which-Key registration | docs aligned; runtime behavior and QA evidence remain tracked separately | Continue broader v2 verification |
 | 2026-07-12 22:50:53 UTC | 102-sg-start | GPT-5 Codex | Activated the twice-daily user systemd sync/index/intake schedule after the manual flow passed | Task 7 implemented; `mbsync`, `notmuch new`, and `mail-intake scan` completed successfully in one manual service run | Continue Task 4 classification adapter and broader v2 verification |
+| 2026-07-12 | 102-sg-start | GPT-5 Codex | Added a focused Avante summary action for long review sources | `r` requests a factual summary of 1 to 5 sentences without replacing the separate classification action | Manually test `r` on a long email |
+| 2026-07-12 | 102-sg-start | GPT-5 Codex | Reworked the review layout and primary mapping after operator UX feedback | `<leader>mm` now opens a full-screen two-pane view with the list above and the first source already open below; source panes are reused | Manually retest the new layout and `r` action |
+| 2026-07-12 | 102-sg-start | GPT-5 Codex | Added next-item progression after review decisions | `y`, `E`, `x`, `i`, and `d` reopen the queue on the next pending email, falling back to the previous item at the end | Manually retest a decision transition |
 
 ## Current Chantier Flow
 

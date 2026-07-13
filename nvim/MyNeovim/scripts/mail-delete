@@ -1,0 +1,134 @@
+#!/usr/bin/env python3
+"""Move one local Mail Intel message to Gmail Trash through IMAP."""
+
+import argparse
+import imaplib
+import json
+import os
+import re
+from pathlib import Path
+
+
+def fail(message):
+    raise RuntimeError(message)
+
+
+def account_config(account):
+    path = Path(os.path.expanduser(os.environ.get("MAIL_INTEL_MBSYNCRC", "~/.mbsyncrc")))
+    if not path.exists():
+        fail(f"mbsyncrc not found: {path}")
+    section = False
+    values = {}
+    for raw in path.read_text(encoding="utf-8").splitlines():
+        line = raw.strip()
+        if line.startswith("IMAPAccount "):
+            section = line.split(None, 1)[1].strip() == account
+            continue
+        if section and line.startswith("IMAPAccount "):
+            break
+        if section and line and not line.startswith("#"):
+            key, _, value = line.partition(" ")
+            values[key] = value.strip().strip('"')
+    if not values:
+        fail(f"IMAP account not found: {account}")
+    return values
+
+
+def password_file(values):
+    configured = os.environ.get("MAIL_INTEL_PASSWORD_FILE")
+    if configured:
+        return Path(os.path.expanduser(configured))
+    command = values.get("PassCmd", "")
+    match = re.fullmatch(r"cat\s+['\"]?([^'\"]+)['\"]?", command)
+    if match:
+        return Path(os.path.expanduser(match.group(1)))
+    return Path(os.path.expanduser("~/.config/mail-intel/business-a-password"))
+
+
+def normalize_message_id(value):
+    value = value.strip()
+    if value.startswith("id:"):
+        value = value[3:]
+    return value.strip("<>")
+
+
+def find_trash(imap):
+    status, rows = imap.list()
+    if status != "OK":
+        fail("unable to list IMAP mailboxes")
+    for row in rows or []:
+        text = row.decode(errors="replace") if isinstance(row, bytes) else str(row)
+        if r"\Trash" not in text:
+            continue
+        quoted = re.findall(r'"((?:[^"\\]|\\.)*)"', text)
+        if quoted:
+            return quoted[-1].replace('\\"', '"')
+        return text.rsplit(" ", 1)[-1]
+    return "[Gmail]/Trash"
+
+
+def delete_message(args):
+    values = account_config(args.account)
+    host = os.environ.get("MAIL_INTEL_IMAP_HOST", values.get("Host", "imap.gmail.com"))
+    username = os.environ.get("MAIL_INTEL_IMAP_USER", values.get("User"))
+    if not username:
+        fail("missing MAIL_INTEL_IMAP_USER or User in mbsyncrc")
+    secret = password_file(values)
+    if not secret.exists():
+        fail(f"password file not found: {secret}")
+    password = secret.read_text(encoding="utf-8").strip()
+    if not password:
+        fail(f"password file is empty: {secret}")
+
+    imap = imaplib.IMAP4_SSL(host)
+    try:
+        status, _ = imap.login(username, password)
+        if status != "OK":
+            fail("IMAP login failed")
+        trash = find_trash(imap)
+        status, _ = imap.select(args.folder)
+        if status != "OK":
+            fail(f"IMAP folder not found: {args.folder}")
+        message_id = normalize_message_id(args.source_id)
+        status, data = imap.uid("SEARCH", None, "HEADER", "Message-ID", f"<{message_id}>")
+        if status != "OK" or not data or not data[0]:
+            status, data = imap.uid("SEARCH", None, "HEADER", "Message-ID", message_id)
+        if status != "OK" or not data or not data[0]:
+            fail(f"message not found in {args.folder}: {args.source_id}")
+        uids = data[0].split()
+        if args.dry_run:
+            print(json.dumps({"status": "planned", "source_id": args.source_id, "folder": args.folder, "trash": trash, "matches": len(uids)}))
+        else:
+            for uid in uids:
+                status, _ = imap.uid("COPY", uid, trash)
+                if status != "OK":
+                    fail(f"could not copy message to Gmail Trash: {args.source_id}")
+                status, _ = imap.uid("STORE", uid, "+FLAGS.SILENT", "(\\Deleted)")
+                if status != "OK":
+                    fail(f"could not remove source label: {args.source_id}")
+            imap.expunge()
+            print(json.dumps({"status": "deleted", "source_id": args.source_id, "folder": args.folder, "trash": trash, "matches": len(uids)}))
+    finally:
+        try:
+            imap.logout()
+        except Exception:
+            pass
+
+
+def main():
+    parser = argparse.ArgumentParser(description="Move one Mail Intel message to Gmail Trash without confirmation.")
+    parser.add_argument("--account", default=os.environ.get("MAIL_INTEL_ACCOUNT", "business-a"))
+    parser.add_argument("--folder", default=os.environ.get("MAIL_INTEL_FOLDER", "_to_transcribe"))
+    parser.add_argument("--source-id", required=True)
+    parser.add_argument("--dry-run", action="store_true")
+    args = parser.parse_args()
+    try:
+        delete_message(args)
+        return 0
+    except Exception as exc:
+        print(f"mail-delete: {exc}", file=os.sys.stderr)
+        return 1
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())

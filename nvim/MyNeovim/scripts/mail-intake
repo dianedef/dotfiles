@@ -179,7 +179,7 @@ def main():
     done.set_defaults(done=True)
     update_cmd = sub.add_parser("update")
     update_cmd.add_argument("key")
-    update_cmd.add_argument("status", choices=["accepted", "edited", "rejected", "ignored"])
+    update_cmd.add_argument("status", choices=["accepted", "edited", "rejected", "ignored", "deleted"])
     args = parser.parse_args()
     try:
         if args.command == "scan":

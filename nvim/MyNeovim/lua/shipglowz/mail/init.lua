@@ -6,7 +6,7 @@ local function register_which_key()
 
   which_key.add({
     { "<leader>m", group = "Mail Intelligence / Markdown", icon = "󰇮" },
-    { "<leader>mi", desc = "ouvrir la revue" },
+    { "<leader>mm", desc = "ouvrir la revue" },
     { "<leader>ms", desc = "scanner la source" },
     { "<leader>mI", desc = "ouvrir la boite" },
     { "<leader>mS", desc = "rechercher" },

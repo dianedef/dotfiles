@@ -23,6 +23,11 @@ vim.keymap.set("n", "<leader>w-", "<C-W>s", { desc = "Split Window Below", remap
 vim.keymap.set("n", "<leader>w|", "<C-W>v", { desc = "Split Window Right", remap = true })
 vim.keymap.set("n", "<leader>uw", ":set wrap!<CR>", { desc = "Toggle wrap" })
 vim.keymap.set("n", "<leader>r", "<cmd>checktime<cr>", { desc = "Reload changed files" })
+vim.keymap.set("n", "<leader>R", function()
+  local init = vim.fn.stdpath("config") .. "/init.lua"
+  vim.cmd("source " .. vim.fn.fnameescape(init))
+  vim.notify("Configuration Neovim rechargée", vim.log.levels.INFO)
+end, { desc = "Reload Neovim config" })
 
 -- Terminal submenu: open new terminals in horizontal/vertical splits
 vim.keymap.set("n", "<leader>th", function()

@@ -6,7 +6,7 @@ return {
   ft = "markdown",
   opts = {},
   keys = {
-    { "<leader>mm", "<cmd>MarkmapOpen<cr>", desc = "Markmap Open" },
+    { "<leader>mK", "<cmd>MarkmapOpen<cr>", desc = "Markmap Open" },
     { "<leader>mw", "<cmd>MarkmapWatch<cr>", desc = "Markmap Watch" },
   },
 }

@@ -4,18 +4,24 @@ Mail Intel est une passerelle locale en lecture seule pour lire des emails Gmail
 
 ## Mail Intelligence review
 
-La revue interactive se lance avec `:MailIntake` ou `<leader>mi`. Elle ouvre une liste buffer-driven des propositions en attente, puis un panneau voisin en lecture seule avec l'email source. Depuis la liste :
+La revue interactive se lance avec `:MailIntake` ou `<leader>mm`. Elle ouvre une vue plein écran avec la liste des propositions en haut et le premier email source déjà ouvert en bas. Depuis la liste :
 
 - `<CR>` ouvre l'email source.
 - `a` ouvre l'email et demande à Avante de proposer projet, angle, owner skill, risques et action.
+- `r` ouvre l'email et demande à Avante un résumé factuel de 1 à 5 phrases maximum.
 - `h` copie un handoff `#source` gouverné pour la skill suivante.
+- `d` déplace immédiatement l'email vers la corbeille Gmail, sans confirmation.
 - `y` accepte, `e` ouvre la fiche pour édition, `E` la marque éditée, `x` rejette et `i` ignore.
+
+Après `y`, `E`, `x`, `i` ou `d`, la fiche traitée sort de la queue et l'email suivant s'ouvre automatiquement. Si c'était le dernier, l'email précédent devient actif.
 
 `:MailIntakeScan` crée les fiches metadata-only dans `~/.shipglowz/private/data/mail-intake/inbox/`. `:MailIntakeScan!` effectue un dry-run. Les corps bruts restent dans le Maildir et ne sont jamais écrits dans la queue privée.
 
 Le corps brut peut résider dans la source Maildir privée approuvée sous `~/.shipglowz/private/data/mail-source/`, mais cette arborescence est exclue du Git privé. Seules les fiches de revue metadata-only sont écrites dans `mail-intake/`.
 
 Le handoff `h` utilise le registre Neovim, le transport terminal OSC 52 et le fallback local `/tmp/nvim_notif.txt`. Il ne contient que les métadonnées de routage et le `source_id`, jamais le corps de l’email.
+
+La suppression distante est séparée du rejet `x` : `x` retire seulement la fiche de revue, tandis que `d` utilise le compte IMAP configuré par `mbsync`, copie le message dans le dossier Gmail Trash, supprime sa présence dans le dossier courant et marque la fiche `deleted`. Aucune confirmation interactive n'est demandée. La restauration se fait depuis la corbeille Gmail.
 
 Le lecteur v1 reste actif en parallèle pour explorer directement le Maildir, rechercher un message et l'envoyer explicitement vers le workflow `$sf-content`. La review v2 est le flux quotidien; le lecteur v1 est la surface d'exploration ponctuelle.
 
@@ -39,7 +45,7 @@ Gmail personnel
 
 `scripts/mail-intake` est le voisin review-first : il crée une queue privée idempotente et déplace les décisions terminées vers `mail-intake/done/`. Il ne modifie pas le Maildir ni Gmail.
 
-`scripts/mail-admin` est le seul chemin de mutation Gmail de ce systeme. Il gere les labels et filtres Gmail via l'API officielle, avec un `dry-run` possible avant application.
+`scripts/mail-admin` reste le chemin de mutation Gmail pour les labels et filtres via l'API officielle. `scripts/mail-delete` est l'exception dédiée à l'envoi explicite d'un message dans la corbeille Gmail via IMAP.
 
 ## Planification locale
 
@@ -208,9 +214,9 @@ Mappings du lecteur v1 :
 <leader>mA  envoyer le prompt $sf-content a Avante
 ```
 
-Les mappings minuscules `<leader>mi` et `<leader>ms` restent réservés à la review v2 (`:MailIntake` et `:MailIntakeScan`). Aucun chemin du lecteur ne modifie Gmail, les labels, le Maildir ou l'état distant.
+Les mappings `<leader>mm` et `<leader>ms` sont réservés à la review v2 (`:MailIntake` et `:MailIntakeScan`). Aucun chemin du lecteur ne modifie Gmail, les labels, le Maildir ou l'état distant.
 
-Dans Which-Key, appuyer sur `<leader>`, puis `m`, ouvre le groupe `Mail Intelligence / Markdown` avec les commandes de review et du lecteur. Les mappings `mi`, `ms`, `mI`, `mS`, `mf`, `ma`, `mO`, `my`, `mb` et `mA` sont enregistrés lorsque le module Mail est chargé.
+Dans Which-Key, appuyer sur `<leader>`, puis `m`, ouvre le groupe `Mail Intelligence / Markdown` avec les commandes de review et du lecteur. Les mappings `mm`, `ms`, `mI`, `mS`, `mf`, `ma`, `mO`, `my`, `mb` et `mA` sont enregistrés lorsque le module Mail est chargé. Markmap, désactivé dans cette configuration, est réservé à `<leader>mK` s'il est réactivé.
 
 ## Gmail
 

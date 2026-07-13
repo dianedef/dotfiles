@@ -73,6 +73,7 @@ return {
       { "<leader>u",     group = "UI", icon = "󰙵" },
       { "<leader>w",     group = "Windows", icon = "" },
       { "<leader>r",     desc = "Reload changed files", icon = "󰑐" },
+      { "<leader>R",     desc = "Reload Neovim config", icon = "󰑐" },
       { "<leader>n",     group = "Notifications", icon = "󰎟" },
       { "<leader>x",     group = "Diagnostics/Quickfix", icon = "󰒡" },
       { "[",             group = "Prev", icon = "" },
