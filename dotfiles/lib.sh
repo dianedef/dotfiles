@@ -170,16 +170,18 @@ is_installed() {
 ensure_pnpm_global_env() {
     export PNPM_HOME="${DOTFILES_PNPM_HOME:-$HOME/.local/share/pnpm}"
     mkdir -p "$PNPM_HOME"
-    export PATH="$PNPM_HOME:${DOTFILES_NPM_DIR:-$HOME/.npm-global}/bin:$PATH"
+    export PATH="$PNPM_HOME:$PATH"
 
     if ! command -v pnpm >/dev/null 2>&1; then
         if command -v corepack >/dev/null 2>&1; then
             corepack prepare pnpm@latest --activate >/dev/null 2>&1 || true
+            corepack enable --install-directory "$PNPM_HOME" >/dev/null 2>&1 || true
             hash -r 2>/dev/null || true
         fi
     fi
 
-    command -v pnpm >/dev/null 2>&1
+    command -v pnpm >/dev/null 2>&1 || return 1
+    pnpm config set --location=user global-bin-dir "$PNPM_HOME" >/dev/null 2>&1
 }
 
 codex_acp_platform_package() {
@@ -202,7 +204,7 @@ codex_acp_platform_package() {
 }
 
 resolve_codex_acp_native_binary() {
-    local platform_package binary_name pnpm_root npm_root root native
+    local platform_package binary_name pnpm_root root native
     platform_package=$(codex_acp_platform_package) || return 1
     binary_name="codex-acp"
     case "$platform_package" in
@@ -210,7 +212,6 @@ resolve_codex_acp_native_binary() {
     esac
 
     pnpm_root=$(pnpm root -g 2>/dev/null || true)
-    npm_root=$(npm root -g 2>/dev/null || true)
 
     for native in \
         "${DOTFILES_PNPM_HOME:-$HOME/.local/share/pnpm}"/global/*/*/node_modules/.pnpm/node_modules/@zed-industries/"$platform_package"/bin/"$binary_name"; do
@@ -221,10 +222,8 @@ resolve_codex_acp_native_binary() {
     done
 
     for root in \
-        "${DOTFILES_NPM_DIR:-$HOME/.npm-global}/lib/node_modules" \
         "${DOTFILES_PNPM_HOME:-$HOME/.local/share/pnpm}"/global/*/node_modules \
-        "$pnpm_root" \
-        "$npm_root"; do
+        "$pnpm_root"; do
         [ -d "$root" ] || continue
         native="$root/@zed-industries/codex-acp/node_modules/@zed-industries/$platform_package/bin/$binary_name"
         if [ -x "$native" ]; then
@@ -1419,29 +1418,29 @@ run_update_check() {
         printf "%-15s %-15s %-15s %b\n" "$tool" "$installed_norm" "$latest_norm" "$status_icon"
     done
 
-    # Check npm global packages
-    if is_installed npm; then
+    # Check pnpm global packages
+    if ensure_pnpm_global_env; then
         echo ""
-        echo "NPM Global Packages:"
+        echo "pnpm Global Packages:"
         printf "%-20s %-15s %-15s %s\n" "Package" "Installed" "Latest" "Status"
         printf "%-20s %-15s %-15s %s\n" "───────" "─────────" "──────" "──────"
 
-        local npm_packages=("@apify/mcpc" "@google/gemini-cli" "opencode-ai" "tldr")
-        for pkg in "${npm_packages[@]}"; do
+        local pnpm_packages=("@apify/mcpc" "@google/gemini-cli" "opencode-ai" "tldr")
+        for pkg in "${pnpm_packages[@]}"; do
             local pkg_installed pkg_latest pkg_status
-            pkg_installed=$(npm list -g "$pkg" 2>/dev/null | grep -oE '[0-9]+\.[0-9]+\.[0-9]+' | head -1)
+            pkg_installed=$(pnpm list -g "$pkg" --depth 0 2>/dev/null | grep -oE '[0-9]+\.[0-9]+\.[0-9]+' | head -1)
 
             if [ -z "$pkg_installed" ]; then
                 continue  # Package not installed
             fi
 
-            pkg_latest=$(npm view "$pkg" version 2>/dev/null || echo "unknown")
+            pkg_latest=$(pnpm view "$pkg" version 2>/dev/null || echo "unknown")
 
             if [ "$pkg_installed" = "$pkg_latest" ]; then
                 pkg_status="${GREEN}✓ up to date${NC}"
             else
                 pkg_status="${YELLOW}⬆ update available${NC}"
-                DOTFILES_UPDATES_AVAILABLE+=("npm:$pkg")
+                DOTFILES_UPDATES_AVAILABLE+=("pnpm:$pkg")
             fi
 
             printf "%-20s %-15s %-15s %b\n" "$pkg" "$pkg_installed" "$pkg_latest" "$pkg_status"
@@ -1458,7 +1457,7 @@ run_update_check() {
         local auto_update=() manual_update=()
         for item in "${DOTFILES_UPDATES_AVAILABLE[@]}"; do
             case "$item" in
-                neovim|starship|zoxide|fzf|doppler|gum|gh|bat|lsd|npm:*)
+                neovim|starship|zoxide|fzf|doppler|gum|gh|bat|lsd|pnpm:*)
                     auto_update+=("$item")
                     ;;
                 node|lazygit)
@@ -1501,16 +1500,15 @@ run_update_check() {
     fi
 }
 
-# Update npm packages
-update_npm_packages() {
+# Update pnpm packages
+update_pnpm_packages() {
     local packages=("$@")
     if ! ensure_pnpm_global_env; then
         warn "pnpm required to update Node global packages"
         return 1
     fi
     for pkg in "${packages[@]}"; do
-        # Remove npm: prefix
-        pkg="${pkg#npm:}"
+        pkg="${pkg#pnpm:}"
         info "Updating $pkg..."
         install_node_global_package "$pkg" 2>/dev/null && success "$pkg updated" || warn "$pkg update failed"
     done
@@ -1663,8 +1661,8 @@ run_direct_updates() {
     echo ""
 
     for tool in "${tools[@]}"; do
-        if [[ "$tool" == npm:* ]]; then
-            local pkg="${tool#npm:}"
+        if [[ "$tool" == pnpm:* ]]; then
+            local pkg="${tool#pnpm:}"
             info "Updating $pkg..."
             if ensure_pnpm_global_env; then
                 install_node_global_package "$pkg" </dev/null >/dev/null 2>&1 && success "$pkg updated" || warn "$pkg update failed"
@@ -1687,10 +1685,10 @@ run_interactive_update() {
     if ! run_update_check; then
         echo ""
 
-        # Separate npm packages from tools (only auto-updatable)
+        # Separate pnpm packages from tools (only auto-updatable)
         local all_auto=()
         for item in "${DOTFILES_UPDATES_AVAILABLE[@]}"; do
-            if [[ "$item" == npm:* ]] || [[ "$item" =~ ^(neovim|starship|zoxide|fzf|doppler|gum|gh|bat|lsd)$ ]]; then
+            if [[ "$item" == pnpm:* ]] || [[ "$item" =~ ^(neovim|starship|zoxide|fzf|doppler|gum|gh|bat|lsd)$ ]]; then
                 all_auto+=("$item")
             fi
         done
@@ -2053,7 +2051,7 @@ Examples:
 Environment Variables:
   SKIP_NEOVIM_INSTALL=true    Skip Neovim
   SKIP_NERD_FONTS=true        Skip Nerd Fonts
-  SKIP_NPM_TOOLS=true         Skip npm tools
+  SKIP_PNPM_TOOLS=true        Skip pnpm tools
   SKIP_DOPPLER_INSTALL=true   Skip Doppler
   SKIP_MCP_INSTALL=true       Skip MCP config setup
   USER_LOCAL_MODE=true        Install to ~/.local (no sudo)
@@ -2561,7 +2559,7 @@ install_component() {
         npm-tools)
             info "Installing Node global tools..."
             if ensure_pnpm_global_env; then
-                for pkg in $DOTFILES_NPM_PACKAGES; do
+                for pkg in $DOTFILES_PNPM_PACKAGES; do
                     local package_name
                     package_name=$(node_package_name "$pkg")
                     if pnpm list -g --depth=-1 "$package_name" >/dev/null 2>&1; then

@@ -35,8 +35,8 @@ export GUM_INPUT_PROMPT_FOREGROUND="99"
 export DOTFILES_DIR="${DOTFILES_DIR:-$HOME/dotfiles}"
 export DOTFILES_BIN_DIR="${DOTFILES_BIN_DIR:-$HOME/.local/bin}"
 export DOTFILES_CONFIG_DIR="${DOTFILES_CONFIG_DIR:-$HOME/.config}"
-export DOTFILES_NPM_DIR="${DOTFILES_NPM_DIR:-$HOME/.npm-global}"
 export DOTFILES_PNPM_HOME="${DOTFILES_PNPM_HOME:-$HOME/.local/share/pnpm}"
+export DOTFILES_LEGACY_NPM_DIR="${DOTFILES_LEGACY_NPM_DIR:-$HOME/.npm-global}"
 export DOTFILES_FONTS_DIR="${DOTFILES_FONTS_DIR:-$HOME/.local/share/fonts}"
 export DOTFILES_BACKUP_DIR="${DOTFILES_BACKUP_DIR:-$HOME/.dotfiles-backup}"
 export DOTFILES_FZF_DIR="${DOTFILES_FZF_DIR:-$HOME/.local/share/.fzf}"
@@ -78,7 +78,7 @@ export SHIPGLOWZ_PRIVATE_DATA_REPO="${SHIPGLOWZ_PRIVATE_DATA_REPO:-${GITHUB_USER
 # ============================================================================
 export SKIP_NEOVIM_INSTALL="${SKIP_NEOVIM_INSTALL:-false}"
 export SKIP_NERD_FONTS="${SKIP_NERD_FONTS:-false}"
-export SKIP_NPM_TOOLS="${SKIP_NPM_TOOLS:-false}"
+export SKIP_PNPM_TOOLS="${SKIP_PNPM_TOOLS:-${SKIP_NPM_TOOLS:-false}}"
 export SKIP_DOPPLER_INSTALL="${SKIP_DOPPLER_INSTALL:-false}"
 export SKIP_MCP_INSTALL="${SKIP_MCP_INSTALL:-false}"
 export AUTO_INSTALL_NVIM_PLUGINS="${AUTO_INSTALL_NVIM_PLUGINS:-false}"
@@ -89,7 +89,7 @@ export USER_LOCAL_MODE="${USER_LOCAL_MODE:-false}"
 # ============================================================================
 export DOTFILES_APT_PACKAGES="git curl wget unzip tar build-essential jq libsecret-1-0 tmux mosh"
 export DOTFILES_CODEX_ACP_PACKAGE="${DOTFILES_CODEX_ACP_PACKAGE:-@zed-industries/codex-acp@0.16.0}"
-export DOTFILES_NPM_PACKAGES="@apify/mcpc $DOTFILES_CODEX_ACP_PACKAGE tldr eslint"
+export DOTFILES_PNPM_PACKAGES="${DOTFILES_PNPM_PACKAGES:-${DOTFILES_NPM_PACKAGES:-@apify/mcpc $DOTFILES_CODEX_ACP_PACKAGE tldr eslint}}"
 
 # ============================================================================
 # CACHE CONFIGURATION

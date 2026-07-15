@@ -91,8 +91,9 @@ source ~/.bashrc
 
 - `~/.local/bin` for user-local binaries
 - `~/.local/share/pnpm` for pnpm global tools without writing to `/usr/local`
-- `~/.npm-global` as a legacy compatibility fallback when an older install already used npm globals
 - `~/.config` and `~/.bashrc` for editor, shell, and terminal configuration
+
+Older `~/.npm-global` installations are not deleted automatically, but they are no longer added to `PATH`. Re-run the installer to migrate its managed global tools to pnpm.
 
 The Node-tools phase pins the Avante-compatible `@zed-industries/codex-acp@0.16.0`, enables its platform-specific optional dependency, and verifies the native executable after installation. `./dotfiles/install.sh --check` repeats that verification, so a new server cannot silently keep only the JavaScript launcher while missing the runtime Avante owns and terminates.
 

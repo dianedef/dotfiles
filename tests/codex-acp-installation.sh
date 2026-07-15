@@ -6,7 +6,6 @@ TMP_DIR="$(mktemp -d)"
 trap 'rm -rf "$TMP_DIR"' EXIT
 
 export HOME="$TMP_DIR/home"
-export DOTFILES_NPM_DIR="$HOME/.npm-global"
 export DOTFILES_PNPM_HOME="$HOME/.local/share/pnpm"
 export DOTFILES_LOG_FILE="$TMP_DIR/dotfiles.log"
 export DOTFILES_LOG_LEVEL=ERROR
@@ -24,8 +23,8 @@ fail() {
 
 [ "$DOTFILES_CODEX_ACP_PACKAGE" = "@zed-industries/codex-acp@0.16.0" ] \
   || fail "Codex ACP installer package is not pinned to the Avante-compatible release"
-[[ " $DOTFILES_NPM_PACKAGES " == *" $DOTFILES_CODEX_ACP_PACKAGE "* ]] \
-  || fail "Codex ACP package is absent from DOTFILES_NPM_PACKAGES"
+[[ " $DOTFILES_PNPM_PACKAGES " == *" $DOTFILES_CODEX_ACP_PACKAGE "* ]] \
+  || fail "Codex ACP package is absent from DOTFILES_PNPM_PACKAGES"
 
 declare -F resolve_codex_acp_native_binary >/dev/null \
   || fail "native Codex ACP resolver is missing"
@@ -66,7 +65,7 @@ fi
 
 grep -q 'verify_codex_acp_installation' "$ROOT_DIR/dotfiles/install.sh" \
   || fail "installer does not validate Codex ACP after installing Node tools"
-grep -q 'if ! install_npm_tools' "$ROOT_DIR/dotfiles/install.sh" \
+grep -q 'if ! install_pnpm_tools' "$ROOT_DIR/dotfiles/install.sh" \
   || fail "installer does not stop after an incomplete Codex ACP installation"
 
 echo "codex-acp installation checks passed"

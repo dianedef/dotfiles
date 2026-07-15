@@ -212,7 +212,7 @@ generate_dotfiles_report() {
 
 ## Outils utilisateur
 
-- PATH shell: $HOME/.local/bin, $HOME/.npm-global/bin
+- PATH shell: $HOME/.local/bin, $HOME/.local/share/pnpm
 
 ## Configuration
 
@@ -303,11 +303,10 @@ setup_user_local_mode() {
     fi
 
     echo "📦 USER-LOCAL MODE ENABLED"
-    echo "   Installing to ~/.local/bin, ~/.local/share/pnpm and ~/.npm-global"
+    echo "   Installing to ~/.local/bin and ~/.local/share/pnpm"
     echo ""
 
     run_action "Create ~/.local/bin" mkdir -p "$DOTFILES_BIN_DIR"
-    run_action "Create ~/.npm-global" mkdir -p "$DOTFILES_NPM_DIR"
     run_action "Create PNPM_HOME" mkdir -p "$DOTFILES_PNPM_HOME"
 
     if ! is_dry_run && command -v corepack >/dev/null 2>&1; then
@@ -315,11 +314,18 @@ setup_user_local_mode() {
     fi
 
     export PNPM_HOME="$DOTFILES_PNPM_HOME"
-    export PATH="$DOTFILES_BIN_DIR:$PNPM_HOME:$DOTFILES_NPM_DIR/bin:$PATH"
+    export PATH="$DOTFILES_BIN_DIR:$PNPM_HOME:$PATH"
+
+    if [ -d "$DOTFILES_LEGACY_NPM_DIR/bin" ] && compgen -G "$DOTFILES_LEGACY_NPM_DIR/bin/*" >/dev/null; then
+        warn "Legacy npm globals detected in $DOTFILES_LEGACY_NPM_DIR; they are not added to PATH. Reinstall required tools with pnpm before removing that directory."
+    fi
 
     if ! is_dry_run; then
+        # Migrate the PATH written by earlier npm-global-based installer versions.
+        sed -i '\|^export PATH="\$HOME/\.local/bin:\$PNPM_HOME:\$HOME/\.npm-global/bin:\$PATH"$|d' "$HOME/.bashrc"
+        sed -i '\|^export PATH="\$HOME/\.local/bin:\$PNPM_HOME:\$HOME/\.npm-global/bin:\$HOME/\.cargo/bin:\$PATH"$|d' "$HOME/.bashrc"
         append_to_bashrc 'PNPM_HOME=' 'export PNPM_HOME="$HOME/.local/share/pnpm"' "PNPM home" || true
-        append_to_bashrc '.npm-global' 'export PATH="$HOME/.local/bin:$PNPM_HOME:$HOME/.npm-global/bin:$PATH"' "User-local binaries" || true
+        append_to_bashrc 'PATH="$HOME/.local/bin:$PNPM_HOME:' 'export PATH="$HOME/.local/bin:$PNPM_HOME:$PATH"' "User-local binaries" || true
     fi
 
     success "User-local paths configured"
@@ -334,9 +340,9 @@ log_privilege_scope() {
         log INFO "Privilege scope: root run. Available: /opt, /usr/local/bin, apt/dpkg, sudo user provisioning, root-owned system services."
     elif [ "$USER_LOCAL_MODE" = "true" ]; then
         info "Privilege scope: non-root user-local run"
-        echo "   Installing user-local tools only: ~/.local/bin, ~/.local/share/pnpm, ~/.npm-global, ~/.config"
+        echo "   Installing user-local tools only: ~/.local/bin, ~/.local/share/pnpm, ~/.config"
         echo "   Not applied here: apt/dpkg, /opt, /usr/local/bin, system services, ShipGlowz system install"
-        log WARN "Privilege scope: non-root user-local run. Installs target ~/.local/bin, ~/.local/share/pnpm, ~/.npm-global, and user config only."
+        log WARN "Privilege scope: non-root user-local run. Installs target ~/.local/bin, ~/.local/share/pnpm, and user config only."
         log WARN "Root-only extras unavailable in this mode: apt/dpkg packages, /opt installs, /usr/local/bin symlinks, system service setup, new sudo user creation, and ShipGlowz system installer."
         log WARN "To add root-only extras later: run ShipGlowz with sudo, or rerun dotfiles without USER_LOCAL_MODE when passwordless sudo is available."
     elif [ "$HAS_SUDO" = "true" ]; then
@@ -732,37 +738,31 @@ install_node() {
 }
 
 # ============================================================================
-# NPM TOOLS INSTALLATION
+# PNPM GLOBAL TOOLS INSTALLATION
 # ============================================================================
-install_npm_tools() {
+install_pnpm_tools() {
     if ! should_install "npm-tools"; then return 0; fi
-    if [ "$SKIP_NPM_TOOLS" = "true" ]; then
-        info "Skipping npm tools (SKIP_NPM_TOOLS=true)"
-        return 0
-    fi
-
-    if ! is_installed npm; then
-        warn "npm not found, skipping npm tools"
+    if [ "$SKIP_PNPM_TOOLS" = "true" ]; then
+        info "Skipping pnpm tools (SKIP_PNPM_TOOLS=true)"
         return 0
     fi
 
     if is_dry_run; then
-        echo -e "${BLUE}[DRY-RUN]${NC} Would install Node global tools via pnpm: $DOTFILES_NPM_PACKAGES"
+        echo -e "${BLUE}[DRY-RUN]${NC} Would install Node global tools via pnpm: $DOTFILES_PNPM_PACKAGES"
         return 0
     fi
 
     info "Configuring pnpm for user-local global installs..."
-    mkdir -p "$DOTFILES_NPM_DIR"
     mkdir -p "$DOTFILES_PNPM_HOME"
     export PNPM_HOME="$DOTFILES_PNPM_HOME"
-    export PATH="$PNPM_HOME:$DOTFILES_NPM_DIR/bin:$PATH"
+    export PATH="$PNPM_HOME:$PATH"
     if ! ensure_pnpm_global_env; then
         warn "pnpm not found, skipping Node global tools"
         return 0
     fi
 
     info "Installing CLI tools via pnpm..."
-    for pkg in $DOTFILES_NPM_PACKAGES; do
+    for pkg in $DOTFILES_PNPM_PACKAGES; do
         install_node_global_package "$pkg" 2>/dev/null && success "$pkg installed" || warn "$pkg failed"
     done
 
@@ -1365,10 +1365,10 @@ install_node
 export NVM_DIR="${NVM_DIR:-$HOME/.nvm}"
 [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh" 2>/dev/null || true
 export PNPM_HOME="${DOTFILES_PNPM_HOME:-$HOME/.local/share/pnpm}"
-export PATH="$PNPM_HOME:$HOME/.npm-global/bin:${DOTFILES_NPM_DIR:-$HOME/.npm-global}/bin:$PATH"
+export PATH="$PNPM_HOME:$PATH"
 hash -r 2>/dev/null || true
 
-if ! install_npm_tools; then
+if ! install_pnpm_tools; then
     error "Node global tools are incomplete; refusing to continue with an unusable Codex ACP runtime"
     exit 1
 fi
@@ -1394,7 +1394,7 @@ install_ai_tools
 
 # Ensure claude CLI is in PATH for MCP setup
 export PNPM_HOME="${DOTFILES_PNPM_HOME:-$HOME/.local/share/pnpm}"
-export PATH="$HOME/.local/bin:$PNPM_HOME:$HOME/.npm-global/bin:${DOTFILES_NPM_DIR:-$HOME/.npm-global}/bin:$PATH"
+export PATH="$HOME/.local/bin:$PNPM_HOME:$PATH"
 hash -r 2>/dev/null || true
 
 # --- Phase 6: Configuration ---
@@ -1504,7 +1504,7 @@ setup_non_root_user() {
 
 # Tool paths
 export PNPM_HOME="$HOME/.local/share/pnpm"
-export PATH="$HOME/.local/bin:$PNPM_HOME:$HOME/.npm-global/bin:$HOME/.cargo/bin:$PATH"
+export PATH="$HOME/.local/bin:$PNPM_HOME:$HOME/.cargo/bin:$PATH"
 export NVM_DIR="$HOME/.nvm"
 [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
 USERPATH
