@@ -29,6 +29,10 @@ return {
 	enable_tab_bar = false,
 	font_size = 16.0,
 	font = wezterm.font('JetBrains Mono'),
+	-- Windows default: ShipGlows' native DevServer and shortcuts use PowerShell.
+	default_prog = {
+		'C:\\Windows\\System32\\WindowsPowerShell\\v1.0\\powershell.exe',
+	},
 
 	window_background_opacity = 1.0,
 	window_decorations = 'RESIZE',
