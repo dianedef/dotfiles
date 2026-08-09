@@ -66,7 +66,7 @@ Ce dépôt regroupe un ensemble de configurations locales (terminal, éditeur, f
   - mode local sans sudo (`USER_LOCAL_MODE`) vers `~/.local/bin`, `~/.local/share/pnpm` et `~/.npm-global` quand nécessaire.
 - Gestion des configurations:
   - la logique privilégie les symlinks vers le dépôt pour garder un source of truth unique.
-  - Dans tmux, `Prefix c` ouvre une nouvelle fenêtre dans le `$HOME` de l'utilisateur courant; `Prefix "` et `Prefix %` conservent le chemin du panneau actif.
+  - Dans tmux, `Prefix c` ouvre une nouvelle fenêtre dans le `$HOME` de l'utilisateur courant; `Prefix "` et `Prefix %` conservent le chemin du panneau actif. Les onglets sont renommés automatiquement à partir du répertoire du panneau actif et de sa commande.
   - Sur Termux, `termux/termux.properties` ne force pas le plein écran: `fullscreen` et `use-fullscreen-workaround` restent désactivés pour éviter les zones noires ou marges mortes au-dessus du clavier Android.
   - La barre `extra-keys` Termux est désactivée avec `extra-keys = []`; ne pas utiliser `[[]]`, qui peut conserver une ligne vide.
 - Dépendances externes: GitHub releases, Starship install script, curl, npm/node, Doppler, gh, npx, outils système selon composants. Sur Termux, le périmètre est limité à `pkg`, Neovim, outils de recherche/navigation, Starship/Zoxide/Ranger et font Nerd Font.
