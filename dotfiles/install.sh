@@ -18,7 +18,7 @@
 #
 # MCP Servers:
 #   Edit mcp/mcp-servers.json for shared registry entries.
-#   ShipGlowz owns Claude/Codex client MCP configuration and AI aliases.
+#   ShipGlows owns Claude/Codex client MCP configuration and AI aliases.
 
 set -uo pipefail
 
@@ -199,7 +199,7 @@ generate_dotfiles_report() {
 | zoxide | $(dotfiles_status "$DOTFILES_PRE_STATUS_ZOXIDE" "$status_zoxide") | Détection binaire |
 | ranger | $(dotfiles_status "$DOTFILES_PRE_STATUS_RANGER" "$status_ranger") | Détection binaire |
 | alias r (ranger) | $(dotfiles_status "" "$status_alias_ranger") | Disponible si ranger installé |
-| alias co (codex) | NON_APPLICABLE | gere par ShipGlowz |
+| alias co (codex) | NON_APPLICABLE | gere par ShipGlows |
 | alias o (opencode) | $(dotfiles_status "" "$status_alias_opencode") | Disponible si opencode installé |
 | alias mcp (mcpc) | $(dotfiles_status "" "$status_alias_mcpc") | Disponible si mcpc installé |
 | tmux | $(dotfiles_status "$DOTFILES_PRE_STATUS_TMUX" "$status_tmux") | Détection binaire |
@@ -341,10 +341,10 @@ log_privilege_scope() {
     elif [ "$USER_LOCAL_MODE" = "true" ]; then
         info "Privilege scope: non-root user-local run"
         echo "   Installing user-local tools only: ~/.local/bin, ~/.local/share/pnpm, ~/.config"
-        echo "   Not applied here: apt/dpkg, /opt, /usr/local/bin, system services, ShipGlowz system install"
+        echo "   Not applied here: apt/dpkg, /opt, /usr/local/bin, system services, ShipGlows system install"
         log WARN "Privilege scope: non-root user-local run. Installs target ~/.local/bin, ~/.local/share/pnpm, and user config only."
-        log WARN "Root-only extras unavailable in this mode: apt/dpkg packages, /opt installs, /usr/local/bin symlinks, system service setup, new sudo user creation, and ShipGlowz system installer."
-        log WARN "To add root-only extras later: run ShipGlowz with sudo, or rerun dotfiles without USER_LOCAL_MODE when passwordless sudo is available."
+        log WARN "Root-only extras unavailable in this mode: apt/dpkg packages, /opt installs, /usr/local/bin symlinks, system service setup, new sudo user creation, and ShipGlows system installer."
+        log WARN "To add root-only extras later: run ShipGlows with sudo, or rerun dotfiles without USER_LOCAL_MODE when passwordless sudo is available."
     elif [ "$HAS_SUDO" = "true" ]; then
         info "Privilege scope: non-root run with sudo available"
         echo "   System packages can use sudo; user config still targets: $HOME"
@@ -354,9 +354,9 @@ log_privilege_scope() {
     else
         info "Privilege scope: non-root run without sudo"
         echo "   Installing user-local tools only where possible"
-        echo "   Missing root-only extras: apt/dpkg, /opt, /usr/local/bin, system services, ShipGlowz system install"
+        echo "   Missing root-only extras: apt/dpkg, /opt, /usr/local/bin, system services, ShipGlows system install"
         log WARN "Privilege scope: non-root without sudo. System package operations are unavailable."
-        log WARN "Missing root-only extras: apt/dpkg packages, /opt installs, /usr/local/bin symlinks, tmux/mosh system packages, Doppler apt install, system GitHub CLI install, ShipGlowz system installer, and new sudo user creation."
+        log WARN "Missing root-only extras: apt/dpkg packages, /opt installs, /usr/local/bin symlinks, tmux/mosh system packages, Doppler apt install, system GitHub CLI install, ShipGlows system installer, and new sudo user creation."
     fi
 }
 
@@ -757,8 +757,8 @@ install_pnpm_tools() {
     export PNPM_HOME="$DOTFILES_PNPM_HOME"
     export PATH="$PNPM_HOME:$PATH"
     if ! ensure_pnpm_global_env; then
-        warn "pnpm not found, skipping Node global tools"
-        return 0
+        warn "pnpm is unavailable; Node global tools cannot be installed"
+        return 1
     fi
 
     info "Installing CLI tools via pnpm..."
@@ -1081,7 +1081,7 @@ setup_mcp_config() {
         return 0
     fi
 
-    info "Setting up shared MCP registry (ShipGlowz owns Claude/Codex client config)..."
+    info "Setting up shared MCP registry (ShipGlows owns Claude/Codex client config)..."
     if is_dry_run; then
         echo -e "${BLUE}[DRY-RUN]${NC} Would link shared MCP registry files only"
         return 0
@@ -1138,46 +1138,54 @@ setup_configs() {
         create_symlink "$SCRIPT_DIR/ghostty/config" "$HOME/.config/ghostty/config" false
     fi
 
-    # ShipGlowz owns Codex and Claude skills/config.
+    # ShipGlows owns Codex and Claude skills/config.
 
-    # Claude Code statusLine — now managed by ShipGlowz/install.sh
-    log DEBUG "Claude Code statusLine is configured by ShipGlowz install"
+    # Claude Code statusLine — now managed by ShipGlows/install.sh
+    log DEBUG "Claude Code statusLine is configured by ShipGlows install"
 
-    # ShipGlowz
-    if [ "${SKIP_SHIPGLOWZ:-false}" != "true" ]; then
-        local shipglowz_dir="$HOME/shipglowz"
-        local legacy_shipglowz_dir="$HOME/ShipGlowz"
+    # ShipGlows
+    if [ "${SKIP_SHIPGLOWS:-${SKIP_SHIPGLOWZ:-false}}" != "true" ]; then
+        local shipglows_dir="${SHIPGLOWS_ROOT:-$HOME/shipglows}"
+        local legacy_shipglowz_dir="$HOME/shipglowz"
+        local legacy_shipglowz_case_dir="$HOME/ShipGlowz"
+        local shipglows_repository="${SHIPGLOWS_REPOSITORY:-commandglows/shipglows.git}"
 
-        if [ ! -d "$shipglowz_dir" ] && [ -d "$legacy_shipglowz_dir" ]; then
-            info "Migrating legacy path $legacy_shipglowz_dir to lowercase $shipglowz_dir"
-            if ! mv "$legacy_shipglowz_dir" "$shipglowz_dir" 2>/dev/null; then
-                ln -sfn "$legacy_shipglowz_dir" "$shipglowz_dir"
+        if [ ! -d "$shipglows_dir" ] && [ -d "$legacy_shipglowz_dir" ]; then
+            info "Migrating legacy path $legacy_shipglowz_dir to $shipglows_dir"
+            if ! mv "$legacy_shipglowz_dir" "$shipglows_dir" 2>/dev/null; then
+                ln -sfn "$legacy_shipglowz_dir" "$shipglows_dir"
+            fi
+        fi
+        if [ ! -d "$shipglows_dir" ] && [ -d "$legacy_shipglowz_case_dir" ]; then
+            info "Migrating legacy path $legacy_shipglowz_case_dir to $shipglows_dir"
+            if ! mv "$legacy_shipglowz_case_dir" "$shipglows_dir" 2>/dev/null; then
+                ln -sfn "$legacy_shipglowz_case_dir" "$shipglows_dir"
             fi
         fi
 
-        if [ ! -d "$shipglowz_dir" ]; then
-            info "Cloning ShipGlowz..."
+        if [ ! -d "$shipglows_dir" ]; then
+            info "Cloning ShipGlows..."
             # Try SSH first, fallback to HTTPS
-            git clone "git@github.com:${GITHUB_USERNAME:-dianedef}/shipglowz.git" "$shipglowz_dir" 2>/dev/null || \
-                git clone "https://github.com/${GITHUB_USERNAME:-dianedef}/shipglowz.git" "$shipglowz_dir" 2>/dev/null || \
-                warn "Could not clone ShipGlowz repo"
+            git clone "git@github.com:${shipglows_repository}" "$shipglows_dir" 2>/dev/null || \
+                git clone "https://github.com/${shipglows_repository}" "$shipglows_dir" 2>/dev/null || \
+                warn "Could not clone ShipGlows repo"
         fi
-        if [ -d "$shipglowz_dir" ]; then
-            [ -f "$shipglowz_dir/TASKS.md" ] && create_symlink "$shipglowz_dir/TASKS.md" "$HOME/TASKS.md" false
-            [ -f "$shipglowz_dir/AUDIT_LOG.md" ] && create_symlink "$shipglowz_dir/AUDIT_LOG.md" "$HOME/AUDIT_LOG.md" false
-            [ -f "$shipglowz_dir/CLAUDE.md" ] && create_symlink "$shipglowz_dir/CLAUDE.md" "$HOME/CLAUDE.md" false
-            success "ShipGlowz linked"
+        if [ -d "$shipglows_dir" ]; then
+            [ -f "$shipglows_dir/TASKS.md" ] && create_symlink "$shipglows_dir/TASKS.md" "$HOME/TASKS.md" false
+            [ -f "$shipglows_dir/AUDIT_LOG.md" ] && create_symlink "$shipglows_dir/AUDIT_LOG.md" "$HOME/AUDIT_LOG.md" false
+            [ -f "$shipglows_dir/CLAUDE.md" ] && create_symlink "$shipglows_dir/CLAUDE.md" "$HOME/CLAUDE.md" false
+            success "ShipGlows linked"
 
-            # ShipGlowz owns system-level AI/code workflow setup. It requires root.
-            if [ -f "$shipglowz_dir/install.sh" ] && ! is_dry_run; then
+            # ShipGlows owns system-level AI/code workflow setup. It requires root.
+            if [ -f "$shipglows_dir/install.sh" ] && ! is_dry_run; then
                 if [ "$(id -u)" = "0" ]; then
-                    info "Running ShipGlowz system installer (PM2, Flox, Caddy, Claude/Codex config)..."
-                    bash "$shipglowz_dir/install.sh" 2>&1 || warn "ShipGlowz installation had issues"
+                    info "Running ShipGlows system installer (PM2, Flox, Caddy, Claude/Codex config)..."
+                    bash "$shipglows_dir/install.sh" 2>&1 || warn "ShipGlows installation had issues"
                 else
-                    warn "ShipGlowz system installer requires root and was not run from dotfiles"
-                    echo "   To apply ShipGlowz root-only setup later:"
-                    echo "   cd \"$shipglowz_dir\" && sudo ./install.sh"
-                    log WARN "Skipped ShipGlowz system installer from non-root dotfiles run. Required root-only scope: PM2/Flox/Caddy, global CLIs, /etc/dokploy, and all-user ShipGlowz configuration."
+                    warn "ShipGlows system installer requires root and was not run from dotfiles"
+                    echo "   To apply ShipGlows root-only setup later:"
+                    echo "   cd \"$shipglows_dir\" && sudo ./install.sh"
+                    log WARN "Skipped ShipGlows system installer from non-root dotfiles run. Required root-only scope: PM2/Flox/Caddy, global CLIs, /etc/dokploy, and all-user ShipGlows configuration."
                 fi
             fi
         fi
@@ -1196,18 +1204,18 @@ setup_configs() {
             if [ -e "$private_data_dir" ] && [ ! -d "$private_data_dir/.git" ]; then
                 warn "Private data path exists but is not a git repo: $private_data_dir"
             else
-                info "Cloning ShipGlowz private data repo..."
+                info "Cloning ShipGlows private data repo..."
                 git clone "$private_data_ssh" "$private_data_dir" 2>/dev/null || \
                     git clone "$private_data_https" "$private_data_dir" 2>/dev/null || \
-                    warn "Could not clone ShipGlowz private data repo"
+                    warn "Could not clone ShipGlows private data repo"
             fi
         else
-            info "Updating ShipGlowz private data repo..."
-            git -C "$private_data_dir" pull --ff-only 2>/dev/null || warn "Could not update ShipGlowz private data repo"
+            info "Updating ShipGlows private data repo..."
+            git -C "$private_data_dir" pull --ff-only 2>/dev/null || warn "Could not update ShipGlows private data repo"
         fi
 
         if [ -d "$private_data_dir/.git" ]; then
-            success "ShipGlowz private data ready at $private_data_dir"
+            success "ShipGlows private data ready at $private_data_dir"
         fi
     fi
 }
@@ -1388,7 +1396,7 @@ fi
 # --- Phase 5: AI Coding Tools ---
 install_ai_tools() {
     if ! should_install "ai-tools"; then return 0; fi
-    info "Skipping Claude/Codex install in dotfiles (owned by ShipGlowz installer)."
+    info "Skipping Claude/Codex install in dotfiles (owned by ShipGlows installer)."
 }
 install_ai_tools
 
@@ -1551,7 +1559,7 @@ else
     command -v flox >/dev/null 2>&1 && echo "    Flox ............. OK" || echo "    Flox ............. MISSING"
     command -v caddy >/dev/null 2>&1 && echo "    Caddy ............ OK" || echo "    Caddy ............ MISSING"
     echo ""
-    echo "  Launch: sf (or shipglowz)"
+    echo "  Launch: sf (or shipglows)"
 fi
 generate_dotfiles_report
 echo "  Report: $DOTFILES_REPORT_FILE"

@@ -1,10 +1,10 @@
 ---
 artifact: architecture_context
 metadata_schema_version: "1.0"
-artifact_version: "0.1.3"
+artifact_version: "0.1.4"
 project: "dotfiles"
 created: "2026-04-26"
-updated: "2026-07-13"
+updated: "2026-08-09"
 status: draft
 source_skill: sf-docs
 scope: architecture
@@ -124,10 +124,11 @@ Contrainte: la même orchestration est réutilisable en mode non-interactif (CI)
 - `Starship`
   - installation via script officiel ou cargo fallback, initialisation shell dans `.bashrc`.
 - `Zoxide`, `Doppler`, `FZF`, `GH CLI`, `lsd`, `bat`.
-- Outils Node globaux via `pnpm` quand disponible:
+- Outils Node globaux via `pnpm`:
   - `@apify/mcpc`, `@zed-industries/codex-acp@0.16.0`, `tldr`, `eslint`, plus outils listés dans `DOTFILES_ALL_COMPONENTS`.
+  - En mode utilisateur, `ensure_pnpm_global_env` publie `PNPM_HOME`, essaie le shim Corepack local, puis utilise `npm --prefix ~/.local` comme repli. L'installation s'arrête si pnpm ou le runtime ACP requis reste indisponible.
   - La version Codex ACP reste figée tant qu'Avante dépend de ses arguments `-c`; l'installateur force les dépendances optionnelles, vérifie le binaire natif OS/architecture après installation, puis répète ce contrôle avec `--check`.
-  - `claude`, `codex`, les skills ShipGlowz, et les configs runtime `~/.claude` / `~/.codex` sont exclus de ce périmètre et appartiennent à ShipGlowz.
+  - `claude`, `codex`, les skills ShipGlows, et les configs runtime `~/.claude` / `~/.codex` sont exclus de ce périmètre et appartiennent à ShipGlows.
 
 ### Modules spécifiques Termux
 
@@ -148,7 +149,9 @@ Contrainte: la même orchestration est réutilisable en mode non-interactif (CI)
   - `tmux` -> `~/.tmux.conf`
   - `ghostty/config` -> `~/.config/ghostty/config`
   - `.config/mcp/servers.json` -> `mcp/mcp-servers.json`
-  - liaisons de `TASKS.md` et `AUDIT_LOG.md` depuis `~/shipglowz` quand disponible.
+  - liaisons de `TASKS.md`, `AUDIT_LOG.md` et `CLAUDE.md` depuis `~/shipglows` quand disponibles; le clone canonique est `commandglows/shipglows`.
+
+Le contrôle `--check` résout les commandes depuis `~/.local/bin` et `PNPM_HOME` sans exiger que le shell appelant ait déjà chargé `.bashrc`. Une configuration Starship régulière créée par le sélecteur est valide; les authentifications GitHub et Doppler absentes restent des avertissements optionnels.
 
 ## Données et flux de secrets
 

@@ -1,10 +1,10 @@
 ---
 artifact: technical_context
 metadata_schema_version: "1.0"
-artifact_version: "0.1.1"
+artifact_version: "0.1.2"
 project: "dotfiles"
 created: "2026-04-26"
-updated: "2026-07-16"
+updated: "2026-08-09"
 status: draft
 source_skill: sf-docs
 scope: technique
@@ -26,7 +26,6 @@ depends_on:
   - "/home/claude/dotfiles/dotfiles/install.sh"
   - "/home/claude/dotfiles/dotfiles/lib.sh"
   - "/home/claude/dotfiles/dotfiles/config.sh"
-next_step: /sf-docs audit shipglowz_data/technical/context.md
 supersedes: []
 next_review: "2026-07-26"
 next_step: /sf-docs audit CONTEXT.md
@@ -63,7 +62,7 @@ Ce dépôt regroupe un ensemble de configurations locales (terminal, éditeur, f
 - Modes de fonctionnement:
   - plein, interactif, `--dry-run`, `--check`, `--only`, `--update`, `--parallel`, `--uninstall`.
 - Gestion des droits:
-  - mode local sans sudo (`USER_LOCAL_MODE`) vers `~/.local/bin`, `~/.local/share/pnpm` et `~/.npm-global` quand nécessaire.
+  - mode local sans sudo (`USER_LOCAL_MODE`) vers `~/.local/bin` et `~/.local/share/pnpm`; `~/.npm-global` est uniquement détecté comme ancien chemin à migrer.
 - Gestion des configurations:
   - la logique privilégie les symlinks vers le dépôt pour garder un source of truth unique.
   - Dans tmux, `Prefix c` ouvre une nouvelle fenêtre dans le `$HOME` de l'utilisateur courant; `Prefix "` et `Prefix %` conservent le chemin du panneau actif. Les onglets sont renommés automatiquement à partir du répertoire du panneau actif et de sa commande.

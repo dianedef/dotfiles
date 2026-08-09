@@ -1,10 +1,10 @@
 ---
 artifact: technical_context
 metadata_schema_version: "1.0"
-artifact_version: "0.1.2"
+artifact_version: "0.1.3"
 project: "dotfiles"
 created: "2026-04-26"
-updated: "2026-07-13"
+updated: "2026-08-09"
 status: draft
 source_skill: sf-docs
 scope: function_tree
@@ -67,8 +67,9 @@ next_step: /sf-docs audit shipglowz_data/technical/context-function-tree.md
   - `install_bat`
 - Groupe Runtime:
   - `install_node`
-  - `install_npm_tools`
+  - `install_pnpm_tools`
     - installe les paquets globaux avec `install_node_global_package`
+    - prépare un pnpm utilisateur via Corepack ou le repli npm sous `~/.local`
     - valide Codex ACP avec `verify_codex_acp_installation`
     - interrompt l'installation si le lanceur ou le runtime natif manque
 - Groupe Shell:
@@ -103,6 +104,7 @@ next_step: /sf-docs audit shipglowz_data/technical/context-function-tree.md
 - `init_logging`, `setup_error_traps`, `error_trap_handler`.
 - `detect_system`, `get_install_path`, `is_installed`.
 - `create_symlink`, `append_to_bashrc`, `health_check_tool`, `health_check_symlink`.
+- `health_check_file` accepte les fichiers gérés réguliers ou liés; `run_health_check` ajoute les chemins utilisateur avant toute résolution de commande.
 - Helpers Codex ACP:
   - `codex_acp_platform_package` choisit le paquet natif OS/architecture.
   - `resolve_codex_acp_native_binary` couvre les implantations globales npm et PNPM.
@@ -150,5 +152,5 @@ next_step: /sf-docs audit shipglowz_data/technical/context-function-tree.md
 
 - `install.sh` contient explicitement l'ordre: dépendances -> outils -> node -> shell tools -> shell integration -> MCP -> auth.
 - `setup_configs` enchaîne les symlinks `nvim`, `ranger`, `starship`, `tmux`, `ghostty`.
-- `setup_mcp_config` publie seulement le registre MCP partagé sous `~/.config/mcp/servers.json`; les fichiers runtime Claude/Codex sont gérés par ShipGlowz.
+- `setup_mcp_config` publie seulement le registre MCP partagé sous `~/.config/mcp/servers.json`; les fichiers runtime Claude/Codex sont gérés par ShipGlows.
 - `termux.sh` montre clairement la voie Android Markdown-only.

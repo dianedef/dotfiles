@@ -3,11 +3,11 @@
 # Example: source $(dirname "${BASH_SOURCE[0]}")/aliases.sh
 
 # Get the directory of this script dynamically
-SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+DOTFILES_NVIM_ALIASES_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
 # Main switcher alias
-alias nvim-switch="$SCRIPT_DIR/switch-config.sh"
-alias nv-switch="$SCRIPT_DIR/switch-config.sh"
+alias nvim-switch="$DOTFILES_NVIM_ALIASES_DIR/switch-config.sh"
+alias nv-switch="$DOTFILES_NVIM_ALIASES_DIR/switch-config.sh"
 
 # Quick access to different configs using NVIM_APPNAME
 alias n="nvim"
@@ -69,12 +69,12 @@ _git_auto_fetch() {
 }
 
 # Hook into PROMPT_COMMAND to run before each prompt
-if [[ -n "$BASH_VERSION" ]]; then
+if [[ -n "${BASH_VERSION:-}" ]]; then
     # Bash: append to PROMPT_COMMAND
-    if [[ "$PROMPT_COMMAND" != *"_git_auto_fetch"* ]]; then
+    if [[ "${PROMPT_COMMAND:-}" != *"_git_auto_fetch"* ]]; then
         PROMPT_COMMAND="_git_auto_fetch${PROMPT_COMMAND:+;$PROMPT_COMMAND}"
     fi
-elif [[ -n "$ZSH_VERSION" ]]; then
+elif [[ -n "${ZSH_VERSION:-}" ]]; then
     # Zsh: use precmd hook
     autoload -Uz add-zsh-hook 2>/dev/null
     add-zsh-hook precmd _git_auto_fetch 2>/dev/null

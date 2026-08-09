@@ -9,15 +9,15 @@
 
 # Method 1: Source the aliases file (recommended)
 # Get the directory of this script to find aliases.sh
-SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-if [ -f "${SCRIPT_DIR}/aliases.sh" ]; then
-    source "${SCRIPT_DIR}/aliases.sh"
+DOTFILES_NVIM_SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+if [ -f "${DOTFILES_NVIM_SCRIPT_DIR}/aliases.sh" ]; then
+    source "${DOTFILES_NVIM_SCRIPT_DIR}/aliases.sh"
 fi
 
 # Method 2: Manual aliases (if you prefer to customize)
 # Uncomment the following lines if you don't want to source aliases.sh
 
-# alias nvim-switch="$SCRIPT_DIR/nvim/switch-config.sh"
+# alias nvim-switch="$DOTFILES_NVIM_SCRIPT_DIR/switch-config.sh"
 # alias nv11="NVIM_APPNAME=nvim11 nvim"
 # alias nv22="NVIM_APPNAME=nvim22 nvim"
 

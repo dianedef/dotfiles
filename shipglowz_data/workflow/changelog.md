@@ -7,6 +7,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+
+- Made fresh Linux user-local installs fail closed when pnpm or required Node tools are unavailable, with a non-root npm fallback for system Corepack installations.
+- Prevented sourced Neovim shell helpers from overwriting installer state or failing when `PROMPT_COMMAND` is unset.
+- Aligned health checks with user-local PATH, PNPM_HOME, regular Starship configs, and optional authentication.
+- Updated the automatic workflow checkout to the canonical `commandglows/shipglows` repository and `~/shipglows` path.
+
 ## [2026-04-29]
 
 ### Fixed

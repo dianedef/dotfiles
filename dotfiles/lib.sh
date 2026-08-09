@@ -170,18 +170,28 @@ is_installed() {
 ensure_pnpm_global_env() {
     export PNPM_HOME="${DOTFILES_PNPM_HOME:-$HOME/.local/share/pnpm}"
     mkdir -p "$PNPM_HOME"
-    export PATH="$PNPM_HOME:$PATH"
+    export PATH="$HOME/.local/bin:$PNPM_HOME:$PATH"
 
-    if ! command -v pnpm >/dev/null 2>&1; then
+    if ! command -v pnpm >/dev/null 2>&1 || ! (cd "$HOME" && pnpm --version >/dev/null 2>&1); then
         if command -v corepack >/dev/null 2>&1; then
-            corepack prepare pnpm@latest --activate >/dev/null 2>&1 || true
-            corepack enable --install-directory "$PNPM_HOME" >/dev/null 2>&1 || true
+            (cd "$HOME" && corepack prepare pnpm@latest --activate >/dev/null 2>&1) || true
+            (cd "$HOME" && corepack enable --install-directory "$PNPM_HOME" >/dev/null 2>&1) || true
+            hash -r 2>/dev/null || true
+        fi
+    fi
+
+    # A system Corepack may be readable but unable to create a usable shim for
+    # an unprivileged user. npm's user-local prefix is the portable fallback.
+    if ! command -v pnpm >/dev/null 2>&1 || ! (cd "$HOME" && pnpm --version >/dev/null 2>&1); then
+        if command -v npm >/dev/null 2>&1; then
+            (cd "$HOME" && npm install --global --prefix "$HOME/.local" pnpm@latest >/dev/null 2>&1) || true
             hash -r 2>/dev/null || true
         fi
     fi
 
     command -v pnpm >/dev/null 2>&1 || return 1
-    pnpm config set --location=user global-bin-dir "$PNPM_HOME" >/dev/null 2>&1
+    (cd "$HOME" && pnpm --version >/dev/null 2>&1) || return 1
+    (cd "$HOME" && pnpm config set --location=user global-bin-dir "$PNPM_HOME" >/dev/null 2>&1) || return 1
 }
 
 codex_acp_platform_package() {
@@ -249,9 +259,9 @@ install_node_global_package() {
     package_name=$(node_package_name "$package")
 
     if [ "$package_name" = "@zed-industries/codex-acp" ]; then
-        npm_config_optional=true pnpm add -g "$package"
+        (cd "$HOME" && npm_config_optional=true pnpm add -g "$package")
     else
-        pnpm add -g "$package"
+        (cd "$HOME" && pnpm add -g "$package")
     fi
 }
 
@@ -716,6 +726,19 @@ health_check_symlink() {
     fi
 }
 
+health_check_file() {
+    local name="$1"
+    local path="$2"
+
+    if [ -f "$path" ]; then
+        echo -e "${GREEN}✓${NC} $name: configured at $path"
+        return 0
+    fi
+
+    echo -e "${RED}✗${NC} $name: missing $path"
+    return 1
+}
+
 health_check_bashrc() {
     local name="$1"
     local pattern="$2"
@@ -1152,6 +1175,12 @@ check_doppler_key() {
 }
 
 run_health_check() {
+    # `--check` exits before the normal install phase exports these paths. Use
+    # the same user-local command resolution as the installer without relying
+    # on the caller having sourced ~/.bashrc first.
+    local PATH="$HOME/.local/bin:${DOTFILES_PNPM_HOME:-$HOME/.local/share/pnpm}:$PATH"
+    hash -r 2>/dev/null || true
+
     echo "════════════════════════════════════════════════════════════════"
     echo "                    DOTFILES HEALTH CHECK"
     echo "════════════════════════════════════════════════════════════════"
@@ -1181,7 +1210,7 @@ run_health_check() {
     echo ""
     echo "🔗 Symlinks:"
     health_check_symlink "Neovim config" "$HOME/.config/nvim" || failed=$((failed + 1))
-    health_check_symlink "Starship config" "$HOME/.config/starship.toml" || failed=$((failed + 1))
+    health_check_file "Starship config" "$HOME/.config/starship.toml" || failed=$((failed + 1))
     health_check_symlink "Tmux config" "$HOME/.tmux.conf" || failed=$((failed + 1))
     health_check_symlink "MCP config" "$HOME/.config/mcp/servers.json" || failed=$((failed + 1))
 
@@ -1191,15 +1220,14 @@ run_health_check() {
     health_check_bashrc "Zoxide" "zoxide init" || failed=$((failed + 1))
     health_check_bashrc "Shell integration" "shell-integration.sh" || failed=$((failed + 1))
     health_check_bashrc "PATH (local bin)" ".local/bin" || failed=$((failed + 1))
-    health_check_bashrc "PATH (npm-global)" "npm-global" || failed=$((failed + 1))
+    health_check_bashrc "PATH (pnpm)" "PNPM_HOME" || failed=$((failed + 1))
 
     echo ""
     echo "🔐 Authentication:"
     if gh auth status &>/dev/null 2>&1; then
         echo -e "${GREEN}✓${NC} GitHub CLI: authenticated"
     else
-        echo -e "${RED}✗${NC} GitHub CLI: not authenticated"
-        failed=$((failed + 1))
+        echo -e "${YELLOW}⚠${NC} GitHub CLI: not authenticated (optional)"
     fi
 
     if is_installed doppler && doppler me &>/dev/null 2>&1; then
@@ -2610,7 +2638,7 @@ install_component() {
             success "Shell configured"
             ;;
         claude-code)
-            warn "claude-code is owned by ShipGlowz. Run the ShipGlowz installer instead."
+            warn "claude-code is owned by ShipGlows. Run the ShipGlows installer instead."
             ;;
         claude-chill)
             if is_installed claude-chill; then
