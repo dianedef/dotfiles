@@ -69,7 +69,7 @@ $HOME/dotfiles/dotfiles/windows.ps1
 
 ```bash
 # Install without manually cloning the repository
-curl -fsSL https://winflowz.com/dotfiles-script | sh
+curl -fsSL https://www.commandglows.com/dotfiles-script | sh
 source ~/.bashrc
 ```
 
@@ -103,7 +103,7 @@ When sudo is available, the script may install generic system packages such as `
 
 When launched without sudo or with `USER_LOCAL_MODE=true`, root-only extras are not applied: apt/dpkg packages, `/opt`, `/usr/local/bin`, system services, and new sudo user creation. The install log now reports this explicitly so the operator can see what was installed user-local and what still requires root.
 
-ShipGlowz is separate: its system installer must be run as `curl -fsSL https://winflowz.com/shipglowz-script | sudo sh` or `sudo ~/shipglowz/install.sh`. dotfiles links or clones ShipGlowz, but does not silently elevate into the ShipGlowz system installer from a non-root run.
+ShipGlowz is separate: its system installer must be run as `curl -fsSL https://www.commandglows.com/shipglows-script | sudo sh` or `sudo ~/shipglowz/install.sh`. dotfiles links or clones ShipGlowz, but does not silently elevate into the ShipGlowz system installer from a non-root run.
 
 dotfiles also prepares the private ShipGlowz data repo under `~/.shipglowz/private/data/`. This repository is intended for versioned private operational data such as local email-management registries, and remains separate from the public `dotfiles` repo.
 
@@ -121,7 +121,7 @@ dotfiles also prepares the private ShipGlowz data repo under `~/.shipglowz/priva
 
 ```bash
 # Install without manually cloning the repository
-curl -fsSL https://winflowz.com/termux-script | sh
+curl -fsSL https://www.commandglows.com/termux-script | sh
 source ~/.bashrc
 ```
 

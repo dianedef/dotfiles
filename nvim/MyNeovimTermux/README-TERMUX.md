@@ -9,7 +9,7 @@ Objectif: édition de fichiers Markdown et de petits fichiers texte. Cette confi
 Depuis Termux:
 
 ```bash
-curl -fsSL https://winflowz.com/termux-script | sh
+curl -fsSL https://www.commandglows.com/termux-script | sh
 source ~/.bashrc
 ```
 
