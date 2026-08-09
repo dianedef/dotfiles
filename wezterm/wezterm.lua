@@ -1,28 +1,8 @@
 local wezterm = require 'wezterm'
 local config = wezterm.config_builder()
+local userprofile = os.getenv 'USERPROFILE' or ''
 
 -- Couleurs de base
-local c = {
-	fg = "#FFFFFF",
-	bg = "#000000",
-	colour0 = "#000000",
-	colour1 = "#D90404",
-	colour2 = "#29CC00",
-	colour3 = "#E5E600",
-	colour4 = "#0066FF",
-	colour5 = "#CC00FF",
-	colour6 = "#1793D1",
-	colour7 = "#D0D0D0",
-	colour8 = "#808080",
-	colour9 = "#FE0100",
-	colour10 = "#33FF00",
-	colour11 = "#FEFF00",
-	colour12 = "#1A76FF",
-	colour13 = "#FF00FF",
-	colour14 = "#00FFFF",
-	colour15 = "#FFFFFF",
-}
-
 return {
 	adjust_window_size_when_changing_font_size = false,
 	color_scheme = 'Catppuccin Mocha',
@@ -32,6 +12,13 @@ return {
 	-- Windows default: ShipGlows' native DevServer and shortcuts use PowerShell.
 	default_prog = {
 		'C:\\Windows\\System32\\WindowsPowerShell\\v1.0\\powershell.exe',
+		'-NoLogo',
+		'-NoProfile',
+		'-ExecutionPolicy',
+		'Bypass',
+		'-NoExit',
+		'-File',
+		userprofile .. '\\.config\\shipglows\\profile.ps1',
 	},
 
 	window_background_opacity = 1.0,
@@ -52,9 +39,8 @@ return {
 		bottom = 0,
 	},
 
-	-- Scrollback: 0 = let tmux own all scrollback
-	-- Fixes: "other panes content bleeding in" when scrolling
-	scrollback_lines = 0,
+	-- Native Windows sessions use WezTerm panes instead of tmux.
+	scrollback_lines = 10000,
 
 	-- TERM: xterm-256color is safe over SSH, avoids terminfo issues
 	term = "xterm-256color",
@@ -63,6 +49,20 @@ return {
 	enable_scroll_bar = false,
 
 	keys = {
+		{
+			key = '|',
+			mods = 'CTRL|SHIFT',
+			action = wezterm.action.SplitHorizontal { domain = 'CurrentPaneDomain' },
+		},
+		{
+			key = '_',
+			mods = 'CTRL|SHIFT',
+			action = wezterm.action.SplitVertical { domain = 'CurrentPaneDomain' },
+		},
+		{ key = 'h', mods = 'CTRL|SHIFT', action = wezterm.action.ActivatePaneDirection 'Left' },
+		{ key = 'j', mods = 'CTRL|SHIFT', action = wezterm.action.ActivatePaneDirection 'Down' },
+		{ key = 'k', mods = 'CTRL|SHIFT', action = wezterm.action.ActivatePaneDirection 'Up' },
+		{ key = 'l', mods = 'CTRL|SHIFT', action = wezterm.action.ActivatePaneDirection 'Right' },
 		{
 			key = 'q',
 			mods = 'CTRL',
@@ -119,35 +119,33 @@ return {
 	cursor_blink_ease_in = "Constant",
 	cursor_blink_rate = 0,
 	colors = {
-		foreground = c.fg,
-		background = c.bg,
-		cursor_bg = c.fg,
-		cursor_fg = c.bg,
-		cursor_border = c.colour13,
-		selection_fg = c.fg,
-		selection_bg = c.colour13,
-		scrollbar_thumb = c.colour8,
-		split = c.colour7,
-
+		-- High contrast palette for readable PowerShell + gum menus on Windows/Shadow.
+		foreground = "#E6E9F0",
+		background = "#1E1E2E",
+		cursor_bg = "#89B4FA",
+		cursor_fg = "#11111B",
+		cursor_border = "#F2CDCD",
+		selection_fg = "#11111B",
+		selection_bg = "#A6E3A1",
 		ansi = {
-			c.colour0, c.colour1, c.colour2, c.colour3,
-			c.colour4, c.colour5, c.colour6, c.colour7,
+			"#45475A",
+			"#F38BA8",
+			"#A6E3A1",
+			"#F9E2AF",
+			"#89B4FA",
+			"#F5C2E7",
+			"#94E2D5",
+			"#BAC2DE",
 		},
-
 		brights = {
-			c.colour8, c.colour9, c.colour10, c.colour11,
-			c.colour12, c.colour13, c.colour14, c.colour15,
+			"#585B70",
+			"#F38BA8",
+			"#A6E3A1",
+			"#F9E2AF",
+			"#89B4FA",
+			"#F5C2E7",
+			"#94E2D5",
+			"#FFFFFF",
 		},
-
-		compose_cursor = c.colour3,
-
-		copy_mode_active_highlight_bg = { Color = c.bg },
-		copy_mode_active_highlight_fg = { AnsiColor = "Black" },
-		copy_mode_inactive_highlight_bg = { Color = "#52ad70" },
-		copy_mode_inactive_highlight_fg = { AnsiColor = "White" },
-		quick_select_label_bg = { Color = "peru" },
-		quick_select_label_fg = { Color = "#ffffff" },
-		quick_select_match_bg = { AnsiColor = "Navy" },
-		quick_select_match_fg = { Color = "#ffffff" },
 	},
 }
