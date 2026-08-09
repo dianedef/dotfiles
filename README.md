@@ -57,11 +57,14 @@ Multi-platform dotfiles repository with a full Linux/Codespaces setup and a deli
 ### Windows
 
 ```powershell
-# Clone and run installation (as administrator)
-git clone https://github.com/dianedef/dotfiles.git $HOME/dotfiles
-Set-ExecutionPolicy Bypass -Scope Process -Force
-$HOME/dotfiles/dotfiles/windows.ps1
+# Safe Windows bootstrap: public checkout plus optional WezTerm configuration.
+# It does not require WSL, administrator rights, or a permanent execution-policy change.
+$i="$env:TEMP\dotfiles.ps1"; curl.exe -fsSL 'https://shipglows.com/dotfiles-script?format=powershell' -o $i; powershell.exe -NoProfile -ExecutionPolicy Bypass -File $i
 ```
+
+The older `dotfiles/windows.ps1` is a personal full-machine provisioning script
+that installs a broad catalogue of applications. It is deliberately not run by
+the public bootstrap.
 
 **[→ Detailed Windows Guide](docs/installation/WINDOWS.md)**
 
@@ -69,7 +72,7 @@ $HOME/dotfiles/dotfiles/windows.ps1
 
 ```bash
 # Install without manually cloning the repository
-curl -fsSL https://www.commandglows.com/dotfiles-script | sh
+curl -fsSL https://shipglows.com/dotfiles-script | sh
 source ~/.bashrc
 ```
 
