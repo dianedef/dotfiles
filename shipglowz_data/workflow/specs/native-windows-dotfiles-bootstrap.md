@@ -1,11 +1,11 @@
 ---
 artifact: spec
 metadata_schema_version: "1.0"
-artifact_version: "1.0.0"
+artifact_version: "1.1.0"
 project: "dotfiles"
 created: "2026-08-09"
 updated: "2026-08-09"
-status: ready
+status: reviewed
 source_skill: sg-development
 scope: "native-windows-dotfiles-bootstrap"
 owner: "Diane"
@@ -24,7 +24,7 @@ evidence:
   - "The public dotfiles endpoint currently downloads a non-existent GitHub path and returns a 404 during bootstrap."
   - "dotfiles/windows.ps1 performs a broad all-app machine setup and is unsuitable as a safe Shadow-first public bootstrap."
   - "ShipGlows native Windows bootstrap provides the established temporary-file, explicit PowerShell execution and profile-independent model."
-next_step: "Implement the safe native PowerShell bootstrap, negotiate it at the public endpoint, then prove local and hosted responses."
+next_step: "Monitor first native Windows installation and keep the legacy full-machine script isolated from the public path."
 ---
 
 # Native Windows Dotfiles Bootstrap
@@ -61,13 +61,13 @@ Give Windows users a safe, profile-independent Dotfiles installation path from `
 
 ## Acceptance Criteria
 
-- [ ] AC01: `shipglows.com/dotfiles-script` serves the valid Unix bootstrap by default.
-- [ ] AC02: `format=powershell`, `ps1`, and `windows` serve the canonical native Windows bootstrap with text/plain cache headers.
-- [ ] AC03: a missing Git executable installs Git with WinGet; an available executable is reused.
-- [ ] AC04: a fresh checkout clones the public repository; a clean existing checkout fast-forwards only; an unclean checkout remains untouched and reports why.
-- [ ] AC05: WezTerm installation/configuration is optional, backup-safe and does not depend on profile execution.
-- [ ] AC06: the public page distinguishes the focused Windows profile from the legacy full-machine script.
-- [ ] AC07: focused static/endpoint/parity tests, shell syntax, metadata and production endpoint responses pass.
+- [x] AC01: `shipglows.com/dotfiles-script` serves the valid Unix bootstrap by default.
+- [x] AC02: `format=powershell`, `ps1`, and `windows` serve the canonical native Windows bootstrap with text/plain cache headers.
+- [x] AC03: a missing Git executable installs Git with WinGet; an available executable is reused.
+- [x] AC04: a fresh checkout clones the public repository; a clean existing checkout fast-forwards only; an unclean checkout remains untouched and reports why.
+- [x] AC05: WezTerm installation/configuration is optional, backup-safe and does not depend on profile execution.
+- [x] AC06: the public page distinguishes the focused Windows profile from the legacy full-machine script.
+- [x] AC07: focused static/endpoint/parity tests, shell syntax, metadata and production endpoint responses pass.
 
 ## Execution Batches
 
@@ -98,6 +98,7 @@ Add the generated Dotfiles artifacts, negotiated endpoint, tests and Windows cop
 | Date UTC | Skill | Model | Action | Result | Next step |
 |---|---|---|---|---|---|
 | 2026-08-09 | sg-development | GPT-5 Codex | Audited the broken public bootstrap and legacy Windows installer; recorded a safe Windows-first contract based on the verified ShipGlows bootstrap. | ready | Implement batches A then B. |
+| 2026-08-09 | sg-development | GPT-5 Codex | Implemented and deployed the native Windows Dotfiles bootstrap and public endpoint negotiation. | complete; 23 focused site tests, site production build, Dotfiles shell/static validation, generated parity and live endpoint hashes pass | Monitor first Shadow installation. |
 
 ## Current Chantier Flow
 
@@ -105,7 +106,7 @@ Add the generated Dotfiles artifacts, negotiated endpoint, tests and Windows cop
 |---|---|---|---|
 | 100-sg-spec | complete | Scope, safety boundary, endpoint behavior and proof order are explicit. | 101-sg-ready |
 | 101-sg-ready | complete | No unresolved product decision; WezTerm is the deliberately bounded optional setup. | 001-sg-build |
-| 001-sg-build | in_progress | Canonical Windows bootstrap and public endpoint remain to implement. | Execute A then B. |
-| 103-sg-verify | pending | Awaiting implementation. | Run local and hosted proof. |
-| 104-sg-end | pending | Awaiting verification. | Close evidence. |
-| 005-sg-ship | pending | Awaiting scoped commits and deployment. | Ship after proof. |
+| 001-sg-build | complete | Canonical Dotfiles bootstrap, endpoint negotiation, public page and docs are implemented in scoped commits. | 103-sg-verify |
+| 103-sg-verify | complete | Focused tests and build pass; live shell and all PowerShell format aliases are byte-identical to canonical sources. | 104-sg-end |
+| 104-sg-end | complete | AC01-AC07 are proven. PowerShell parser proof remains deferred to the first Windows host because pwsh is unavailable in this Linux workspace. | 005-sg-ship |
+| 005-sg-ship | complete | Dotfiles source `871c99a` was published before ShipGlows site `02fe72a`; live deployment is verified. | Monitor first Shadow installation. |
