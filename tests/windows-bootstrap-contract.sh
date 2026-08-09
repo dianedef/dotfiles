@@ -18,6 +18,10 @@ rg -n 'Non-interactive run: WezTerm setup skipped|ConfigureWezTerm|SkipWezTerm' 
 rg -n 'ConfigureTools|SkipTools|Neovim\.Neovim|Starship\.Starship|ajeetdsouza\.zoxide|sxyazi\.yazi' "$INSTALLER" >/dev/null
 rg -n 'junegunn\.fzf|BurntSushi\.ripgrep\.MSVC|sharkdp\.fd|sharkdp\.bat' "$INSTALLER" >/dev/null
 rg -n 'ShipGlows\.Profile\.ps1|Starship and PowerShell terminal configuration installed' "$INSTALLER" >/dev/null
+rg -n -- '--disable-interactivity.*Out-Null' "$INSTALLER" >/dev/null
+if rg -n 'Write-Warning|winget.*install.*Out-Host' "$INSTALLER"; then
+  fail 'native Windows bootstrap must keep controlled output in English'
+fi
 rg -n 'dotfiles-backup-|Get-FileHash|Copy-Item -LiteralPath \$source' "$INSTALLER" >/dev/null
 
 if rg -n 'Set-ExecutionPolicy|\$PROFILE|Add-Content.*Profile|windows\.ps1' "$INSTALLER"; then
