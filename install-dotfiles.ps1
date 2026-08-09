@@ -162,6 +162,7 @@ function Install-TerminalConfigs {
 }
 
 function Install-WezTermConfig {
+    Install-TerminalConfigs
     $wezterm = Get-Application 'wezterm.exe'
     if (-not $wezterm) {
         Install-WinGetPackage 'WezTerm' 'wez.wezterm' 'wezterm.exe'

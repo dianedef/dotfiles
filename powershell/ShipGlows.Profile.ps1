@@ -1,6 +1,7 @@
 # Loaded by WezTerm with ExecutionPolicy Bypass. This deliberately avoids the
 # system PowerShell profile so it also works on managed hosts such as Shadow.
 
+$script:ShipGlowsProfilePath = $PSCommandPath
 $starship = Get-Command starship.exe -CommandType Application -ErrorAction SilentlyContinue
 if ($starship) {
     $env:STARSHIP_CONFIG = Join-Path $env:USERPROFILE '.config\starship.toml'
@@ -12,7 +13,7 @@ if ($zoxide) { Invoke-Expression (& $zoxide.Source init powershell) }
 
 function n { & nvim.exe @args }
 function r { & yazi.exe @args }
-function re { . $PSCommandPath }
+function re { . $script:ShipGlowsProfilePath }
 function ch {
     Clear-Host
     Clear-History -ErrorAction SilentlyContinue
