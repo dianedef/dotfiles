@@ -214,17 +214,7 @@ function Install-WezTermConfig {
     $targetDirectory = Join-Path $env:USERPROFILE '.config\wezterm'
     $target = Join-Path $targetDirectory 'wezterm.lua'
     if (-not (Test-Path -LiteralPath $source -PathType Leaf)) { throw "WezTerm config was not found in the checkout: $source" }
-    New-Item -ItemType Directory -Path $targetDirectory -Force | Out-Null
-
-    if (Test-Path -LiteralPath $target -PathType Leaf) {
-        $sameContents = (Get-FileHash -LiteralPath $source -Algorithm SHA256).Hash -eq (Get-FileHash -LiteralPath $target -Algorithm SHA256).Hash
-        if (-not $sameContents) {
-            $backup = "$target.dotfiles-backup-$(Get-Date -Format 'yyyyMMdd-HHmmss')"
-            Move-Item -LiteralPath $target -Destination $backup
-            Write-Info "Existing WezTerm config backed up to $backup"
-        }
-    }
-    Copy-Item -LiteralPath $source -Destination $target -Force
+    Copy-ConfigWithBackup $source $target
     Write-Success "WezTerm config installed at $target"
 }
 
