@@ -15,11 +15,11 @@ La revue interactive se lance avec `:MailIntake` ou `<leader>mi`. Elle ouvre une
 
 Après `y`, `E`, `x`, `i` ou `d`, la fiche traitée sort de la queue et l'email suivant s'ouvre automatiquement. Si c'était le dernier, l'email précédent devient actif.
 
-`:MailIntakeScan` crée les fiches metadata-only dans `~/.shipglowz/private/data/mail-intake/inbox/`. `:MailIntakeScan!` effectue un dry-run. Les corps bruts restent dans le Maildir et ne sont jamais écrits dans la queue privée.
+`:MailIntakeScan` crée les fiches metadata-only dans `~/.shipglows/private/data/mail-intake/inbox/`. `:MailIntakeScan!` effectue un dry-run. Les corps bruts restent dans le Maildir et ne sont jamais écrits dans la queue privée.
 
-L'action `a` analyse l'email avec le provider IA configuré via la couche provider-neutre de `lua/shipglowz/mail/ai.lua`, attend un JSON de classification, puis persiste le résumé et les champs de routage dans la fiche privée. Avec un provider Avante ACP comme `codex`, elle donne à l'agent le chemin absolu du message Maildir privé plutôt que de recopier son corps dans le prompt. Les providers HTTP reçoivent encore l'export borné du corps, car ils ne peuvent pas lire un chemin local. Pour les messages HTML/multipart, Mail Intel extrait le texte visible avec BeautifulSoup quand la bibliothèque est disponible, puis utilise un fallback standard-library qui ignore explicitement les balises de style, script et métadonnées. Les règles CSS et le JavaScript du template ne sont donc pas affichés dans le corps. L'action `o` extrait les URLs présentes dans le message et affiche le libellé du lien quand il existe avant d'ouvrir le lien choisi via le navigateur système. Le contexte de routage est chargé depuis le cache privé approuvé `~/.shipglowz/private/data/projects/`; il contient les fiches de pitch, audiences et angles des projets. Le provider par défaut reste celui configuré par Avante. Le provider ACP `codex` est lancé avec `gpt-5.4-mini` et un effort `medium` afin de ne pas hériter d'un modèle global encore inconnu de `codex-acp`; `AVANTE_CODEX_MODEL` et `AVANTE_CODEX_REASONING_EFFORT` permettent de surcharger ces valeurs. Chaque analyse Mail Intelligence ouvre un nouveau chat Avante afin qu'une ancienne session ACP ne conserve pas son précédent modèle. `MAIL_INTEL_AI_PROVIDER=gemini` sélectionne le provider Gemini via Avante si sa configuration et ses identifiants sont disponibles.
+L'action `a` analyse l'email avec le provider IA configuré via la couche provider-neutre de `lua/shipglows/mail/ai.lua`, attend un JSON de classification, puis persiste le résumé et les champs de routage dans la fiche privée. Avec un provider Avante ACP comme `codex`, elle donne à l'agent le chemin absolu du message Maildir privé plutôt que de recopier son corps dans le prompt. Les providers HTTP reçoivent encore l'export borné du corps, car ils ne peuvent pas lire un chemin local. Pour les messages HTML/multipart, Mail Intel extrait le texte visible avec BeautifulSoup quand la bibliothèque est disponible, puis utilise un fallback standard-library qui ignore explicitement les balises de style, script et métadonnées. Les règles CSS et le JavaScript du template ne sont donc pas affichés dans le corps. L'action `o` extrait les URLs présentes dans le message et affiche le libellé du lien quand il existe avant d'ouvrir le lien choisi via le navigateur système. Le contexte de routage est chargé depuis le cache privé approuvé `~/.shipglows/private/data/projects/`; il contient les fiches de pitch, audiences et angles des projets. Le provider par défaut reste celui configuré par Avante. Le provider ACP `codex` est lancé avec `gpt-5.4-mini` et un effort `medium` afin de ne pas hériter d'un modèle global encore inconnu de `codex-acp`; `AVANTE_CODEX_MODEL` et `AVANTE_CODEX_REASONING_EFFORT` permettent de surcharger ces valeurs. Chaque analyse Mail Intelligence ouvre un nouveau chat Avante afin qu'une ancienne session ACP ne conserve pas son précédent modèle. `MAIL_INTEL_AI_PROVIDER=gemini` sélectionne le provider Gemini via Avante si sa configuration et ses identifiants sont disponibles.
 
-Le corps brut peut résider dans la source Maildir privée approuvée sous `~/.shipglowz/private/data/mail-source/`, mais cette arborescence est exclue du Git privé. Seules les fiches de revue metadata-only sont écrites dans `mail-intake/`.
+Le corps brut peut résider dans la source Maildir privée approuvée sous `~/.shipglows/private/data/mail-source/`, mais cette arborescence est exclue du Git privé. Seules les fiches de revue metadata-only sont écrites dans `mail-intake/`.
 
 Le handoff `h` utilise le registre Neovim, le transport terminal OSC 52 et le fallback local `/tmp/nvim_notif.txt`. Il ne contient que les métadonnées de routage et le `source_id`, jamais le corps de l’email.
 
@@ -27,7 +27,7 @@ La suppression distante est séparée du rejet `x` : `x` retire seulement la fic
 
 Le lecteur v1 reste actif en parallèle pour explorer directement le Maildir, rechercher un message et l'envoyer explicitement vers le workflow `$sf-content`. La review v2 est le flux quotidien; le lecteur v1 est la surface d'exploration ponctuelle.
 
-L'administration amont des labels et filtres Gmail vit maintenant a cote, via `scripts/mail-admin`, avec un registre local versionne sous `~/.shipglowz/private/data/mail-admin/`.
+L'administration amont des labels et filtres Gmail vit maintenant a cote, via `scripts/mail-admin`, avec un registre local versionne sous `~/.shipglows/private/data/mail-admin/`.
 
 ## Architecture
 
@@ -36,10 +36,10 @@ Gmail personnel
   -> scripts/mail-admin
   -> labels/filtres Gmail
   -> mbsync/isync
-  -> ~/.shipglowz/private/data/mail-source/<account>/
+  -> ~/.shipglows/private/data/mail-source/<account>/
   -> notmuch
   -> scripts/mail-intel
-  -> lua/shipglowz/mail/
+  -> lua/shipglows/mail/
   -> Neovim
 ```
 
@@ -64,25 +64,25 @@ Le service ne lance pas Avante, ne classe pas automatiquement les projets et n'e
 Contrôle :
 
 ```bash
-systemctl --user status shipglowz-mail-intake.timer
-systemctl --user list-timers shipglowz-mail-intake.timer
-journalctl --user -u shipglowz-mail-intake.service -n 50 --no-pager
+systemctl --user status shipglows-mail-intake.timer
+systemctl --user list-timers shipglows-mail-intake.timer
+journalctl --user -u shipglows-mail-intake.service -n 50 --no-pager
 ```
 
 Déclenchement manuel du même passage :
 
 ```bash
-systemctl --user start shipglowz-mail-intake.service
+systemctl --user start shipglows-mail-intake.service
 ```
 
-Les unités vivent sous `~/.config/systemd/user/shipglowz-mail-intake.{service,timer}` et utilisent la source privée `~/.shipglowz/private/data/mail-source/`.
+Les unités vivent sous `~/.config/systemd/user/shipglows-mail-intake.{service,timer}` et utilisent la source privée `~/.shipglows/private/data/mail-source/`.
 Le linger systemd utilisateur est activé pour que le timer continue à fonctionner après déconnexion : `loginctl show-user "$USER" -p Linger` doit afficher `Linger=yes`.
 
 ## Prérequis
 
 - `mbsync` ou `isync` pour synchroniser Gmail vers Maildir.
 - `notmuch` pour indexer et rechercher les emails locaux.
-- La source Maildir privée locale `~/.shipglowz/private/data/mail-source`.
+- La source Maildir privée locale `~/.shipglows/private/data/mail-source`.
 
 Ne committez jamais de mot de passe Gmail, app password, token OAuth, cookie ou contenu réel d'email dans ce dépôt.
 
@@ -98,7 +98,7 @@ sudo apt-get install -y notmuch isync
 Variables utiles:
 
 ```bash
-export MAIL_INTEL_ROOT="$HOME/.shipglowz/private/data/mail-source/competitors"
+export MAIL_INTEL_ROOT="$HOME/.shipglows/private/data/mail-source/competitors"
 export MAIL_INTEL_ACCOUNT="business-a"
 export MAIL_INTEL_FOLDER="_to_transcribe"
 export MAIL_INTEL_LIMIT="30"
@@ -109,7 +109,7 @@ export NOTMUCH_CONFIG="$HOME/.config/notmuch/mail-intel-config"
 Structure attendue:
 
 ```text
-~/.shipglowz/private/data/mail-source/competitors/
+~/.shipglows/private/data/mail-source/competitors/
   business-a/
     INBOX/
       cur/
@@ -120,10 +120,10 @@ Structure attendue:
 ## CLI
 
 ```bash
-scripts/mail-intel --maildir-root "$HOME/.shipglowz/private/data/mail-source/competitors" accounts
-scripts/mail-intel --maildir-root "$HOME/.shipglowz/private/data/mail-source/competitors" folders business-a
-scripts/mail-intel --maildir-root "$HOME/.shipglowz/private/data/mail-source/competitors" --format json list business-a _to_transcribe --limit 10
-scripts/mail-intel --maildir-root "$HOME/.shipglowz/private/data/mail-source/competitors" --format json search business-a "pricing" --limit 10
+scripts/mail-intel --maildir-root "$HOME/.shipglows/private/data/mail-source/competitors" accounts
+scripts/mail-intel --maildir-root "$HOME/.shipglows/private/data/mail-source/competitors" folders business-a
+scripts/mail-intel --maildir-root "$HOME/.shipglows/private/data/mail-source/competitors" --format json list business-a _to_transcribe --limit 10
+scripts/mail-intel --maildir-root "$HOME/.shipglows/private/data/mail-source/competitors" --format json search business-a "pricing" --limit 10
 scripts/mail-intel export <message-or-thread-id> --markdown
 ```
 
@@ -133,7 +133,7 @@ L’index de cette installation est séparé de l’ancien Maildir de test :
 
 ```text
 ~/.config/notmuch/mail-intel-config
-  path=/home/claude/.shipglowz/private/data/mail-source/competitors
+  path=/home/claude/.shipglows/private/data/mail-source/competitors
 ```
 
 ## Gmail Admin
@@ -141,7 +141,7 @@ L’index de cette installation est séparé de l’ancien Maildir de test :
 Le registre declaratif non secret vit sous :
 
 ```text
-~/.shipglowz/private/data/mail-admin/
+~/.shipglows/private/data/mail-admin/
   registry.json
   registry.example.json
 ```
@@ -185,7 +185,7 @@ Scopes utilises :
 
 ## Lecteur Neovim v1
 
-Les commandes `CompetitorMail*` sont actives sous le namespace `shipglowz.mail.reader` et réutilisent le CLI local en lecture seule `scripts/mail-intel`.
+Les commandes `CompetitorMail*` sont actives sous le namespace `shipglows.mail.reader` et réutilisent le CLI local en lecture seule `scripts/mail-intel`.
 
 ```vim
 :CompetitorMailAccounts
@@ -243,7 +243,7 @@ sudo apt-get install -y notmuch isync
 2. Préparer les dossiers locaux:
 
 ```bash
-mkdir -p "$HOME/.shipglowz/private/data/mail-source/competitors/business-a/INBOX"
+mkdir -p "$HOME/.shipglows/private/data/mail-source/competitors/business-a/INBOX"
 ```
 
 3. Créer un secret local hors dépôt:
@@ -272,8 +272,8 @@ Account business-a
 
 MaildirStore business-a-local
 SubFolders Verbatim
-Path ~/.shipglowz/private/data/mail-source/competitors/business-a/
-Inbox ~/.shipglowz/private/data/mail-source/competitors/business-a/INBOX
+Path ~/.shipglows/private/data/mail-source/competitors/business-a/
+Inbox ~/.shipglows/private/data/mail-source/competitors/business-a/INBOX
 
 Channel business-a-inbox
 Far :business-a-remote:
@@ -302,7 +302,7 @@ notmuch setup
 Quand `notmuch setup` demande le dossier mail, indiquez:
 
 ```text
-~/.shipglowz/private/data/mail-source/competitors
+~/.shipglows/private/data/mail-source/competitors
 ```
 
 Puis indexez:
@@ -314,7 +314,7 @@ notmuch new
 7. Exporter les variables pour Neovim:
 
 ```bash
-export MAIL_INTEL_ROOT="$HOME/.shipglowz/private/data/mail-source/competitors"
+export MAIL_INTEL_ROOT="$HOME/.shipglows/private/data/mail-source/competitors"
 export MAIL_INTEL_ACCOUNT="business-a"
 export MAIL_INTEL_FOLDER="_to_transcribe"
 ```
@@ -324,9 +324,9 @@ Pour les rendre permanentes, ajoutez-les à votre shell (`~/.bashrc`, `~/.zshrc`
 8. Tester:
 
 ```bash
-scripts/mail-intel --maildir-root "$HOME/.shipglowz/private/data/mail-source/competitors" accounts
-scripts/mail-intel --maildir-root "$HOME/.shipglowz/private/data/mail-source/competitors" folders business-a
-scripts/mail-intel --maildir-root "$HOME/.shipglowz/private/data/mail-source/competitors" --format json list business-a _to_transcribe --limit 10
+scripts/mail-intel --maildir-root "$HOME/.shipglows/private/data/mail-source/competitors" accounts
+scripts/mail-intel --maildir-root "$HOME/.shipglows/private/data/mail-source/competitors" folders business-a
+scripts/mail-intel --maildir-root "$HOME/.shipglows/private/data/mail-source/competitors" --format json list business-a _to_transcribe --limit 10
 ```
 
 Ensuite dans Neovim:

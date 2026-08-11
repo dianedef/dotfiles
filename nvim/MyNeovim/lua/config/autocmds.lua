@@ -42,7 +42,7 @@ local function markdown_heading_line_at_or_before_cursor(line_num)
 end
 
 local function markdown_toggle_global_fold_except_h1()
-  local folded = vim.b.shipglowz_fold_except_h1_only or false
+  local folded = vim.b.shipglows_fold_except_h1_only or false
   if folded then
     vim.cmd("normal! zR")
     vim.wo.foldlevel = 99
@@ -52,7 +52,7 @@ local function markdown_toggle_global_fold_except_h1()
     vim.wo.foldlevel = 1
     vim.opt_global.foldlevelstart = 1
   end
-  vim.b.shipglowz_fold_except_h1_only = not folded
+  vim.b.shipglows_fold_except_h1_only = not folded
 end
 
 local function markdown_toggle_current_heading_fold()
@@ -151,7 +151,7 @@ local function markdown_set_h1_fold_policy()
   end, { buffer = true, desc = "Fold below H5 (keep H1/H2/H3/H4/H5 visible)" })
 
   vim.keymap.set(heading_fold_modes, "zh", function()
-    require("shipglowz").search_headings({ 1, 2, 3, 4, 5, 6 })
+    require("shipglows").search_headings({ 1, 2, 3, 4, 5, 6 })
   end, { buffer = true, desc = "Next heading (any level)" })
 
   vim.keymap.set(heading_fold_modes, "za", function()

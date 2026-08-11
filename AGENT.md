@@ -1,10 +1,10 @@
 ---
 artifact: technical_guidelines
 metadata_schema_version: "1.0"
-artifact_version: "0.1.0"
+artifact_version: "0.1.1"
 project: "dotfiles"
 created: "2026-04-26"
-updated: "2026-05-22"
+updated: "2026-08-11"
 status: draft
 source_skill: sf-docs
 scope: technical
@@ -89,5 +89,5 @@ Avant toute modification de logique, lire en priorité:
   - fiabiliser les sorties de santé/trace,
   - corriger des régressions d'installation,
   - améliorer la portabilité des chemins.
-- Documenter chaque décision de configuration dans `shipglowz_data/technical/context.md`, `shipglowz_data/technical/context-function-tree.md` ou `shipglowz_data/technical/README.md`.
+- Documenter chaque décision de configuration dans `shipglows_data/technical/context.md`, `shipglows_data/technical/context-function-tree.md` ou `shipglows_data/technical/README.md`.
 - Éviter d'introduire des dépendances externes non déclarées dans `.env`/`env.example`.

@@ -117,7 +117,7 @@ end
 
 vim.keymap.set("n", "<leader>H", choose_cheat_sheet, { desc = "Cheat Sheet" })
 
-require("shipglowz").setup()
+require("shipglows").setup()
 
 pcall(vim.keymap.del, "n", "<leader>L")
 
@@ -128,7 +128,7 @@ vim.keymap.set("i", "<ScrollWheelUp>", "<C-o>3<C-y>", { desc = "Scroll up" })
 vim.keymap.set("i", "<ScrollWheelDown>", "<C-o>3<C-e>", { desc = "Scroll down" })
 
 -- Notifications (which-key group)
-local copy_to_clipboard = require("shipglowz.clipboard").copy
+local copy_to_clipboard = require("shipglows.clipboard").copy
 
 vim.keymap.set("n", "<leader>nn", "<cmd>Noice history<cr>", { desc = "Afficher notifications" })
 

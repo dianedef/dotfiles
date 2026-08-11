@@ -34,7 +34,7 @@ Avante lance directement le binaire natif `codex-acp`, afin que `:AvanteStop` et
 
 L'installateur dotfiles conserve `@zed-industries/codex-acp@0.16.0`, la version compatible avec les arguments `-c` configurés ici, et refuse de considérer l'installation complète si le runtime natif OS/architecture manque. Le successeur officiel `@agentclientprotocol/codex-acp` utilise une autre interface de configuration et doit faire l'objet d'une migration dédiée avant remplacement.
 
-Pour l'installation, les vérifications sûres, les erreurs à éviter et la procédure de dépannage, lire le [guide opérateur Avante et Codex ACP](../../shipglowz_data/technical/operator-guides/avante-codex-acp.md).
+Pour l'installation, les vérifications sûres, les erreurs à éviter et la procédure de dépannage, lire le [guide opérateur Avante et Codex ACP](../../shipglows_data/technical/operator-guides/avante-codex-acp.md).
 
 ### Gemini CLI
 

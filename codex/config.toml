@@ -1,20 +1,20 @@
-# >>> shipglowz codex autonomous >>>
+# >>> shipglows codex autonomous >>>
 approval_policy = "never"
 sandbox_mode = "danger-full-access"
-# <<< shipglowz codex autonomous <<<
+# <<< shipglows codex autonomous <<<
 
-# >>> shipglowz codex tui >>>
+# >>> shipglows codex tui >>>
 tui.status_line = ["model-with-reasoning", "current-dir", "context-remaining", "five-hour-limit", "weekly-limit"]
 tui.terminal_title = ["spinner", "thread", "project"]
-# <<< shipglowz codex tui <<<
+# <<< shipglows codex tui <<<
 
 
 model = "gpt-5.4"
 model_reasoning_effort = "high"
-# >>> shipglowz codex rmcp >>>
+# >>> shipglows codex rmcp >>>
 [beta]
 rmcp = true
-# <<< shipglowz codex rmcp <<<
+# <<< shipglows codex rmcp <<<
 
 [features]
 # `codex_apps` currently fails to initialize from this environment because
@@ -74,19 +74,16 @@ trust_level = "trusted"
 [projects."/home/claude/contentflow"]
 trust_level = "trusted"
 
-[projects."/home/claude/shipglowz"]
+[projects."/home/claude/ShipGlows/shipglows"]
 trust_level = "trusted"
 
 [projects."/home/claude/tubeflow_lab"]
 trust_level = "trusted"
 
-[projects."/home/ubuntu/ShipGlowz"]
+[projects."/home/ubuntu/ShipGlows/shipglows"]
 trust_level = "trusted"
 
 [projects."/home/ubuntu"]
-trust_level = "trusted"
-
-[projects."/home/ubuntu/shipglowz"]
 trust_level = "trusted"
 
 [projects."/home/ubuntu/dotfiles"]
@@ -96,9 +93,6 @@ trust_level = "trusted"
 trust_level = "trusted"
 
 [projects."/home/ubuntu/tubeflow_flutter"]
-trust_level = "trusted"
-
-[projects."/home/ubuntu/shipglowz_app"]
 trust_level = "trusted"
 
 [projects."/home/ubuntu/voiceflowz"]
@@ -168,7 +162,7 @@ enabled = false
 [mcp_servers.openaiDeveloperDocs]
 url = "https://developers.openai.com/mcp"
 
-# >>> shipglowz codex playwright mcp >>>
+# >>> shipglows codex playwright mcp >>>
 [mcp_servers.playwright]
 command = "npx"
 args = ["-y", "@playwright/mcp@latest", "--executable-path", "/home/ubuntu/.cache/ms-playwright/chromium-1222/chrome-linux/chrome", "--headless", "--no-sandbox"]
@@ -188,7 +182,7 @@ approval_mode = "approve"
 
 [mcp_servers.playwright.tools.browser_resize]
 approval_mode = "approve"
-# <<< shipglowz codex playwright mcp <<<
+# <<< shipglows codex playwright mcp <<<
 
 [mcp_servers.supabase]
 url = "https://mcp.supabase.com/mcp"
