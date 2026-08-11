@@ -9,7 +9,8 @@ local function repo_root()
 end
 
 M.options = {
-  maildir_root = vim.env.MAIL_INTEL_ROOT or (private_data_root .. "/mail-source/competitors"),
+  maildir_root = vim.env.MAIL_INTEL_ROOT
+    or vim.fn.expand("~/shipglows/shipglows_data/workflow/mail-buffer/data/competitors"),
   default_account = vim.env.MAIL_INTEL_ACCOUNT or "business-a",
   default_folder = vim.env.MAIL_INTEL_FOLDER or "_to_transcribe",
   limit = tonumber(vim.env.MAIL_INTEL_LIMIT or "30") or 30,
