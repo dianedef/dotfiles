@@ -24,14 +24,34 @@ function Update-ProcessPath {
     $env:Path = @($userPath, $machinePath) -join ';'
 }
 
+function Publish-EnvironmentChange {
+    if (-not ('DotfilesNativeMethods' -as [type])) {
+        Add-Type @'
+using System;
+using System.Runtime.InteropServices;
+
+public static class DotfilesNativeMethods {
+    [DllImport("user32.dll", CharSet = CharSet.Auto, SetLastError = true)]
+    public static extern IntPtr SendMessageTimeout(
+        IntPtr hWnd, uint msg, UIntPtr wParam, string lParam,
+        uint flags, uint timeout, out UIntPtr result);
+}
+'@
+    }
+    $result = [UIntPtr]::Zero
+    [void][DotfilesNativeMethods]::SendMessageTimeout([IntPtr]0xffff, 0x001a, [UIntPtr]::Zero, 'Environment', 0x0002, 5000, [ref]$result)
+}
+
 function Add-UserPathEntry([string]$PathEntry) {
     $resolvedEntry = [IO.Path]::GetFullPath($PathEntry).TrimEnd('\')
     $currentPath = [Environment]::GetEnvironmentVariable('Path', 'User')
     $entries = @($currentPath -split ';' | Where-Object { $_ })
-    if ($entries | Where-Object { [IO.Path]::GetFullPath($_).TrimEnd('\') -ieq $resolvedEntry }) { return }
-    [Environment]::SetEnvironmentVariable('Path', (@($entries) + $resolvedEntry) -join ';', 'User')
-    Update-ProcessPath
-    Write-Success "Added Dotfiles shortcuts to the user PATH."
+    if (-not ($entries | Where-Object { [IO.Path]::GetFullPath($_).TrimEnd('\') -ieq $resolvedEntry })) {
+        [Environment]::SetEnvironmentVariable('Path', (@($entries) + $resolvedEntry) -join ';', 'User')
+        Update-ProcessPath
+        Write-Success "Added Dotfiles shortcuts to the user PATH."
+    }
+    Publish-EnvironmentChange
 }
 
 function Get-Application([string]$Name) {
