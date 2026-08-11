@@ -66,6 +66,11 @@ The older `dotfiles/windows.ps1` is a personal full-machine provisioning script
 that installs a broad catalogue of applications. It is deliberately not run by
 the public bootstrap.
 
+On native Windows, `y` opens Yazi while PowerShell keeps ownership of its
+built-in `r` alias. The bootstrap also installs Yazi's official Git plugin, so
+file and directory rows display repository modification status. Ranger remains
+the file manager used by the Linux configuration.
+
 **[→ Detailed Windows Guide](docs/installation/WINDOWS.md)**
 
 ### Linux/Codespaces

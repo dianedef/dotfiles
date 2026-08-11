@@ -17,7 +17,12 @@ rg -n 'status --porcelain|Local changes were found|--ff-only|already exists and 
 rg -n 'Non-interactive run: WezTerm setup skipped|ConfigureWezTerm|SkipWezTerm' "$INSTALLER" >/dev/null
 rg -n 'ConfigureTools|SkipTools|Neovim\.Neovim|Starship\.Starship|ajeetdsouza\.zoxide|sxyazi\.yazi' "$INSTALLER" >/dev/null
 rg -n 'junegunn\.fzf|BurntSushi\.ripgrep\.MSVC|sharkdp\.fd|sharkdp\.bat' "$INSTALLER" >/dev/null
-rg -n 'ShipGlows\.Profile\.ps1|Starship and PowerShell terminal configuration installed' "$INSTALLER" >/dev/null
+rg -n 'ShipGlows\.Profile\.ps1|Install-YaziConfig|APPDATA.*yazi\\config|ya\.exe|pkg install|Starship, PowerShell, and Yazi terminal configuration installed' "$INSTALLER" >/dev/null
+rg -n 'installTools -or \$installWezTerm|if \(\$installWezTerm\).*Install-WezTermConfig' "$INSTALLER" >/dev/null
+rg -n 'Remove-Item Function:r|function y.*yazi\.exe' "$ROOT_DIR/powershell/ShipGlows.Profile.ps1" >/dev/null
+rg -n 'require\("git"\):setup' "$ROOT_DIR/yazi/init.lua" >/dev/null
+rg -n 'prepend_fetchers|run.*=.*"git"|group.*=.*"git"' "$ROOT_DIR/yazi/yazi.toml" >/dev/null
+rg -n 'yazi-rs/plugins:git' "$ROOT_DIR/yazi/package.toml" >/dev/null
 rg -n -- '--disable-interactivity.*Out-Null' "$INSTALLER" >/dev/null
 if rg -n 'Write-Warning|winget.*install.*Out-Host' "$INSTALLER"; then
   fail 'native Windows bootstrap must keep controlled output in English'
