@@ -24,6 +24,16 @@ function Update-ProcessPath {
     $env:Path = @($userPath, $machinePath) -join ';'
 }
 
+function Add-UserPathEntry([string]$PathEntry) {
+    $resolvedEntry = [IO.Path]::GetFullPath($PathEntry).TrimEnd('\')
+    $currentPath = [Environment]::GetEnvironmentVariable('Path', 'User')
+    $entries = @($currentPath -split ';' | Where-Object { $_ })
+    if ($entries | Where-Object { [IO.Path]::GetFullPath($_).TrimEnd('\') -ieq $resolvedEntry }) { return }
+    [Environment]::SetEnvironmentVariable('Path', (@($entries) + $resolvedEntry) -join ';', 'User')
+    Update-ProcessPath
+    Write-Success "Added Dotfiles shortcuts to the user PATH."
+}
+
 function Get-Application([string]$Name) {
     return Get-Command $Name -CommandType Application -ErrorAction SilentlyContinue | Select-Object -First 1
 }
@@ -195,10 +205,19 @@ function Install-YaziConfig {
     Write-Success 'Yazi configuration and locked plugins installed.'
 }
 
+function Install-YaziShortcut {
+    $shortcutDirectory = Join-Path $DotfilesDir 'bin'
+    $shortcut = Join-Path $shortcutDirectory 'y.cmd'
+    if (-not (Test-Path -LiteralPath $shortcut -PathType Leaf)) { throw "Yazi shortcut was not found in the checkout: $shortcut" }
+    Add-UserPathEntry $shortcutDirectory
+    Write-Success 'Yazi shortcut installed: y (available in newly opened terminals).'
+}
+
 function Install-TerminalConfigs {
     Copy-ConfigWithBackup (Join-Path $DotfilesDir 'starship\starship.toml') (Join-Path $env:USERPROFILE '.config\starship.toml')
     Copy-ConfigWithBackup (Join-Path $DotfilesDir 'powershell\ShipGlows.Profile.ps1') (Join-Path $env:USERPROFILE '.config\shipglows\profile.ps1')
     Install-YaziConfig
+    Install-YaziShortcut
     Write-Success 'Starship, PowerShell, and Yazi terminal configuration installed.'
 }
 

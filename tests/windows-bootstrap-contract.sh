@@ -21,6 +21,8 @@ rg -n 'Non-interactive run: WezTerm setup skipped|ConfigureWezTerm|SkipWezTerm' 
 rg -n 'ConfigureTools|SkipTools|Neovim\.Neovim|Starship\.Starship|ajeetdsouza\.zoxide|sxyazi\.yazi' "$INSTALLER" >/dev/null
 rg -n 'junegunn\.fzf|BurntSushi\.ripgrep\.MSVC|sharkdp\.fd|sharkdp\.bat' "$INSTALLER" >/dev/null
 rg -n 'ShipGlows\.Profile\.ps1|Install-YaziConfig|keymap\.toml|APPDATA.*yazi\\config|ya\.exe|pkg install|Starship, PowerShell, and Yazi terminal configuration installed' "$INSTALLER" >/dev/null
+rg -n 'Add-UserPathEntry|Install-YaziShortcut|Yazi shortcut installed|Dotfiles shortcuts to the user PATH' "$INSTALLER" >/dev/null
+rg -n 'where yazi\.exe|yazi\.exe %\*' "$ROOT_DIR/bin/y.cmd" >/dev/null
 rg -n 'installTools -or \$installWezTerm|if \(\$installWezTerm\).*Install-WezTermConfig' "$INSTALLER" >/dev/null
 rg -n 'Remove-Item Function:r|function y.*yazi\.exe' "$ROOT_DIR/powershell/ShipGlows.Profile.ps1" >/dev/null
 rg -n 'require\("git"\):setup' "$ROOT_DIR/yazi/init.lua" >/dev/null

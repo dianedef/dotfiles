@@ -27,6 +27,10 @@ Yazi preserves the old Ranger `Shift+S` behavior: it opens PowerShell on
 Windows or the configured shell on Unix in Yazi's current directory. Exit that
 shell to return to Yazi.
 
+On Windows, `y` is also a PATH shortcut for Yazi in ordinary PowerShell and
+WezTerm. Open a new terminal after the Dotfiles installation so Windows reads
+the updated user PATH.
+
 WezTerm does not use tmux-resurrect files. Workspaces, tabs and panes live in
 the active WezTerm multiplexer; keep a WezTerm window open when you need a
 long-running workspace to stay available.
