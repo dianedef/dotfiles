@@ -8,12 +8,12 @@
 # What it does:
 #   1. Installs minimal prerequisites (git, curl, jq)
 #   2. Clones dotfiles repository
-#   3. Runs the full installation (dotfiles + ShipGlowz + Claude Code + Codex)
+#   3. Runs the full installation (dotfiles + ShipGlows + Claude Code + Codex)
 #
 # Environment variables:
 #   DOTFILES_REPO   - Override repo URL (default: dianedef/dotfiles)
 #   DOTFILES_DIR    - Override install directory (default: ~/.dotfiles)
-#   SKIP_SHIPGLOWZ   - Set to 1 to skip ShipGlowz installation
+#   SKIP_SHIPGLOWS   - Set to 1 to skip ShipGlows installation
 #   NON_INTERACTIVE - Set to 1 to skip all interactive prompts
 # ============================================================================
 

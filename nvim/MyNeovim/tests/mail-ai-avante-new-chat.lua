@@ -8,7 +8,7 @@ package.path = table.concat({
 
 local captured
 
-package.loaded["shipglowz.mail.config"] = {
+package.loaded["shipglows.mail.config"] = {
   get = function()
     return {
       ai_provider = "avante",
@@ -20,9 +20,9 @@ package.loaded["shipglowz.mail.config"] = {
 package.loaded["avante.api"] = {
   ask = function(opts) captured = opts end,
 }
-package.loaded["shipglowz.mail.ai"] = nil
+package.loaded["shipglows.mail.ai"] = nil
 
-local ai = require("shipglowz.mail.ai")
+local ai = require("shipglows.mail.ai")
 assert(ai.ask("Classe cette source", "source de test"))
 assert(captured, "Mail Intelligence did not call Avante")
 assert(captured.provider == "codex", "Mail Intelligence did not preserve the configured ACP provider")

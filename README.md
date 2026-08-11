@@ -1,7 +1,7 @@
 ---
 artifact: documentation
 metadata_schema_version: "1.0"
-artifact_version: "0.1.1"
+artifact_version: "0.1.2"
 project: "dotfiles"
 created: "2026-04-26"
 updated: "2026-08-11"
@@ -105,7 +105,7 @@ Older `~/.npm-global` installations are not deleted automatically, but they are 
 
 The Node-tools phase pins the Avante-compatible `@zed-industries/codex-acp@0.16.0`, enables its platform-specific optional dependency, and verifies the native ACP executable after installation. `./dotfiles/install.sh --check` repeats that verification, so a new server cannot silently keep only the JavaScript launcher while missing the runtime Avante owns and terminates. The Codex CLI itself is installed by ShipGlows through pnpm.
 
-For safe installation, everyday use, checks, and troubleshooting in French, see the [Avante and Codex ACP operator guide](shipglowz_data/technical/operator-guides/avante-codex-acp.md).
+For safe installation, everyday use, checks, and troubleshooting in French, see the [Avante and Codex ACP operator guide](shipglows_data/technical/operator-guides/avante-codex-acp.md).
 
 When sudo is available, the script may install generic system packages such as `git`, `curl`, `ripgrep`, `fd`, `bat`, `lsd`, `tmux`, or `mosh`. User configuration still remains scoped to the current `$HOME`.
 
@@ -113,14 +113,14 @@ When launched without sudo or with `USER_LOCAL_MODE=true`, root-only extras are 
 
 ShipGlows is separate and is installed or updated through its official bootstrap/CLI. Dotfiles does not clone or execute a potentially stale local ShipGlows source tree.
 
-dotfiles also prepares the private ShipGlowz data repo under `~/.shipglowz/private/data/`. This repository is intended for versioned private operational data such as local email-management registries, and remains separate from the public `dotfiles` repo.
+dotfiles also prepares the private ShipGlows data repo under `~/.shipglows/private/data/`. This repository is intended for versioned private operational data such as local email-management registries, and remains separate from the public `dotfiles` repo.
 
 ### Component-aware shell integration
 
 `dotfiles` applies shell aliases and config symlinks only for components that are actually installed when the run finishes.
 
 - `alias r='ranger'` is added only when `ranger` is available.
-- `alias k`, `alias o`, `alias kc`, `alias oc`, `alias mcp` are added when available. `alias co` is owned by ShipGlowz.
+- `alias k`, `alias o`, `alias kc`, `alias oc`, `alias mcp` are added when available. `alias co` is owned by ShipGlows.
 - `~/.config/ranger` is created only when Ranger is installed.
 - In `--dry-run`, no `.bashrc` or config symlink is actually modified.
 - Synchronization runs on the final component state, including `--only` modes, so stale aliases/symlinks are removed and only installed-component artifacts are kept.
@@ -196,7 +196,7 @@ Linux/Codespaces only. The Termux installer does not configure MCP clients or re
 - Shared MCP configuration lives in `mcp/mcp-servers.json`
 - Includes `consensus` at `https://mcp.consensus.app/mcp`
 - Consensus does not require an API key to get started; OAuth can trigger automatically on first use in supported clients
-- ShipGlowz owns Claude/Codex MCP client configuration. Dotfiles only links shared MCP registry files via `./dotfiles/install.sh --only=mcp`.
+- ShipGlows owns Claude/Codex MCP client configuration. Dotfiles only links shared MCP registry files via `./dotfiles/install.sh --only=mcp`.
 
 ### Secrets Management
 Linux/Codespaces only. The Termux Markdown profile does not install Doppler or local API-key setup.
@@ -218,81 +218,81 @@ Linux/Codespaces only. The Termux Markdown profile does not install Doppler or l
 | Starship | ✅ | ✅ | ✅ |
 | Nerd Fonts | ✅ | ✅ | ✅ |
 | Mosh / tmux | ✅ | ✅ | ✅ |
-| ShipGlowz local tunnels | ✅ | ✅ | ✅ |
+| ShipGlows local tunnels | ✅ | ✅ | ✅ |
 | GitHub Copilot | ✅ | ✅ | ❌ |
 | OpenCode AI | ✅ | ✅ | ❌ |
 | Doppler | ✅ | ✅ | ❌ |
 | MCP config | ✅ | ✅ | ❌ |
 
-## ShipGlowz Ownership
+## ShipGlows Ownership
 
-Claude Code skills, the Codex CLI and config, Claude settings, and ShipGlowz AI aliases are owned by the ShipGlowz installer. Dotfiles only installs the tmux configuration and launcher that use ShipGlows' pnpm-managed Codex binary; it does not write runtime state under `~/.claude` or `~/.codex`, aside from non-runtime repository samples kept under version control.
+Claude Code skills, the Codex CLI and config, Claude settings, and ShipGlows AI aliases are owned by the ShipGlows installer. Dotfiles only installs the tmux configuration and launcher that use ShipGlows' pnpm-managed Codex binary; it does not write runtime state under `~/.claude` or `~/.codex`, aside from non-runtime repository samples kept under version control.
 
 ## Audit System (8 domains)
 
-Run `/shipglowz-audit` in any project to launch a full 8-domain audit (code, design, copy, SEO, GTM, translation, dependencies, performance) with parallel agents. Three modes:
+Run `/shipglows-audit` in any project to launch a full 8-domain audit (code, design, copy, SEO, GTM, translation, dependencies, performance) with parallel agents. Three modes:
 
 ```bash
 # Page mode — audit a single file
-/shipglowz-audit-seo @src/pages/index.astro
+/shipglows-audit-seo @src/pages/index.astro
 
 # Project mode — audit the current project
-/shipglowz-audit-code
-/shipglowz-audit                      # All 8 domains in parallel
+/shipglows-audit-code
+/shipglows-audit                      # All 8 domains in parallel
 
 # Global mode — audit ALL projects in the workspace
-/shipglowz-audit-seo global           # SEO across all web projects
-/shipglowz-audit global               # Everything, everywhere, all at once
-/shipglowz-deps global                # Dependencies across all projects
+/shipglows-audit-seo global           # SEO across all web projects
+/shipglows-audit global               # Everything, everywhere, all at once
+/shipglows-deps global                # Dependencies across all projects
 ```
 
-Global mode reads `~/shipglowz/PROJECTS.md` (private, 8-domain applicability matrix) and launches parallel agents per project.
+Global mode reads `~/.shipglows/private/data/PROJECTS.md` (private, 8-domain applicability matrix) and launches parallel agents per project.
 
 Each audit:
 - Scores every category A/B/C/D
-- Fixes issues directly (or asks first for `/shipglowz-audit` master)
+- Fixes issues directly (or asks first for `/shipglows-audit` master)
 - Logs scores to `AUDIT_LOG.md` (global + project-local)
 - Creates tasks in `TASKS.md` for all issues found
 
 ### Task Tracking
 
 ```bash
-/shipglowz-tasks       # Update task tracker
-/shipglowz-backlog     # Capture ideas
-/shipglowz-priorities  # Re-rank by impact/effort
-/shipglowz-review      # Session review + planning
+/shipglows-tasks       # Update task tracker
+/shipglows-backlog     # Capture ideas
+/shipglows-priorities  # Re-rank by impact/effort
+/shipglows-review      # Session review + planning
 /sf-resume            # Fast thread summary + close/keep-open verdict
-/shipglowz-ship        # Commit, push, sync ShipGlowz
+/shipglows-ship        # Commit, push, sync ShipGlows
 ```
 
 ### DevOps & Shipping
 
 ```bash
-/shipglowz-check       # Typecheck + lint + build + auto-fix
-/shipglowz-deploy      # Full deploy: check → ship → restart → verify
-/shipglowz-status      # Cross-project git dashboard
+/shipglows-check       # Typecheck + lint + build + auto-fix
+/shipglows-deploy      # Full deploy: check → ship → restart → verify
+/shipglows-status      # Cross-project git dashboard
 ```
 
 ### Scaffolding & Init
 
 ```bash
-/shipglowz-init        # Bootstrap new project for ShipGlowz tracking
-/shipglowz-scaffold page about    # Generate files matching project patterns
+/shipglows-init        # Bootstrap new project for ShipGlows tracking
+/shipglows-scaffold page about    # Generate files matching project patterns
 ```
 
 ### Research & Documentation
 
 ```bash
-/shipglowz-research "topic"  # Deep web research → saved report
-/shipglowz-docs readme       # Generate/update docs from code
-/shipglowz-enrich @file      # Web research + content upgrade
+/shipglows-research "topic"  # Deep web research → saved report
+/shipglows-docs readme       # Generate/update docs from code
+/shipglows-enrich @file      # Web research + content upgrade
 ```
 
 ### Upgrades
 
 ```bash
-/shipglowz-migrate astro@5   # Framework upgrade assistant
-/shipglowz-changelog         # Auto-generate CHANGELOG from git
+/shipglows-migrate astro@5   # Framework upgrade assistant
+/shipglows-changelog         # Auto-generate CHANGELOG from git
 ```
 
 ### Interactive Prompts
@@ -300,20 +300,21 @@ Each audit:
 All skills are **context-aware** with interactive selection prompts:
 
 - **Workspace root detection** — Run any skill from `~/` and it detects you're not inside a project. Instead of failing, it asks "Which project(s)?" with checkboxes.
-- **Scope selection** — `/shipglowz-review` asks time scope (daily/weekly/sprint), `/shipglowz-check` asks which checks (typecheck/lint/build/test), `/shipglowz-audit` asks which domains.
-- **Global mode** — `/shipglowz-audit global` prompts both "Which projects?" and "Which domains?" before launching.
-- **Content targeting** — `/shipglowz-enrich` with a folder prompts which files to process.
+- **Scope selection** — `/shipglows-review` asks time scope (daily/weekly/sprint), `/shipglows-check` asks which checks (typecheck/lint/build/test), `/shipglows-audit` asks which domains.
+- **Global mode** — `/shipglows-audit global` prompts both "Which projects?" and "Which domains?" before launching.
+- **Content targeting** — `/shipglows-enrich` with a folder prompts which files to process.
 
 When arguments are provided explicitly, prompts are skipped.
 
-### ShipGlowz Data (Private)
+### ShipGlows Data (Private)
 
-Personal tracking data lives in a separate private repo (`~/shipglowz/`):
+Personal tracking data lives in a separate private repo (`~/.shipglows/private/data/`):
 - `TASKS.md` — master tracker across all projects
 - `AUDIT_LOG.md` — audit history with scores over time
 - `PROJECTS.md` — project registry with domain applicability matrix
 
-`install.sh` clones it automatically. Create yours with `gh repo create shipglowz --private`.
+`install.sh` clones it automatically. Configure its remote with
+`SHIPGLOWS_PRIVATE_DATA_REPO`.
 
 ## BMAD Method Integration
 

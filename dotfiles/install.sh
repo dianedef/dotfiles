@@ -1147,14 +1147,14 @@ setup_configs() {
     # local ShipGlows source tree here: it may be stale. Installation and
     # updates are delegated to the official ShipGlows bootstrap/CLI.
     log DEBUG "ShipGlows installation is managed by the official ShipGlows installer"
-    if [ "${SKIP_SHIPGLOWS:-${SKIP_SHIPGLOWZ:-false}}" != "true" ]; then
+    if [ "${SKIP_SHIPGLOWS:-false}" != "true" ]; then
         info "ShipGlows installation is managed separately by the official ShipGlows installer."
     fi
 
-    if [ "${SKIP_SHIPGLOWS_PRIVATE_DATA:-${SKIP_SHIPGLOWZ_PRIVATE_DATA:-false}}" != "true" ]; then
-        local private_dir="${SHIPGLOWS_PRIVATE_DIR:-${SHIPGLOWZ_PRIVATE_DIR:-$HOME/.shipglows/private}}"
-        local private_data_dir="${SHIPGLOWS_PRIVATE_DATA_DIR:-${SHIPGLOWZ_PRIVATE_DATA_DIR:-$private_dir/data}}"
-        local private_data_repo="${SHIPGLOWS_PRIVATE_DATA_REPO:-${SHIPGLOWZ_PRIVATE_DATA_REPO:-${GITHUB_USERNAME:-dianedef}/shipglowz-private-data.git}}"
+    if [ "${SKIP_SHIPGLOWS_PRIVATE_DATA:-false}" != "true" ]; then
+        local private_dir="${SHIPGLOWS_PRIVATE_DIR:-$HOME/.shipglows/private}"
+        local private_data_dir="${SHIPGLOWS_PRIVATE_DATA_DIR:-$private_dir/data}"
+        local private_data_repo="${SHIPGLOWS_PRIVATE_DATA_REPO:-${GITHUB_USERNAME:-dianedef}/shipglows-private-data.git}"
         local private_data_https="https://github.com/${private_data_repo}"
         local private_data_ssh="git@github.com:${private_data_repo}"
 

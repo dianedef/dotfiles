@@ -9,7 +9,7 @@ from typing import Any
 
 
 REGISTRY_VERSION = 1
-DEFAULT_DATA_ROOT = Path.home() / ".shipglowz" / "private" / "data"
+DEFAULT_DATA_ROOT = Path.home() / ".shipglows" / "private" / "data"
 DEFAULT_REGISTRY = "mail-admin/registry.json"
 DEFAULT_SCOPES = [
     "https://www.googleapis.com/auth/gmail.labels",
@@ -607,7 +607,7 @@ def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(
         description="Manage declarative Gmail labels and filters for Mail Intel."
     )
-    parser.add_argument("--data-root", default=os.environ.get("SHIPGLOWZ_PRIVATE_DATA_ROOT"))
+    parser.add_argument("--data-root", default=os.environ.get("SHIPGLOWS_PRIVATE_DATA_ROOT"))
     parser.add_argument("--registry", default=os.environ.get("MAIL_ADMIN_REGISTRY"))
     sub = parser.add_subparsers(dest="command", required=True)
 

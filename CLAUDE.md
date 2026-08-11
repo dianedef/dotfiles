@@ -1,7 +1,7 @@
 ---
 artifact: technical_guidelines
 metadata_schema_version: "1.0"
-artifact_version: "0.1.1"
+artifact_version: "0.1.2"
 project: "dotfiles"
 created: "2026-04-26"
 updated: "2026-08-11"
@@ -104,57 +104,57 @@ cd ~/.dotfiles && ./dotfiles/install.sh
 
 Global workflow skills are owned by ShipGlows and installed through the official
 ShipGlows bootstrap/CLI. Dotfiles must not clone or execute a local
-`~/shipglowz` source tree because it may be stale. This repository may keep
+an unmanaged source tree because it may be stale. This repository may keep
 historical samples or editor-facing notes, but it is not the source of truth
 for live Claude/Codex skills.
 
 ### Task & Workflow Skills
-- `/shipglowz-tasks` — Update TASKS.md, mark completed items, suggest next steps
-- `/shipglowz-backlog` — Capture ideas, defer non-urgent tasks
-- `/shipglowz-priorities` — Re-rank tasks by impact/effort
-- `/shipglowz-review` — Session review, update docs, plan next
+- `/shipglows-tasks` — Update TASKS.md, mark completed items, suggest next steps
+- `/shipglows-backlog` — Capture ideas, defer non-urgent tasks
+- `/shipglows-priorities` — Re-rank tasks by impact/effort
+- `/shipglows-review` — Session review, update docs, plan next
 - `/sf-resume` — Fast thread summary with task statuses and close/keep-open verdict
-- `/shipglowz-ship` — Stage, commit, push + auto-sync ShipGlowz data
+- `/shipglows-ship` — Stage, commit, push + auto-sync ShipGlows data
 
 ### Audit Skills (8 domains, 3 modes: `@file` = page, no arg = project, `global` = all projects)
-- `/shipglowz-audit` — Master orchestrator: launches all 8 domains in parallel
-- `/shipglowz-audit-code` — Architecture, security, reliability
-- `/shipglowz-audit-design` — UI/UX, accessibility, responsiveness
-- `/shipglowz-audit-copy` — Copywriting, tone, CTAs, grammar
-- `/shipglowz-audit-seo` — Meta tags, structured data, internal linking
-- `/shipglowz-audit-gtm` — Go-to-market, conversion, trust, analytics
-- `/shipglowz-audit-translate` — i18n completeness, consistency, terminology
-- `/shipglowz-deps` — Dependencies: vulnerabilities, outdated, unused, licenses
-- `/shipglowz-perf` — Performance: bundle, rendering, CWV, data fetching
+- `/shipglows-audit` — Master orchestrator: launches all 8 domains in parallel
+- `/shipglows-audit-code` — Architecture, security, reliability
+- `/shipglows-audit-design` — UI/UX, accessibility, responsiveness
+- `/shipglows-audit-copy` — Copywriting, tone, CTAs, grammar
+- `/shipglows-audit-seo` — Meta tags, structured data, internal linking
+- `/shipglows-audit-gtm` — Go-to-market, conversion, trust, analytics
+- `/shipglows-audit-translate` — i18n completeness, consistency, terminology
+- `/shipglows-deps` — Dependencies: vulnerabilities, outdated, unused, licenses
+- `/shipglows-perf` — Performance: bundle, rendering, CWV, data fetching
 
-Project registry for global mode: `~/shipglowz/PROJECTS.md` (private) — lists all projects with domain applicability matrix (8 domains).
+Project registry for global mode: `~/.shipglows/private/data/PROJECTS.md` (private) — lists all projects with domain applicability matrix (8 domains).
 
 ### DevOps & Shipping Skills
-- `/shipglowz-check` — Typecheck + lint + build, auto-fix errors
-- `/shipglowz-deploy` — Full deploy cycle: check → ship → restart → verify
-- `/shipglowz-status` — Cross-project git dashboard
+- `/shipglows-check` — Typecheck + lint + build, auto-fix errors
+- `/shipglows-deploy` — Full deploy cycle: check → ship → restart → verify
+- `/shipglows-status` — Cross-project git dashboard
 
 ### Scaffolding & Init Skills
-- `/shipglowz-init` — Bootstrap new project for ShipGlowz tracking
-- `/shipglowz-scaffold` — Generate files matching existing project patterns
+- `/shipglows-init` — Bootstrap new project for ShipGlows tracking
+- `/shipglows-scaffold` — Generate files matching existing project patterns
 
 ### Research & Documentation Skills
-- `/shipglowz-research` — Deep web research → structured markdown report
-- `/shipglowz-docs` — Generate/update docs from code (README, API, components)
-- `/shipglowz-enrich` — Web research + content upgrade
+- `/shipglows-research` — Deep web research → structured markdown report
+- `/shipglows-docs` — Generate/update docs from code (README, API, components)
+- `/shipglows-enrich` — Web research + content upgrade
 
 ### Upgrade Skills
-- `/shipglowz-migrate` — Framework upgrade assistant with backup branch
-- `/shipglowz-changelog` — Auto-generate CHANGELOG.md from git history
+- `/shipglows-migrate` — Framework upgrade assistant with backup branch
+- `/shipglows-changelog` — Auto-generate CHANGELOG.md from git history
 
 ### Interactive Prompts
 
 All skills use `AskUserQuestion` for interactive selection when context is ambiguous:
 
 - **Workspace root detection**: Every skill detects when run from `~/` (no project markers) and prompts "Which project(s)?" instead of failing silently.
-- **Scope selection**: `/shipglowz-review` prompts for time scope (daily/weekly/sprint/release). `/shipglowz-check` prompts for which checks (typecheck/lint/build/test). `/shipglowz-audit` prompts for which domains.
-- **Global mode**: `/shipglowz-audit global` and `/shipglowz-audit-* global` prompt for project and domain selection with multiSelect checkboxes.
-- **Content selection**: `/shipglowz-enrich` with folder arg prompts which files to enrich.
+- **Scope selection**: `/shipglows-review` prompts for time scope (daily/weekly/sprint/release). `/shipglows-check` prompts for which checks (typecheck/lint/build/test). `/shipglows-audit` prompts for which domains.
+- **Global mode**: `/shipglows-audit global` and `/shipglows-audit-* global` prompt for project and domain selection with multiSelect checkboxes.
+- **Content selection**: `/shipglows-enrich` with folder arg prompts which files to enrich.
 
 When arguments are provided explicitly, prompts are skipped — the skill runs directly.
 

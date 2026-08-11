@@ -21,10 +21,10 @@ scripts/mail-admin list-filters <account>
 Chemins utiles :
 
 ```text
-~/.shipglowz/private/data/mail-admin/registry.json
-~/.shipglowz/private/data/mail-admin/registry.example.json
-~/.shipglowz/private/data/mail-intake/inbox/
-~/.shipglowz/private/data/mail-intake/done/
+~/.shipglows/private/data/mail-admin/registry.json
+~/.shipglows/private/data/mail-admin/registry.example.json
+~/.shipglows/private/data/mail-intake/inbox/
+~/.shipglows/private/data/mail-intake/done/
 ~/.config/mail-admin/oauth/<account>/
 ```
 
@@ -49,9 +49,9 @@ Le handoff `h` est copié via le registre Neovim et OSC 52 ; le fallback local e
 Planification automatique à 07:00 et 14:00 Europe/Paris :
 
 ```bash
-systemctl --user status shipglowz-mail-intake.timer
-systemctl --user list-timers shipglowz-mail-intake.timer
-journalctl --user -u shipglowz-mail-intake.service -n 50 --no-pager
+systemctl --user status shipglows-mail-intake.timer
+systemctl --user list-timers shipglows-mail-intake.timer
+journalctl --user -u shipglows-mail-intake.service -n 50 --no-pager
 ```
 
 ## Mail Intelligence reader
@@ -483,7 +483,7 @@ scripts/mail-delete --account business-a --folder _to_transcribe --source-id <so
 Les variables importantes sont :
 
 ```bash
-export MAIL_INTEL_ROOT="$HOME/.shipglowz/private/data/mail-source/competitors"
+export MAIL_INTEL_ROOT="$HOME/.shipglows/private/data/mail-source/competitors"
 export MAIL_INTEL_ACCOUNT="business-a"
 export MAIL_INTEL_FOLDER="_to_transcribe"
 export NOTMUCH_CONFIG="$HOME/.config/notmuch/mail-intel-config"
@@ -606,7 +606,7 @@ Ceux que tu devrais connaître d'abord :
 - `Copilot` : autocomplétion rapide
 - `Copilot Chat` : explication / review / fix rapide d'un buffer
 - `vim-pencil` : confort d'écriture en Markdown et texte
-- `ShipGlowz` : navigation dans les titres Markdown (ce que tu appelles parfois *Wispr Flow*)
+- `ShipGlows` : navigation dans les titres Markdown (ce que tu appelles parfois *Wispr Flow*)
 
 Ceux qui valent le coup plus tard pour la rédaction :
 

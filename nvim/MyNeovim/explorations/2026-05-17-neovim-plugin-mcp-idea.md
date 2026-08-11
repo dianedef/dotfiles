@@ -24,7 +24,7 @@ evidence:
   - "lua/plugins/mcphub.lua"
   - "lua/plugins/claudecode.lua"
   - "lua/plugins/gemini-cli.lua"
-  - "lua/shipglowz/init.lua"
+  - "lua/shipglows/init.lua"
   - "lua/config/keymaps.lua"
   - "AI Plugins.md"
 depends_on:
@@ -44,7 +44,7 @@ The user wants to create something for Neovim, but has not yet decided whether t
 - `lua/plugins/mcphub.lua` - MCP integration exists but is disabled.
 - `lua/plugins/claudecode.lua` - Claude Code is already available inside Neovim as an agent terminal.
 - `lua/plugins/gemini-cli.lua` - Gemini CLI is already wired with file, diagnostic, and command-picker actions.
-- `lua/shipglowz/init.lua` - A local Lua module already groups custom commands and mappings.
+- `lua/shipglows/init.lua` - A local Lua module already groups custom commands and mappings.
 - `lua/config/keymaps.lua` - Several personal workflow helpers are currently embedded directly in keymaps.
 - `AI Plugins.md` - The current AI tool choice matrix is already documented.
 
@@ -60,13 +60,13 @@ This setup already has many AI frontends. The interesting opportunity is probabl
 
 ### Option A: Local Neovim Workflow Plugin
 
-- Summary: Extract existing custom helpers into a first-class local plugin, likely under `lua/shipglowz/`.
+- Summary: Extract existing custom helpers into a first-class local plugin, likely under `lua/shipglows/`.
 - Pros: Low risk, fits the current config, immediately useful, no server process required.
 - Cons: Only helps inside Neovim; does not expose capabilities to external agents.
 
 ### Option B: MCP Server For Dotfiles And Neovim Context
 
-- Summary: Build an MCP server that exposes curated tools such as reading current project context, listing ShipGlowz docs, or preparing prompts.
+- Summary: Build an MCP server that exposes curated tools such as reading current project context, listing ShipGlows docs, or preparing prompts.
 - Pros: Useful from Claude Code and other MCP clients; can make local context portable.
 - Cons: More moving parts; requires deciding which client should consume it; security boundaries matter.
 
@@ -88,7 +88,7 @@ The local plugin is the safest first move if the goal is personal workflow polis
 
 ## Emerging Recommendation
 
-Start with a local Neovim "workflow cockpit" plugin under `lua/shipglowz/`, backed by small testable Lua functions and user commands. Keep the boundary clean enough that selected actions can later call a CLI or MCP server.
+Start with a local Neovim "workflow cockpit" plugin under `lua/shipglows/`, backed by small testable Lua functions and user commands. Keep the boundary clean enough that selected actions can later call a CLI or MCP server.
 
 Confidence: medium.
 
