@@ -98,7 +98,7 @@ sudo apt-get install -y notmuch isync
 Variables utiles:
 
 ```bash
-export MAIL_INTEL_ROOT="$HOME/shipglows/shipglows_data/workflow/mail-buffer/data/competitors"
+export MAIL_INTEL_ROOT="$HOME/.shipglowz/private/data/mail-source/competitors"
 export MAIL_INTEL_ACCOUNT="business-a"
 export MAIL_INTEL_FOLDER="_to_transcribe"
 export MAIL_INTEL_LIMIT="30"
@@ -109,7 +109,7 @@ export NOTMUCH_CONFIG="$HOME/.config/notmuch/mail-intel-config"
 Structure attendue:
 
 ```text
-~/shipglows/shipglows_data/workflow/mail-buffer/data/competitors/
+~/.shipglowz/private/data/mail-source/competitors/
   business-a/
     INBOX/
       cur/
@@ -120,10 +120,10 @@ Structure attendue:
 ## CLI
 
 ```bash
-scripts/mail-intel --maildir-root "$HOME/shipglows/shipglows_data/workflow/mail-buffer/data/competitors" accounts
-scripts/mail-intel --maildir-root "$HOME/shipglows/shipglows_data/workflow/mail-buffer/data/competitors" folders business-a
-scripts/mail-intel --maildir-root "$HOME/shipglows/shipglows_data/workflow/mail-buffer/data/competitors" --format json list business-a _to_transcribe --limit 10
-scripts/mail-intel --maildir-root "$HOME/shipglows/shipglows_data/workflow/mail-buffer/data/competitors" --format json search business-a "pricing" --limit 10
+scripts/mail-intel --maildir-root "$HOME/.shipglowz/private/data/mail-source/competitors" accounts
+scripts/mail-intel --maildir-root "$HOME/.shipglowz/private/data/mail-source/competitors" folders business-a
+scripts/mail-intel --maildir-root "$HOME/.shipglowz/private/data/mail-source/competitors" --format json list business-a _to_transcribe --limit 10
+scripts/mail-intel --maildir-root "$HOME/.shipglowz/private/data/mail-source/competitors" --format json search business-a "pricing" --limit 10
 scripts/mail-intel export <message-or-thread-id> --markdown
 ```
 
@@ -133,7 +133,7 @@ L’index de cette installation est séparé de l’ancien Maildir de test :
 
 ```text
 ~/.config/notmuch/mail-intel-config
-  path=/home/claude/shipglows/shipglows_data/workflow/mail-buffer/data/competitors
+  path=/home/claude/.shipglowz/private/data/mail-source/competitors
 ```
 
 ## Gmail Admin
@@ -243,7 +243,7 @@ sudo apt-get install -y notmuch isync
 2. Préparer les dossiers locaux:
 
 ```bash
-mkdir -p "$HOME/shipglows/shipglows_data/workflow/mail-buffer/data/competitors/business-a/INBOX"
+mkdir -p "$HOME/.shipglowz/private/data/mail-source/competitors/business-a/INBOX"
 ```
 
 3. Créer un secret local hors dépôt:
@@ -272,8 +272,8 @@ Account business-a
 
 MaildirStore business-a-local
 SubFolders Verbatim
-Path ~/shipglows/shipglows_data/workflow/mail-buffer/data/competitors/business-a/
-Inbox ~/shipglows/shipglows_data/workflow/mail-buffer/data/competitors/business-a/INBOX
+Path ~/.shipglowz/private/data/mail-source/competitors/business-a/
+Inbox ~/.shipglowz/private/data/mail-source/competitors/business-a/INBOX
 
 Channel business-a-inbox
 Far :business-a-remote:
@@ -302,7 +302,7 @@ notmuch setup
 Quand `notmuch setup` demande le dossier mail, indiquez:
 
 ```text
-~/shipglows/shipglows_data/workflow/mail-buffer/data/competitors
+~/.shipglowz/private/data/mail-source/competitors
 ```
 
 Puis indexez:
@@ -314,7 +314,7 @@ notmuch new
 7. Exporter les variables pour Neovim:
 
 ```bash
-export MAIL_INTEL_ROOT="$HOME/shipglows/shipglows_data/workflow/mail-buffer/data/competitors"
+export MAIL_INTEL_ROOT="$HOME/.shipglowz/private/data/mail-source/competitors"
 export MAIL_INTEL_ACCOUNT="business-a"
 export MAIL_INTEL_FOLDER="_to_transcribe"
 ```
@@ -324,9 +324,9 @@ Pour les rendre permanentes, ajoutez-les à votre shell (`~/.bashrc`, `~/.zshrc`
 8. Tester:
 
 ```bash
-scripts/mail-intel --maildir-root "$HOME/shipglows/shipglows_data/workflow/mail-buffer/data/competitors" accounts
-scripts/mail-intel --maildir-root "$HOME/shipglows/shipglows_data/workflow/mail-buffer/data/competitors" folders business-a
-scripts/mail-intel --maildir-root "$HOME/shipglows/shipglows_data/workflow/mail-buffer/data/competitors" --format json list business-a _to_transcribe --limit 10
+scripts/mail-intel --maildir-root "$HOME/.shipglowz/private/data/mail-source/competitors" accounts
+scripts/mail-intel --maildir-root "$HOME/.shipglowz/private/data/mail-source/competitors" folders business-a
+scripts/mail-intel --maildir-root "$HOME/.shipglowz/private/data/mail-source/competitors" --format json list business-a _to_transcribe --limit 10
 ```
 
 Ensuite dans Neovim:

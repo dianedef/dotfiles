@@ -483,7 +483,7 @@ scripts/mail-delete --account business-a --folder _to_transcribe --source-id <so
 Les variables importantes sont :
 
 ```bash
-export MAIL_INTEL_ROOT="$HOME/shipglows/shipglows_data/workflow/mail-buffer/data/competitors"
+export MAIL_INTEL_ROOT="$HOME/.shipglowz/private/data/mail-source/competitors"
 export MAIL_INTEL_ACCOUNT="business-a"
 export MAIL_INTEL_FOLDER="_to_transcribe"
 export NOTMUCH_CONFIG="$HOME/.config/notmuch/mail-intel-config"
