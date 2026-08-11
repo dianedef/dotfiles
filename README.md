@@ -103,7 +103,7 @@ source ~/.bashrc
 
 Older `~/.npm-global` installations are not deleted automatically, but they are no longer added to `PATH`. Re-run the installer to migrate its managed global tools to pnpm.
 
-The Node-tools phase pins the Avante-compatible `@zed-industries/codex-acp@0.16.0`, enables its platform-specific optional dependency, and verifies the native executable after installation. `./dotfiles/install.sh --check` repeats that verification, so a new server cannot silently keep only the JavaScript launcher while missing the runtime Avante owns and terminates.
+The Node-tools phase installs the Codex CLI through pnpm, pins the Avante-compatible `@zed-industries/codex-acp@0.16.0`, enables its platform-specific optional dependency, and verifies the native ACP executable after installation. `./dotfiles/install.sh --check` repeats that verification, so a new server cannot silently keep only the JavaScript launcher while missing the runtime Avante owns and terminates.
 
 For safe installation, everyday use, checks, and troubleshooting in French, see the [Avante and Codex ACP operator guide](shipglowz_data/technical/operator-guides/avante-codex-acp.md).
 
@@ -111,7 +111,7 @@ When sudo is available, the script may install generic system packages such as `
 
 When launched without sudo or with `USER_LOCAL_MODE=true`, root-only extras are not applied: apt/dpkg packages, `/opt`, `/usr/local/bin`, system services, and new sudo user creation. The install log now reports this explicitly so the operator can see what was installed user-local and what still requires root.
 
-ShipGlowz is separate: its system installer must be run as `curl -fsSL https://www.commandglows.com/shipglows-script | sudo sh` or `sudo ~/shipglowz/install.sh`. dotfiles links or clones ShipGlowz, but does not silently elevate into the ShipGlowz system installer from a non-root run.
+ShipGlows is separate and is installed or updated through its official bootstrap/CLI. Dotfiles does not clone or execute a potentially stale local ShipGlows source tree.
 
 dotfiles also prepares the private ShipGlowz data repo under `~/.shipglowz/private/data/`. This repository is intended for versioned private operational data such as local email-management registries, and remains separate from the public `dotfiles` repo.
 
@@ -215,7 +215,7 @@ Linux/Codespaces only. The Termux Markdown profile does not install Doppler or l
 
 ## ShipGlowz Ownership
 
-Claude Code skills, Codex config, Claude settings, and ShipGlowz AI aliases are owned by the ShipGlowz installer. Dotfiles no longer writes `~/.claude` or `~/.codex` for that workflow, aside from non-runtime repository samples kept under version control.
+Claude Code skills, Codex config, Claude settings, and ShipGlowz AI aliases are owned by the ShipGlowz installer. Dotfiles installs the Codex CLI binary through pnpm and the tmux launcher that depends on it, but does not write runtime state under `~/.claude` or `~/.codex`, aside from non-runtime repository samples kept under version control.
 
 ## Audit System (8 domains)
 

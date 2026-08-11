@@ -1102,6 +1102,7 @@ setup_configs() {
     if is_dry_run; then
         echo -e "${BLUE}[DRY-RUN]${NC} Would setup Neovim config"
         echo -e "${BLUE}[DRY-RUN]${NC} Would setup Starship config"
+        echo -e "${BLUE}[DRY-RUN]${NC} Would link tmux Codex helper into $DOTFILES_BIN_DIR"
         return 0
     fi
 
@@ -1126,6 +1127,10 @@ setup_configs() {
     fi
 
     # Tmux
+    if [ -f "$SCRIPT_DIR/bin/tmux-codex-fresh" ]; then
+        chmod +x "$SCRIPT_DIR/bin/tmux-codex-fresh" 2>/dev/null || true
+        create_symlink "$SCRIPT_DIR/bin/tmux-codex-fresh" "$DOTFILES_BIN_DIR/tmux-codex-fresh" false
+    fi
     [ -f "$SCRIPT_DIR/.tmux.conf" ] && create_symlink "$SCRIPT_DIR/.tmux.conf" "$HOME/.tmux.conf" false
     if [ ! -d "$HOME/.tmux/plugins/tpm" ]; then
         log "Installing TPM (Tmux Plugin Manager)..."
@@ -1351,7 +1356,7 @@ fi
 # --- Phase 5: AI Coding Tools ---
 install_ai_tools() {
     if ! should_install "ai-tools"; then return 0; fi
-    info "Skipping Claude/Codex install in dotfiles (owned by ShipGlows installer)."
+    info "Skipping Claude and AI runtime config in dotfiles; Codex CLI is managed by the pnpm tools phase."
 }
 install_ai_tools
 

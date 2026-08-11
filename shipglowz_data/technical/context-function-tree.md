@@ -69,6 +69,7 @@ next_step: /sf-docs audit shipglowz_data/technical/context-function-tree.md
   - `install_node`
   - `install_pnpm_tools`
     - installe les paquets globaux avec `install_node_global_package`
+    - installe le CLI `@openai/codex` dans `PNPM_HOME`
     - prépare un pnpm utilisateur via Corepack ou le repli npm sous `~/.local`
     - valide Codex ACP avec `verify_codex_acp_installation`
     - interrompt l'installation si le lanceur ou le runtime natif manque

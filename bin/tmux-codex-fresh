@@ -1,0 +1,47 @@
+#!/usr/bin/env bash
+set -u
+
+# Replace a pane only after a fresh PNPM-managed Codex is confirmed alive.
+# This avoids respawn-pane's destructive kill-before-launch behavior.
+old_pane="${1:-}"
+pnpm_home="${PNPM_HOME:-$HOME/.local/share/pnpm}"
+codex_bin="$pnpm_home/codex"
+
+if [[ ! "$old_pane" =~ ^%[0-9]+$ ]]; then
+  tmux display-message "Codex restart aborted: invalid pane target"
+  exit 1
+fi
+
+if [ ! -x "$codex_bin" ]; then
+  tmux display-message -t "$old_pane" "Codex PNPM not found; current conversation preserved"
+  exit 1
+fi
+
+old_path="$(tmux display-message -p -t "$old_pane" '#{pane_current_path}')" || {
+  tmux display-message "Codex restart aborted: source pane not found"
+  exit 1
+}
+
+new_pane="$(tmux split-window -d -P -F '#{pane_id}' -t "$old_pane" -c "$old_path" "$codex_bin")" || {
+  tmux display-message -t "$old_pane" "Codex restart failed; current conversation preserved"
+  exit 1
+}
+
+# Preserve launch diagnostics while the new process is being checked.
+tmux set-option -p -t "$new_pane" remain-on-exit on 2>/dev/null || true
+sleep 1
+
+new_dead="$(tmux display-message -p -t "$new_pane" '#{pane_dead}' 2>/dev/null || printf '1')"
+new_command="$(tmux display-message -p -t "$new_pane" '#{pane_current_command}' 2>/dev/null || true)"
+
+if [[ "$new_dead" != "0" || -z "$new_command" ]]; then
+  tmux kill-pane -t "$new_pane" 2>/dev/null || true
+  tmux select-pane -t "$old_pane" 2>/dev/null || true
+  tmux display-message -t "$old_pane" "Codex PNPM did not start; current conversation preserved"
+  exit 1
+fi
+
+tmux set-option -p -t "$new_pane" remain-on-exit off
+tmux select-pane -t "$new_pane"
+tmux clear-history -t "$new_pane"
+tmux kill-pane -t "$old_pane"

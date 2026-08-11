@@ -93,7 +93,7 @@ export USER_LOCAL_MODE="${USER_LOCAL_MODE:-false}"
 # ============================================================================
 export DOTFILES_APT_PACKAGES="git curl wget unzip tar build-essential jq libsecret-1-0 tmux mosh"
 export DOTFILES_CODEX_ACP_PACKAGE="${DOTFILES_CODEX_ACP_PACKAGE:-@zed-industries/codex-acp@0.16.0}"
-export DOTFILES_PNPM_PACKAGES="${DOTFILES_PNPM_PACKAGES:-${DOTFILES_NPM_PACKAGES:-@apify/mcpc $DOTFILES_CODEX_ACP_PACKAGE tldr eslint}}"
+export DOTFILES_PNPM_PACKAGES="${DOTFILES_PNPM_PACKAGES:-${DOTFILES_NPM_PACKAGES:-@openai/codex @apify/mcpc $DOTFILES_CODEX_ACP_PACKAGE tldr eslint}}"
 
 # ============================================================================
 # CACHE CONFIGURATION

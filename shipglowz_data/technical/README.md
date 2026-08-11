@@ -125,10 +125,10 @@ Contrainte: la même orchestration est réutilisable en mode non-interactif (CI)
   - installation via script officiel ou cargo fallback, initialisation shell dans `.bashrc`.
 - `Zoxide`, `Doppler`, `FZF`, `GH CLI`, `lsd`, `bat`.
 - Outils Node globaux via `pnpm`:
-  - `@apify/mcpc`, `@zed-industries/codex-acp@0.16.0`, `tldr`, `eslint`, plus outils listés dans `DOTFILES_ALL_COMPONENTS`.
+  - `@openai/codex`, `@apify/mcpc`, `@zed-industries/codex-acp@0.16.0`, `tldr`, `eslint`, plus outils listés dans `DOTFILES_ALL_COMPONENTS`.
   - En mode utilisateur, `ensure_pnpm_global_env` publie `PNPM_HOME`, essaie le shim Corepack local, puis utilise `npm --prefix ~/.local` comme repli. L'installation s'arrête si pnpm ou le runtime ACP requis reste indisponible.
   - La version Codex ACP reste figée tant qu'Avante dépend de ses arguments `-c`; l'installateur force les dépendances optionnelles, vérifie le binaire natif OS/architecture après installation, puis répète ce contrôle avec `--check`.
-  - `claude`, `codex`, les skills ShipGlows, et les configs runtime `~/.claude` / `~/.codex` sont exclus de ce périmètre et appartiennent à ShipGlows.
+  - Le binaire Codex CLI et son helper tmux sont installés par dotfiles via PNPM. Les skills ShipGlows et les configs runtime `~/.claude` / `~/.codex` restent la propriété de ShipGlows.
 
 ### Modules spécifiques Termux
 

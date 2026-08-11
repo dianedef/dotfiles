@@ -139,10 +139,10 @@ if grep -q 'npm-global' "$health_output"; then
   fail "health check still requires the retired npm-global path"
 fi
 
-grep -q 'commandglows/shipglows.git' "$ROOT_DIR/dotfiles/install.sh" \
-  || fail "installer does not use the canonical ShipGlows repository"
-if grep -q 'GITHUB_USERNAME.*shipglowz\.git' "$ROOT_DIR/dotfiles/install.sh"; then
-  fail "installer still derives the retired ShipGlowz repository from the user name"
+grep -q 'managed separately by the official ShipGlows installer' "$ROOT_DIR/dotfiles/install.sh" \
+  || fail "installer does not delegate ShipGlows to the official installer"
+if grep -q 'commandglows/shipglows\.git' "$ROOT_DIR/dotfiles/install.sh"; then
+  fail "installer still clones a local ShipGlows source tree"
 fi
 
 echo "Linux user-local regression checks passed"
