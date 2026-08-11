@@ -1,0 +1,13 @@
+# Ranger compatibility: open an interactive shell in Yazi's current directory.
+# `S` is the Shift+S key used in the former Ranger configuration.
+[[mgr.prepend_keymap]]
+on   = "S"
+for  = "windows"
+run  = 'shell "powershell.exe -NoLogo -NoExit" --block'
+desc = "Open PowerShell here"
+
+[[mgr.prepend_keymap]]
+on   = "S"
+for  = "unix"
+run  = 'shell "$SHELL" --block'
+desc = "Open shell here"

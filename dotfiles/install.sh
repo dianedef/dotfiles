@@ -1143,6 +1143,11 @@ setup_configs() {
         create_symlink "$SCRIPT_DIR/ghostty/config" "$HOME/.config/ghostty/config" false
     fi
 
+    # WezTerm (native Windows replacement for tmux and optional Linux terminal)
+    if [ -f "$SCRIPT_DIR/wezterm/wezterm.lua" ]; then
+        create_symlink "$SCRIPT_DIR/wezterm/wezterm.lua" "$HOME/.config/wezterm/wezterm.lua" false
+    fi
+
     # ShipGlows owns Codex and Claude skills/config. Do not clone or execute a
     # local ShipGlows source tree here: it may be stale. Installation and
     # updates are delegated to the official ShipGlows bootstrap/CLI.
