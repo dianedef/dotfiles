@@ -181,7 +181,7 @@ function Copy-ConfigWithBackup([string]$Source, [string]$Target) {
 function Install-YaziConfig {
     $sourceDirectory = Join-Path $DotfilesDir 'yazi'
     $targetDirectory = Join-Path $env:APPDATA 'yazi\config'
-    foreach ($name in @('init.lua', 'yazi.toml', 'package.toml')) {
+    foreach ($name in @('init.lua', 'keymap.toml', 'yazi.toml', 'package.toml')) {
         Copy-ConfigWithBackup (Join-Path $sourceDirectory $name) (Join-Path $targetDirectory $name)
     }
 
