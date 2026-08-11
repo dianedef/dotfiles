@@ -122,9 +122,10 @@ Contrainte: la même orchestration est réutilisable en mode non-interactif (CI)
 - `Neovim`
   - install binaire/URL release, lien binaire, symlink config vers `nvim/MyNeovim`.
 - `Starship`
-  - installation via script officiel ou cargo fallback, initialisation shell dans `.bashrc`.
+  - installation via script officiel dans `~/.local/bin` ou cargo fallback, sans écriture système ni demande de mot de passe sudo; initialisation shell dans `.bashrc` après publication des chemins utilisateur.
 - `Zoxide`, `Doppler`, `FZF`, `GH CLI`, `lsd`, `bat`.
 - Outils Node globaux via `pnpm`:
+  - L'installateur charge un runtime nvm existant avant de conclure que Node est absent; chaque téléchargement, installation LTS et activation est vérifié explicitement pour qu'un premier run non interactif ne s'arrête pas silencieusement.
   - `@apify/mcpc`, `@zed-industries/codex-acp@0.16.0`, `tldr`, `eslint`, plus outils listés dans `DOTFILES_ALL_COMPONENTS`.
   - En mode utilisateur, `ensure_pnpm_global_env` publie `PNPM_HOME`, essaie le shim Corepack local, puis utilise `npm --prefix ~/.local` comme repli. L'installation s'arrête si pnpm ou le runtime ACP requis reste indisponible.
   - La version Codex ACP reste figée tant qu'Avante dépend de ses arguments `-c`; l'installateur force les dépendances optionnelles, vérifie le binaire natif OS/architecture après installation, puis répète ce contrôle avec `--check`.
@@ -149,9 +150,11 @@ Contrainte: la même orchestration est réutilisable en mode non-interactif (CI)
   - `tmux` -> `~/.tmux.conf`
   - `ghostty/config` -> `~/.config/ghostty/config`
   - `.config/mcp/servers.json` -> `mcp/mcp-servers.json`
-  - liaisons de `TASKS.md`, `AUDIT_LOG.md` et `CLAUDE.md` depuis `~/.shipglows/source` quand disponibles; le clone canonique est `commandglows/shipglows`.
+  - liaisons de `TASKS.md`, `AUDIT_LOG.md` et `CLAUDE.md` depuis `~/.shipglows/runtime` quand disponibles; le clone canonique est `commandglows/shipglows`.
 
 Le contrôle `--check` résout les commandes depuis `~/.local/bin` et `PNPM_HOME` sans exiger que le shell appelant ait déjà chargé `.bashrc`. Une configuration Starship régulière créée par le sélecteur est valide; les authentifications GitHub et Doppler absentes restent des avertissements optionnels.
+
+Le clone optionnel des données privées désactive les prompts Git/SSH en mode automatisé (`BatchMode` et `GIT_TERMINAL_PROMPT=0`); une authentification absente produit un avertissement et laisse l'installation publique continuer.
 
 ## Données et flux de secrets
 
