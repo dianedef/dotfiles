@@ -12,7 +12,7 @@
 #
 # Environment variables:
 #   DOTFILES_REPO   - Override repo URL (default: dianedef/dotfiles)
-#   DOTFILES_DIR    - Override install directory (default: ~/dotfiles)
+#   DOTFILES_DIR    - Override install directory (default: ~/.dotfiles)
 #   SKIP_SHIPGLOWZ   - Set to 1 to skip ShipGlowz installation
 #   NON_INTERACTIVE - Set to 1 to skip all interactive prompts
 # ============================================================================
@@ -29,7 +29,7 @@ CYAN='\033[0;36m'
 NC='\033[0m'
 
 DOTFILES_REPO="${DOTFILES_REPO:-https://github.com/dianedef/dotfiles.git}"
-DOTFILES_DIR="${DOTFILES_DIR:-$HOME/dotfiles}"
+DOTFILES_DIR="${DOTFILES_DIR:-$HOME/.dotfiles}"
 
 echo -e "${CYAN}╔══════════════════════════════════════════════════╗${NC}"
 echo -e "${CYAN}║${NC}       ${YELLOW}One-Click Dev Environment Setup${NC}        ${CYAN}║${NC}"
@@ -85,9 +85,8 @@ if [ -d "$DOTFILES_DIR/.git" ]; then
     cd "$DOTFILES_DIR" && git pull --quiet 2>/dev/null || true
 elif [ -d "$DOTFILES_DIR" ]; then
     echo -e "${YELLOW}Dossier $DOTFILES_DIR existe mais n'est pas un repo git${NC}"
-    echo -e "${YELLOW}Suppression et re-clonage...${NC}"
-    rm -rf "$DOTFILES_DIR"
-    git clone "$DOTFILES_REPO" "$DOTFILES_DIR"
+    echo -e "${RED}Déplacez-le ou définissez DOTFILES_DIR vers un autre chemin, puis relancez.${NC}"
+    exit 1
 else
     git clone "$DOTFILES_REPO" "$DOTFILES_DIR"
 fi

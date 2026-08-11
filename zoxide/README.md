@@ -12,7 +12,7 @@ Zoxide se souvient automatiquement des dossiers que vous visitez et vous permet 
 
 ### 1. Visitez des dossiers normalement
 ```bash
-cd ~/dotfiles/nvim/lua/plugins/
+cd ~/.dotfiles/nvim/lua/plugins/
 cd /tmp/test/
 cd ~/projects/myapp/src/
 ```
@@ -22,8 +22,8 @@ Aucune action requise ! Zoxide enregistre en arrière-plan.
 
 ### 3. Utilisez `z` pour sauter rapidement
 ```bash
-z plugins    # → ~/dotfiles/nvim/lua/plugins/
-z dot        # → ~/dotfiles/
+z plugins    # → ~/.dotfiles/nvim/lua/plugins/
+z dot        # → ~/.dotfiles/
 z myapp      # → ~/projects/myapp/src/
 ```
 
@@ -53,7 +53,7 @@ zoxide remove /tmp       # Exemple: supprimer /tmp
 ### Navigation rapide dans les dotfiles
 ```bash
 # Au lieu de :
-cd ~/dotfiles/nvim/lua/plugins/ui/
+cd ~/.dotfiles/nvim/lua/plugins/ui/
 
 # Tapez juste :
 z ui         # Zoxide trouve le bon chemin !
@@ -69,10 +69,10 @@ z config starship    # → Spécifiquement starship/config
 
 ### Naviguer entre projets
 ```bash
-z dot       # → ~/dotfiles/
-z nvim      # → ~/dotfiles/nvim/
-z plugins   # → ~/dotfiles/nvim/lua/plugins/
-z ranger    # → ~/dotfiles/ranger/
+z dot       # → ~/.dotfiles/
+z nvim      # → ~/.dotfiles/nvim/
+z plugins   # → ~/.dotfiles/nvim/lua/plugins/
+z ranger    # → ~/.dotfiles/ranger/
 ```
 
 ## 🔍 Comprendre la Sélection
@@ -88,7 +88,7 @@ Plus vous utilisez un dossier, plus il est prioritaire !
 
 | Commande | cd traditionnel | Zoxide |
 |----------|----------------|--------|
-| Navigation | `cd ~/dotfiles/nvim/lua/plugins/` | `z plugins` |
+| Navigation | `cd ~/.dotfiles/nvim/lua/plugins/` | `z plugins` |
 | Retour | `cd -` | `z -` |
 | Parent | `cd ..` | `cd ..` (utilisez cd) |
 
@@ -111,7 +111,7 @@ Ceci active automatiquement :
 ### `z` ne trouve pas un dossier
 **Solution** : Visitez-le d'abord avec `cd`, puis zoxide le mémorisera.
 ```bash
-cd ~/dotfiles/nvim/lua/plugins/
+cd ~/.dotfiles/nvim/lua/plugins/
 # Maintenant "z plugins" fonctionnera
 ```
 

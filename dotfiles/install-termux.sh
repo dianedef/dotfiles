@@ -5,7 +5,7 @@ set -eu
 
 REPO_URL="${DOTFILES_REPO_URL:-https://github.com/dianedef/dotfiles.git}"
 BRANCH="${DOTFILES_BRANCH:-master}"
-DOTFILES_DIR="${DOTFILES_DIR:-$HOME/dotfiles}"
+DOTFILES_DIR="${DOTFILES_DIR:-$HOME/.dotfiles}"
 BOOTSTRAP_LOG="${TERMUX_DOTFILES_BOOTSTRAP_LOG:-$HOME/termux-bootstrap.log}"
 export DEBIAN_FRONTEND=noninteractive
 
@@ -44,7 +44,7 @@ stash_dotfiles_changes() {
         return 0
     fi
 
-    log "Modifications locales détectées dans ~/dotfiles; sauvegarde temporaire..."
+    log "Modifications locales détectées dans $DOTFILES_DIR; sauvegarde temporaire..."
     run_or_explain "sauvegarde des modifications locales dotfiles" env \
         GIT_AUTHOR_NAME="Termux Bootstrap" \
         GIT_AUTHOR_EMAIL="termux-bootstrap@example.invalid" \
@@ -93,6 +93,10 @@ log "Préparation de l'installation Termux..."
 run_or_explain "mise à jour des paquets Termux" apt_termux update
 run_or_explain "réparation de l'état dpkg" dpkg --force-confdef --force-confold --configure -a
 run_or_explain "installation de git/curl/bash" apt_termux install -y git curl bash
+
+if [ "$DOTFILES_DIR" != "$HOME/dotfiles" ] && [ -e "$HOME/dotfiles" ]; then
+    log "Ancien checkout laissé inchangé: $HOME/dotfiles"
+fi
 
 if [ -d "$DOTFILES_DIR/.git" ]; then
     log "Mise à jour du dépôt dotfiles..."

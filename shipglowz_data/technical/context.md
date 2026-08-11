@@ -1,10 +1,10 @@
 ---
 artifact: technical_context
 metadata_schema_version: "1.0"
-artifact_version: "0.1.2"
+artifact_version: "0.1.3"
 project: "dotfiles"
 created: "2026-04-26"
-updated: "2026-08-09"
+updated: "2026-08-11"
 status: draft
 source_skill: sf-docs
 scope: technique
@@ -40,7 +40,7 @@ Ce dépôt regroupe un ensemble de configurations locales (terminal, éditeur, f
 
 - Couche installation:
   - `bootstrap.sh` installe prérequis, clone/actualise le dépôt puis délègue à `install.sh`.
-  - `install-termux.sh` fournit l'entrée réseau Termux en une commande, clone ou met à jour `~/dotfiles`, puis délègue à `termux.sh`.
+  - `install-termux.sh` fournit l'entrée réseau Termux en une commande, clone ou met à jour `~/.dotfiles`, puis délègue à `termux.sh`.
   - `install.sh` est le point d'entrée principal et pilote toutes les phases.
   - `lib.sh` contient le socle utilitaire: parsing d'options, installation, santé, symlinks, auth, menu, logs.
   - `config.sh` concentre les constantes runtime: versions, chemins, flags, listes de composants.
@@ -53,7 +53,7 @@ Ce dépôt regroupe un ensemble de configurations locales (terminal, éditeur, f
   - `.env.example` et `env.example` décrivent les variables supportées.
   - `mcp/mcp-servers.json` est la source principale des serveurs MCP.
 - Couche intégration shell:
-  - `nvim/shell-integration.sh`, alias (`alias dot='~/dotfiles/dotfiles/install.sh'`), `append_to_bashrc` dans `dotfiles/lib.sh`.
+  - `nvim/shell-integration.sh`, alias (`alias dot='~/.dotfiles/dotfiles/install.sh'`), `append_to_bashrc` dans `dotfiles/lib.sh`.
   - `setup_shell_integration` (dans `install.sh`) injecte `starship init`, `zoxide init` et éditeurs.
   - Le bootstrap Windows conserve l'alias PowerShell natif `r`, expose Yazi via
     `y`, copie sa configuration dans `%APPDATA%\yazi\config` et installe le

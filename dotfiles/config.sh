@@ -32,7 +32,7 @@ export GUM_INPUT_PROMPT_FOREGROUND="99"
 # ============================================================================
 # DIRECTORY CONFIGURATION
 # ============================================================================
-export DOTFILES_DIR="${DOTFILES_DIR:-$HOME/dotfiles}"
+export DOTFILES_DIR="${DOTFILES_DIR:-$HOME/.dotfiles}"
 export DOTFILES_BIN_DIR="${DOTFILES_BIN_DIR:-$HOME/.local/bin}"
 export DOTFILES_CONFIG_DIR="${DOTFILES_CONFIG_DIR:-$HOME/.config}"
 export DOTFILES_PNPM_HOME="${DOTFILES_PNPM_HOME:-$HOME/.local/share/pnpm}"

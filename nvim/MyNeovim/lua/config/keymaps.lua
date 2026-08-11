@@ -62,12 +62,12 @@ local cheat_sheets = {
   {
     label = "Neovim",
     detail = "Cheatsheet privee de la config Neovim",
-    path = "~/dotfiles/nvim/MyNeovim/Cheat Sheet.md",
+    path = "~/.dotfiles/nvim/MyNeovim/Cheat Sheet.md",
   },
   {
     label = "Focus Tags",
     detail = "Cheatsheet publique docs/focus-tags-cheatsheet.md",
-    path = "~/dotfiles/docs/focus-tags-cheatsheet.md",
+    path = "~/.dotfiles/docs/focus-tags-cheatsheet.md",
   },
 }
 

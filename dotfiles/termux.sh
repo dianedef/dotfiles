@@ -339,12 +339,13 @@ done
 # Ajouter à ~/.bashrc
 BASHRC="$HOME/.bashrc"
 touch "$BASHRC"
+sed -i 's|$HOME/dotfiles/nvim/shell-integration\.sh|$HOME/.dotfiles/nvim/shell-integration.sh|g' "$BASHRC" 2>/dev/null || true
 
 # Shell integration
 if ! grep -q "shell-integration.sh" "$BASHRC" 2>/dev/null; then
     echo "" >> "$BASHRC"
     echo "# Neovim config switcher" >> "$BASHRC"
-    echo '[ -f "$HOME/dotfiles/nvim/shell-integration.sh" ] && source "$HOME/dotfiles/nvim/shell-integration.sh"' >> "$BASHRC"
+    echo '[ -f "$HOME/.dotfiles/nvim/shell-integration.sh" ] && source "$HOME/.dotfiles/nvim/shell-integration.sh"' >> "$BASHRC"
     log "INFO" "✅ Added shell integration"
 fi
 
@@ -388,9 +389,9 @@ cat >> "$BASHRC" << 'EOF'
 # Termux aliases
 alias re='source "$HOME/.bashrc" && echo "✓ Shell rechargé!"'
 alias reload='source "$HOME/.bashrc" && echo "✓ Shell rechargé!"'
-alias i='bash ~/dotfiles/dotfiles/termux.sh'
-alias dot='~/dotfiles/dotfiles/termux.sh'
-alias dotfiles='~/dotfiles/dotfiles/termux.sh'
+alias i='bash ~/.dotfiles/dotfiles/termux.sh'
+alias dot='~/.dotfiles/dotfiles/termux.sh'
+alias dotfiles='~/.dotfiles/dotfiles/termux.sh'
 alias cls='clear'
 alias ..='cd ..'
 alias ...='cd ../..'
@@ -492,5 +493,5 @@ report "  ${REPORT_DIM}• Mason, LSP lourds, Treesitter auto-installé${REPORT_
 report ""
 report "${REPORT_BOLD}${REPORT_DIM}🧾 Détails techniques${REPORT_RESET}"
 report "  Log: ${REPORT_CYAN}$LOG_FILE${REPORT_RESET}"
-report "  Debug: ${REPORT_CYAN}TERMUX_DOTFILES_VERBOSE=1 bash ~/dotfiles/dotfiles/termux.sh${REPORT_RESET}"
+report "  Debug: ${REPORT_CYAN}TERMUX_DOTFILES_VERBOSE=1 bash ~/.dotfiles/dotfiles/termux.sh${REPORT_RESET}"
 report "${REPORT_CYAN}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${REPORT_RESET}"

@@ -16,8 +16,8 @@ source ~/.bashrc
 Équivalent manuel:
 
 ```bash
-git clone https://github.com/dianedef/dotfiles.git ~/dotfiles
-cd ~/dotfiles
+git clone https://github.com/dianedef/dotfiles.git ~/.dotfiles
+cd ~/.dotfiles
 bash termux.sh
 source ~/.bashrc
 ```
@@ -31,7 +31,7 @@ apt update && apt full-upgrade -y
 apt install --reinstall curl openssl libngtcp2 -y
 ```
 
-Le bootstrap distant clone ou met à jour `~/dotfiles`, puis lance `termux.sh`. Le script doit être lancé dans Termux, car il dépend de `pkg`.
+Le bootstrap distant clone ou met à jour `~/.dotfiles`, puis lance `termux.sh`. Le script doit être lancé dans Termux, car il dépend de `pkg`.
 
 ## Ce que `termux.sh` installe
 

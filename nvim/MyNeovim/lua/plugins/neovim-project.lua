@@ -16,7 +16,7 @@ return {
     projects = {
       "~/projects/*",
       "~/work/*",
-      "~/dotfiles/*",
+      "~/ShipGlows/*",
       "~/.config/*",
     },
     picker = {

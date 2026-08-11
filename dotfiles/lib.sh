@@ -805,10 +805,10 @@ show_help_quickstart() {
 ## First Time Setup
 
 1. Clone the repository:
-   git clone https://github.com/dianedef/dotfiles.git ~/dotfiles
+   git clone https://github.com/dianedef/dotfiles.git ~/.dotfiles
 
 2. Run installation:
-   cd ~/dotfiles && ./install.sh
+   cd ~/.dotfiles && ./dotfiles/install.sh
 
 3. (Optional) Setup API keys:
    ds    # Doppler setup - configures all keys
@@ -852,7 +852,7 @@ show_help_aliases() {
 ├─────────┼─────────────────────────┼─────────────────────────┤
 │ re      │ source ~/.bashrc        │ Reload shell            │
 │ c       │ claude                  │ Claude Code CLI         │
-│ dot     │ ~/dotfiles/install.sh   │ Run installer           │
+│ dot     │ ~/.dotfiles/dotfiles/install.sh │ Run installer     │
 │ ds      │ doppler-setup.sh        │ Setup API keys          │
 ├─────────┼─────────────────────────┼─────────────────────────┤
 │ r       │ ranger                  │ File manager            │
@@ -1545,7 +1545,7 @@ update_pnpm_packages() {
 # Direct update for a single tool (without full install)
 update_tool() {
     local tool="$1"
-    local script_dir="${DOTFILES_DIR:-$HOME/dotfiles}"
+    local script_dir="${DOTFILES_DIR:-$HOME/.dotfiles}"
 
     case "$tool" in
         neovim)
@@ -2403,7 +2403,7 @@ select_components() {
 # Install a single component directly
 install_component() {
     local comp="$1"
-    local script_dir="${DOTFILES_DIR:-$HOME/dotfiles}"
+    local script_dir="${DOTFILES_DIR:-$HOME/.dotfiles}"
 
     case "$comp" in
         neovim)

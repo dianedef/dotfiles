@@ -1,10 +1,10 @@
 ---
 artifact: documentation
 metadata_schema_version: "1.0"
-artifact_version: "0.1.0"
+artifact_version: "0.1.1"
 project: "dotfiles"
 created: "2026-04-26"
-updated: "2026-05-22"
+updated: "2026-08-11"
 status: draft
 source_skill: sf-docs
 scope: readme
@@ -84,8 +84,8 @@ source ~/.bashrc
 Manual equivalent:
 
 ```bash
-git clone https://github.com/dianedef/dotfiles.git ~/dotfiles
-cd ~/dotfiles && ./dotfiles/install.sh
+git clone https://github.com/dianedef/dotfiles.git ~/.dotfiles
+cd ~/.dotfiles && ./dotfiles/install.sh
 source ~/.bashrc
 ```
 
@@ -136,12 +136,23 @@ source ~/.bashrc
 Manual equivalent:
 
 ```bash
-git clone https://github.com/dianedef/dotfiles.git ~/dotfiles
-cd ~/dotfiles && chmod +x dotfiles/termux.sh && ./dotfiles/termux.sh
+git clone https://github.com/dianedef/dotfiles.git ~/.dotfiles
+cd ~/.dotfiles && chmod +x dotfiles/termux.sh && ./dotfiles/termux.sh
 source ~/.bashrc
 ```
 
 After the first activation, use `re` to reload `.bashrc`.
+
+### Installed runtime and development clone
+
+The bootstrap owns `~/.dotfiles` on Linux/Termux and
+`%USERPROFILE%\.dotfiles` on Windows. Active Linux configurations symlink to
+that installed runtime; Windows installs backed-up copies into the native
+configuration locations. Do not edit the installed runtime as source.
+
+Maintainers use a separate clone such as `~/ShipGlows/dotfiles` or
+`%USERPROFILE%\ShipGlows\dotfiles`. Test installer changes by pushing a branch,
+installing that branch into `.dotfiles`, then reinstalling `master` after merge.
 
 The Termux installer keeps terminal output short for non-technical users. Detailed logs are written to `~/termux-install.log`; rerun with `TERMUX_DOTFILES_VERBOSE=1` to show detailed progress in the terminal.
 

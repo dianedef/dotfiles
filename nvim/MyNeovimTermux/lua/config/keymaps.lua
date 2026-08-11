@@ -66,7 +66,7 @@ vim.keymap.set("n", "<leader>bb", switch_to_other_buffer, { desc = "Switch to Ot
 pcall(vim.keymap.del, "n", "<leader>`")
 
 local function toggle_termux_notes()
-  local path = vim.fn.expand("~/dotfiles/nvim/MyNeovimTermux/README-TERMUX.md")
+  local path = vim.fn.expand("~/.dotfiles/nvim/MyNeovimTermux/README-TERMUX.md")
   if vim.fn.filereadable(path) == 0 then
     vim.notify("README-TERMUX.md introuvable", vim.log.levels.WARN)
     return

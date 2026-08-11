@@ -12,8 +12,11 @@ fail() {
 [ -f "$INSTALLER" ] || fail 'native Windows bootstrap is missing'
 rg -n '^\[CmdletBinding\(\)\]|Set-StrictMode -Version Latest' "$INSTALLER" >/dev/null
 rg -n "RepoUrl = 'https://github.com/dianedef/dotfiles.git'|Branch = 'master'" "$INSTALLER" >/dev/null
+rg -n "USERPROFILE '.dotfiles'|Set-InstalledRootHidden|FileAttributes.*Hidden|installed runtime ready" "$INSTALLER" >/dev/null
+rg -n "ShipGlows\\dotfiles|Legacy checkout left unchanged" "$INSTALLER" >/dev/null
 rg -n "Git\.Git|wez\.wezterm|--accept-package-agreements|--accept-source-agreements" "$INSTALLER" >/dev/null
 rg -n 'status --porcelain|Local changes were found|--ff-only|already exists and is not a Git checkout' "$INSTALLER" >/dev/null
+rg -n "fetch'.*'origin'.*\$Branch|checkout'.*'-B'.*\$Branch.*'FETCH_HEAD'|Switching the installed runtime" "$INSTALLER" >/dev/null
 rg -n 'Non-interactive run: WezTerm setup skipped|ConfigureWezTerm|SkipWezTerm' "$INSTALLER" >/dev/null
 rg -n 'ConfigureTools|SkipTools|Neovim\.Neovim|Starship\.Starship|ajeetdsouza\.zoxide|sxyazi\.yazi' "$INSTALLER" >/dev/null
 rg -n 'junegunn\.fzf|BurntSushi\.ripgrep\.MSVC|sharkdp\.fd|sharkdp\.bat' "$INSTALLER" >/dev/null

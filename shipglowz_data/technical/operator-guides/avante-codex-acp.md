@@ -1,10 +1,10 @@
 ---
 artifact: documentation
 metadata_schema_version: "1.0"
-artifact_version: "0.1.0"
+artifact_version: "0.1.1"
 project: "dotfiles"
 created: "2026-07-13"
-updated: "2026-07-13"
+updated: "2026-08-11"
 status: draft
 source_skill: 300-sg-docs
 scope: avante-codex-acp-operator-guide
@@ -57,7 +57,7 @@ Le correctif couvre donc le serveur actuel **et** les prochaines installations r
 Depuis le dépôt des dotfiles :
 
 ```bash
-cd ~/dotfiles
+cd ~/.dotfiles
 ./dotfiles/install.sh
 ```
 
@@ -77,7 +77,7 @@ L'échec est volontaire : une installation interrompue vaut mieux qu'une install
 La vérification générale des dotfiles est :
 
 ```bash
-cd ~/dotfiles
+cd ~/.dotfiles
 ./dotfiles/install.sh --check
 ```
 
@@ -90,7 +90,7 @@ Cherche cette ligne :
 Le contrôle général peut aussi signaler d'autres outils facultatifs absents. Pour vérifier uniquement Codex ACP :
 
 ```bash
-bash -lc 'source "$HOME/dotfiles/dotfiles/config.sh"; source "$HOME/dotfiles/dotfiles/lib.sh"; health_check_codex_acp'
+bash -lc 'source "$HOME/.dotfiles/dotfiles/config.sh"; source "$HOME/.dotfiles/dotfiles/lib.sh"; health_check_codex_acp'
 ```
 
 Cette commande ne réinstalle rien et ne supprime rien.
@@ -158,7 +158,7 @@ La version `0.16.0` est épinglée volontairement : la configuration Avante actu
 Les validations automatisées sont destinées aux agents ou aux mainteneurs :
 
 ```bash
-cd ~/dotfiles
+cd ~/.dotfiles
 bash tests/codex-acp-installation.sh
 nvim --headless -u NONE -l nvim/MyNeovim/tests/codex-acp-lifecycle.lua
 ```
