@@ -180,7 +180,6 @@ function Install-TerminalConfigs {
 }
 
 function Install-WezTermConfig {
-    Install-TerminalConfigs
     $wezterm = Get-Application 'wezterm.exe'
     if (-not $wezterm) {
         Install-WinGetPackage 'WezTerm' 'wez.wezterm' 'wezterm.exe'
@@ -220,11 +219,14 @@ Sync-DotfilesCheckout $git
 Write-Success "Dotfiles checkout ready: $DotfilesDir"
 
 $installTools = Should-ConfigureTools
+$installWezTerm = Should-ConfigureWezTerm
 if ($installTools) {
     Install-DeveloperTools
+}
+if ($installTools -or $installWezTerm) {
     Install-TerminalConfigs
 }
-if (Should-ConfigureWezTerm) { Install-WezTermConfig }
+if ($installWezTerm) { Install-WezTermConfig }
 
 Write-Host ''
 Write-Success 'Dotfiles Windows bootstrap completed.'
