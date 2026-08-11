@@ -146,7 +146,9 @@ function Copy-ConfigWithBackup([string]$Source, [string]$Target) {
     if (-not (Test-Path -LiteralPath $Source -PathType Leaf)) { throw "Configuration file not found: $Source" }
     New-Item -ItemType Directory -Path (Split-Path -Parent $Target) -Force | Out-Null
     if (Test-Path -LiteralPath $Target -PathType Leaf) {
-        $sameContents = (Get-FileHash -LiteralPath $Source -Algorithm SHA256).Hash -eq (Get-FileHash -LiteralPath $Target -Algorithm SHA256).Hash
+        $sourceText = [IO.File]::ReadAllText($Source).Replace("`r`n", "`n")
+        $targetText = [IO.File]::ReadAllText($Target).Replace("`r`n", "`n")
+        $sameContents = $sourceText -ceq $targetText
         if ($sameContents) { return }
         $backup = "$Target.dotfiles-backup-$(Get-Date -Format 'yyyyMMdd-HHmmss')"
         Move-Item -LiteralPath $Target -Destination $backup

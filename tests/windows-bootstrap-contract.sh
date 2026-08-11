@@ -27,7 +27,7 @@ rg -n -- '--disable-interactivity.*Out-Null' "$INSTALLER" >/dev/null
 if rg -n 'Write-Warning|winget.*install.*Out-Host' "$INSTALLER"; then
   fail 'native Windows bootstrap must keep controlled output in English'
 fi
-rg -n 'dotfiles-backup-|Get-FileHash|Copy-Item -LiteralPath \$source' "$INSTALLER" >/dev/null
+rg -n 'dotfiles-backup-|ReadAllText.*Replace|Copy-Item -LiteralPath \$source' "$INSTALLER" >/dev/null
 
 if rg -n 'Set-ExecutionPolicy|\$PROFILE|Add-Content.*Profile|windows\.ps1' "$INSTALLER"; then
   fail 'native Windows bootstrap must not alter execution policy, profiles, or invoke the legacy full-machine script'
