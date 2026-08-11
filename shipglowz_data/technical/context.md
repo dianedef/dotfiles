@@ -58,6 +58,9 @@ Ce dépôt regroupe un ensemble de configurations locales (terminal, éditeur, f
   - Le bootstrap Windows conserve l'alias PowerShell natif `r`, expose Yazi via
     `y`, copie sa configuration dans `%APPDATA%\yazi\config` et installe le
     plugin officiel `yazi-rs/plugins:git` verrouillé par `package.toml`.
+  - La copie des configurations Windows compare le texte après normalisation
+    CRLF/LF afin que les outils qui réécrivent leurs fichiers ne provoquent pas
+    de backups identiques à chaque installation.
 
 ## Contraintes techniques
 
