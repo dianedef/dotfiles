@@ -1,10 +1,10 @@
 ---
 artifact: technical_context
 metadata_schema_version: "1.0"
-artifact_version: "0.1.3"
+artifact_version: "0.1.4"
 project: "dotfiles"
 created: "2026-04-26"
-updated: "2026-08-09"
+updated: "2026-08-11"
 status: draft
 source_skill: sf-docs
 scope: function_tree
@@ -33,7 +33,7 @@ next_step: /sf-docs audit shipglowz_data/technical/context-function-tree.md
 
 - `bootstrap.sh` (entrée réseau one-click) appelle `install.sh`.
 - `install.sh` est l'orchestrateur machine-agnostique.
-- `install-termux.sh` est le bootstrap réseau Termux: il installe `git`, `curl`, `bash`, clone ou met à jour `~/dotfiles`, puis délègue à `termux.sh`.
+- `install-termux.sh` est le bootstrap réseau Termux: il installe `git`, `curl`, `bash`, clone ou met à jour `~/.dotfiles`, puis délègue à `termux.sh`.
 - `termux.sh` est une alternative légère pour Android, centrée Markdown, sans Node.js, GitHub CLI, Doppler, MCP, Copilot, Claude/Codex/OpenCode, Aider ou agents Neovim.
 
 ## Arbre fonctionnel (`install.sh`)

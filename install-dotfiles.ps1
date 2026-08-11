@@ -5,7 +5,7 @@
 param(
     [string]$RepoUrl = 'https://github.com/dianedef/dotfiles.git',
     [string]$Branch = 'master',
-    [string]$DotfilesDir = (Join-Path $env:USERPROFILE 'dotfiles'),
+    [string]$DotfilesDir = (Join-Path $env:USERPROFILE '.dotfiles'),
     [switch]$ConfigureWezTerm,
     [switch]$SkipWezTerm,
     [switch]$ConfigureTools,
@@ -87,8 +87,13 @@ function Sync-DotfilesCheckout([string]$Git) {
         }
 
         $currentBranch = (& $Git -C $DotfilesDir branch --show-current | Out-String).Trim()
-        if ($LASTEXITCODE -ne 0 -or $currentBranch -ne $Branch) {
-            throw "The existing checkout is on '$currentBranch', not '$Branch'. It was left untouched. Switch it yourself before rerunning."
+        if ($LASTEXITCODE -ne 0) {
+            throw "Could not determine the current branch in $DotfilesDir."
+        }
+        if ($currentBranch -ne $Branch) {
+            Write-Info "Switching the installed runtime from '$currentBranch' to '$Branch'..."
+            Invoke-Git $Git @('-C', $DotfilesDir, 'fetch', 'origin', $Branch)
+            Invoke-Git $Git @('-C', $DotfilesDir, 'checkout', '-B', $Branch, 'FETCH_HEAD')
         }
 
         Write-Info "Updating the existing $Branch checkout..."
@@ -98,6 +103,22 @@ function Sync-DotfilesCheckout([string]$Git) {
 
     Write-Info 'Cloning the public Dotfiles repository...'
     Invoke-Git $Git @('clone', '--branch', $Branch, '--single-branch', $RepoUrl, $DotfilesDir)
+}
+
+function Set-InstalledRootHidden {
+    $defaultRoot = [IO.Path]::GetFullPath((Join-Path $env:USERPROFILE '.dotfiles')).TrimEnd('\')
+    if ([IO.Path]::GetFullPath($DotfilesDir).TrimEnd('\') -ne $defaultRoot) { return }
+    $rootItem = Get-Item -LiteralPath $DotfilesDir -Force
+    $rootItem.Attributes = $rootItem.Attributes -bor [IO.FileAttributes]::Hidden
+}
+
+function Show-LegacyCheckoutNotice {
+    $legacyRoot = Join-Path $env:USERPROFILE 'dotfiles'
+    if ([IO.Path]::GetFullPath($legacyRoot).TrimEnd('\') -eq [IO.Path]::GetFullPath($DotfilesDir).TrimEnd('\')) { return }
+    if (Test-Path -LiteralPath $legacyRoot) {
+        Write-Info "Legacy checkout left unchanged: $legacyRoot"
+        Write-Info 'Use %USERPROFILE%\ShipGlows\dotfiles for development and .dotfiles only as the installed runtime.'
+    }
 }
 
 function Should-ConfigureWezTerm {
@@ -218,7 +239,9 @@ Write-Host 'It does not edit your PowerShell profile, change execution policy, o
 Update-ProcessPath
 $git = Ensure-Git
 Sync-DotfilesCheckout $git
-Write-Success "Dotfiles checkout ready: $DotfilesDir"
+Set-InstalledRootHidden
+Show-LegacyCheckoutNotice
+Write-Success "Dotfiles installed runtime ready: $DotfilesDir"
 
 $installTools = Should-ConfigureTools
 $installWezTerm = Should-ConfigureWezTerm

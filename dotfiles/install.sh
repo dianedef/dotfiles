@@ -1209,6 +1209,7 @@ setup_shell_integration() {
     [ -f "$HOME/.cargo/env" ] && append_to_bashrc 'cargo/env' 'source "$HOME/.cargo/env"' "Rust/Cargo PATH" || true
 
     # Productivity aliases
+    sed -i 's|~/dotfiles/dotfiles/install\.sh|~/.dotfiles/dotfiles/install.sh|g' "$HOME/.bashrc" 2>/dev/null || true
     if ! grep -q "# Productivity aliases" "$HOME/.bashrc" 2>/dev/null; then
         cat >> "$HOME/.bashrc" << 'ALIASES'
 
@@ -1240,8 +1241,8 @@ alias o='opencode'
 alias mcp='mcpc'
 
 # Dotfiles management
-    alias dot='~/dotfiles/dotfiles/install.sh'
-    alias dotfiles='~/dotfiles/dotfiles/install.sh -i'
+    alias dot='~/.dotfiles/dotfiles/install.sh'
+    alias dotfiles='~/.dotfiles/dotfiles/install.sh -i'
 ALIASES
         success "Added productivity aliases"
     else
@@ -1260,8 +1261,8 @@ ALIASES
             cat >> "$HOME/.bashrc" << 'DOTALIASES'
 
 # Dotfiles management
-    alias dot='~/dotfiles/dotfiles/install.sh'
-    alias dotfiles='~/dotfiles/dotfiles/install.sh -i'
+    alias dot='~/.dotfiles/dotfiles/install.sh'
+    alias dotfiles='~/.dotfiles/dotfiles/install.sh -i'
 DOTALIASES
             success "Added dotfiles aliases"
         fi

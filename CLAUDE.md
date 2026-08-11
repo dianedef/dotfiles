@@ -1,10 +1,10 @@
 ---
 artifact: technical_guidelines
 metadata_schema_version: "1.0"
-artifact_version: "0.1.0"
+artifact_version: "0.1.1"
 project: "dotfiles"
 created: "2026-04-26"
-updated: "2026-05-22"
+updated: "2026-08-11"
 status: draft
 source_skill: sf-docs
 scope: technical
@@ -54,7 +54,7 @@ Multi-platform dotfiles repository. Linux/Codespaces is the full development set
 nvim --headless "+Lazy! sync" +qa
 
 # Re-run installation after updates
-cd ~/dotfiles && ./dotfiles/install.sh
+cd ~/.dotfiles && ./dotfiles/install.sh
 ```
 
 ## Key Aliases

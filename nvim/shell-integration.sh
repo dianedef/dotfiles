@@ -41,10 +41,10 @@ nvims() {
         # Try to find the nvim directory relative to common locations
         if [[ -f "${BASH_SOURCE[1]}" ]]; then
             script_dir="$(cd "$(dirname "${BASH_SOURCE[1]}")" && pwd)"
-        elif [[ -d "/root/dotfiles/nvim" ]]; then
-            script_dir="/root/dotfiles/nvim"
-        elif [[ -d "$HOME/dotfiles/nvim" ]]; then
-            script_dir="$HOME/dotfiles/nvim"
+        elif [[ -d "/root/.dotfiles/nvim" ]]; then
+            script_dir="/root/.dotfiles/nvim"
+        elif [[ -d "$HOME/.dotfiles/nvim" ]]; then
+            script_dir="$HOME/.dotfiles/nvim"
         else
             echo "Error: Cannot determine nvim config directory"
             return 1
