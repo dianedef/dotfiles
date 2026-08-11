@@ -1356,7 +1356,7 @@ fi
 # --- Phase 5: AI Coding Tools ---
 install_ai_tools() {
     if ! should_install "ai-tools"; then return 0; fi
-    info "Skipping Claude and AI runtime config in dotfiles; Codex CLI is managed by the pnpm tools phase."
+    info "Skipping Claude/Codex installation and AI runtime config in dotfiles; owned by ShipGlows."
 }
 install_ai_tools
 

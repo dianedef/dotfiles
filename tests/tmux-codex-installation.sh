@@ -23,8 +23,9 @@ grep -q 'bind R run-shell.*tmux-codex-fresh.*#{pane_id}' "$ROOT_DIR/.tmux.conf" 
 if grep -q 'bind R respawn-pane' "$ROOT_DIR/.tmux.conf"; then
   fail "tmux configuration still destroys the pane before Codex starts"
 fi
-grep -q 'DOTFILES_PNPM_PACKAGES=.*@openai/codex' "$ROOT_DIR/dotfiles/config.sh" \
-  || fail "dotfiles does not install the Codex CLI through PNPM"
+if grep -q '@openai/codex' "$ROOT_DIR/dotfiles/config.sh"; then
+  fail "dotfiles must not install the Codex CLI; ShipGlows owns it"
+fi
 
 export HOME="$TEST_DIR/home"
 export DOTFILES_NO_GUM=true

@@ -103,7 +103,7 @@ source ~/.bashrc
 
 Older `~/.npm-global` installations are not deleted automatically, but they are no longer added to `PATH`. Re-run the installer to migrate its managed global tools to pnpm.
 
-The Node-tools phase installs the Codex CLI through pnpm, pins the Avante-compatible `@zed-industries/codex-acp@0.16.0`, enables its platform-specific optional dependency, and verifies the native ACP executable after installation. `./dotfiles/install.sh --check` repeats that verification, so a new server cannot silently keep only the JavaScript launcher while missing the runtime Avante owns and terminates.
+The Node-tools phase pins the Avante-compatible `@zed-industries/codex-acp@0.16.0`, enables its platform-specific optional dependency, and verifies the native ACP executable after installation. `./dotfiles/install.sh --check` repeats that verification, so a new server cannot silently keep only the JavaScript launcher while missing the runtime Avante owns and terminates. The Codex CLI itself is installed by ShipGlows through pnpm.
 
 For safe installation, everyday use, checks, and troubleshooting in French, see the [Avante and Codex ACP operator guide](shipglowz_data/technical/operator-guides/avante-codex-acp.md).
 
@@ -215,7 +215,7 @@ Linux/Codespaces only. The Termux Markdown profile does not install Doppler or l
 
 ## ShipGlowz Ownership
 
-Claude Code skills, Codex config, Claude settings, and ShipGlowz AI aliases are owned by the ShipGlowz installer. Dotfiles installs the Codex CLI binary through pnpm and the tmux launcher that depends on it, but does not write runtime state under `~/.claude` or `~/.codex`, aside from non-runtime repository samples kept under version control.
+Claude Code skills, the Codex CLI and config, Claude settings, and ShipGlowz AI aliases are owned by the ShipGlowz installer. Dotfiles only installs the tmux configuration and launcher that use ShipGlows' pnpm-managed Codex binary; it does not write runtime state under `~/.claude` or `~/.codex`, aside from non-runtime repository samples kept under version control.
 
 ## Audit System (8 domains)
 
