@@ -12,7 +12,8 @@ $zoxide = Get-Command zoxide.exe -CommandType Application -ErrorAction SilentlyC
 if ($zoxide) { & $zoxide.Source init powershell | Out-String | Invoke-Expression }
 
 function n { & nvim.exe @args }
-function r { & yazi.exe @args }
+Remove-Item Function:r -ErrorAction SilentlyContinue
+function y { & yazi.exe @args }
 function re { . $script:ShipGlowsProfilePath }
 function ch {
     Clear-Host

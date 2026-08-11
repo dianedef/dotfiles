@@ -45,7 +45,7 @@ Ce dépôt regroupe un ensemble de configurations locales (terminal, éditeur, f
   - `lib.sh` contient le socle utilitaire: parsing d'options, installation, santé, symlinks, auth, menu, logs.
   - `config.sh` concentre les constantes runtime: versions, chemins, flags, listes de composants.
 - Couche configuration:
-  - Répertoires de configs versionnés: `nvim/`, `ranger/`, `starship/`, `ghostty/`.
+  - Répertoires de configs versionnés: `nvim/`, `ranger/`, `yazi/`, `starship/`, `ghostty/`.
   - Fichiers dédiés: `.tmux.conf`, `.env.example`, `cheat/conf.yml`, `mcp/mcp-servers.json`, `codex/config.toml`, `lazygit/config.yml`, `cursor/settings.json`, `ranger/...`.
 - Couche secrets/AI:
   - `doppler-setup.sh` gère la configuration d'accès pour Linux/Codespaces.
@@ -55,6 +55,9 @@ Ce dépôt regroupe un ensemble de configurations locales (terminal, éditeur, f
 - Couche intégration shell:
   - `nvim/shell-integration.sh`, alias (`alias dot='~/dotfiles/dotfiles/install.sh'`), `append_to_bashrc` dans `dotfiles/lib.sh`.
   - `setup_shell_integration` (dans `install.sh`) injecte `starship init`, `zoxide init` et éditeurs.
+  - Le bootstrap Windows conserve l'alias PowerShell natif `r`, expose Yazi via
+    `y`, copie sa configuration dans `%APPDATA%\yazi\config` et installe le
+    plugin officiel `yazi-rs/plugins:git` verrouillé par `package.toml`.
 
 ## Contraintes techniques
 

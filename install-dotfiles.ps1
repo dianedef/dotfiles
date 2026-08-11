@@ -155,10 +155,28 @@ function Copy-ConfigWithBackup([string]$Source, [string]$Target) {
     Copy-Item -LiteralPath $Source -Destination $Target -Force
 }
 
+function Install-YaziConfig {
+    $sourceDirectory = Join-Path $DotfilesDir 'yazi'
+    $targetDirectory = Join-Path $env:APPDATA 'yazi\config'
+    foreach ($name in @('init.lua', 'yazi.toml', 'package.toml')) {
+        Copy-ConfigWithBackup (Join-Path $sourceDirectory $name) (Join-Path $targetDirectory $name)
+    }
+
+    $ya = Get-Application 'ya.exe'
+    if (-not $ya) {
+        Write-Info 'Yazi configuration installed; run again with -ConfigureTools to install its plugins.'
+        return
+    }
+    & $ya.Source pkg install | Out-Host
+    if ($LASTEXITCODE -ne 0) { throw "Yazi plugin installation returned exit code $LASTEXITCODE." }
+    Write-Success 'Yazi configuration and locked plugins installed.'
+}
+
 function Install-TerminalConfigs {
     Copy-ConfigWithBackup (Join-Path $DotfilesDir 'starship\starship.toml') (Join-Path $env:USERPROFILE '.config\starship.toml')
     Copy-ConfigWithBackup (Join-Path $DotfilesDir 'powershell\ShipGlows.Profile.ps1') (Join-Path $env:USERPROFILE '.config\shipglows\profile.ps1')
-    Write-Success 'Starship and PowerShell terminal configuration installed.'
+    Install-YaziConfig
+    Write-Success 'Starship, PowerShell, and Yazi terminal configuration installed.'
 }
 
 function Install-WezTermConfig {
