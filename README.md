@@ -113,7 +113,7 @@ When launched without sudo or with `USER_LOCAL_MODE=true`, root-only extras are 
 
 ShipGlows is separate and is installed or updated through its official bootstrap/CLI. Dotfiles does not clone or execute a potentially stale local ShipGlows source tree.
 
-dotfiles also prepares the private ShipGlows data repo under `~/.shipglows/private/data/`. This repository is intended for versioned private operational data such as local email-management registries, and remains separate from the public `dotfiles` repo.
+dotfiles also prepares the private ShipGlows data repo under `~/.shipglows/data/`. This repository is intended for versioned private operational data such as local email-management registries, and remains separate from the public `dotfiles` repo.
 
 ### Component-aware shell integration
 
@@ -246,7 +246,7 @@ Run `/shipglows-audit` in any project to launch a full 8-domain audit (code, des
 /shipglows-deps global                # Dependencies across all projects
 ```
 
-Global mode reads `~/.shipglows/private/data/PROJECTS.md` (private, 8-domain applicability matrix) and launches parallel agents per project.
+Global mode reads `~/.shipglows/data/PROJECTS.md` (private, 8-domain applicability matrix) and launches parallel agents per project.
 
 Each audit:
 - Scores every category A/B/C/D
@@ -308,7 +308,7 @@ When arguments are provided explicitly, prompts are skipped.
 
 ### ShipGlows Data (Private)
 
-Personal tracking data lives in a separate private repo (`~/.shipglows/private/data/`):
+Personal tracking data lives in a separate private repo (`~/.shipglows/data/`):
 - `TASKS.md` — master tracker across all projects
 - `AUDIT_LOG.md` — audit history with scores over time
 - `PROJECTS.md` — project registry with domain applicability matrix
