@@ -9,7 +9,7 @@ if ($starship) {
 }
 
 $zoxide = Get-Command zoxide.exe -CommandType Application -ErrorAction SilentlyContinue
-if ($zoxide) { Invoke-Expression (& $zoxide.Source init powershell) }
+if ($zoxide) { & $zoxide.Source init powershell | Out-String | Invoke-Expression }
 
 function n { & nvim.exe @args }
 function r { & yazi.exe @args }

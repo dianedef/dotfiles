@@ -100,9 +100,13 @@ cd ~/dotfiles && ./dotfiles/install.sh
 - Format with StyLua: 2-space indent, 120 column width
 - Use return table pattern for modules; lazy.nvim spec format for plugins
 
-## ShipGlowz Skills
+## ShipGlows Skills
 
-Global workflow skills are owned by ShipGlowz and synced from `~/shipglowz/skills/` into the runtime by the ShipGlowz installer. This repository may keep historical samples or editor-facing notes, but it is not the source of truth for live Claude/Codex skills.
+Global workflow skills are owned by ShipGlows and installed through the official
+ShipGlows bootstrap/CLI. Dotfiles must not clone or execute a local
+`~/shipglowz` source tree because it may be stale. This repository may keep
+historical samples or editor-facing notes, but it is not the source of truth
+for live Claude/Codex skills.
 
 ### Task & Workflow Skills
 - `/shipglowz-tasks` — Update TASKS.md, mark completed items, suggest next steps
@@ -154,13 +158,15 @@ All skills use `AskUserQuestion` for interactive selection when context is ambig
 
 When arguments are provided explicitly, prompts are skipped — the skill runs directly.
 
-### ShipGlowz Data
+### ShipGlows Data
 
-The `ShipGlowz` private repo (`~/shipglowz/`) stores personal tracking data:
+The separate ShipGlows private-data repository is stored under
+`~/.shipglows/private/data/` by default and stores personal tracking data:
 - `TASKS.md` — master task tracker (symlinked to `~/TASKS.md`)
 - `AUDIT_LOG.md` — cross-project audit history (symlinked to `~/AUDIT_LOG.md`)
 
-`install.sh` clones it automatically via `git@github.com:${GITHUB_USERNAME}/shipglowz.git`.
+`install.sh` may synchronize that private-data repository, but the ShipGlows
+runtime itself remains owned by the official ShipGlows installer.
 
 ## Key Conventions
 
