@@ -1138,63 +1138,18 @@ setup_configs() {
         create_symlink "$SCRIPT_DIR/ghostty/config" "$HOME/.config/ghostty/config" false
     fi
 
-    # ShipGlows owns Codex and Claude skills/config.
-
-    # Claude Code statusLine — now managed by ShipGlows/install.sh
-    log DEBUG "Claude Code statusLine is configured by ShipGlows install"
-
-    # ShipGlows
+    # ShipGlows owns Codex and Claude skills/config. Do not clone or execute a
+    # local ShipGlows source tree here: it may be stale. Installation and
+    # updates are delegated to the official ShipGlows bootstrap/CLI.
+    log DEBUG "ShipGlows installation is managed by the official ShipGlows installer"
     if [ "${SKIP_SHIPGLOWS:-${SKIP_SHIPGLOWZ:-false}}" != "true" ]; then
-        local shipglows_dir="${SHIPGLOWS_ROOT:-$HOME/shipglows}"
-        local legacy_shipglowz_dir="$HOME/shipglowz"
-        local legacy_shipglowz_case_dir="$HOME/ShipGlowz"
-        local shipglows_repository="${SHIPGLOWS_REPOSITORY:-commandglows/shipglows.git}"
-
-        if [ ! -d "$shipglows_dir" ] && [ -d "$legacy_shipglowz_dir" ]; then
-            info "Migrating legacy path $legacy_shipglowz_dir to $shipglows_dir"
-            if ! mv "$legacy_shipglowz_dir" "$shipglows_dir" 2>/dev/null; then
-                ln -sfn "$legacy_shipglowz_dir" "$shipglows_dir"
-            fi
-        fi
-        if [ ! -d "$shipglows_dir" ] && [ -d "$legacy_shipglowz_case_dir" ]; then
-            info "Migrating legacy path $legacy_shipglowz_case_dir to $shipglows_dir"
-            if ! mv "$legacy_shipglowz_case_dir" "$shipglows_dir" 2>/dev/null; then
-                ln -sfn "$legacy_shipglowz_case_dir" "$shipglows_dir"
-            fi
-        fi
-
-        if [ ! -d "$shipglows_dir" ]; then
-            info "Cloning ShipGlows..."
-            # Try SSH first, fallback to HTTPS
-            git clone "git@github.com:${shipglows_repository}" "$shipglows_dir" 2>/dev/null || \
-                git clone "https://github.com/${shipglows_repository}" "$shipglows_dir" 2>/dev/null || \
-                warn "Could not clone ShipGlows repo"
-        fi
-        if [ -d "$shipglows_dir" ]; then
-            [ -f "$shipglows_dir/TASKS.md" ] && create_symlink "$shipglows_dir/TASKS.md" "$HOME/TASKS.md" false
-            [ -f "$shipglows_dir/AUDIT_LOG.md" ] && create_symlink "$shipglows_dir/AUDIT_LOG.md" "$HOME/AUDIT_LOG.md" false
-            [ -f "$shipglows_dir/CLAUDE.md" ] && create_symlink "$shipglows_dir/CLAUDE.md" "$HOME/CLAUDE.md" false
-            success "ShipGlows linked"
-
-            # ShipGlows owns system-level AI/code workflow setup. It requires root.
-            if [ -f "$shipglows_dir/install.sh" ] && ! is_dry_run; then
-                if [ "$(id -u)" = "0" ]; then
-                    info "Running ShipGlows system installer (PM2, Flox, Caddy, Claude/Codex config)..."
-                    bash "$shipglows_dir/install.sh" 2>&1 || warn "ShipGlows installation had issues"
-                else
-                    warn "ShipGlows system installer requires root and was not run from dotfiles"
-                    echo "   To apply ShipGlows root-only setup later:"
-                    echo "   cd \"$shipglows_dir\" && sudo ./install.sh"
-                    log WARN "Skipped ShipGlows system installer from non-root dotfiles run. Required root-only scope: PM2/Flox/Caddy, global CLIs, /etc/dokploy, and all-user ShipGlows configuration."
-                fi
-            fi
-        fi
+        info "ShipGlows installation is managed separately by the official ShipGlows installer."
     fi
 
-    if [ "${SKIP_SHIPGLOWZ_PRIVATE_DATA:-false}" != "true" ]; then
-        local private_dir="${SHIPGLOWZ_PRIVATE_DIR:-$HOME/.shipglowz/private}"
-        local private_data_dir="${SHIPGLOWZ_PRIVATE_DATA_DIR:-$private_dir/data}"
-        local private_data_repo="${SHIPGLOWZ_PRIVATE_DATA_REPO:-${GITHUB_USERNAME:-dianedef}/shipglowz-private-data.git}"
+    if [ "${SKIP_SHIPGLOWS_PRIVATE_DATA:-${SKIP_SHIPGLOWZ_PRIVATE_DATA:-false}}" != "true" ]; then
+        local private_dir="${SHIPGLOWS_PRIVATE_DIR:-${SHIPGLOWZ_PRIVATE_DIR:-$HOME/.shipglows/private}}"
+        local private_data_dir="${SHIPGLOWS_PRIVATE_DATA_DIR:-${SHIPGLOWZ_PRIVATE_DATA_DIR:-$private_dir/data}}"
+        local private_data_repo="${SHIPGLOWS_PRIVATE_DATA_REPO:-${SHIPGLOWZ_PRIVATE_DATA_REPO:-${GITHUB_USERNAME:-dianedef}/shipglowz-private-data.git}}"
         local private_data_https="https://github.com/${private_data_repo}"
         local private_data_ssh="git@github.com:${private_data_repo}"
 
