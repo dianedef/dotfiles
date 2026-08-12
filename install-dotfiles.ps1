@@ -24,6 +24,36 @@ function Update-ProcessPath {
     $env:Path = @($userPath, $machinePath) -join ';'
 }
 
+function Publish-EnvironmentChange {
+    if (-not ('DotfilesNativeMethods' -as [type])) {
+        Add-Type @'
+using System;
+using System.Runtime.InteropServices;
+
+public static class DotfilesNativeMethods {
+    [DllImport("user32.dll", CharSet = CharSet.Auto, SetLastError = true)]
+    public static extern IntPtr SendMessageTimeout(
+        IntPtr hWnd, uint msg, UIntPtr wParam, string lParam,
+        uint flags, uint timeout, out UIntPtr result);
+}
+'@
+    }
+    $result = [UIntPtr]::Zero
+    [void][DotfilesNativeMethods]::SendMessageTimeout([IntPtr]0xffff, 0x001a, [UIntPtr]::Zero, 'Environment', 0x0002, 5000, [ref]$result)
+}
+
+function Add-UserPathEntry([string]$PathEntry) {
+    $resolvedEntry = [IO.Path]::GetFullPath($PathEntry).TrimEnd('\')
+    $currentPath = [Environment]::GetEnvironmentVariable('Path', 'User')
+    $entries = @($currentPath -split ';' | Where-Object { $_ })
+    if (-not ($entries | Where-Object { [IO.Path]::GetFullPath($_).TrimEnd('\') -ieq $resolvedEntry })) {
+        [Environment]::SetEnvironmentVariable('Path', (@($entries) + $resolvedEntry) -join ';', 'User')
+        Update-ProcessPath
+        Write-Success "Added Dotfiles shortcuts to the user PATH."
+    }
+    Publish-EnvironmentChange
+}
+
 function Get-Application([string]$Name) {
     return Get-Command $Name -CommandType Application -ErrorAction SilentlyContinue | Select-Object -First 1
 }
@@ -209,7 +239,7 @@ function Install-NeovimConfig {
 function Install-YaziConfig {
     $sourceDirectory = Join-Path $DotfilesDir 'yazi'
     $targetDirectory = Join-Path $env:APPDATA 'yazi\config'
-    foreach ($name in @('init.lua', 'yazi.toml', 'package.toml')) {
+    foreach ($name in @('init.lua', 'keymap.toml', 'yazi.toml', 'package.toml')) {
         Copy-ConfigWithBackup (Join-Path $sourceDirectory $name) (Join-Path $targetDirectory $name)
     }
 
@@ -223,11 +253,20 @@ function Install-YaziConfig {
     Write-Success 'Yazi configuration and locked plugins installed.'
 }
 
+function Install-YaziShortcut {
+    $shortcutDirectory = Join-Path $DotfilesDir 'bin'
+    $shortcut = Join-Path $shortcutDirectory 'y.cmd'
+    if (-not (Test-Path -LiteralPath $shortcut -PathType Leaf)) { throw "Yazi shortcut was not found in the checkout: $shortcut" }
+    Add-UserPathEntry $shortcutDirectory
+    Write-Success 'Yazi shortcut installed: y (available in newly opened terminals).'
+}
+
 function Install-TerminalConfigs {
     Install-NeovimConfig
     Copy-ConfigWithBackup (Join-Path $DotfilesDir 'starship\starship.toml') (Join-Path $env:USERPROFILE '.config\starship.toml')
     Copy-ConfigWithBackup (Join-Path $DotfilesDir 'powershell\ShipGlows.Profile.ps1') (Join-Path $env:USERPROFILE '.config\shipglows\profile.ps1')
     Install-YaziConfig
+    Install-YaziShortcut
     Write-Success 'Neovim, Starship, PowerShell, and Yazi terminal configuration installed.'
 }
 
@@ -243,17 +282,7 @@ function Install-WezTermConfig {
     $targetDirectory = Join-Path $env:USERPROFILE '.config\wezterm'
     $target = Join-Path $targetDirectory 'wezterm.lua'
     if (-not (Test-Path -LiteralPath $source -PathType Leaf)) { throw "WezTerm config was not found in the checkout: $source" }
-    New-Item -ItemType Directory -Path $targetDirectory -Force | Out-Null
-
-    if (Test-Path -LiteralPath $target -PathType Leaf) {
-        $sameContents = (Get-FileHash -LiteralPath $source -Algorithm SHA256).Hash -eq (Get-FileHash -LiteralPath $target -Algorithm SHA256).Hash
-        if (-not $sameContents) {
-            $backup = "$target.dotfiles-backup-$(Get-Date -Format 'yyyyMMdd-HHmmss')"
-            Move-Item -LiteralPath $target -Destination $backup
-            Write-Info "Existing WezTerm config backed up to $backup"
-        }
-    }
-    Copy-Item -LiteralPath $source -Destination $target -Force
+    Copy-ConfigWithBackup $source $target
     Write-Success "WezTerm config installed at $target"
 }
 

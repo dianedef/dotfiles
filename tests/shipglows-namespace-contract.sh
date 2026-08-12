@@ -17,7 +17,8 @@ if find "$ROOT_DIR" -path "$ROOT_DIR/.git" -prune -o -iname "*$OBSOLETE_NAMESPAC
   fail 'a tracked workspace path still uses the obsolete namespace'
 fi
 
-rg -n 'SHIPGLOWS_PRIVATE_DIR=.*\.shipglows/private' "$ROOT_DIR/dotfiles/config.sh" >/dev/null
+rg -n 'SHIPGLOWS_PRIVATE_DIR=.*\$HOME/\.shipglows}' "$ROOT_DIR/dotfiles/config.sh" >/dev/null
+rg -n 'SHIPGLOWS_PRIVATE_DATA_DIR=.*SHIPGLOWS_PRIVATE_DIR/data' "$ROOT_DIR/dotfiles/config.sh" >/dev/null
 rg -n 'lua/shipglows|require\("shipglows' "$ROOT_DIR/nvim/MyNeovim" >/dev/null
 rg -n 'shipglows_data/technical' "$ROOT_DIR/AGENT.md" >/dev/null
 

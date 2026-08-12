@@ -698,8 +698,23 @@ install_nerd_fonts() {
 # ============================================================================
 # NODE.JS INSTALLATION
 # ============================================================================
+load_nvm_runtime() {
+    export NVM_DIR="${NVM_DIR:-$HOME/.nvm}"
+    [ -s "$NVM_DIR/nvm.sh" ] || return 1
+    # shellcheck disable=SC1090
+    . "$NVM_DIR/nvm.sh"
+    if ! command -v node >/dev/null 2>&1; then
+        nvm use --silent default >/dev/null 2>&1 || nvm use --silent --lts >/dev/null 2>&1 || true
+    fi
+    hash -r 2>/dev/null || true
+}
+
 install_node() {
     if ! should_install "node"; then return 0; fi
+
+    # nvm is initialized by interactive shell profiles, not by a fresh
+    # non-interactive installer process. Load it before deciding Node is absent.
+    load_nvm_runtime >/dev/null 2>&1 || true
 
     # Update mode: upgrade to latest LTS
     if [ "${DOTFILES_UPDATE_MODE:-false}" = "true" ] && is_installed node; then
@@ -708,11 +723,10 @@ install_node() {
             return 0
         fi
         info "Updating Node.js via nvm..."
-        export NVM_DIR="$HOME/.nvm"
-        # shellcheck disable=SC1091
-        [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
-        nvm install --lts >/dev/null 2>&1
-        nvm use --lts >/dev/null 2>&1
+        load_nvm_runtime || { warn "nvm is unavailable"; return 1; }
+        nvm install --lts >/dev/null 2>&1 || { warn "Node.js LTS update failed"; return 1; }
+        nvm use --lts >/dev/null 2>&1 || { warn "Node.js LTS activation failed"; return 1; }
+        command -v node >/dev/null 2>&1 || return 1
         success "Node.js updated to $(node --version)"
         return 0
     fi
@@ -728,13 +742,15 @@ install_node() {
     fi
 
     info "Installing Node.js via nvm..."
-    curl -o- "https://raw.githubusercontent.com/nvm-sh/nvm/$DOTFILES_NVM_VERSION/install.sh" 2>/dev/null | bash >/dev/null 2>&1
-    export NVM_DIR="$HOME/.nvm"
-    # shellcheck disable=SC1091
-    [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
-    nvm install --lts >/dev/null 2>&1
-    nvm use --lts >/dev/null 2>&1
-    success "Node.js installed via nvm"
+    if ! curl -fsSL "https://raw.githubusercontent.com/nvm-sh/nvm/$DOTFILES_NVM_VERSION/install.sh" | bash >/dev/null 2>&1; then
+        warn "nvm installation failed"
+        return 1
+    fi
+    load_nvm_runtime || { warn "nvm was installed but could not be loaded"; return 1; }
+    nvm install --lts >/dev/null 2>&1 || { warn "Node.js LTS installation failed"; return 1; }
+    nvm use --lts >/dev/null 2>&1 || { warn "Node.js LTS activation failed"; return 1; }
+    command -v node >/dev/null 2>&1 || return 1
+    success "Node.js installed via nvm: $(node --version)"
 }
 
 # ============================================================================
@@ -948,11 +964,8 @@ install_starship() {
 
     info "Installing Starship..."
     local install_result=0
-    if [ "$USER_LOCAL_MODE" = "true" ]; then
-        curl -sS https://starship.rs/install.sh | sh -s -- -y -b "$DOTFILES_BIN_DIR" || install_result=1
-    else
-        curl -sS https://starship.rs/install.sh | sh -s -- -y || install_result=1
-    fi
+    mkdir -p "$DOTFILES_BIN_DIR"
+    curl -fsSL https://starship.rs/install.sh | sh -s -- -y -b "$DOTFILES_BIN_DIR" || install_result=1
 
     # Fallback: build from source if prebuilt binary unavailable (arm64)
     if [ $install_result -ne 0 ]; then
@@ -1143,6 +1156,11 @@ setup_configs() {
         create_symlink "$SCRIPT_DIR/ghostty/config" "$HOME/.config/ghostty/config" false
     fi
 
+    # WezTerm (native Windows replacement for tmux and optional Linux terminal)
+    if [ -f "$SCRIPT_DIR/wezterm/wezterm.lua" ]; then
+        create_symlink "$SCRIPT_DIR/wezterm/wezterm.lua" "$HOME/.config/wezterm/wezterm.lua" false
+    fi
+
     # ShipGlows owns Codex and Claude skills/config. Do not clone or execute a
     # local ShipGlows source tree here: it may be stale. Installation and
     # updates are delegated to the official ShipGlows bootstrap/CLI.
@@ -1152,7 +1170,7 @@ setup_configs() {
     fi
 
     if [ "${SKIP_SHIPGLOWS_PRIVATE_DATA:-false}" != "true" ]; then
-        local private_dir="${SHIPGLOWS_PRIVATE_DIR:-$HOME/.shipglows/private}"
+        local private_dir="${SHIPGLOWS_PRIVATE_DIR:-$HOME/.shipglows}"
         local private_data_dir="${SHIPGLOWS_PRIVATE_DATA_DIR:-$private_dir/data}"
         local private_data_repo="${SHIPGLOWS_PRIVATE_DATA_REPO:-${GITHUB_USERNAME:-dianedef}/shipglows-private-data.git}"
         local private_data_https="https://github.com/${private_data_repo}"
@@ -1165,13 +1183,15 @@ setup_configs() {
                 warn "Private data path exists but is not a git repo: $private_data_dir"
             else
                 info "Cloning ShipGlows private data repo..."
-                git clone "$private_data_ssh" "$private_data_dir" 2>/dev/null || \
-                    git clone "$private_data_https" "$private_data_dir" 2>/dev/null || \
+                env GIT_TERMINAL_PROMPT=0 GIT_SSH_COMMAND='ssh -o BatchMode=yes -o StrictHostKeyChecking=accept-new' \
+                    git clone "$private_data_ssh" "$private_data_dir" 2>/dev/null || \
+                    env GIT_TERMINAL_PROMPT=0 git clone "$private_data_https" "$private_data_dir" 2>/dev/null || \
                     warn "Could not clone ShipGlows private data repo"
             fi
         else
             info "Updating ShipGlows private data repo..."
-            git -C "$private_data_dir" pull --ff-only 2>/dev/null || warn "Could not update ShipGlows private data repo"
+            env GIT_TERMINAL_PROMPT=0 GIT_SSH_COMMAND='ssh -o BatchMode=yes -o StrictHostKeyChecking=accept-new' \
+                git -C "$private_data_dir" pull --ff-only 2>/dev/null || warn "Could not update ShipGlows private data repo"
         fi
 
         if [ -d "$private_data_dir/.git" ]; then
@@ -1199,6 +1219,8 @@ setup_shell_integration() {
     done
 
     # Shell integration
+    append_to_bashrc 'PNPM_HOME=' 'export PNPM_HOME="$HOME/.local/share/pnpm"' "PNPM home" || true
+    append_to_bashrc 'PATH="$HOME/.local/bin:$PNPM_HOME:' 'export PATH="$HOME/.local/bin:$PNPM_HOME:$PATH"' "User-local binaries" || true
     append_to_bashrc "shell-integration.sh" "source $SCRIPT_DIR/nvim/shell-integration.sh" "Neovim config switcher" || true
 
     # Starship

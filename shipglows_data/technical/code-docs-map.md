@@ -95,7 +95,7 @@ Pour tout changement de code, relever :
 ## Validation
 
 ```bash
-python3 /home/claude/.shipglows/source/tools/shipglows_metadata_lint.py shipglows_data/technical
+python3 /home/claude/.shipglows/runtime/tools/shipglows_metadata_lint.py shipglows_data/technical
 git diff --check
 ```
 

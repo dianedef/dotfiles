@@ -21,13 +21,18 @@ rg -n 'Non-interactive run: WezTerm setup skipped|ConfigureWezTerm|SkipWezTerm' 
 rg -n 'ConfigureTools|SkipTools|Neovim\.Neovim|Starship\.Starship|ajeetdsouza\.zoxide|sxyazi\.yazi' "$INSTALLER" >/dev/null
 rg -n 'junegunn\.fzf|BurntSushi\.ripgrep\.MSVC|sharkdp\.fd|sharkdp\.bat' "$INSTALLER" >/dev/null
 rg -n 'BrechtSanders\.WinLibs\.POSIX\.UCRT|WinLibs GCC|gcc\.exe' "$INSTALLER" >/dev/null
-rg -n 'ShipGlows\.Profile\.ps1|Install-YaziConfig|APPDATA.*yazi\\config|ya\.exe|pkg install|Neovim, Starship, PowerShell, and Yazi terminal configuration installed' "$INSTALLER" >/dev/null
+rg -n 'ShipGlows\.Profile\.ps1|Install-YaziConfig|keymap\.toml|APPDATA.*yazi\\config|ya\.exe|pkg install|Neovim, Starship, PowerShell, and Yazi terminal configuration installed' "$INSTALLER" >/dev/null
 rg -n "Install-NeovimConfig|nvim\\\\MyNeovim|LOCALAPPDATA.*'nvim'|Install-DirectoryJunction|ItemType Junction" "$INSTALLER" >/dev/null
+rg -n 'Add-UserPathEntry|Publish-EnvironmentChange|SendMessageTimeout|Install-YaziShortcut|Yazi shortcut installed|Dotfiles shortcuts to the user PATH' "$INSTALLER" >/dev/null
+rg -n 'where yazi\.exe|yazi\.exe %\*' "$ROOT_DIR/bin/y.cmd" >/dev/null
 rg -n '^Install-TerminalConfigs$|if \(\$installWezTerm\).*Install-WezTermConfig' "$INSTALLER" >/dev/null
 rg -n 'Remove-Item Function:r|function y.*yazi\.exe' "$ROOT_DIR/powershell/ShipGlows.Profile.ps1" >/dev/null
 rg -n 'require\("git"\):setup' "$ROOT_DIR/yazi/init.lua" >/dev/null
 rg -n 'prepend_fetchers|run.*=.*"git"|group.*=.*"git"' "$ROOT_DIR/yazi/yazi.toml" >/dev/null
+rg -n 'on.*=.*"S"|powershell\.exe.*--block|\$SHELL.*--block' "$ROOT_DIR/yazi/keymap.toml" >/dev/null
 rg -n 'yazi-rs/plugins:git' "$ROOT_DIR/yazi/package.toml" >/dev/null
+rg -n "leader.*key.*=.*'w'|ShowLauncherArgs.*WORKSPACES|SpawnCommandInNewPane.*co|format-tab-title|use_fancy_tab_bar.*false" "$ROOT_DIR/wezterm/wezterm.lua" >/dev/null
+rg -n 'Ctrl\+W|Shift\+S|fresh Codex pane' "$ROOT_DIR/wezterm/README.md" >/dev/null
 rg -n -- '--disable-interactivity.*Out-Null' "$INSTALLER" >/dev/null
 if rg -n 'Write-Warning|winget.*install.*Out-Host' "$INSTALLER"; then
   fail 'native Windows bootstrap must keep controlled output in English'

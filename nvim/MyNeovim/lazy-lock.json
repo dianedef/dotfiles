@@ -2,7 +2,7 @@
   "2077.nvim": { "branch": "master", "commit": "ac84f753d225649c95ea86b0157f982c8f694237" },
   "CopilotChat.nvim": { "branch": "main", "commit": "f0c2a23ab79dc295f5e0eef0d8b587a39020c852" },
   "LazyVim": { "branch": "main", "commit": "c10948c50b18fae7f256433afdef09e432410480" },
-  "SchemaStore.nvim": { "branch": "main", "commit": "885ecf4fa0ffcd20d052b14701540a451898fb34" },
+  "SchemaStore.nvim": { "branch": "main", "commit": "427b0ff24377a6cdd18aa822a984a5adf156c3fa" },
   "agentic.nvim": { "branch": "main", "commit": "a37f19f1d7eda70267c73c65dd7c1c1d4f47c971" },
   "augment.vim": { "branch": "main", "commit": "71f49befb94d3ddcf42220d640e892bd025dda5d" },
   "auto-save.nvim": { "branch": "main", "commit": "9aabcb8396224dcbf8d51c0c1d620d88a46e89d7" },
