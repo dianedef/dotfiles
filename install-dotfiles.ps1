@@ -178,6 +178,33 @@ function Copy-ConfigWithBackup([string]$Source, [string]$Target) {
     Copy-Item -LiteralPath $Source -Destination $Target -Force
 }
 
+function Install-DirectoryJunction([string]$Source, [string]$Target) {
+    if (-not (Test-Path -LiteralPath $Source -PathType Container)) { throw "Configuration directory not found: $Source" }
+
+    $sourcePath = [IO.Path]::GetFullPath($Source).TrimEnd('\')
+    $targetItem = Get-Item -LiteralPath $Target -Force -ErrorAction SilentlyContinue
+    if ($targetItem -and $targetItem.LinkType -in @('Junction', 'SymbolicLink')) {
+        $linkTarget = @($targetItem.Target)[0]
+        if ($linkTarget -and [IO.Path]::GetFullPath($linkTarget).TrimEnd('\') -eq $sourcePath) { return }
+    }
+
+    if ($targetItem) {
+        $backup = "$Target.dotfiles-backup-$(Get-Date -Format 'yyyyMMdd-HHmmssfff')"
+        Move-Item -LiteralPath $Target -Destination $backup
+        Write-Info "Existing configuration backed up to $backup"
+    }
+
+    New-Item -ItemType Directory -Path (Split-Path -Parent $Target) -Force | Out-Null
+    New-Item -ItemType Junction -Path $Target -Target $sourcePath | Out-Null
+}
+
+function Install-NeovimConfig {
+    $sourceDirectory = Join-Path $DotfilesDir 'nvim\MyNeovim'
+    $targetDirectory = Join-Path $env:LOCALAPPDATA 'nvim'
+    Install-DirectoryJunction $sourceDirectory $targetDirectory
+    Write-Success "Neovim config linked at $targetDirectory"
+}
+
 function Install-YaziConfig {
     $sourceDirectory = Join-Path $DotfilesDir 'yazi'
     $targetDirectory = Join-Path $env:APPDATA 'yazi\config'
@@ -196,10 +223,11 @@ function Install-YaziConfig {
 }
 
 function Install-TerminalConfigs {
+    Install-NeovimConfig
     Copy-ConfigWithBackup (Join-Path $DotfilesDir 'starship\starship.toml') (Join-Path $env:USERPROFILE '.config\starship.toml')
     Copy-ConfigWithBackup (Join-Path $DotfilesDir 'powershell\ShipGlows.Profile.ps1') (Join-Path $env:USERPROFILE '.config\shipglows\profile.ps1')
     Install-YaziConfig
-    Write-Success 'Starship, PowerShell, and Yazi terminal configuration installed.'
+    Write-Success 'Neovim, Starship, PowerShell, and Yazi terminal configuration installed.'
 }
 
 function Install-WezTermConfig {
@@ -248,9 +276,7 @@ $installWezTerm = Should-ConfigureWezTerm
 if ($installTools) {
     Install-DeveloperTools
 }
-if ($installTools -or $installWezTerm) {
-    Install-TerminalConfigs
-}
+Install-TerminalConfigs
 if ($installWezTerm) { Install-WezTermConfig }
 
 Write-Host ''
