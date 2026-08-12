@@ -158,6 +158,7 @@ function Install-DeveloperTools {
         @{ Name = 'ripgrep'; Package = 'BurntSushi.ripgrep.MSVC'; Command = 'rg.exe' },
         @{ Name = 'fd'; Package = 'sharkdp.fd'; Command = 'fd.exe' },
         @{ Name = 'bat'; Package = 'sharkdp.bat'; Command = 'bat.exe' },
+        @{ Name = 'WinLibs GCC'; Package = 'BrechtSanders.WinLibs.POSIX.UCRT'; Command = 'gcc.exe' },
         @{ Name = 'Yazi'; Package = 'sxyazi.yazi'; Command = 'yazi.exe' }
     )
     foreach ($tool in $tools) { Install-WinGetPackage $tool.Name $tool.Package $tool.Command }
