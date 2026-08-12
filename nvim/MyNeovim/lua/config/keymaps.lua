@@ -129,38 +129,26 @@ vim.keymap.set("i", "<ScrollWheelDown>", "<C-o>3<C-e>", { desc = "Scroll down" }
 
 -- Notifications (which-key group)
 local copy_to_clipboard = require("shipglows.clipboard").copy
+local notifications = require("shipglows.notifications")
 
 vim.keymap.set("n", "<leader>nn", "<cmd>Noice history<cr>", { desc = "Afficher notifications" })
 
 vim.keymap.set("n", "<leader>nc", function()
-  local ok, manager = pcall(require, "noice.message.manager")
-  if ok then
-    local messages = manager.get({}, { history = true })
-    if messages and #messages > 0 then
-      local last = messages[#messages]
-      local text = last:content()
-      copy_to_clipboard(text)
-      vim.notify("Copié ! (aussi dans /tmp/nvim_notif.txt)", "info")
-      return
-    end
+  local text = notifications.latest()
+  if text then
+    local result = copy_to_clipboard(text)
+    vim.notify("Derniere notification copiee. Sauvegarde : " .. result.fallback_path, "info")
+    return
   end
   vim.notify("Aucun message", "warn")
 end, { desc = "Copier dernier message" })
 
 vim.keymap.set("n", "<leader>nC", function()
-  local ok, manager = pcall(require, "noice.message.manager")
-  if ok then
-    local messages = manager.get({}, { history = true })
-    if messages and #messages > 0 then
-      local texts = {}
-      for _, msg in ipairs(messages) do
-        table.insert(texts, msg:content())
-      end
-      local text = table.concat(texts, "\n\n")
-      copy_to_clipboard(text)
-      vim.notify(#messages .. " messages copiés ! (aussi dans /tmp/nvim_notif.txt)", "info")
-      return
-    end
+  local text, count = notifications.report()
+  if count > 0 then
+    local result = copy_to_clipboard(text)
+    vim.notify(count .. " messages copies. Sauvegarde : " .. result.fallback_path, "info")
+    return
   end
   vim.notify("Aucun message", "warn")
 end, { desc = "Copier tous les messages" })
