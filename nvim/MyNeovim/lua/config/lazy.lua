@@ -31,9 +31,8 @@ require("lazy").setup({
   },
   install = { colorscheme = { "tokyonight", "habamax" } },
   checker = {
-    enabled = true, -- check for plugin updates periodically
-    notify = false, -- keep updates discreet; lualine shows the pending-update icon
-  }, -- automatically check for plugin updates
+    enabled = false, -- check manually with :Lazy check
+  },
   change_detection = {
     notify = false, -- avoid startup popups when plugin specs/config files changed
   },

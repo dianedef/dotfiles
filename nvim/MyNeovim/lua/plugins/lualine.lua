@@ -164,36 +164,64 @@ return {
       color = { fg = colors.cyan },
     })
 
-    local git_repo_cache = { cwd = "", modified = 0, untracked = 0, ahead = 0, behind = 0, in_repo = false, ts = 0 }
+    local git_repo_cache = {
+      cwd = "",
+      modified = 0,
+      untracked = 0,
+      ahead = 0,
+      behind = 0,
+      in_repo = false,
+      refreshing = false,
+      ts = 0,
+    }
+    local git_request_id = 0
 
-    local function refresh_git_repo_stats()
-      local cwd = vim.fn.getcwd()
-      local lines = vim.fn.systemlist({ "git", "-C", cwd, "status", "--porcelain=v1", "--branch" })
-      if vim.v.shell_error ~= 0 then
-        git_repo_cache = { cwd = cwd, modified = 0, untracked = 0, ahead = 0, behind = 0, in_repo = false, ts = vim.uv.now() }
-        return
-      end
-      local modified, untracked, ahead, behind = 0, 0, 0, 0
-      for _, line in ipairs(lines) do
-        if line:sub(1, 2) == "##" then
-          local a = line:match("ahead (%d+)")
-          local b = line:match("behind (%d+)")
-          if a then ahead = tonumber(a) end
-          if b then behind = tonumber(b) end
-        elseif line:sub(1, 2) == "??" then
-          untracked = untracked + 1
-        elseif line ~= "" then
-          modified = modified + 1
+    local function refresh_git_repo_stats(cwd)
+      git_request_id = git_request_id + 1
+      local request_id = git_request_id
+      git_repo_cache.cwd = cwd
+      git_repo_cache.refreshing = true
+      git_repo_cache.ts = vim.uv.now()
+
+      vim.system({ "git", "-C", cwd, "status", "--porcelain=v1", "--branch" }, { text = true }, function(result)
+        if request_id ~= git_request_id then return end
+
+        local modified, untracked, ahead, behind = 0, 0, 0, 0
+        local in_repo = result.code == 0
+        if in_repo then
+          for _, line in ipairs(vim.split(result.stdout or "", "\n", { plain = true, trimempty = true })) do
+            if line:sub(1, 2) == "##" then
+              local a = line:match("ahead (%d+)")
+              local b = line:match("behind (%d+)")
+              if a then ahead = tonumber(a) end
+              if b then behind = tonumber(b) end
+            elseif line:sub(1, 2) == "??" then
+              untracked = untracked + 1
+            else
+              modified = modified + 1
+            end
+          end
         end
-      end
-      git_repo_cache = { cwd = cwd, modified = modified, untracked = untracked, ahead = ahead, behind = behind, in_repo = true, ts = vim.uv.now() }
+
+        git_repo_cache = {
+          cwd = cwd,
+          modified = modified,
+          untracked = untracked,
+          ahead = ahead,
+          behind = behind,
+          in_repo = in_repo,
+          refreshing = false,
+          ts = vim.uv.now(),
+        }
+        vim.schedule(vim.cmd.redrawstatus)
+      end)
     end
 
     local function git_repo_stats()
       local cwd = vim.fn.getcwd()
       local now = vim.uv.now()
-      if git_repo_cache.cwd ~= cwd or (now - git_repo_cache.ts) > 60000 then
-        refresh_git_repo_stats()
+      if not git_repo_cache.refreshing and (git_repo_cache.cwd ~= cwd or (now - git_repo_cache.ts) > 60000) then
+        refresh_git_repo_stats(cwd)
       end
       return git_repo_cache
     end

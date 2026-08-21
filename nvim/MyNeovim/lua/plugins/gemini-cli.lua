@@ -1,6 +1,5 @@
 return {
   "marcinjahn/gemini-cli.nvim",
-  event = "VeryLazy",
   dependencies = {
     "MunifTanjim/nui.nvim",
     "nvim-lua/plenary.nvim",
