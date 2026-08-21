@@ -1,17 +1,5 @@
 local explorer_panel = require("config.explorer-panel")
 
-local function has_git_diff_results()
-  local root = vim.fs.root(vim.fn.getcwd(), ".git") or vim.fn.getcwd()
-
-  local unstaged = vim.system({ "git", "-C", root, "diff", "--name-only" }, { text = true }):wait()
-  if unstaged.code == 0 and unstaged.stdout and unstaged.stdout:gsub("%s+", "") ~= "" then
-    return true
-  end
-
-  local staged = vim.system({ "git", "-C", root, "diff", "--cached", "--name-only" }, { text = true }):wait()
-  return staged.code == 0 and staged.stdout and staged.stdout:gsub("%s+", "") ~= ""
-end
-
 local function normalize_dir(path)
   if not path or path == "" then
     return nil
@@ -178,11 +166,7 @@ return {
         end
 
         vim.schedule(function()
-          if has_git_diff_results() then
-            Snacks.picker.git_diff({ group = true })
-          else
-            require("config.neotree-smart").open("filesystem", vim.fn.getcwd())
-          end
+          require("config.neotree-smart").open("filesystem", vim.fn.getcwd())
         end)
       end,
     })

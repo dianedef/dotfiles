@@ -119,7 +119,6 @@ end
 return {
   "yetone/avante.nvim",
   enabled = true,
-  event = "VeryLazy",
   build = "make",
   init = function()
     vim.api.nvim_create_autocmd({ "BufEnter", "WinEnter" }, {

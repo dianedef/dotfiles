@@ -1,7 +1,6 @@
 return {
   "augmentcode/augment.vim",
   enabled = true,
-  event = { "BufReadPre", "BufNewFile" },
   dependencies = {
     -- Requires Node 22.0.0+ to be installed on the system
   },
