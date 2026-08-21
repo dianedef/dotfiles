@@ -53,7 +53,6 @@ return {
       { "<leader>ag",    group = "Gemini", icon = "󰊭" },
       { "<leader>aj",    group = "Agentic", icon = "󰚩" },
       { "<leader>ak",    group = "Codex", icon = "󰚩" },
-      { "<leader>ap",    group = "Copilot", icon = "" },
       { "<leader>au",    group = "Augment", icon = "󰘦" },
       { "<leader>ax",    group = "Avante", icon = "󰚩" },
       { "<leader>e",     group = "Explorer", icon = "" },

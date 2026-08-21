@@ -192,18 +192,11 @@ return {
     local function git_repo_stats()
       local cwd = vim.fn.getcwd()
       local now = vim.uv.now()
-      if git_repo_cache.cwd ~= cwd or (now - git_repo_cache.ts) > 3000 then
+      if git_repo_cache.cwd ~= cwd or (now - git_repo_cache.ts) > 60000 then
         refresh_git_repo_stats()
       end
       return git_repo_cache
     end
-
-    vim.api.nvim_create_autocmd({ "BufWritePost", "FocusGained", "DirChanged", "ShellCmdPost" }, {
-      group = vim.api.nvim_create_augroup("LualineGitRepoStats", { clear = true }),
-      callback = function()
-        git_repo_cache.ts = 0
-      end,
-    })
 
     ins_left({
       function()

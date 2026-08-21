@@ -142,7 +142,6 @@ return {
     "nvim-lua/plenary.nvim",
     "MunifTanjim/nui.nvim",
     "nvim-tree/nvim-web-devicons",
-    "zbirenbaum/copilot.lua",
     {
       "MeanderingProgrammer/render-markdown.nvim",
       opts = { file_types = { "Avante" }, latex = { enabled = false } },
