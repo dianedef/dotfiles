@@ -1,11 +1,11 @@
 ---
 artifact: documentation
 metadata_schema_version: "1.0"
-artifact_version: "0.1.1"
+artifact_version: "0.2.0"
 project: "dotfiles"
 created: "2026-07-13"
-updated: "2026-08-11"
-status: draft
+updated: "2026-08-27"
+status: ready
 source_skill: 300-sg-docs
 scope: avante-codex-acp-operator-guide
 owner: Diane
@@ -71,6 +71,18 @@ Pendant la phase des outils Node, le script :
 6. arrête l'installation avec une erreur claire si l'ensemble est incomplet.
 
 L'échec est volontaire : une installation interrompue vaut mieux qu'une installation annoncée comme réussie alors qu'Avante ne pourrait pas fonctionner correctement.
+
+### Windows natif
+
+L'installateur PowerShell installe exactement `@zed-industries/codex-acp@0.16.0` avec `pnpm` ou `npm` deja present. Il exige ensuite le lanceur `codex-acp.cmd` et le binaire optionnel `codex-acp-win32-x64` ou `codex-acp-win32-arm64`, puis verifie ce binaire avec `--help`. Une reussite du gestionnaire Node sans ces postconditions devient une erreur actionnable; aucun store npm/pnpm n'est supprime.
+
+```powershell
+powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\install-dotfiles.ps1 -DryRun -Only codex-acp
+powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\install-dotfiles.ps1 -Only codex-acp
+powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\install-dotfiles.ps1 -Check -Only codex-acp
+```
+
+Avante utilise le script upstream `Build.ps1 -BuildFromSource false` sous Windows. Telescope reste utilisable sans `telescope-fzf-native`: l'extension est desactivee proprement quand CMake et un compilateur compatible sont absents, et elle reste construite sous Linux/macOS quand les prerequis existent.
 
 ## Vérification sans rien modifier
 

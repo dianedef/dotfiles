@@ -17,11 +17,108 @@ $ErrorActionPreference = 'Stop'
 Set-StrictMode -Version Latest
 $script:JournalPath = Join-Path $StateDir 'journal.tsv'
 $script:SourceRoot = $PSScriptRoot
+$script:CodexAcpPackage = '@zed-industries/codex-acp@0.16.0'
 
 function Write-Info([string]$Message) { Write-Host "[Dotfiles] $Message" -ForegroundColor Cyan }
 function Write-Ok([string]$Message) { Write-Host "[Dotfiles] $Message" -ForegroundColor Green }
 function Write-Plan([string]$Message) { Write-Host "[Dotfiles] DRY-RUN: $Message" -ForegroundColor Yellow }
 function Get-App([string]$Name) { Get-Command $Name -CommandType Application -ErrorAction SilentlyContinue | Select-Object -First 1 }
+
+function Get-NodePackageManager {
+    foreach ($name in @('pnpm.cmd','pnpm.exe','npm.cmd','npm.exe')) {
+        $manager = Get-App $name
+        if ($manager) { return $manager.Source }
+    }
+    $null
+}
+
+function Get-CodexAcpPlatformPackage {
+    $architecture = [Runtime.InteropServices.RuntimeInformation]::OSArchitecture.ToString().ToLowerInvariant()
+    if ($architecture -notin @('x64','arm64')) { throw "Codex ACP does not provide a supported Windows runtime for architecture '$architecture'." }
+    "codex-acp-win32-$architecture"
+}
+
+function Get-NodeGlobalRoot([string]$Manager) {
+    if (-not $Manager) { return $null }
+    $output = @(& $Manager root --global 2>$null)
+    if ($LASTEXITCODE -ne 0 -or -not $output) { return $null }
+    $candidate = ($output -join "`n").Trim()
+    if ($candidate -and (Test-Path -LiteralPath $candidate -PathType Container)) { [IO.Path]::GetFullPath($candidate) }
+}
+
+function Find-CodexAcpNativeBinary([string]$Manager = '') {
+    $platformPackage = Get-CodexAcpPlatformPackage
+    $roots = [Collections.Generic.List[string]]::new()
+    $seen = [Collections.Generic.HashSet[string]]::new([StringComparer]::OrdinalIgnoreCase)
+    function Add-Root([string]$Path) {
+        if ($Path -and (Test-Path -LiteralPath $Path -PathType Container)) {
+            $full = [IO.Path]::GetFullPath($Path)
+            if ($seen.Add($full)) { $roots.Add($full) }
+        }
+    }
+
+    Add-Root (Get-NodeGlobalRoot $Manager)
+    if ($env:APPDATA) { Add-Root (Join-Path $env:APPDATA 'npm\node_modules') }
+    foreach ($pnpmRoot in @(
+        $(if ($env:LOCALAPPDATA) { Join-Path $env:LOCALAPPDATA 'pnpm\global' }),
+        $(if ($env:PNPM_HOME) { Join-Path $env:PNPM_HOME 'global' })
+    )) {
+        if ($pnpmRoot -and (Test-Path -LiteralPath $pnpmRoot -PathType Container)) {
+            foreach ($versionRoot in @(Get-ChildItem -LiteralPath $pnpmRoot -Directory -ErrorAction SilentlyContinue)) { Add-Root (Join-Path $versionRoot.FullName 'node_modules') }
+        }
+    }
+
+    $wrapper = Get-App 'codex-acp.cmd'
+    if ($wrapper) { Add-Root (Join-Path (Split-Path -Parent $wrapper.Source) 'node_modules') }
+
+    foreach ($root in $roots) {
+        foreach ($candidate in @(
+            (Join-Path $root "@zed-industries\$platformPackage\bin\codex-acp.exe"),
+            (Join-Path $root "@zed-industries\codex-acp\node_modules\@zed-industries\$platformPackage\bin\codex-acp.exe"),
+            (Join-Path $root ".pnpm\node_modules\@zed-industries\$platformPackage\bin\codex-acp.exe")
+        )) {
+            if (Test-Path -LiteralPath $candidate -PathType Leaf) { return [IO.Path]::GetFullPath($candidate) }
+        }
+        $fallback = Get-ChildItem -LiteralPath $root -Filter 'codex-acp.exe' -File -Recurse -ErrorAction SilentlyContinue |
+            Where-Object { $_.FullName -match "[\\/]@zed-industries[\\/]$([regex]::Escape($platformPackage))[\\/]bin[\\/]codex-acp\.exe$" } |
+            Select-Object -First 1
+        if ($fallback) { return $fallback.FullName }
+    }
+    $null
+}
+
+function Test-CodexAcpRuntime([string]$Manager = '', [switch]$Quiet) {
+    $wrapper = Get-App 'codex-acp.cmd'
+    $native = Find-CodexAcpNativeBinary $Manager
+    if (-not $wrapper -or -not $native) {
+        if (-not $Quiet) { Write-Host "MISSING Codex ACP wrapper/native runtime: expected $script:CodexAcpPackage and $(Get-CodexAcpPlatformPackage)" }
+        return $false
+    }
+    & $native --help *> $null
+    if ($LASTEXITCODE -ne 0) {
+        if (-not $Quiet) { Write-Host "BROKEN Codex ACP native runtime: $native returned exit $LASTEXITCODE for --help" }
+        return $false
+    }
+    if (-not $Quiet) { Write-Ok "Codex ACP native runtime ready: $native" }
+    $true
+}
+
+function Install-CodexAcp([object]$Row) {
+    $manager = Get-NodePackageManager
+    if ((Test-CodexAcpRuntime $manager -Quiet) -and -not $Update) { return }
+    if (-not $manager) { throw 'Codex ACP requires an existing Node package manager. Install pnpm or npm through ShipGlows, then rerun -Only codex-acp.' }
+    if ($DryRun) { Write-Plan "would install $($Row.node_package) with $([IO.Path]::GetFileName($manager)) and require $(Get-CodexAcpPlatformPackage)"; return }
+
+    $managerName = [IO.Path]::GetFileName($manager).ToLowerInvariant()
+    $arguments = if ($managerName.StartsWith('pnpm')) { @('add','--global','--config.optional=true',$Row.node_package) } else { @('install','--global','--include=optional',$Row.node_package) }
+    Write-Info "Installing $($Row.node_package) with $managerName."
+    & $manager @arguments | Out-Host
+    if ($LASTEXITCODE -ne 0) { throw "$managerName failed to install $($Row.node_package) (exit $LASTEXITCODE)." }
+    Update-ProcessPath
+    if (-not (Test-CodexAcpRuntime $manager)) {
+        throw "Node reported success, but the Codex ACP wrapper or native $(Get-CodexAcpPlatformPackage) runtime is missing/broken. Optional dependencies must remain enabled; no package store was removed."
+    }
+}
 
 function Assert-ModeContract {
     $modeCount = @($Check, $Update, $Uninstall).Where({ $_ }).Count
@@ -114,7 +211,7 @@ function Get-ManifestPath {
 
 function Read-Manifest {
     $rows = @(Import-Csv -LiteralPath (Get-ManifestPath) -Delimiter "`t")
-    $required = @('id','owner','platforms','profile','deps','winget_package','config_source','target_windows','mode_windows','conflict_policy','privilege','health_probe')
+    $required = @('id','owner','platforms','profile','deps','winget_package','node_package','config_source','target_windows','mode_windows','conflict_policy','privilege','health_probe')
     if (-not $rows) { throw 'components.tsv has no components.' }
     foreach ($name in $required) { if ($rows[0].PSObject.Properties.Name -notcontains $name) { throw "Missing manifest column '$name'." } }
     $ids = [Collections.Generic.HashSet[string]]::new([StringComparer]::OrdinalIgnoreCase)
@@ -218,7 +315,9 @@ function Install-Artifact([object]$Row) {
 }
 
 function Install-Package([object]$Row) {
-    if ($SkipTools -or -not $Row.winget_package -or $Row.winget_package -eq '-' -or -not $Row.health_probe -or $Row.health_probe -eq '-') { return }
+    if ($SkipTools) { return }
+    if ($Row.node_package -and $Row.node_package -ne '-') { Install-CodexAcp $Row; return }
+    if (-not $Row.winget_package -or $Row.winget_package -eq '-' -or -not $Row.health_probe -or $Row.health_probe -eq '-') { return }
     $installed = @($Row.health_probe -split '\|' | Where-Object { Get-App $_ }).Count -gt 0
     if ($installed -and -not $Update) { return }
     if ($DryRun) { Write-Plan "would install or update $($Row.id) with WinGet package $($Row.winget_package)"; return }
@@ -233,7 +332,11 @@ function Install-Package([object]$Row) {
 
 function Test-Component([object]$Row) {
     $healthy = $true
-    if ($Row.health_probe -and $Row.health_probe -ne '-' -and -not @($Row.health_probe -split '\|' | Where-Object { Get-App $_ }).Count) { Write-Host "MISSING command: $($Row.health_probe) [$($Row.id)]"; $healthy=$false }
+    if ($Row.node_package -and $Row.node_package -ne '-') {
+        if (-not (Test-CodexAcpRuntime (Get-NodePackageManager))) { $healthy=$false }
+    } elseif ($Row.health_probe -and $Row.health_probe -ne '-' -and -not @($Row.health_probe -split '\|' | Where-Object { Get-App $_ }).Count) {
+        Write-Host "MISSING command: $($Row.health_probe) [$($Row.id)]"; $healthy=$false
+    }
     if ($Row.mode_windows -and $Row.mode_windows -notin @('none','path')) { $target=Resolve-TokenPath $Row.target_windows; if (-not (Test-Path -LiteralPath $target)) { Write-Host "MISSING config: $target [$($Row.id)]"; $healthy=$false } }
     $healthy
 }

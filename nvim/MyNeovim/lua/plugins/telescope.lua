@@ -1,3 +1,27 @@
+local function telescope_fzf_native_build()
+  local has_cmake = vim.fn.executable("cmake") == 1
+  local has_make = vim.fn.executable("make") == 1
+  local has_compiler = vim.fn.executable("cl") == 1
+    or vim.fn.executable("gcc") == 1
+    or vim.fn.executable("clang") == 1
+    or vim.fn.executable("cc") == 1
+
+  if vim.fn.has("win32") == 1 then
+    if has_cmake and has_compiler then
+      return "cmake -S. -Bbuild -DCMAKE_BUILD_TYPE=Release && cmake --build build --config Release --target install"
+    end
+    return nil
+  end
+
+  if has_make and has_compiler then return "make" end
+  if has_cmake and has_compiler then
+    return "cmake -S. -Bbuild -DCMAKE_BUILD_TYPE=Release && cmake --build build --config Release --target install"
+  end
+  return nil
+end
+
+local fzf_native_build = telescope_fzf_native_build()
+
 return {
   "nvim-telescope/telescope.nvim",
   enabled = true,
@@ -7,7 +31,8 @@ return {
     { "romgrk/fzy-lua-native" },
     {
       "nvim-telescope/telescope-fzf-native.nvim",
-      build = "cmake -S. -Bbuild -DCMAKE_BUILD_TYPE=Release && cmake --build build --config Release && cmake --install build --prefix build",
+      enabled = fzf_native_build ~= nil,
+      build = fzf_native_build,
     },
 
     -- ╭─────────────────────────────────────────────────────────╮

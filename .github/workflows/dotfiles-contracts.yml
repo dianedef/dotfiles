@@ -22,6 +22,7 @@ jobs:
           bash tests/linux-user-local-regressions.sh
           bash tests/linux-installer-behavior.sh
           bash tests/windows-bootstrap-contract.sh
+          bash tests/codex-acp-installation.sh
   windows:
     runs-on: windows-latest
     steps:

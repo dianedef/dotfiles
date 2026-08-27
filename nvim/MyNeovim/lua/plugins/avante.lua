@@ -37,6 +37,24 @@ local function resolve_native_codex_acp(wrapper)
       .. "/bin/"
       .. binary_name,
   }
+
+  if jit.os == "Windows" then
+    local appdata = os.getenv("APPDATA")
+    local localappdata = os.getenv("LOCALAPPDATA")
+    local pnpm_home = os.getenv("PNPM_HOME")
+
+    if appdata and appdata ~= "" then
+      table.insert(patterns, vim.fs.joinpath(appdata, "npm", "node_modules", "@zed-industries", "codex-acp", "node_modules", "@zed-industries", native_package, "bin", binary_name))
+      table.insert(patterns, vim.fs.joinpath(appdata, "npm", "node_modules", "@zed-industries", native_package, "bin", binary_name))
+    end
+
+    for _, root in ipairs({ localappdata and vim.fs.joinpath(localappdata, "pnpm") or nil, pnpm_home }) do
+      if root and root ~= "" then
+        table.insert(patterns, vim.fs.joinpath(root, "global", "*", "node_modules", "@zed-industries", "codex-acp", "node_modules", "@zed-industries", native_package, "bin", binary_name))
+        table.insert(patterns, vim.fs.joinpath(root, "global", "*", "node_modules", ".pnpm", "node_modules", "@zed-industries", native_package, "bin", binary_name))
+      end
+    end
+  end
   local real_wrapper = (vim.uv or vim.loop).fs_realpath(wrapper)
 
   if real_wrapper then
@@ -71,6 +89,16 @@ local function resolve_codex_acp_command()
     vim.fn.expand("~/.local/share/pnpm/codex-acp"),
     vim.fn.expand("~/.npm-global/bin/codex-acp"),
   }
+
+  if jit.os == "Windows" then
+    for _, candidate in ipairs({
+      os.getenv("APPDATA") and vim.fs.joinpath(os.getenv("APPDATA"), "npm", "codex-acp.cmd") or nil,
+      os.getenv("LOCALAPPDATA") and vim.fs.joinpath(os.getenv("LOCALAPPDATA"), "pnpm", "codex-acp.cmd") or nil,
+      os.getenv("PNPM_HOME") and vim.fs.joinpath(os.getenv("PNPM_HOME"), "codex-acp.cmd") or nil,
+    }) do
+      if candidate then table.insert(candidates, candidate) end
+    end
+  end
 
   for _, local_bin in ipairs(candidates) do
     if vim.fn.executable(local_bin) == 1 then
@@ -119,7 +147,9 @@ end
 return {
   "yetone/avante.nvim",
   enabled = true,
-  build = "make",
+  build = vim.fn.has("win32") ~= 0
+      and "powershell -ExecutionPolicy Bypass -File Build.ps1 -BuildFromSource false"
+    or "make",
   init = function()
     vim.api.nvim_create_autocmd({ "BufEnter", "WinEnter" }, {
       group = vim.api.nvim_create_augroup("user_avante_input_insert", { clear = true }),

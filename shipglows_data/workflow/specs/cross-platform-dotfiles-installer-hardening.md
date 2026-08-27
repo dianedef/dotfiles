@@ -52,6 +52,7 @@ Out: Termux changes, production/server provisioning, credentials, execution poli
 - AC08: Yazi is modern/default; Ranger is Linux-only legacy and explicit.
 - AC09: shims contain no provisioning; runtime and development-clone roles are documented.
 - AC10: Windows/Ubuntu CI exercises syntax, contracts, and temporary profiles without heavy network installation.
+- AC11: Windows Neovim uses upstream OS-specific builds, treats fzf-native as prerequisite-gated optional acceleration, and verifies pinned Codex ACP 0.16.0 plus its native x64/arm64 runtime.
 
 ## Security, OWASP, ZOMBIES, and recovery
 
@@ -75,6 +76,7 @@ OWASP: command arguments are fixed or manifest-token validated; paths are quoted
 | 2026-08-27 | 100-sg-spec | inherited current model | Audited scope, ownership, safety contract, and proof order. | ready | 101-sg-ready |
 | 2026-08-27 | 101-sg-ready | inherited current model | Resolved manifest, native engines, recovery, and exclusions. | ready | 102-sg-implementation |
 | 2026-08-27 | 102-sg-implementation | inherited current model | Implementing engines, manifest, shims, contracts, CI, and docs. | implementation in progress; tests not run | Execute proof order. |
+| 2026-08-27 | 106-sg-fix | inherited current model | Repaired Windows native plugin build assumptions and added manifest-driven Codex ACP installation/postconditions. | fix attempted; focused retest pending | Run focused Windows installer and Neovim contracts. |
 
 ## Current chantier flow
 
@@ -82,5 +84,5 @@ OWASP: command arguments are fixed or manifest-token validated; paths are quoted
 | --- | --- | --- | --- |
 | 100-sg-spec | ready | Outcome, scope, acceptance, recovery, OWASP, ZOMBIES, and proofs are explicit. | 101-sg-ready |
 | 101-sg-ready | ready | No unresolved material direction remains after approval. | 102-sg-implementation |
-| 102-sg-implementation | in progress | Native engines and supporting artifacts are written; no result claimed. | 103-sg-verify |
+| 102-sg-implementation | in progress | Native engines now include Windows Neovim/ACP compatibility; focused retest remains required. | 103-sg-verify |
 | 103-sg-verify | pending | Commands documented but intentionally not executed in this phase. | Run focused contracts. |

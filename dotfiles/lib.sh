@@ -72,9 +72,9 @@ sync_checkout() {
 
 validate_manifest() {
   [ -f "$DOTFILES_MANIFEST" ] || die "manifest not found: $DOTFILES_MANIFEST"
-  local expected=$'id\towner\tplatforms\tprofile\tdeps\tapt_package\tdnf_package\tpacman_package\tzypper_package\tbrew_package\twinget_package\tconfig_source\ttarget_linux\ttarget_windows\tmode_linux\tmode_windows\tconflict_policy\tprivilege\thealth_probe' header
+  local expected=$'id\towner\tplatforms\tprofile\tdeps\tapt_package\tdnf_package\tpacman_package\tzypper_package\tbrew_package\twinget_package\tconfig_source\ttarget_linux\ttarget_windows\tmode_linux\tmode_windows\tconflict_policy\tprivilege\thealth_probe\tnode_package' header
   IFS= read -r header < "$DOTFILES_MANIFEST"; [ "$header" = "$expected" ] || die 'components.tsv header does not match the required schema'
-  awk -F '\t' 'NR>1 {if(NF!=19||$1!~/^[a-z0-9][a-z0-9-]*$/||seen[$1]++||$2!="dotfiles"||$17!="backup")exit 1}' "$DOTFILES_MANIFEST" || die 'components.tsv has an invalid, duplicate, foreign-owned, or unsafe row'
+  awk -F '\t' 'NR>1 {if(NF!=20||$1!~/^[a-z0-9][a-z0-9-]*$/||seen[$1]++||$2!="dotfiles"||$17!="backup")exit 1}' "$DOTFILES_MANIFEST" || die 'components.tsv has an invalid, duplicate, foreign-owned, or unsafe row'
 }
 
 platform_rows() { awk -F '\t' 'NR>1 && (","$3",")~/,linux,/ {print}' "$DOTFILES_MANIFEST"; }

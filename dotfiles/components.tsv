@@ -1,15 +1,16 @@
-id	owner	platforms	profile	deps	apt_package	dnf_package	pacman_package	zypper_package	brew_package	winget_package	config_source	target_linux	target_windows	mode_linux	mode_windows	conflict_policy	privilege	health_probe
-neovim	dotfiles	windows,linux	core	-	neovim	neovim	neovim	neovim	neovim	Neovim.Neovim	nvim/MyNeovim	${XDG_CONFIG_HOME}/nvim	${LOCALAPPDATA}/nvim	link	junction	backup	user-or-package-manager	nvim|nvim.exe
-starship	dotfiles	windows,linux	core	-	starship	starship	starship	starship	starship	Starship.Starship	starship/starship.toml	${XDG_CONFIG_HOME}/starship.toml	${HOME}/.config/starship.toml	link	copy	backup	user-or-package-manager	starship|starship.exe
-zoxide	dotfiles	windows,linux	core	-	zoxide	zoxide	zoxide	zoxide	zoxide	ajeetdsouza.zoxide	-	-	-	none	none	backup	user-or-package-manager	zoxide|zoxide.exe
-fzf	dotfiles	windows,linux	core	-	fzf	fzf	fzf	fzf	fzf	junegunn.fzf	-	-	-	none	none	backup	user-or-package-manager	fzf|fzf.exe
-ripgrep	dotfiles	windows,linux	core	-	ripgrep	ripgrep	ripgrep	ripgrep	ripgrep	BurntSushi.ripgrep.MSVC	-	-	-	none	none	backup	user-or-package-manager	rg|rg.exe
-fd	dotfiles	windows,linux	core	-	fd-find	fd-find	fd	fd	fd	sharkdp.fd	-	-	-	none	none	backup	user-or-package-manager	fd|fdfind|fd.exe
-bat	dotfiles	windows,linux	core	-	bat	bat	bat	bat	bat	sharkdp.bat	-	-	-	none	none	backup	user-or-package-manager	bat|batcat|bat.exe
-yazi	dotfiles	windows,linux	core	-	-	-	yazi	-	yazi	sxyazi.yazi	yazi	${XDG_CONFIG_HOME}/yazi	${APPDATA}/yazi/config	link	junction	backup	user-or-package-manager	yazi|yazi.exe
-yazi-shortcut	dotfiles	windows	core	yazi	-	-	-	-	-	-	bin	-	${HOME}/.dotfiles/bin	none	path	backup	user	y.cmd
-powershell-config	dotfiles	windows	core	-	-	-	-	-	-	-	powershell/ShipGlows.Profile.ps1	-	${HOME}/.config/shipglows/profile.ps1	none	copy	backup	user	-
-shell-init	dotfiles	linux	core	starship,zoxide	-	-	-	-	-	-	builtin:shell-block	${HOME}/.bashrc	-	shell-block	none	backup	user	-
-wezterm	dotfiles	windows,linux	optional	-	-	-	wezterm	-	wezterm	wez.wezterm	wezterm/wezterm.lua	${XDG_CONFIG_HOME}/wezterm/wezterm.lua	${HOME}/.config/wezterm/wezterm.lua	copy	copy	backup	user-or-package-manager	wezterm|wezterm.exe
-ghostty	dotfiles	linux	optional	-	-	-	ghostty	-	ghostty	-	ghostty/config	${XDG_CONFIG_HOME}/ghostty/config	-	copy	none	backup	user-or-package-manager	ghostty
-ranger-legacy	dotfiles	linux	legacy	-	ranger	ranger	ranger	ranger	ranger	-	ranger	${XDG_CONFIG_HOME}/ranger	-	link	none	backup	user-or-package-manager	ranger
+id	owner	platforms	profile	deps	apt_package	dnf_package	pacman_package	zypper_package	brew_package	winget_package	config_source	target_linux	target_windows	mode_linux	mode_windows	conflict_policy	privilege	health_probe	node_package
+neovim	dotfiles	windows,linux	core	-	neovim	neovim	neovim	neovim	neovim	Neovim.Neovim	nvim/MyNeovim	${XDG_CONFIG_HOME}/nvim	${LOCALAPPDATA}/nvim	link	junction	backup	user-or-package-manager	nvim|nvim.exe	-
+starship	dotfiles	windows,linux	core	-	starship	starship	starship	starship	starship	Starship.Starship	starship/starship.toml	${XDG_CONFIG_HOME}/starship.toml	${HOME}/.config/starship.toml	link	copy	backup	user-or-package-manager	starship|starship.exe	-
+zoxide	dotfiles	windows,linux	core	-	zoxide	zoxide	zoxide	zoxide	zoxide	ajeetdsouza.zoxide	-	-	-	none	none	backup	user-or-package-manager	zoxide|zoxide.exe	-
+fzf	dotfiles	windows,linux	core	-	fzf	fzf	fzf	fzf	fzf	junegunn.fzf	-	-	-	none	none	backup	user-or-package-manager	fzf|fzf.exe	-
+ripgrep	dotfiles	windows,linux	core	-	ripgrep	ripgrep	ripgrep	ripgrep	ripgrep	BurntSushi.ripgrep.MSVC	-	-	-	none	none	backup	user-or-package-manager	rg|rg.exe	-
+fd	dotfiles	windows,linux	core	-	fd-find	fd-find	fd	fd	fd	sharkdp.fd	-	-	-	none	none	backup	user-or-package-manager	fd|fdfind|fd.exe	-
+bat	dotfiles	windows,linux	core	-	bat	bat	bat	bat	bat	sharkdp.bat	-	-	-	none	none	backup	user-or-package-manager	bat|batcat|bat.exe	-
+yazi	dotfiles	windows,linux	core	-	-	-	yazi	-	yazi	sxyazi.yazi	yazi	${XDG_CONFIG_HOME}/yazi	${APPDATA}/yazi/config	link	junction	backup	user-or-package-manager	yazi|yazi.exe	-
+yazi-shortcut	dotfiles	windows	core	yazi	-	-	-	-	-	-	bin	-	${HOME}/.dotfiles/bin	none	path	backup	user	y.cmd	-
+powershell-config	dotfiles	windows	core	-	-	-	-	-	-	-	powershell/ShipGlows.Profile.ps1	-	${HOME}/.config/shipglows/profile.ps1	none	copy	backup	user	-	-
+codex-acp	dotfiles	windows	core	neovim	-	-	-	-	-	-	-	-	-	none	none	backup	user	codex-acp|codex-acp.cmd	@zed-industries/codex-acp@0.16.0
+shell-init	dotfiles	linux	core	starship,zoxide	-	-	-	-	-	-	builtin:shell-block	${HOME}/.bashrc	-	shell-block	none	backup	user	-	-
+wezterm	dotfiles	windows,linux	optional	-	-	-	wezterm	-	wezterm	wez.wezterm	wezterm/wezterm.lua	${XDG_CONFIG_HOME}/wezterm/wezterm.lua	${HOME}/.config/wezterm/wezterm.lua	copy	copy	backup	user-or-package-manager	wezterm|wezterm.exe	-
+ghostty	dotfiles	linux	optional	-	-	-	ghostty	-	ghostty	-	ghostty/config	${XDG_CONFIG_HOME}/ghostty/config	-	copy	none	backup	user-or-package-manager	ghostty	-
+ranger-legacy	dotfiles	linux	legacy	-	ranger	ranger	ranger	ranger	ranger	-	ranger	${XDG_CONFIG_HOME}/ranger	-	link	none	backup	user-or-package-manager	ranger	-
