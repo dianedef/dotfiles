@@ -357,7 +357,7 @@ function Install-Package([object]$Row) {
     if ($SkipTools) { return }
     if ($Row.node_package -and $Row.node_package -ne '-') { Install-CodexAcp $Row; return }
     if (-not $Row.winget_package -or $Row.winget_package -eq '-' -or -not $Row.health_probe -or $Row.health_probe -eq '-') { return }
-    $installed = @($Row.health_probe -split '\|' | Where-Object { Get-App $_ }).Count -gt 0
+    $installed = Test-HealthProbe $Row.health_probe
     if ($installed -and -not $Update) { return }
     if ($DryRun) { Write-Plan "would install or update $($Row.id) with WinGet package $($Row.winget_package)"; return }
     $winget = Get-WinGet; $verb = if ($installed -and $Update) { 'upgrade' } else { 'install' }
@@ -366,7 +366,7 @@ function Install-Package([object]$Row) {
     if (-not (Test-WinGetConvergedExitCode $verb $exitCode)) { throw "WinGet $verb failed for '$($Row.id)' (exit $exitCode)." }
     if ($verb -eq 'upgrade' -and $exitCode -eq -1978335189) { Write-Ok "$($Row.id) is already at the latest applicable WinGet version." }
     Update-ProcessPath
-    $available = @($Row.health_probe -split '\|' | Where-Object { Get-App $_ }).Count -gt 0
+    $available = Test-HealthProbe $Row.health_probe
     if (-not $available) { throw "WinGet reported success for '$($Row.id)', but its health probe is unavailable. Open a new terminal and rerun." }
 }
 
@@ -374,11 +374,19 @@ function Test-WinGetConvergedExitCode([string]$Verb, [int]$ExitCode) {
     $ExitCode -eq 0 -or ($Verb -eq 'upgrade' -and $ExitCode -eq -1978335189)
 }
 
+function Test-HealthProbe([string]$Expression) {
+    if (-not $Expression -or $Expression -eq '-') { return $true }
+    foreach ($requirement in @($Expression -split '&' | ForEach-Object Trim | Where-Object { $_ })) {
+        if (-not @($requirement -split '\|' | ForEach-Object Trim | Where-Object { $_ -and (Get-App $_) }).Count) { return $false }
+    }
+    $true
+}
+
 function Test-Component([object]$Row) {
     $healthy = $true
     if ($Row.node_package -and $Row.node_package -ne '-') {
         if (-not (Test-CodexAcpRuntime (Get-NodePackageManager))) { $healthy=$false }
-    } elseif ($Row.health_probe -and $Row.health_probe -ne '-' -and -not @($Row.health_probe -split '\|' | Where-Object { Get-App $_ }).Count) {
+    } elseif (-not (Test-HealthProbe $Row.health_probe)) {
         Write-Host "MISSING command: $($Row.health_probe) [$($Row.id)]"; $healthy=$false
     }
     if ($Row.mode_windows -and $Row.mode_windows -notin @('none','path')) { $target=Resolve-TokenPath $Row.target_windows; if (-not (Test-Path -LiteralPath $target)) { Write-Host "MISSING config: $target [$($Row.id)]"; $healthy=$false } }

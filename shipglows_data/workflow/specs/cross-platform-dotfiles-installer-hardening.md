@@ -54,6 +54,7 @@ Out: Termux changes, production/server provisioning, credentials, execution poli
 - AC10: Windows/Ubuntu CI exercises syntax, contracts, and temporary profiles without heavy network installation.
 - AC11: Windows Neovim pins Avante to exact release v0.2.3/SHA a0a1d12c51d5336167074215bc22ff7127ac240c with published Windows assets, uses upstream OS-specific builds, treats fzf-native as prerequisite-gated optional acceleration, and verifies pinned Codex ACP 0.16.0 plus its native x64/arm64 runtime.
 - AC12: the versioned Lazy lockfile is normalized to LF so Windows lockfile rewrites do not create formatting-only dirty checkout failures.
+- AC13: Windows installs and checks WinLibs GCC/CMake/Ninja plus the official Tree-sitter CLI as manifest dependencies of the Avante/ACP stack, without applying WinLibs or its probes to Linux.
 
 ## Security, OWASP, ZOMBIES, and recovery
 
@@ -81,6 +82,7 @@ OWASP: command arguments are fixed or manifest-token validated; paths are quoted
 | 2026-08-27 | 106-sg-fix | inherited current model | Hardened WinGet update convergence and pnpm v11 global-bin/instance runtime resolution after real Windows retests. | fix attempted; focused fixture retest pending | Prove exact HRESULT and pnpm v11 layouts. |
 | 2026-08-27 | 106-sg-fix | inherited current model | Pinned Avante to stable v0.2.3 after main requested a prebuilt version with no matching release. | fix attempted; focused static/headless retest pending | Activate the pinned release in the operator runtime. |
 | 2026-08-27 | 103-sg-verify | inherited current model | Verified native Windows update/check, ACP executable, Avante release build/modules/config, and Telescope core; normalized the Lazy lockfile to LF. | passed; technical non-visual proof complete | Close BUG-2026-08-27-001. |
+| 2026-08-27 | 106-sg-fix | inherited current model | Persisted the WinLibs native toolchain and official Tree-sitter CLI after LazyVim's real prerequisite check identified their absence. | passed: parser, Windows behavior/static contracts, manifest validation, and Linux isolation | Keep the prerequisites under focused CI contracts. |
 
 ## Current chantier flow
 

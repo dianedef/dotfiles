@@ -88,6 +88,8 @@ Le fichier versionne `nvim/MyNeovim/lazy-lock.json` est force en LF par `.gitatt
 
 Telescope reste utilisable sans `telescope-fzf-native`: l'extension est desactivee proprement quand CMake et un compilateur compatible sont absents, et elle reste construite sous Linux/macOS quand les prerequis existent.
 
+Sous Windows, le profil installe aussi les prerequis natifs verifies lors du retest: `BrechtSanders.WinLibs.POSIX.UCRT` fournit `gcc.exe`, `cmake.exe` et `ninja.exe`, tandis que `tree-sitter.tree-sitter-cli` fournit `tree-sitter.exe`. Ces composants sont exclusivement Windows; Linux conserve ses gestionnaires et paquets natifs. `-Only codex-acp` selectionne ces dependances, `-Check` exige toutes les commandes du toolchain, et `-Update` traite chaque paquet WinGet de facon idempotente.
+
 Avec pnpm 11, le lanceur global peut vivre sous `%LOCALAPPDATA%\pnpm\bin` tandis que le lien du paquet natif vit dans une instance sous `global\v11\<instance>\node_modules\.pnpm\node_modules`. Le resolveur suit ces emplacements deterministes et le lien officiel du paquet; il ne parcourt ni ne supprime le store pnpm. Pendant `-Update`, le code WinGet signifiant qu'aucune mise a niveau applicable n'existe est traite comme un etat deja converge, sans masquer les autres codes d'erreur.
 
 ## Vérification sans rien modifier
