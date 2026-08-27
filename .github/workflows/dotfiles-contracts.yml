@@ -1,0 +1,33 @@
+name: Dotfiles contracts
+on:
+  pull_request:
+  push:
+    branches: [master]
+jobs:
+  ubuntu:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Bash syntax
+        run: bash -n dotfiles/install.sh dotfiles/bootstrap.sh dotfiles/install-dotfiles.sh dotfiles/config.sh dotfiles/lib.sh
+      - name: Behavioral contracts
+        run: |
+          bash tests/fresh-install-contract.sh
+          bash tests/runtime-layout-contract.sh
+          bash tests/symlink-safety.sh
+          bash tests/linux-user-local-regressions.sh
+          bash tests/linux-installer-behavior.sh
+          bash tests/windows-bootstrap-contract.sh
+  windows:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: PowerShell parse
+        shell: pwsh
+        run: |
+          $errors = $null
+          [void][System.Management.Automation.Language.Parser]::ParseFile("$PWD/install-dotfiles.ps1", [ref]$null, [ref]$errors)
+          if ($errors) { $errors | Format-List | Out-String | Write-Error }
+      - name: Read-only behavior
+        shell: pwsh
+        run: ./tests/windows-bootstrap.behavior.Tests.ps1
