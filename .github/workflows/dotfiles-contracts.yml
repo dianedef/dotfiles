@@ -10,6 +10,10 @@ jobs:
       - uses: actions/checkout@v4
       - name: Bash syntax
         run: bash -n dotfiles/install.sh dotfiles/bootstrap.sh dotfiles/install-dotfiles.sh dotfiles/config.sh dotfiles/lib.sh
+      - name: Install contract dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y ripgrep
       - name: Behavioral contracts
         run: |
           bash tests/fresh-install-contract.sh
