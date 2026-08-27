@@ -155,6 +155,24 @@ function Assert-UserTarget([string]$Target) {
     if (-not ($allowed | Where-Object { $full -ieq $_ -or $full.StartsWith("$_\",[StringComparison]::OrdinalIgnoreCase) })) { throw "Refusing target outside the user profile: $full" }
 }
 
+function Test-ArtifactConverged([object]$Row, [string]$Source, [string]$Target, [string]$Mode) {
+    if ($Mode -eq 'path') {
+        $entries = @([Environment]::GetEnvironmentVariable('Path','User') -split ';' | Where-Object { $_ })
+        return @($entries | Where-Object { [IO.Path]::GetFullPath($_).TrimEnd('\') -ieq $Source.TrimEnd('\') }).Count -gt 0
+    }
+    if (-not (Test-Path -LiteralPath $Target)) { return $false }
+    if ($Mode -eq 'junction') {
+        $item = Get-Item -LiteralPath $Target -Force
+        $link = @($item.Target)[0]
+        return $item.LinkType -in @('Junction','SymbolicLink') -and $link -and [IO.Path]::GetFullPath($link).TrimEnd('\') -ieq $Source.TrimEnd('\')
+    }
+    if ($Mode -eq 'copy') {
+        if (-not (Test-Path -LiteralPath $Source -PathType Leaf) -or -not (Test-Path -LiteralPath $Target -PathType Leaf)) { return $false }
+        return (Get-FileHash -LiteralPath $Source).Hash -eq (Get-FileHash -LiteralPath $Target).Hash
+    }
+    return $false
+}
+
 function Ensure-State {
     if (-not (Test-Path -LiteralPath $StateDir)) { New-Item -ItemType Directory -Path $StateDir -Force | Out-Null }
     if (-not (Test-Path -LiteralPath $script:JournalPath)) { "platform`tcomponent`ttarget`tsource`tkind`tbackup`tproof" | Set-Content -LiteralPath $script:JournalPath -Encoding utf8 }
@@ -177,6 +195,7 @@ function Install-Artifact([object]$Row) {
     $source = if ($row.config_source -and $row.config_source -ne '-') { [IO.Path]::GetFullPath((Join-Path $script:SourceRoot $row.config_source)) } else { '' }
     $target = if ($mode -eq 'path') { $source } else { Resolve-TokenPath $row.target_windows }
     Assert-UserTarget $target
+    if (Test-ArtifactConverged $row $source $target $mode) { return }
     if ($DryRun) { Write-Plan "would install $($row.id) at $target ($mode)"; return }
     if ($mode -in @('copy','junction') -and -not (Test-Path -LiteralPath $source)) { throw "Missing source for '$($row.id)': $source" }
     if ($mode -eq 'junction') {
@@ -205,7 +224,11 @@ function Install-Package([object]$Row) {
     if ($DryRun) { Write-Plan "would install or update $($Row.id) with WinGet package $($Row.winget_package)"; return }
     $winget = Get-WinGet; $verb = if ($installed -and $Update) { 'upgrade' } else { 'install' }
     & $winget $verb --id $Row.winget_package --exact --source winget --accept-package-agreements --accept-source-agreements --silent --disable-interactivity | Out-Null
-    if ($LASTEXITCODE -ne 0) { throw "WinGet $verb failed for '$($Row.id)' (exit $LASTEXITCODE)." }; Update-ProcessPath
+    $exitCode = $LASTEXITCODE
+    if ($exitCode -ne 0) { throw "WinGet $verb failed for '$($Row.id)' (exit $exitCode)." }
+    Update-ProcessPath
+    $available = @($Row.health_probe -split '\|' | Where-Object { Get-App $_ }).Count -gt 0
+    if (-not $available) { throw "WinGet reported success for '$($Row.id)', but its health probe is unavailable. Open a new terminal and rerun." }
 }
 
 function Test-Component([object]$Row) {
@@ -233,7 +256,7 @@ function Remove-ManagedArtifacts {
 }
 
 Assert-ModeContract
-if (-not $DryRun) { Update-ProcessPath }
+Update-ProcessPath
 if($Uninstall){Remove-ManagedArtifacts;exit 0}
 Sync-Checkout
 $script:SourceRoot=if(Test-Path(Join-Path $DotfilesDir 'dotfiles\components.tsv')){[IO.Path]::GetFullPath($DotfilesDir)}else{[IO.Path]::GetFullPath($PSScriptRoot)}
