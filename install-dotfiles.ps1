@@ -46,6 +46,33 @@ function Get-NodeGlobalRoot([string]$Manager) {
     if ($candidate -and (Test-Path -LiteralPath $candidate -PathType Container)) { [IO.Path]::GetFullPath($candidate) }
 }
 
+function Get-NodeGlobalBin([string]$Manager) {
+    if (-not $Manager -or -not [IO.Path]::GetFileName($Manager).ToLowerInvariant().StartsWith('pnpm')) { return $null }
+    $output = @(& $Manager bin --global 2>$null)
+    if ($LASTEXITCODE -ne 0 -or -not $output) { return $null }
+    $candidate = ($output -join "`n").Trim()
+    if ($candidate -and (Test-Path -LiteralPath $candidate -PathType Container)) { [IO.Path]::GetFullPath($candidate) }
+}
+
+function Find-CodexAcpWrapper([string]$Manager = '') {
+    $globalBin = Get-NodeGlobalBin $Manager
+    if ($globalBin) {
+        $candidate = Join-Path $globalBin 'codex-acp.CMD'
+        if (Test-Path -LiteralPath $candidate -PathType Leaf) { return [IO.Path]::GetFullPath($candidate) }
+    }
+    if ($env:APPDATA) {
+        $candidate = Join-Path $env:APPDATA 'npm\codex-acp.CMD'
+        if (Test-Path -LiteralPath $candidate -PathType Leaf) { return [IO.Path]::GetFullPath($candidate) }
+    }
+    if ($env:LOCALAPPDATA) {
+        $candidate = Join-Path $env:LOCALAPPDATA 'pnpm\bin\codex-acp.CMD'
+        if (Test-Path -LiteralPath $candidate -PathType Leaf) { return [IO.Path]::GetFullPath($candidate) }
+    }
+    $wrapper = Get-App 'codex-acp.cmd'
+    if ($wrapper) { return $wrapper.Source }
+    $null
+}
+
 function Find-CodexAcpNativeBinary([string]$Manager = '') {
     $platformPackage = Get-CodexAcpPlatformPackage
     $roots = [Collections.Generic.List[string]]::new()
@@ -57,19 +84,31 @@ function Find-CodexAcpNativeBinary([string]$Manager = '') {
         }
     }
 
-    Add-Root (Get-NodeGlobalRoot $Manager)
+    $managerName = if ($Manager) { [IO.Path]::GetFileName($Manager).ToLowerInvariant() } else { '' }
+    $globalRoot = Get-NodeGlobalRoot $Manager
+    if ($globalRoot -and $managerName.StartsWith('pnpm')) {
+        foreach ($instanceRoot in @(Get-ChildItem -LiteralPath $globalRoot -Directory -ErrorAction SilentlyContinue)) {
+            Add-Root (Join-Path $instanceRoot.FullName 'node_modules')
+        }
+    } else {
+        Add-Root $globalRoot
+    }
     if ($env:APPDATA) { Add-Root (Join-Path $env:APPDATA 'npm\node_modules') }
     foreach ($pnpmRoot in @(
         $(if ($env:LOCALAPPDATA) { Join-Path $env:LOCALAPPDATA 'pnpm\global' }),
         $(if ($env:PNPM_HOME) { Join-Path $env:PNPM_HOME 'global' })
     )) {
         if ($pnpmRoot -and (Test-Path -LiteralPath $pnpmRoot -PathType Container)) {
-            foreach ($versionRoot in @(Get-ChildItem -LiteralPath $pnpmRoot -Directory -ErrorAction SilentlyContinue)) { Add-Root (Join-Path $versionRoot.FullName 'node_modules') }
+            foreach ($versionRoot in @(Get-ChildItem -LiteralPath $pnpmRoot -Directory -ErrorAction SilentlyContinue)) {
+                foreach ($instanceRoot in @(Get-ChildItem -LiteralPath $versionRoot.FullName -Directory -ErrorAction SilentlyContinue)) {
+                    Add-Root (Join-Path $instanceRoot.FullName 'node_modules')
+                }
+            }
         }
     }
 
-    $wrapper = Get-App 'codex-acp.cmd'
-    if ($wrapper) { Add-Root (Join-Path (Split-Path -Parent $wrapper.Source) 'node_modules') }
+    $wrapper = Find-CodexAcpWrapper $Manager
+    if ($wrapper) { Add-Root (Join-Path (Split-Path -Parent $wrapper) 'node_modules') }
 
     foreach ($root in $roots) {
         foreach ($candidate in @(
@@ -88,7 +127,7 @@ function Find-CodexAcpNativeBinary([string]$Manager = '') {
 }
 
 function Test-CodexAcpRuntime([string]$Manager = '', [switch]$Quiet) {
-    $wrapper = Get-App 'codex-acp.cmd'
+    $wrapper = Find-CodexAcpWrapper $Manager
     $native = Find-CodexAcpNativeBinary $Manager
     if (-not $wrapper -or -not $native) {
         if (-not $Quiet) { Write-Host "MISSING Codex ACP wrapper/native runtime: expected $script:CodexAcpPackage and $(Get-CodexAcpPlatformPackage)" }
@@ -324,10 +363,15 @@ function Install-Package([object]$Row) {
     $winget = Get-WinGet; $verb = if ($installed -and $Update) { 'upgrade' } else { 'install' }
     & $winget $verb --id $Row.winget_package --exact --source winget --accept-package-agreements --accept-source-agreements --silent --disable-interactivity | Out-Null
     $exitCode = $LASTEXITCODE
-    if ($exitCode -ne 0) { throw "WinGet $verb failed for '$($Row.id)' (exit $exitCode)." }
+    if (-not (Test-WinGetConvergedExitCode $verb $exitCode)) { throw "WinGet $verb failed for '$($Row.id)' (exit $exitCode)." }
+    if ($verb -eq 'upgrade' -and $exitCode -eq -1978335189) { Write-Ok "$($Row.id) is already at the latest applicable WinGet version." }
     Update-ProcessPath
     $available = @($Row.health_probe -split '\|' | Where-Object { Get-App $_ }).Count -gt 0
     if (-not $available) { throw "WinGet reported success for '$($Row.id)', but its health probe is unavailable. Open a new terminal and rerun." }
+}
+
+function Test-WinGetConvergedExitCode([string]$Verb, [int]$ExitCode) {
+    $ExitCode -eq 0 -or ($Verb -eq 'upgrade' -and $ExitCode -eq -1978335189)
 }
 
 function Test-Component([object]$Row) {

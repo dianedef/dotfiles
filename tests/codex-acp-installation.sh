@@ -7,6 +7,7 @@ awk -F '\t' 'NR==1{if($20!="node_package")exit 1}$1=="codex-acp"{found=1;if($3!=
 rg -n "@zed-industries/codex-acp@0\.16\.0|codex-acp-win32-\$architecture" "$P" >/dev/null
 rg -n 'pnpm\.cmd|npm\.cmd|--config\.optional=true|--include=optional' "$P" >/dev/null
 rg -n 'Find-CodexAcpNativeBinary|Test-CodexAcpRuntime|Optional dependencies must remain enabled' "$P" >/dev/null
+rg -n 'Get-NodeGlobalBin|Find-CodexAcpWrapper|pnpm\\global|instanceRoot.*node_modules' "$P" >/dev/null
 rg -n 'Build\.ps1 -BuildFromSource false|APPDATA.*codex-acp\.cmd|codex-acp-win32' "$A" >/dev/null
 rg -n 'telescope_fzf_native_build|enabled = fzf_native_build ~= nil|has_cmake and has_compiler' "$T" >/dev/null
 printf 'Codex ACP Windows installation contracts: OK\n'

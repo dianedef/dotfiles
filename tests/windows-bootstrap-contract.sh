@@ -9,6 +9,8 @@ rg -n 'Update-ProcessPath|GetEnvironmentVariable.*Path.*User|GetEnvironmentVaria
 rg -n 'InstallYaziPlugins|ya\.exe|pkg install' "$P" >/dev/null
 rg -n "@zed-industries/codex-acp@0\.16\.0|codex-acp-win32-\$architecture|pnpm\.cmd|npm\.cmd|--include=optional|--config\.optional=true" "$P" >/dev/null
 rg -n 'Find-CodexAcpNativeBinary|Test-CodexAcpRuntime|Node reported success.*native' "$P" >/dev/null
+rg -n 'Test-WinGetConvergedExitCode.*-1978335189|already at the latest applicable WinGet version' "$P" >/dev/null
+rg -n 'pnpm.*bin --global|Find-CodexAcpWrapper|fixture-instance|no-applicable-upgrade' "$P" "$ROOT_DIR/tests/windows-bootstrap.behavior.Tests.ps1" >/dev/null
 rg -n 'Build\.ps1 -BuildFromSource false' "$ROOT_DIR/nvim/MyNeovim/lua/plugins/avante.lua" >/dev/null
 rg -n 'telescope_fzf_native_build|enabled = fzf_native_build ~= nil|executable\("cmake"\)|executable\("cl"\)' "$ROOT_DIR/nvim/MyNeovim/lua/plugins/telescope.lua" >/dev/null
 if rg -n 'checkout.*-B|Set-ExecutionPolicy|\$PROFILE|doppler secrets|gh auth|curl.*\|.*(sh|bash)|Remove-Item.*-Recurse' "$P";then printf 'FAIL: forbidden behavior\n' >&2;exit 1;fi

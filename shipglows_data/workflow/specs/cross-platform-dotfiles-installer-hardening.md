@@ -77,6 +77,7 @@ OWASP: command arguments are fixed or manifest-token validated; paths are quoted
 | 2026-08-27 | 101-sg-ready | inherited current model | Resolved manifest, native engines, recovery, and exclusions. | ready | 102-sg-implementation |
 | 2026-08-27 | 102-sg-implementation | inherited current model | Implementing engines, manifest, shims, contracts, CI, and docs. | implementation in progress; tests not run | Execute proof order. |
 | 2026-08-27 | 106-sg-fix | inherited current model | Repaired Windows native plugin build assumptions and added manifest-driven Codex ACP installation/postconditions. | fix attempted; focused retest pending | Run focused Windows installer and Neovim contracts. |
+| 2026-08-27 | 106-sg-fix | inherited current model | Hardened WinGet update convergence and pnpm v11 global-bin/instance runtime resolution after real Windows retests. | fix attempted; focused fixture retest pending | Prove exact HRESULT and pnpm v11 layouts. |
 
 ## Current chantier flow
 

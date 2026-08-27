@@ -84,6 +84,8 @@ powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\install-dotfiles.ps1 -
 
 Avante utilise le script upstream `Build.ps1 -BuildFromSource false` sous Windows. Telescope reste utilisable sans `telescope-fzf-native`: l'extension est desactivee proprement quand CMake et un compilateur compatible sont absents, et elle reste construite sous Linux/macOS quand les prerequis existent.
 
+Avec pnpm 11, le lanceur global peut vivre sous `%LOCALAPPDATA%\pnpm\bin` tandis que le lien du paquet natif vit dans une instance sous `global\v11\<instance>\node_modules\.pnpm\node_modules`. Le resolveur suit ces emplacements deterministes et le lien officiel du paquet; il ne parcourt ni ne supprime le store pnpm. Pendant `-Update`, le code WinGet signifiant qu'aucune mise a niveau applicable n'existe est traite comme un etat deja converge, sans masquer les autres codes d'erreur.
+
 ## Vérification sans rien modifier
 
 La vérification générale des dotfiles est :

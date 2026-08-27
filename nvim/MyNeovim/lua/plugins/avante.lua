@@ -52,6 +52,8 @@ local function resolve_native_codex_acp(wrapper)
       if root and root ~= "" then
         table.insert(patterns, vim.fs.joinpath(root, "global", "*", "node_modules", "@zed-industries", "codex-acp", "node_modules", "@zed-industries", native_package, "bin", binary_name))
         table.insert(patterns, vim.fs.joinpath(root, "global", "*", "node_modules", ".pnpm", "node_modules", "@zed-industries", native_package, "bin", binary_name))
+        table.insert(patterns, vim.fs.joinpath(root, "global", "*", "*", "node_modules", "@zed-industries", "codex-acp", "node_modules", "@zed-industries", native_package, "bin", binary_name))
+        table.insert(patterns, vim.fs.joinpath(root, "global", "*", "*", "node_modules", ".pnpm", "node_modules", "@zed-industries", native_package, "bin", binary_name))
       end
     end
   end
@@ -93,7 +95,7 @@ local function resolve_codex_acp_command()
   if jit.os == "Windows" then
     for _, candidate in ipairs({
       os.getenv("APPDATA") and vim.fs.joinpath(os.getenv("APPDATA"), "npm", "codex-acp.cmd") or nil,
-      os.getenv("LOCALAPPDATA") and vim.fs.joinpath(os.getenv("LOCALAPPDATA"), "pnpm", "codex-acp.cmd") or nil,
+      os.getenv("LOCALAPPDATA") and vim.fs.joinpath(os.getenv("LOCALAPPDATA"), "pnpm", "bin", "codex-acp.cmd") or nil,
       os.getenv("PNPM_HOME") and vim.fs.joinpath(os.getenv("PNPM_HOME"), "codex-acp.cmd") or nil,
     }) do
       if candidate then table.insert(candidates, candidate) end
