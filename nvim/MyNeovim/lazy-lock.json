@@ -6,7 +6,7 @@
   "augment.vim": { "branch": "main", "commit": "71f49befb94d3ddcf42220d640e892bd025dda5d" },
   "auto-save.nvim": { "branch": "main", "commit": "9aabcb8396224dcbf8d51c0c1d620d88a46e89d7" },
   "auto-session": { "branch": "main", "commit": "c8e6139a2e52a38101fecaba6014d7dd75489044" },
-  "avante.nvim": { "branch": "main", "commit": "317a16d44f964863ef0dcb47474a06dd8ed3d52a" },
+  "avante.nvim": { "branch": "main", "commit": "a0a1d12c51d5336167074215bc22ff7127ac240c" },
   "blink-cmp-avante": { "branch": "master", "commit": "4f494c6e124acbe31a8f5d58effa0c14aa38a6d5" },
   "blink.cmp": { "branch": "main", "commit": "78336bc89ee5365633bcf754d93df01678b5c08f" },
   "bufferline.nvim": { "branch": "main", "commit": "655133c3b4c3e5e05ec549b9f8cc2894ac6f51b3" },

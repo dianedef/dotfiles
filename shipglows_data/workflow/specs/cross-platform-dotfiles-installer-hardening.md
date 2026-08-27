@@ -52,7 +52,7 @@ Out: Termux changes, production/server provisioning, credentials, execution poli
 - AC08: Yazi is modern/default; Ranger is Linux-only legacy and explicit.
 - AC09: shims contain no provisioning; runtime and development-clone roles are documented.
 - AC10: Windows/Ubuntu CI exercises syntax, contracts, and temporary profiles without heavy network installation.
-- AC11: Windows Neovim uses upstream OS-specific builds, treats fzf-native as prerequisite-gated optional acceleration, and verifies pinned Codex ACP 0.16.0 plus its native x64/arm64 runtime.
+- AC11: Windows Neovim pins Avante to exact release v0.2.3/SHA a0a1d12c51d5336167074215bc22ff7127ac240c with published Windows assets, uses upstream OS-specific builds, treats fzf-native as prerequisite-gated optional acceleration, and verifies pinned Codex ACP 0.16.0 plus its native x64/arm64 runtime.
 
 ## Security, OWASP, ZOMBIES, and recovery
 
@@ -78,6 +78,7 @@ OWASP: command arguments are fixed or manifest-token validated; paths are quoted
 | 2026-08-27 | 102-sg-implementation | inherited current model | Implementing engines, manifest, shims, contracts, CI, and docs. | implementation in progress; tests not run | Execute proof order. |
 | 2026-08-27 | 106-sg-fix | inherited current model | Repaired Windows native plugin build assumptions and added manifest-driven Codex ACP installation/postconditions. | fix attempted; focused retest pending | Run focused Windows installer and Neovim contracts. |
 | 2026-08-27 | 106-sg-fix | inherited current model | Hardened WinGet update convergence and pnpm v11 global-bin/instance runtime resolution after real Windows retests. | fix attempted; focused fixture retest pending | Prove exact HRESULT and pnpm v11 layouts. |
+| 2026-08-27 | 106-sg-fix | inherited current model | Pinned Avante to stable v0.2.3 after main requested a prebuilt version with no matching release. | fix attempted; focused static/headless retest pending | Activate the pinned release in the operator runtime. |
 
 ## Current chantier flow
 
