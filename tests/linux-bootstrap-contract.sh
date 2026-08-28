@@ -5,6 +5,8 @@ ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd -P)"
 TMP="$(mktemp -d)"
 trap 'rm -rf "$TMP"' EXIT
 export HOME="$TMP/home"
+export DOTFILES_REPO_URL="$ROOT_DIR"
+export DOTFILES_BRANCH="contract-test"
 mkdir -p "$HOME"
 
 printf 'dotfiles: Dry-run preview without local checkout.\n'
@@ -22,7 +24,8 @@ fi
 
 printf 'dotfiles: Fresh local checkout delegate preview.\n'
 rm -rf "$DOTFILES_DIR"
-git clone --depth 1 --branch master "$ROOT_DIR" "$DOTFILES_DIR" >/dev/null
+git clone --quiet --no-checkout "$ROOT_DIR" "$DOTFILES_DIR"
+git -C "$DOTFILES_DIR" checkout --quiet -b "$DOTFILES_BRANCH" "$(git -C "$ROOT_DIR" rev-parse HEAD)"
 before="$(find "$TMP" -mindepth 1 -print | sort)"
 "$ROOT_DIR/install-dotfiles.sh" --dry-run --only neovim >"$TMP/delegated-dry.out" 2>&1
 after="$(find "$TMP" -mindepth 1 ! -name dry.out ! -name delegated-dry.out -print | sort)"
