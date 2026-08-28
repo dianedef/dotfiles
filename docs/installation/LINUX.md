@@ -3,7 +3,7 @@
 Clone explicitly, then invoke the in-repository Bash engine:
 
 ```bash
-git clone https://github.com/dianedef/dotfiles.git "$HOME/.dotfiles"
+git clone https://github.com/commandglows/dotfiles.git "$HOME/.dotfiles"
 "$HOME/.dotfiles/dotfiles/install-dotfiles.sh" --dry-run
 "$HOME/.dotfiles/dotfiles/install-dotfiles.sh"
 ```

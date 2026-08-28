@@ -2,7 +2,7 @@
 set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd -P)"
-REPO_URL="${DOTFILES_REPO_URL:-https://github.com/dianedef/dotfiles.git}"
+REPO_URL="${DOTFILES_REPO_URL:-https://github.com/commandglows/dotfiles.git}"
 BRANCH="${DOTFILES_BRANCH:-master}"
 DOTFILES_DIR="${DOTFILES_DIR:-${HOME:-/tmp}/.dotfiles}"
 

@@ -2,7 +2,7 @@
 # ShipGlows owns developer provisioning, AI agents, skills, MCP and Doppler.
 [CmdletBinding()]
 param(
-    [string]$RepoUrl = 'https://github.com/dianedef/dotfiles.git',
+    [string]$RepoUrl = 'https://github.com/commandglows/dotfiles.git',
     [string]$Branch = 'master',
     [string]$DotfilesDir = (Join-Path $env:USERPROFILE '.dotfiles'),
     [string]$StateDir = (Join-Path $env:LOCALAPPDATA 'dotfiles\state'),
