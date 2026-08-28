@@ -26,7 +26,7 @@ printf 'dotfiles: Fresh local checkout delegate preview.\n'
 rm -rf "$DOTFILES_DIR"
 git clone --quiet --no-checkout "$ROOT_DIR" "$DOTFILES_DIR"
 git -C "$DOTFILES_DIR" checkout --quiet -b "$DOTFILES_BRANCH" "$(git -C "$ROOT_DIR" rev-parse HEAD)"
-before="$(find "$TMP" -mindepth 1 -print | sort)"
+before="$(find "$TMP" -mindepth 1 ! -name dry.out ! -name delegated-dry.out -print | sort)"
 "$ROOT_DIR/install-dotfiles.sh" --dry-run --only neovim >"$TMP/delegated-dry.out" 2>&1
 after="$(find "$TMP" -mindepth 1 ! -name dry.out ! -name delegated-dry.out -print | sort)"
 if [ "$before" != "$after" ] || rg -q 'DRY-RUN: would clone' "$TMP/delegated-dry.out"; then
