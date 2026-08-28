@@ -5,6 +5,8 @@ ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd -P)"
 TMP="$(mktemp -d)"
 trap 'rm -rf "$TMP"' EXIT
 export HOME="$TMP/home"
+export XDG_CONFIG_HOME="$HOME/.config"
+export XDG_STATE_HOME="$TMP/state"
 export DOTFILES_REPO_URL="$ROOT_DIR"
 export DOTFILES_BRANCH="contract-test"
 mkdir -p "$HOME"
