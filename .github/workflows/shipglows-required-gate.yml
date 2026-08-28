@@ -73,6 +73,8 @@ jobs:
         shell: bash
         working-directory: "."
         run: |
+          sudo apt-get update
+          sudo apt-get install -y ripgrep
           bash -n install-dotfiles.sh dotfiles/install.sh dotfiles/bootstrap.sh dotfiles/install-dotfiles.sh dotfiles/config.sh dotfiles/lib.sh
           bash tests/fresh-install-contract.sh
           bash tests/runtime-layout-contract.sh
