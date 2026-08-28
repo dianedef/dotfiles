@@ -16,7 +16,7 @@ source ~/.bashrc
 Équivalent manuel:
 
 ```bash
-git clone https://github.com/dianedef/dotfiles.git ~/.dotfiles
+git clone https://github.com/commandglows/dotfiles.git ~/.dotfiles
 cd ~/.dotfiles
 bash termux.sh
 source ~/.bashrc

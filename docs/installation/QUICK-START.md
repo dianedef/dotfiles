@@ -7,7 +7,7 @@ powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\install-dotfiles.ps1 -
 ```
 
 ```bash
-git clone https://github.com/dianedef/dotfiles.git "$HOME/.dotfiles"
+git clone https://github.com/commandglows/dotfiles.git "$HOME/.dotfiles"
 "$HOME/.dotfiles/dotfiles/install-dotfiles.sh" --dry-run
 ```
 
