@@ -9,7 +9,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - name: Bash syntax
-        run: bash -n dotfiles/install.sh dotfiles/bootstrap.sh dotfiles/install-dotfiles.sh dotfiles/config.sh dotfiles/lib.sh
+        run: bash -n install-dotfiles.sh dotfiles/install.sh dotfiles/bootstrap.sh dotfiles/install-dotfiles.sh dotfiles/config.sh dotfiles/lib.sh
       - name: Install contract dependencies
         run: |
           sudo apt-get update
@@ -21,6 +21,7 @@ jobs:
           bash tests/symlink-safety.sh
           bash tests/linux-user-local-regressions.sh
           bash tests/linux-installer-behavior.sh
+          bash tests/linux-bootstrap-contract.sh
           bash tests/windows-bootstrap-contract.sh
           bash tests/codex-acp-installation.sh
   windows:

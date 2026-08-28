@@ -11,7 +11,7 @@ powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\install-dotfiles.ps1 -
 ```
 
 ```bash
-./dotfiles/install-dotfiles.sh --dry-run
+./install-dotfiles.sh --dry-run
 ```
 
 Both engines read `dotfiles/components.tsv`. They validate selections, preserve conflicts in central backups, and journal managed artifacts. Check is read-only; update accepts only a clean matching checkout and fast-forward; uninstall removes only journal-proven artifacts, restores backups, and never removes packages.
