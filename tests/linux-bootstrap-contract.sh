@@ -27,7 +27,10 @@ rm -rf "$DOTFILES_DIR"
 git clone --quiet --no-checkout "$ROOT_DIR" "$DOTFILES_DIR"
 git -C "$DOTFILES_DIR" checkout --quiet -b "$DOTFILES_BRANCH" "$(git -C "$ROOT_DIR" rev-parse HEAD)"
 before="$(find "$TMP" -mindepth 1 ! -name dry.out ! -name delegated-dry.out -print | sort)"
-"$ROOT_DIR/install-dotfiles.sh" --dry-run --only neovim >"$TMP/delegated-dry.out" 2>&1
+if ! "$ROOT_DIR/install-dotfiles.sh" --dry-run --only neovim >"$TMP/delegated-dry.out" 2>&1; then
+  cat "$TMP/delegated-dry.out" >&2
+  exit 1
+fi
 after="$(find "$TMP" -mindepth 1 ! -name dry.out ! -name delegated-dry.out -print | sort)"
 if [ "$before" != "$after" ] || rg -q 'DRY-RUN: would clone' "$TMP/delegated-dry.out"; then
   echo "Expected delegated dry-run on existing valid checkout without filesystem mutation." >&2
