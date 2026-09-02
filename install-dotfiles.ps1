@@ -3,7 +3,7 @@
 [CmdletBinding()]
 param(
     [string]$RepoUrl = 'https://github.com/commandglows/dotfiles.git',
-    [string]$Branch = 'master',
+    [string]$Branch = 'main',
     [string]$DotfilesDir = (Join-Path $env:USERPROFILE '.dotfiles'),
     [string]$StateDir = (Join-Path $env:LOCALAPPDATA 'dotfiles\state'),
     [switch]$DryRun, [switch]$Check, [switch]$Update, [switch]$Uninstall,
