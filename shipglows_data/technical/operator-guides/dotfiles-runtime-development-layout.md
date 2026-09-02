@@ -43,10 +43,10 @@ Develop in the visible clone on a branch. To test a branch on Windows, run:
 .\install-dotfiles.ps1 -Branch my-branch -ConfigureTools -ConfigureWezTerm
 ```
 
-After merging, reinstall `master` from the development clone:
+After merging, reinstall `main` from the development clone:
 
 ```powershell
-.\install-dotfiles.ps1 -Branch master -ConfigureTools -ConfigureWezTerm
+.\install-dotfiles.ps1 -Branch main -ConfigureTools -ConfigureWezTerm
 ```
 
 The bootstrap may switch the clean installed runtime between these branches. It

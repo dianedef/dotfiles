@@ -1,10 +1,10 @@
 ---
 artifact: business_context
 metadata_schema_version: "1.0"
-artifact_version: "0.1.1"
+artifact_version: "0.2.0"
 project: "dotfiles"
 created: "2026-04-26"
-updated: "2026-07-12"
+updated: "2026-09-02"
 status: draft
 source_skill: sf-docs
 scope: business
@@ -17,15 +17,17 @@ target_audience: "développeurs solo et équipes techniques qui réinstallent so
 value_proposition: "réduire le coût de setup machine grâce à une configuration automatisée et reproductible"
 business_model: "dépôt d’ingénierie personnelle de référence, réutilisable et évolutif"
 market: "utilisateurs techniques, équipes lean, workflows d’onboarding infra"
+delivery_posture: development
 evidence:
   - "/home/claude/dotfiles/CLAUDE.md"
   - "/home/claude/dotfiles/README.md"
   - "/home/claude/dotfiles/dotfiles/install.sh"
+  - "Operator decision 2026-09-02: delivery_posture is development."
 depends_on:
   - "/home/claude/dotfiles/CLAUDE.md"
   - "/home/claude/dotfiles/dotfiles/install.sh"
 supersedes: []
-next_review: "2026-07-26"
+next_review: "2026-12-02"
 next_step: /sf-docs audit BUSINESS.md
 ---
 

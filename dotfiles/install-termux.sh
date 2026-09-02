@@ -4,7 +4,7 @@
 set -eu
 
 REPO_URL="${DOTFILES_REPO_URL:-https://github.com/commandglows/dotfiles.git}"
-BRANCH="${DOTFILES_BRANCH:-master}"
+BRANCH="${DOTFILES_BRANCH:-main}"
 DOTFILES_DIR="${DOTFILES_DIR:-$HOME/.dotfiles}"
 BOOTSTRAP_LOG="${TERMUX_DOTFILES_BOOTSTRAP_LOG:-$HOME/termux-bootstrap.log}"
 export DEBIAN_FRONTEND=noninteractive

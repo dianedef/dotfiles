@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 DOTFILES_REPO_URL="${DOTFILES_REPO_URL:-https://github.com/commandglows/dotfiles.git}"
-DOTFILES_BRANCH="${DOTFILES_BRANCH:-master}"
+DOTFILES_BRANCH="${DOTFILES_BRANCH:-main}"
 DOTFILES_DIR="${DOTFILES_DIR:-$HOME/.dotfiles}"
 DOTFILES_STATE_DIR="${DOTFILES_STATE_DIR:-${XDG_STATE_HOME:-$HOME/.local/state}/dotfiles}"
 DOTFILES_MANIFEST="${DOTFILES_MANIFEST:-$DOTFILES_DIR/dotfiles/components.tsv}"
